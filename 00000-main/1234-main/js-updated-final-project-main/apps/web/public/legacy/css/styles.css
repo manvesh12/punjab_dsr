@@ -5106,7 +5106,7 @@ table {
 @media (min-width: 1024px) {
   html,
   html[style] {
-    zoom: 1.02 !important;
+    zoom: 0.83 !important;
   }
 }
 
@@ -5119,11 +5119,11 @@ table {
 
 @media (min-width: 1024px) {
   body.auth-page {
-    zoom: 0.80 !important;
+    zoom: 0.83 !important;
   }
 
   html:has(#screen-app.active) {
-    zoom: 0.75 !important;
+    zoom: 0.83 !important;
   }
 }
 
