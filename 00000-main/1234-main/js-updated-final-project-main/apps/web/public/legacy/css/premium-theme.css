@@ -4608,7 +4608,7 @@ body.home-page.page-scrolled .nav-links-hub {
 }
 
 @media (min-width: 1024px) {
-  html:has(#screen-auth.active) {
+  body.auth-page {
     zoom: 0.80 !important;
   }
 
