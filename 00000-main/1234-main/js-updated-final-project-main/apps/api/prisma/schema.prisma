@@ -233,3 +233,14 @@ model PasswordResetRequest {
 
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+model OtpVerification {
+  id            BigInt   @id @default(autoincrement())
+  identifier    String   // Email or Mobile number
+  otpHash       String
+  purpose       String   // e.g. "REGISTER"
+  expiresAt     DateTime
+  attemptCount  Int      @default(0)
+  used          Boolean  @default(false)
+  createdAt     DateTime @default(now())
+}

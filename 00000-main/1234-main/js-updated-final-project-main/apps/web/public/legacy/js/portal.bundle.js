@@ -2672,12 +2672,17 @@ function togglePinReveal() {
     pinInput.type = pinInput.type === 'password' ? 'text' : 'password';
   }
 }
+let userSignupEmail = "";
+
 async function doSignup() {
   const name = document.getElementById('signup-name').value.trim();
   const email = document.getElementById('signup-email').value.trim();
   const pass = document.getElementById('signup-pass').value;
   const err = document.getElementById('signup-error');
   const ok = document.getElementById('signup-success');
+  const btn = document.getElementById('btn-signup');
+  const oldBtnText = btn ? btn.innerHTML : 'Register ->';
+
   if (!name||!email||!pass) { err.style.display='block'; err.textContent='Please fill all required fields.'; return; }
   if (pass.length<10 || !/[A-Za-z]/.test(pass) || !/[0-9]/.test(pass)) {
     err.style.display='block';
@@ -2685,17 +2690,53 @@ async function doSignup() {
     return;
   }
   err.style.display='none'; 
+  
+  if (btn) btn.innerHTML = 'Sending OTP...';
+
   try {
       await apiFetch('/auth/register', {
           method: 'POST',
           body: JSON.stringify({ fullName: name, username: email, email: email, password: pass })
       });
-      ok.style.display='block'; 
-      ok.textContent='Account created! You can now log in.';
-      setTimeout(()=>switchAuthMode('faculty'),1500);
+      userSignupEmail = email;
+      document.getElementById('signup-step-1').style.display = 'none';
+      document.getElementById('signup-step-2').style.display = 'block';
   } catch (error) {
+      if (btn) btn.innerHTML = oldBtnText;
       err.style.display='block'; 
       err.textContent = error.message || 'Signup failed.';
+  }
+}
+
+async function doVerifySignupOtp() {
+  const otp = document.getElementById('signup-otp').value.trim();
+  const err = document.getElementById('signup-otp-error');
+  const ok = document.getElementById('signup-success');
+  const btn = document.getElementById('btn-verify-otp');
+  const oldBtnText = btn ? btn.innerHTML : 'Verify OTP';
+
+  if (!otp || otp.length !== 6) {
+    err.style.display = 'block'; err.textContent = 'Please enter a valid 6-digit OTP.'; return;
+  }
+
+  err.style.display = 'none';
+  if (btn) btn.innerHTML = 'Verifying...';
+
+  try {
+    await apiFetch('/auth/verify-register-otp', {
+      method: 'POST',
+      body: JSON.stringify({ email: userSignupEmail, otp })
+    });
+    
+    // Hide step 2 and show success
+    document.getElementById('signup-step-2').style.display = 'none';
+    ok.style.display='block'; 
+    ok.textContent='Account verified! You can now log in.';
+    setTimeout(()=>toggleSignUp(false), 2000);
+  } catch (error) {
+    if (btn) btn.innerHTML = oldBtnText;
+    err.style.display='block'; 
+    err.textContent = error.message || 'Verification failed.';
   }
 }
 function doLogout() {

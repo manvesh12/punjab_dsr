@@ -7,6 +7,7 @@ import { recordAudit } from "../lib/audit.js";
 import { config } from "../lib/config.js";
 import { prisma } from "../lib/prisma.js";
 import { jsonSafe } from "../lib/json.js";
+import { sendOtpEmail } from "../lib/email.js";
 
 const loginSchema = z.object({
   username: z.string().trim().min(3).max(254),
@@ -57,6 +58,11 @@ authRouter.post("/login", async (req, res) => {
   if (!user || !(await bcrypt.compare(parsed.data.password, user.password))) {
     recordAudit(req, "AUTH_LOGIN_FAILED", { username: usernameOrEmail }, 401);
     res.status(401).json({ error: "Invalid username or password" });
+    return;
+  }
+
+  if (!user.active) {
+    res.status(403).json({ error: "Please verify your email via OTP to activate your account." });
     return;
   }
 
@@ -149,23 +155,117 @@ authRouter.post("/register", async (req, res) => {
   const exists = await prisma.user.findFirst({
     where: { OR: [{ username }, { email: parsed.data.email }] }
   });
+  
   if (exists) {
-    res.status(409).json({ error: "User already exists" });
-    return;
+    if (exists.active) {
+      res.status(409).json({ error: "User already exists and is active. Please login." });
+      return;
+    } else {
+      // User exists but inactive. We update password and resend OTP.
+      await prisma.user.update({
+        where: { id: exists.id },
+        data: {
+          password: await bcrypt.hash(parsed.data.password, 10),
+          fullName: parsed.data.fullName,
+        }
+      });
+    }
   }
 
-  const user = await prisma.user.create({
+  let user = exists;
+  if (!user) {
+    user = await prisma.user.create({
+      data: {
+        username,
+        email: parsed.data.email,
+        fullName: parsed.data.fullName,
+        password: await bcrypt.hash(parsed.data.password, 10),
+        role: Role.OFFICER,
+        active: false // Wait for OTP
+      }
+    });
+  }
+
+  // Generate 6-digit OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const otpHash = await bcrypt.hash(otp, 10);
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+
+  // Deprecate previous unused register OTPs
+  await prisma.otpVerification.updateMany({
+    where: { identifier: parsed.data.email, purpose: "REGISTER", used: false },
+    data: { used: true }
+  });
+
+  await prisma.otpVerification.create({
     data: {
-      username,
-      email: parsed.data.email,
-      fullName: parsed.data.fullName,
-      password: await bcrypt.hash(parsed.data.password, 10),
-      role: Role.OFFICER,
-      active: true
+      identifier: parsed.data.email,
+      otpHash,
+      purpose: "REGISTER",
+      expiresAt
     }
   });
 
-  res.json(jsonSafe({ success: true, username: user.username, fullName: user.fullName }));
+  try {
+    await sendOtpEmail(parsed.data.email, otp);
+  } catch(e) {
+    console.error("Failed to send OTP:", e);
+  }
+
+  res.json(jsonSafe({ success: true, message: "OTP sent to your email", username: user.username }));
+});
+
+authRouter.post("/verify-register-otp", async (req, res) => {
+  const parsed = z.object({
+    email: z.string().email(),
+    otp: z.string().length(6)
+  }).safeParse(req.body);
+
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid payload. Need valid email and 6-digit OTP." });
+    return;
+  }
+
+  const { email, otp } = parsed.data;
+
+  const otpRecord = await prisma.otpVerification.findFirst({
+    where: { identifier: email, purpose: "REGISTER", used: false },
+    orderBy: { createdAt: 'desc' }
+  });
+
+  if (!otpRecord || otpRecord.expiresAt < new Date()) {
+    res.status(400).json({ error: "Invalid or expired OTP." });
+    return;
+  }
+
+  if (otpRecord.attemptCount >= 5) {
+    res.status(429).json({ error: "Too many attempts. Please request a new OTP by registering again." });
+    return;
+  }
+
+  const isValid = await bcrypt.compare(otp, otpRecord.otpHash);
+  if (!isValid) {
+    await prisma.otpVerification.update({
+      where: { id: otpRecord.id },
+      data: { attemptCount: { increment: 1 } }
+    });
+    res.status(400).json({ error: "Invalid OTP" });
+    return;
+  }
+
+  // Mark used
+  await prisma.otpVerification.update({
+    where: { id: otpRecord.id },
+    data: { used: true }
+  });
+
+  // Activate the user
+  await prisma.user.update({
+    where: { email },
+    data: { active: true }
+  });
+
+  res.json({ success: true, message: "Registration verified successfully. You can now login." });
 });
 
 const forgotPasswordSchema = z.object({

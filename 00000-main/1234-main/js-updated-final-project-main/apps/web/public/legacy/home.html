@@ -66,7 +66,7 @@
           <h2>Register for DSR Portal</h2>
         </div>
       </div>
-      <div class="registration-form-card" style="max-width: 450px;">
+      <div class="registration-form-card" style="max-width: 450px;" id="reg-step-1">
         <div style="display: flex; flex-direction: column; gap: 16px;">
           <div>
             <label style="font-size: 14px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">Full Name</label>
@@ -83,6 +83,17 @@
           </div>
           <p id="reg-msg" style="font-size: 14px; font-weight: 600; margin: 0; display: none;"></p>
           <button type="button" onclick="submitHomeRegistration()" class="button primary" style="width: 100%; justify-content: center; margin-top: 10px; font-size: 16px;">Register Now</button>
+        </div>
+      </div>
+
+      <div class="registration-form-card" style="max-width: 450px; display: none;" id="reg-step-2">
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div>
+            <label style="font-size: 14px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">Enter OTP sent to your email</label>
+            <input type="text" id="reg-otp" placeholder="6-digit OTP" maxlength="6" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 15px; box-sizing: border-box; text-align: center; letter-spacing: 2px;">
+          </div>
+          <p id="otp-msg" style="font-size: 14px; font-weight: 600; margin: 0; display: none;"></p>
+          <button type="button" onclick="verifyRegisterOtp()" class="button primary" style="width: 100%; justify-content: center; margin-top: 10px; font-size: 16px;">Verify OTP</button>
         </div>
       </div>
     </section>
@@ -106,6 +117,8 @@
 
   <footer id="footer"><div class="site-wrap footer-grid"><div><h2>District Survey Report Portal</h2><p>Department of Mining and Geology<br>Government of Punjab</p></div><div><h3>Important Links</h3><a href="login.html">About the Department</a><a href="login.html">Privacy Policy</a><a href="login.html">Terms of Use</a></div><div><h3>Support</h3><a href="login.html">Helpdesk</a><a href="login.html">Accessibility Statement</a><a href="login.html">Feedback</a></div></div><div class="site-wrap copyright"><span>© 2026 Government of Punjab. All Rights Reserved.</span><span>Designed & developed with technical support from IIT Ropar.</span></div></footer>
   <script>
+    let userRegEmail = "";
+
     async function submitHomeRegistration() {
       const name = document.getElementById('reg-name').value.trim();
       const email = document.getElementById('reg-email').value.trim();
@@ -122,7 +135,7 @@
       
       msg.style.display = 'none';
       const oldBtnText = btn.textContent;
-      btn.textContent = 'Registering...';
+      btn.textContent = 'Sending OTP...';
       btn.disabled = true;
       btn.style.opacity = '0.7';
 
@@ -135,10 +148,51 @@
         
         const data = await response.json();
         if (response.ok) {
-          msg.style.display = 'block'; msg.style.color = '#10b981'; msg.textContent = 'Registration successful! Redirecting to login...';
-          setTimeout(() => { window.location.href = 'login.html'; }, 2000);
+          userRegEmail = email;
+          document.getElementById('reg-step-1').style.display = 'none';
+          document.getElementById('reg-step-2').style.display = 'block';
         } else {
           msg.style.display = 'block'; msg.style.color = '#ef4444'; msg.textContent = data.error || 'Registration failed.';
+          btn.textContent = oldBtnText;
+          btn.disabled = false;
+          btn.style.opacity = '1';
+        }
+      } catch (e) {
+        msg.style.display = 'block'; msg.style.color = '#ef4444'; msg.textContent = 'Network error. Please try again.';
+        btn.textContent = oldBtnText;
+        btn.disabled = false;
+        btn.style.opacity = '1';
+      }
+    }
+
+    async function verifyRegisterOtp() {
+      const otp = document.getElementById('reg-otp').value.trim();
+      const msg = document.getElementById('otp-msg');
+      const btn = document.querySelector('button[onclick="verifyRegisterOtp()"]');
+
+      if (!otp || otp.length !== 6) {
+        msg.style.display = 'block'; msg.style.color = '#ef4444'; msg.textContent = 'Please enter a valid 6-digit OTP.'; return;
+      }
+
+      msg.style.display = 'none';
+      const oldBtnText = btn.textContent;
+      btn.textContent = 'Verifying...';
+      btn.disabled = true;
+      btn.style.opacity = '0.7';
+
+      try {
+        const response = await fetch('/api/auth/verify-register-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: userRegEmail, otp })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          msg.style.display = 'block'; msg.style.color = '#10b981'; msg.textContent = 'Registration verified! Redirecting to login...';
+          setTimeout(() => { window.location.href = 'login.html'; }, 2000);
+        } else {
+          msg.style.display = 'block'; msg.style.color = '#ef4444'; msg.textContent = data.error || 'Verification failed.';
           btn.textContent = oldBtnText;
           btn.disabled = false;
           btn.style.opacity = '1';
