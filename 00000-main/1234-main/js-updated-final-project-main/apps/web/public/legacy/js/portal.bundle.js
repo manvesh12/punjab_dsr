@@ -1346,6 +1346,9 @@ function isAnnexureViewId(id) {
 function isCoreAnnexureViewId(id) {
   return /^anx[1-7]$/.test(id) || id === 'annexure-f' || id === 'annexure-j' || id === 'annexure-k';
 }
+function isFullWidthAnnexureEntryView(id) {
+  return isCoreAnnexureViewId(id) || /^annexure-[b-eghi]$/.test(id);
+}
 function getAnnexureInstructionText(id) {
   const map = {
     anx1: 'Fill the source tables, upload section Excel files where needed, and use the live preview to check Annexure I before download.',
@@ -1379,7 +1382,7 @@ function normalizeAnnexureViewLayout(id) {
   if (!isAnnexureViewId(id)) return;
   const view = document.getElementById('view-' + id);
   if (!view) return;
-  const shouldHideInstructions = isCoreAnnexureViewId(id);
+  const shouldHideInstructions = isFullWidthAnnexureEntryView(id);
   const existingLayout = view.querySelector(':scope > .annexure-unified-layout, :scope > .annexure-line-layout, :scope > .g2');
   if (existingLayout) {
     existingLayout.classList.add('annexure-unified-layout', 'annexure-line-layout');
@@ -1391,9 +1394,10 @@ function normalizeAnnexureViewLayout(id) {
       instructions = cols[1];
     }
     if (shouldHideInstructions) {
-      if (instructions) instructions.remove();
+      existingLayout.querySelectorAll(':scope > .annexure-line-instructions').forEach(panel => panel.remove());
       existingLayout.classList.add('annexure-no-instructions');
       existingLayout.style.gridTemplateColumns = 'minmax(0, 1fr)';
+      if (cols[0]) cols[0].style.width = '100%';
     } else if (!instructions) {
       existingLayout.appendChild(buildAnnexureInstructions(id));
     }
