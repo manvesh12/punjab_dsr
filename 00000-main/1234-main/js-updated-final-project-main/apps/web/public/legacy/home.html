@@ -58,6 +58,33 @@
 
     <section class="notice-strip" aria-label="Latest notice"><div class="site-wrap notice-inner"><strong>Latest Updates</strong><p>District Survey Report preparation and review services are available through the portal.</p><a href="login.html">View all notices →</a></div></section>
 
+    <section class="site-wrap section registration-section" id="register-section" style="background: #f8fafc; padding: 40px; border-radius: 12px; margin-top: 40px; border: 1px solid #e2e8f0;">
+      <div class="section-heading" style="margin-bottom: 24px;">
+        <div>
+          <p class="section-kicker">New User?</p>
+          <h2>Register for DSR Portal</h2>
+        </div>
+      </div>
+      <div class="registration-form-card" style="max-width: 450px;">
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div>
+            <label style="font-size: 14px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">Full Name</label>
+            <input type="text" id="reg-name" placeholder="Enter your full name" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 15px; box-sizing: border-box;">
+          </div>
+          <div>
+            <label style="font-size: 14px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">Email Address</label>
+            <input type="email" id="reg-email" placeholder="name@domain.gov.in" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 15px; box-sizing: border-box;">
+          </div>
+          <div>
+            <label style="font-size: 14px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">Create Password</label>
+            <input type="password" id="reg-pass" placeholder="********" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 15px; box-sizing: border-box;">
+            <span style="font-size: 12px; color: #64748b; margin-top: 4px; display: block;">Must be at least 10 characters with letters and numbers.</span>
+          </div>
+          <p id="reg-msg" style="font-size: 14px; font-weight: 600; margin: 0; display: none;"></p>
+          <button type="button" onclick="submitHomeRegistration()" class="button primary" style="width: 100%; justify-content: center; margin-top: 10px; font-size: 16px;">Register Now</button>
+        </div>
+      </div>
+    </section>
     <section class="site-wrap section services">
       <div class="section-heading"><div><p class="section-kicker">Citizen & department services</p><h2>Quick access</h2></div><a href="login.html">View all services →</a></div>
       <div class="service-list">
@@ -77,5 +104,51 @@
   </main>
 
   <footer id="footer"><div class="site-wrap footer-grid"><div><h2>District Survey Report Portal</h2><p>Department of Mining and Geology<br>Government of Punjab</p></div><div><h3>Important Links</h3><a href="login.html">About the Department</a><a href="login.html">Privacy Policy</a><a href="login.html">Terms of Use</a></div><div><h3>Support</h3><a href="login.html">Helpdesk</a><a href="login.html">Accessibility Statement</a><a href="login.html">Feedback</a></div></div><div class="site-wrap copyright"><span>© 2026 Government of Punjab. All Rights Reserved.</span><span>Designed & developed with technical support from IIT Ropar.</span></div></footer>
+  <script>
+    async function submitHomeRegistration() {
+      const name = document.getElementById('reg-name').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const pass = document.getElementById('reg-pass').value;
+      const msg = document.getElementById('reg-msg');
+      const btn = document.querySelector('button[onclick="submitHomeRegistration()"]');
+      
+      if (!name || !email || !pass) {
+        msg.style.display = 'block'; msg.style.color = '#ef4444'; msg.textContent = 'Please fill all fields.'; return;
+      }
+      if (pass.length < 10 || !/[A-Za-z]/.test(pass) || !/[0-9]/.test(pass)) {
+        msg.style.display = 'block'; msg.style.color = '#ef4444'; msg.textContent = 'Password must be at least 10 chars with letters and numbers.'; return;
+      }
+      
+      msg.style.display = 'none';
+      const oldBtnText = btn.textContent;
+      btn.textContent = 'Registering...';
+      btn.disabled = true;
+      btn.style.opacity = '0.7';
+
+      try {
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fullName: name, username: email, email: email, password: pass })
+        });
+        
+        const data = await response.json();
+        if (response.ok) {
+          msg.style.display = 'block'; msg.style.color = '#10b981'; msg.textContent = 'Registration successful! Redirecting to login...';
+          setTimeout(() => { window.location.href = 'login.html'; }, 2000);
+        } else {
+          msg.style.display = 'block'; msg.style.color = '#ef4444'; msg.textContent = data.error || 'Registration failed.';
+          btn.textContent = oldBtnText;
+          btn.disabled = false;
+          btn.style.opacity = '1';
+        }
+      } catch (e) {
+        msg.style.display = 'block'; msg.style.color = '#ef4444'; msg.textContent = 'Network error. Please try again.';
+        btn.textContent = oldBtnText;
+        btn.disabled = false;
+        btn.style.opacity = '1';
+      }
+    }
+  </script>
 </body>
 </html>
