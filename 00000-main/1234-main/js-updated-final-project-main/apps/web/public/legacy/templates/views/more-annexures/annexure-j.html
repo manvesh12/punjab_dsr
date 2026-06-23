@@ -2,23 +2,49 @@
   <div class="header-row">
     <div>
       <div class="page-title">Annexure J</div>
-      <div class="page-sub">Upload and manage Annexure J PDFs and images</div>
+      <div class="page-sub">Projected Demand of Gravel</div>
     </div>
-    <button type="button" class="btn btn-primary btn-sm" onclick="addAnnexureJ()">
-      + Add Entry
-    </button>
   </div>
-  <div class="g2" style="grid-template-columns: 1fr;">
-    <div>
+  <div class="g2 annexure-line-layout" style="grid-template-columns:minmax(0, 1fr);">
+    <div class="annexure-line-main">
       <div class="card">
-        <div class="card-hd">
-          <div class="card-title">Annexure J Entries</div>
-        </div>
         <div class="card-bd">
-          <div id="annexure-j-list"></div>
+          <div class="anx-section">
+            <div class="anx-section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+              <div>
+                <div class="anx-section-title" style="font-weight:bold; font-size:14px;">Supporting PDF / Image Upload:</div>
+                <div style="font-size:12px; color:var(--text-soft); margin-top:3px;">Uploaded PDF pages or images will be appended after the Annexure J tables in the final PDF.</div>
+              </div>
+              <label class="btn btn-pdf-upload btn-xs" style="cursor:pointer; margin-bottom:0; display:inline-flex; align-items:center; gap:6px;">
+                <i data-lucide="upload" style="width:12px; height:12px;"></i>
+                <span>Upload PDF/Image</span>
+                <input type="file" accept="application/pdf,image/*" hidden onchange="handleAttachmentUploadAnnexureJ(event)">
+              </label>
+            </div>
+            <div id="annexure-j-attachment-info" style="margin-top:10px;"></div>
+          </div>
+
+          <div class="anx-section" style="margin-top:32px;">
+            <div class="anx-section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+              <div>
+                <div class="anx-section-title" style="font-weight:bold; font-size:14px;">Projected Demand of Gravel:</div>
+                <div style="font-size:12px; color:var(--text-soft); margin-top:3px;">Use the supplied Demand Table Excel template or upload a completed workbook.</div>
+              </div>
+              <button type="button" class="btn btn-excel-template btn-xs" onclick="downloadAnnexureJTemplate()" style="display:inline-flex; align-items:center; gap:6px;">
+                <i data-lucide="file-spreadsheet" style="width:12px; height:12px;"></i>
+                <span>Excel Template</span>
+              </button>
+            </div>
+            <div id="annexure-j-demand-container" class="annexure-j-table-container"></div>
+            <div style="margin-top:12px;">
+              <button type="button" class="btn btn-sm btn-pdf-upload" onclick="addAnnexureJTableBlock()" style="display:inline-flex; align-items:center; gap:6px;">
+                <i data-lucide="plus-circle" style="width:14px; height:14px;"></i>
+                <span>Add Another Table</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    
   </div>
 </div>
