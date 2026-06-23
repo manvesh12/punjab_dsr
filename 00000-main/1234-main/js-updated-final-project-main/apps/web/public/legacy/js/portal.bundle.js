@@ -1426,6 +1426,29 @@ function normalizeAnnexureViewLayout(id) {
   }
 }
 function refreshCoreAnnexurePreview(id) {
+  if (id && id.startsWith('annexure-')) {
+    if (window.pdfPreview && window.pdfPreview.currentView === id) {
+      const fn = {
+        'annexure-f': window.exportAnnexureFPDF,
+        'annexure-j': window.exportAnnexureJPDF,
+        'annexure-k': window.exportAnnexureKPDF
+      }[id];
+      if (typeof fn === 'function') {
+        const run = () => fn(null, true);
+        if (typeof ensurePortalVendors === 'function') {
+          ensurePortalVendors(['jspdf', 'autotable']).then(run).catch(err => {
+            console.error('Live preview tools failed:', err);
+            if (typeof toast === 'function') toast('Live preview tools could not load.', 'error');
+          });
+        } else {
+          run();
+        }
+      } else {
+        window.pdfPreview.refresh();
+      }
+    }
+    return;
+  }
   if (window.pdfPreview && typeof window.pdfPreview.generateAnnexureLivePreview === 'function') {
     window.pdfPreview.generateAnnexureLivePreview(id, 80);
     return;
@@ -11261,8 +11284,15 @@ async function exportAnnexureFPDF(btn, isLivePreview = false) {
   if (isLivePreview) {
     const blob = doc.output('blob');
     const blobUrl = URL.createObjectURL(blob);
+    if (window.pdfPreview && window.pdfPreview.currentView === 'annexure-f') {
+      window.pdfPreview.renderPdfBlob(blobUrl);
+      return;
+    }
     const iframe = (window.getAnnexurePreviewIframe ? window.getAnnexurePreviewIframe('annexure-f') : document.getElementById('pdf-iframe-annexure-f-preview'));
-    if (iframe) iframe.src = blobUrl;
+    if (iframe) {
+      iframe.removeAttribute('srcdoc');
+      iframe.src = blobUrl;
+    }
   } else {
     doc.save('Annexure_F_Sand_Ghats_Benchmarks_CORS_Merged.pdf');
     toast('PDF downloaded successfully!', 'success');
@@ -11701,10 +11731,16 @@ async function exportAnnexureJPDF(btn, isLivePreview = false, previewRequestId =
   await appendAnnexureJAttachmentPages(doc);
   if (isLivePreview) {
     if (requestId !== window.annexureJPreviewRequest) return;
+    const blob = doc.output('blob');
+    const blobUrl = URL.createObjectURL(blob);
+    if (window.pdfPreview && window.pdfPreview.currentView === 'annexure-j') {
+      window.pdfPreview.renderPdfBlob(blobUrl);
+      return;
+    }
     const iframe = window.getAnnexurePreviewIframe ? window.getAnnexurePreviewIframe('annexure-j') : document.getElementById('pdf-iframe-annexure-j-preview');
     if (iframe) {
       iframe.removeAttribute('srcdoc');
-      iframe.src = URL.createObjectURL(doc.output('blob'));
+      iframe.src = blobUrl;
     }
   } else {
     doc.save('Annexure_J_Projected_Demand_of_Gravel.pdf');
@@ -12170,8 +12206,15 @@ async function exportAnnexureKPDF(btn, isLivePreview = false) {
   if (isLivePreview) {
     const blob = doc.output('blob');
     const blobUrl = URL.createObjectURL(blob);
+    if (window.pdfPreview && window.pdfPreview.currentView === 'annexure-k') {
+      window.pdfPreview.renderPdfBlob(blobUrl);
+      return;
+    }
     const iframe = (window.getAnnexurePreviewIframe ? window.getAnnexurePreviewIframe('annexure-k') : document.getElementById('pdf-iframe-annexure-k-preview'));
-    if (iframe) iframe.src = blobUrl;
+    if (iframe) {
+      iframe.removeAttribute('srcdoc');
+      iframe.src = blobUrl;
+    }
   } else {
     doc.save('Annexure_K_Proforma_Auctioned_Sites_Annexure_A_Merged.pdf');
     toast('PDF downloaded successfully!', 'success');
@@ -12311,6 +12354,61 @@ async function appendAnnexureKAttachmentPages(doc) {
     doc.addImage(src, format, x, y, drawW, drawH);
   }
 }
+function getMergedAnnexureAttachmentPages(viewId) {
+  if (viewId === 'annexure-f') {
+    const attachment = typeof getAnnexureFAttachment === 'function' ? getAnnexureFAttachment() : null;
+    return attachment && Array.isArray(attachment.pages)
+      ? attachment.pages.map((src, index) => ({
+        src,
+        label: attachment.pages.length > 1
+          ? `Annexure F Supporting - Page ${index + 1}`
+          : 'Annexure F Supporting'
+      }))
+      : [];
+  }
+  if (viewId === 'annexure-j') {
+    const attachments = typeof getAnnexureJAttachments === 'function' ? getAnnexureJAttachments() : [];
+    return attachments.flatMap(attachment => (attachment.pages || []).map((src, index) => ({
+      src,
+      label: (attachment.pages || []).length > 1
+        ? `${attachment.fileName || attachment.name || 'Annexure J Supporting'} - Page ${index + 1}`
+        : (attachment.fileName || attachment.name || 'Annexure J Supporting')
+    })));
+  }
+  if (viewId === 'annexure-k') {
+    const attachment = typeof getAnnexureKAttachment === 'function' ? getAnnexureKAttachment() : null;
+    return attachment && Array.isArray(attachment.pages)
+      ? attachment.pages.map((src, index) => ({
+        src,
+        label: attachment.pages.length > 1
+          ? `Annexure K Supporting - Page ${index + 1}`
+          : 'Annexure K Supporting'
+      }))
+      : [];
+  }
+  return [];
+}
+function renderAnnexureAttachmentPreview(viewId) {
+  const pages = getMergedAnnexureAttachmentPages(viewId).filter(page => page && page.src);
+  if (!pages.length) return '';
+  const escape = value => String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+  return `
+    <section class="annexure-uploaded-pages">
+      <h2>Uploaded PDF / Image Pages</h2>
+      ${pages.map((page, index) => `
+        <figure class="annexure-uploaded-page">
+          <img src="${escape(page.src)}" alt="${escape(page.label || `Uploaded page ${index + 1}`)}">
+          <figcaption>${escape(page.label || `Uploaded page ${index + 1}`)}</figcaption>
+        </figure>
+      `).join('')}
+    </section>`;
+}
+window.renderAnnexureAttachmentPreview = renderAnnexureAttachmentPreview;
 function renderAnnexureK() {
   renderAttachmentUploadUIAnnexureK();
   ['PROFORMA', 'ANNEXURE_A'].forEach(renumberAnnexureKTableBlocks);
@@ -13844,7 +13942,7 @@ const pdfPreview = {
     'annexure-k': 'pdf-iframe-annexure-k-preview'
   },
   isAnnexureView(viewId) {
-    return !!viewId && (viewId.startsWith('anx') || viewId.startsWith('annexure-'));
+    return !!viewId && viewId.startsWith('anx') && !viewId.startsWith('annexure-');
   },
   FM_ORDER: ['cover', 'toc', 'pref', 'ack', 'cert'],
   FM_LABELS: {
@@ -14034,10 +14132,12 @@ const pdfPreview = {
         case 'annexure-c': this.renderAnnexureC(); break;
         case 'annexure-d': this.renderAnnexureD(); break;
         case 'annexure-e': this.renderAnnexureE(); break;
+        case 'annexure-f': this.renderAnnexureF(); break;
         case 'annexure-g': this.renderAnnexureG(); break;
         case 'annexure-h': this.renderAnnexureH(); break;
         case 'annexure-i': this.renderAnnexureI(); break;
         case 'annexure-j': this.renderAnnexureJ(); break;
+        case 'annexure-k': this.renderAnnexureK(); break;
       }
     }
     if (window.initLucide) initLucide();
@@ -14074,15 +14174,20 @@ const pdfPreview = {
     if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
       pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
     }
-    const headers = {};
-    const token = localStorage.getItem('dsr_token');
-    if (token && /^\/?api\//i.test(String(src).replace(/^https?:\/\/[^/]+/i, '').replace(/^\//, ''))) {
-      headers.Authorization = `Bearer ${token}`;
+    let response;
+    if (String(src).startsWith('blob:') || String(src).startsWith('data:')) {
+      response = await fetch(src);
+    } else {
+      const headers = {};
+      const token = localStorage.getItem('dsr_token');
+      if (token && /^\/?api\//i.test(String(src).replace(/^https?:\/\/[^/]+/i, '').replace(/^\//, ''))) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+      response = await fetch(src, {
+        credentials: 'same-origin',
+        headers
+      });
     }
-    const response = await fetch(src, {
-      credentials: 'same-origin',
-      headers
-    });
     if (!response.ok) throw new Error(`Unable to load uploaded PDF (${response.status}).`);
     const data = new Uint8Array(await response.arrayBuffer());
     const pdf = await pdfjsLib.getDocument({ data }).promise;
@@ -14237,7 +14342,13 @@ const pdfPreview = {
     const title = this.SECTION_TITLES[viewId] || 'Annexure Preview';
     const district = (window.S && S.frontMatter && S.frontMatter.district) || 'Jalandhar';
     const year = (window.S && S.frontMatter && S.frontMatter.year) || '2025-26';
-    const bodyHtml = clone.innerHTML.trim() || '<p class="empty">No annexure data entered yet.</p>';
+    let bodyHtml = clone.innerHTML.trim() || '<p class="empty">No annexure data entered yet.</p>';
+    if (typeof renderAnnexureAttachmentPreview === 'function') {
+      const attachmentHtml = renderAnnexureAttachmentPreview(viewId);
+      if (attachmentHtml) {
+        bodyHtml += attachmentHtml;
+      }
+    }
     return `<!doctype html>
       <html>
         <head>
@@ -14260,6 +14371,12 @@ const pdfPreview = {
             .field-value{display:inline-block;min-width:80px;padding:4px 6px;border-bottom:1px solid #cbd5e1;color:#111827;}
             .empty{padding:24px;border:1px dashed #cbd5e1;border-radius:8px;text-align:center;}
             img{max-width:100%;height:auto;}
+            .annexure-uploaded-pages { margin-top: 24px; border-top: 2px dashed #cbd5e1; padding-top: 20px; }
+            .annexure-uploaded-pages h2 { font-size: 16px; margin: 0 0 16px; color: #17324d; }
+            .annexure-uploaded-page { margin: 0 0 20px 0; background: #f8fafc; border: 1px solid #cbd5e1; padding: 10px; border-radius: 8px; text-align: center; }
+            .annexure-uploaded-page img { max-width: 100%; height: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.08); border-radius: 4px; display: block; margin: 0 auto 10px; }
+            .annexure-uploaded-page iframe { width: 100%; height: 500px; border: none; background: #fff; margin-bottom: 10px; }
+            .annexure-uploaded-page figcaption { font-size: 11px; color: #64748b; font-weight: 500; }
           </style>
         </head>
         <body>
@@ -14640,6 +14757,12 @@ const pdfPreview = {
               : `Annexure B: ${p.name}`
           });
         });
+      } else {
+        pages.push({
+          src: this.renderTextPageCanvas(p.name || 'Annexure B Entry', p.summary || 'Upload your Annexure B PDF or image here.', 'Annexure B'),
+          label: `Annexure B: ${p.name}`,
+          generated: true
+        });
       }
     });
     return pages;
@@ -14658,6 +14781,12 @@ const pdfPreview = {
               ? `Annexure C - Page ${idx + 1}`
               : `Annexure C: ${p.name}`
           });
+        });
+      } else {
+        pages.push({
+          src: this.renderTextPageCanvas(p.name || 'Annexure C Entry', p.summary || 'Upload your Annexure C PDF or image here.', 'Annexure C'),
+          label: `Annexure C: ${p.name}`,
+          generated: true
         });
       }
     });
@@ -14678,6 +14807,12 @@ const pdfPreview = {
               : `Annexure D: ${p.name}`
           });
         });
+      } else {
+        pages.push({
+          src: this.renderTextPageCanvas(p.name || 'Annexure D Entry', p.summary || 'Upload your Annexure D PDF or image here.', 'Annexure D'),
+          label: `Annexure D: ${p.name}`,
+          generated: true
+        });
       }
     });
     return pages;
@@ -14697,12 +14832,46 @@ const pdfPreview = {
               : `Annexure E: ${p.name}`
           });
         });
+      } else {
+        pages.push({
+          src: this.renderTextPageCanvas(p.name || 'Annexure E Entry', p.summary || 'Upload your Annexure E PDF or image here.', 'Annexure E'),
+          label: `Annexure E: ${p.name}`,
+          generated: true
+        });
       }
     });
     return pages;
   },
   renderAnnexureE() {
     this.renderPages(this.getAnnexureEPages());
+  },
+  getAnnexureFPages() {
+    const attachment = getAnnexureFAttachment();
+    const pages = [];
+    if (attachment && attachment.pages && attachment.pages.length) {
+      attachment.pages.forEach((img, idx) => {
+        pages.push({
+          src: img,
+          label: attachment.pages.length > 1
+            ? `Annexure F Supporting - Page ${idx + 1}`
+            : `Annexure F Supporting`
+        });
+      });
+    } else {
+      pages.push({
+        src: this.renderTextPageCanvas('Annexure F Supporting', 'Upload supporting PDF/image below the tables.', 'Annexure F'),
+        label: 'Annexure F Placeholder',
+        generated: true
+      });
+    }
+    return pages;
+  },
+  renderAnnexureF() {
+    if (typeof exportAnnexureFPDF === 'function') {
+      exportAnnexureFPDF(null, true);
+    } else {
+      this.renderPages(this.getAnnexureFPages());
+    }
   },
   getAnnexureGPages() {
     const pages = [];
@@ -14715,6 +14884,12 @@ const pdfPreview = {
               ? `Annexure G - Page ${idx + 1}`
               : `Annexure G: ${p.name}`
           });
+        });
+      } else {
+        pages.push({
+          src: this.renderTextPageCanvas(p.name || 'Annexure G Entry', p.summary || 'Upload your Annexure G PDF or image here.', 'Annexure G'),
+          label: `Annexure G: ${p.name}`,
+          generated: true
         });
       }
     });
@@ -14735,6 +14910,12 @@ const pdfPreview = {
               : `Annexure H: ${p.name}`
           });
         });
+      } else {
+        pages.push({
+          src: this.renderTextPageCanvas(p.name || 'Annexure H Entry', p.summary || 'Upload your Annexure H PDF or image here.', 'Annexure H'),
+          label: `Annexure H: ${p.name}`,
+          generated: true
+        });
       }
     });
     return pages;
@@ -14753,6 +14934,12 @@ const pdfPreview = {
               ? `Annexure I - Page ${idx + 1}`
               : `Annexure I: ${p.name}`
           });
+        });
+      } else {
+        pages.push({
+          src: this.renderTextPageCanvas(p.name || 'Annexure I Entry', p.summary || 'Upload your Annexure I PDF or image here.', 'Annexure I'),
+          label: `Annexure I: ${p.name}`,
+          generated: true
         });
       }
     });
@@ -14773,12 +14960,58 @@ const pdfPreview = {
               : `Annexure J: ${p.name}`
           });
         });
+      } else {
+        pages.push({
+          src: this.renderTextPageCanvas(p.name || 'Annexure J Entry', p.summary || 'Upload your Annexure J PDF or image here.', 'Annexure J'),
+          label: `Annexure J: ${p.name}`,
+          generated: true
+        });
       }
     });
     return pages;
   },
   renderAnnexureJ() {
-    this.renderPages(this.getAnnexureJPages());
+    if (typeof exportAnnexureJPDF === 'function') {
+      exportAnnexureJPDF(null, true);
+    } else {
+      this.renderPages(this.getAnnexureJPages());
+    }
+  },
+  getAnnexureKPages() {
+    const attachment = getAnnexureKAttachment();
+    const pages = [];
+    if (attachment && attachment.pages && attachment.pages.length) {
+      attachment.pages.forEach((img, idx) => {
+        pages.push({
+          src: img,
+          label: attachment.pages.length > 1
+            ? `Annexure K Supporting - Page ${idx + 1}`
+            : `Annexure K Supporting`
+        });
+      });
+    } else {
+      pages.push({
+        src: this.renderTextPageCanvas('Annexure K Supporting', 'Upload supporting PDF/image below the tables.', 'Annexure K'),
+        label: 'Annexure K Placeholder',
+        generated: true
+      });
+    }
+    return pages;
+  },
+  renderAnnexureK() {
+    if (typeof exportAnnexureKPDF === 'function') {
+      exportAnnexureKPDF(null, true);
+    } else {
+      this.renderPages(this.getAnnexureKPages());
+    }
+  },
+  async renderPdfBlob(blobUrl) {
+    try {
+      const pages = await this.renderPdfUrlToImages(blobUrl);
+      this.renderPages(pages);
+    } catch (err) {
+      console.error('Error rendering PDF blob to images:', err);
+    }
   },
   renderPages(pages) {
     if (!this.body) return;
@@ -14982,10 +15215,12 @@ const pdfPreview = {
       : this.currentView === 'annexure-c' ? 'annexure-c'
       : this.currentView === 'annexure-d' ? 'annexure-d'
       : this.currentView === 'annexure-e' ? 'annexure-e'
+      : this.currentView === 'annexure-f' ? 'annexure-f'
       : this.currentView === 'annexure-g' ? 'annexure-g'
       : this.currentView === 'annexure-h' ? 'annexure-h'
       : this.currentView === 'annexure-i' ? 'annexure-i'
-      : this.currentView === 'annexure-j' ? 'annexure-j' : 'preview';
+      : this.currentView === 'annexure-j' ? 'annexure-j'
+      : this.currentView === 'annexure-k' ? 'annexure-k' : 'preview';
     return `DSR-${dist}-${yr}-${section}.pdf`;
   },
   generateMergedPDF(images) {
