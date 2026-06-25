@@ -12634,12 +12634,7 @@ function getMergedAnnexureAttachmentPages(viewId) {
 }
 function renderAnnexureAttachmentPreview(viewId) {
   const pages = getMergedAnnexureAttachmentPages(viewId).filter(page => page && page.src);
-  if (!pages.length) {
-    return `
-      <div style="padding:14px 16px; border:1px dashed #cbd5e1; border-radius:8px; color:#64748b; font-size:13.5px; background:#f8fafc; text-align:center; margin-top:10px;">
-        No supporting PDF/image uploaded yet.
-      </div>`;
-  }
+  if (!pages.length) return '';
   const escape = value => String(value ?? '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -14490,6 +14485,25 @@ const pdfPreview = {
       });
   },
   cleanupAnnexurePreviewClone(clone, viewId) {
+    if (viewId) {
+      clone.querySelectorAll('div, p, span, figcaption, h2, td, th').forEach(el => {
+        if (el.children.length > 0) return;
+        const txt = (el.textContent || '').trim();
+        if (
+          txt.includes('Uploaded PDF pages or images will be appended after the Annexure') ||
+          txt.includes('No supporting PDF/image uploaded yet') ||
+          txt.includes('Use the supplied Demand Table Excel template or upload a completed workbook') ||
+          txt.includes('Example input values from Proforma_Template_One_Example.xlsx') ||
+          txt.includes('Example input values from Annexure_A_Template_One_Example.xlsx') ||
+          txt.includes('Uploaded PDF / Image Pages') ||
+          txt.includes('Annexure K Supporting') ||
+          txt.includes('Annexure F Supporting') ||
+          txt.includes('Annexure J Supporting')
+        ) {
+          el.remove();
+        }
+      });
+    }
     clone.querySelectorAll('table').forEach(table => {
       // First, compute the printable cells for each row while the table is fully intact.
       const rows = Array.from(table.querySelectorAll('tr'));
