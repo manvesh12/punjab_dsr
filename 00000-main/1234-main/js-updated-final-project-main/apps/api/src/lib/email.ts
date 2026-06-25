@@ -1,28 +1,45 @@
 import nodemailer from 'nodemailer';
 import { config } from './config.js';
-import dns from 'node:dns';
+import dns from 'node:dns/promises';
 
-// Force Node.js to use IPv4 first. This prevents 'ENETUNREACH' errors on platforms like Render 
-// which sometimes fail to route outbound IPv6 connections to Google's SMTP.
-dns.setDefaultResultOrder('ipv4first');
+let transporter: nodemailer.Transporter | null = null;
 
-// Setup Nodemailer transport using SMTP credentials from environment
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.SMTP_PORT || '587', 10),
-  secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-  pool: true,             // Use pooled connections instead of creating a new connection for every email
-  maxConnections: 1,      // Limit simultaneous connections to 1 to avoid ETIMEDOUT from rapid concurrent bursts
-  maxMessages: 50,        // Max messages per connection
-  family: 4,              // Force IPv4
-  tls: {
-    rejectUnauthorized: false
+async function getTransporter() {
+  if (transporter) return transporter;
+
+  let hostIp = process.env.SMTP_HOST || 'smtp.gmail.com';
+  const originalHost = hostIp;
+
+  try {
+    // Manually resolve to IPv4 ONLY. This completely bypasses Nodemailer's internal IPv6 routing 
+    // which causes the ENETUNREACH error on Render free tiers.
+    const ips = await dns.resolve4(originalHost);
+    if (ips && ips.length > 0) {
+      hostIp = ips[0];
+    }
+  } catch (err) {
+    console.warn(`[WARNING] Failed to resolve IPv4 for ${originalHost}, falling back to default.`);
   }
-} as any);
+
+  transporter = nodemailer.createTransport({
+    host: hostIp,
+    port: parseInt(process.env.SMTP_PORT || '587', 10),
+    secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+    pool: true,
+    maxConnections: 1,
+    tls: {
+      servername: originalHost, // Required so Google doesn't reject the TLS handshake when using an IP
+      rejectUnauthorized: false
+    }
+  } as any);
+
+  return transporter;
+}
+
 
 
 export const sendOtpEmail = async (toEmail: string, otp: string) => {
@@ -32,7 +49,7 @@ export const sendOtpEmail = async (toEmail: string, otp: string) => {
   }
 
   try {
-    const info = await transporter.sendMail({
+    const info = await (await getTransporter()).sendMail({
       from: `"Government of Punjab" <${process.env.SMTP_USER}>`,
       to: toEmail,
       subject: 'Verify your Registration - Punjab DSR',
@@ -76,7 +93,7 @@ export const sendInvitationEmail = async (toEmail: string, token: string, role: 
   const roleDisplay = role.replace(/_/g, ' ').replace(/\w\S*/g, (w) => (w.replace(/^\w/, (c) => c.toUpperCase())));
 
   try {
-    const info = await transporter.sendMail({
+    const info = await (await getTransporter()).sendMail({
       from: `"Government of Punjab" <${process.env.SMTP_USER}>`,
       to: toEmail,
       subject: 'You have been invited to the Punjab DSR Portal',
