@@ -441,7 +441,9 @@ const registerInvitedSchema = z.object({
   token: z.string().min(1),
   fullName: z.string().min(1),
   mobileNumber: z.string().min(10),
-  password: z.string().min(10).max(128).regex(/[A-Za-z]/).regex(/[0-9]/)
+  password: z.string().min(10).max(128).regex(/[A-Za-z]/).regex(/[0-9]/),
+  phoneVerified: z.boolean().optional(),
+  idToken: z.string().optional()
 });
 
 authRouter.post("/register-invited", async (req, res) => {
@@ -462,7 +464,66 @@ authRouter.post("/register-invited", async (req, res) => {
     return;
   }
 
-  // Generate 6-digit OTP for Mobile (mocked via console)
+  // If frontend already verified phone via Firebase SMS
+  if (parsed.data.phoneVerified) {
+    let user = await prisma.user.findFirst({ where: { email: invitation.email } });
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          username: invitation.email,
+          email: invitation.email,
+          fullName,
+          mobileNumber,
+          password: await bcrypt.hash(password, 10),
+          role: invitation.role,
+          active: true
+        }
+      });
+    } else {
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          password: await bcrypt.hash(password, 10),
+          fullName,
+          mobileNumber,
+          active: true
+        }
+      });
+    }
+
+    // Mark invitation as ACCEPTED
+    await prisma.invitation.update({
+      where: { id: invitation.id },
+      data: { status: "ACCEPTED" }
+    });
+
+    // Automatically log them in
+    const sessionToken = signToken(user);
+    const refreshTokenStr = crypto.randomBytes(40).toString("hex");
+    await prisma.refreshToken.create({
+      data: {
+        token: refreshTokenStr,
+        userId: user.id,
+        expiresAt: new Date(Date.now() + refreshTokenCookieOptions.maxAge)
+      }
+    });
+
+    res.cookie("refreshToken", refreshTokenStr, refreshTokenCookieOptions);
+    res.json(jsonSafe({
+      success: true,
+      message: "Registration successful",
+      token: sessionToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        fullName: user.fullName,
+        role: user.role
+      }
+    }));
+    return;
+  }
+
+  // Fallback: Generate 6-digit OTP for Email (or old mock mobile)
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   const otpHash = await bcrypt.hash(otp, 10);
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
@@ -484,17 +545,14 @@ authRouter.post("/register-invited", async (req, res) => {
 
   // Send real OTP via Email to the invited user
   try {
-    // Fire and forget OTP email to prevent blocking
     sendOtpEmail(invitation.email, otp).catch(err => {
       console.error(`Background OTP email failed for ${invitation.email}:`, err);
     });
-    console.log(`[EMAIL OTP] Registration OTP for ${invitation.email} (Mobile: ${mobileNumber}) sent successfully.`);
+    console.log(`[EMAIL OTP] Registration OTP for ${invitation.email} sent successfully.`);
   } catch (error) {
     console.error(`Failed to trigger OTP email for ${invitation.email}`, error);
   }
 
-  // Create the inactive user so we have the password and mobileNumber saved temporarily.
-  // We can just update the existing logic or create an inactive user directly.
   let user = await prisma.user.findFirst({ where: { email: invitation.email } });
   
   if (!user) {
@@ -506,7 +564,7 @@ authRouter.post("/register-invited", async (req, res) => {
         mobileNumber,
         password: await bcrypt.hash(password, 10),
         role: invitation.role,
-        active: false // Wait for Mobile OTP
+        active: false // Wait for OTP
       }
     });
   } else if (!user.active) {
@@ -520,7 +578,7 @@ authRouter.post("/register-invited", async (req, res) => {
     });
   }
 
-  res.json({ success: true, message: "OTP sent to your mobile number" });
+  res.json({ success: true, message: "OTP sent to your email" });
 });
 
 authRouter.post("/verify-invited-otp", async (req, res) => {

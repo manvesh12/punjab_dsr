@@ -6076,6 +6076,28 @@
 
   <div class="toast" id="toast"></div>
 
+  <div id="recaptcha-container"></div>
+
+  <!-- Firebase Setup -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBSeV_dxwjXdZmf3-YIx7tf9rq5oFLtXg8",
+      authDomain: "punjab-dsr1.firebaseapp.com",
+      projectId: "punjab-dsr1",
+      storageBucket: "punjab-dsr1.firebasestorage.app",
+      messagingSenderId: "902856251457",
+      appId: "1:902856251457:web:736caf271a09915e534ec0"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    window.firebaseAuth = getAuth(app);
+    window.RecaptchaVerifier = RecaptchaVerifier;
+    window.signInWithPhoneNumber = signInWithPhoneNumber;
+  </script>
+
 <script defer src="js/portal.bundle.js?v=site-zoom-20260612i"></script>
 </body>
 </html>

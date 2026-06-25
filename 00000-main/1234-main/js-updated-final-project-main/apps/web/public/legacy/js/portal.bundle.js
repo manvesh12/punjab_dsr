@@ -5554,30 +5554,44 @@ async function doInvitedRegister() {
     return;
   }
 
-  try {
-    const res = await fetch('/api/auth/register-invited', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, fullName, mobileNumber, password })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to register');
+  // Format phone
+  const phone = mobileNumber.startsWith('+') ? mobileNumber : '+91' + mobileNumber;
 
+  try {
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new window.RecaptchaVerifier(window.firebaseAuth, 'recaptcha-container', {
+        'size': 'invisible'
+      });
+    }
+
+    const btn = document.getElementById('invited-btn-submit');
+    const oldText = btn.innerHTML;
+    btn.innerHTML = 'Sending SMS...';
+
+    window.confirmationResult = await window.signInWithPhoneNumber(window.firebaseAuth, phone, window.recaptchaVerifier);
+
+    btn.innerHTML = oldText;
     document.getElementById('invited-error').style.display = 'none';
-    document.getElementById('invited-success').textContent = data.message;
+    document.getElementById('invited-success').textContent = "OTP sent to your mobile number.";
     document.getElementById('invited-success').style.display = 'block';
     
     document.getElementById('invited-btn-submit').style.display = 'none';
     document.getElementById('invited-otp-section').style.display = 'block';
   } catch (e) {
-    document.getElementById('invited-error').textContent = e.message;
+    document.getElementById('invited-error').textContent = e.message || 'Failed to send OTP via SMS';
     document.getElementById('invited-error').style.display = 'block';
+    if (window.recaptchaVerifier) {
+      window.recaptchaVerifier.clear();
+      window.recaptchaVerifier = null;
+    }
   }
 }
 
 async function doVerifyInvitedOtp() {
   const token = new URLSearchParams(window.location.search).get('invite');
+  const fullName = document.getElementById('invited-name').value.trim();
   const mobileNumber = document.getElementById('invited-mobile').value.trim();
+  const password = document.getElementById('invited-pass').value;
   const otp = document.getElementById('invited-otp').value.trim();
 
   if (!otp || otp.length !== 6) {
@@ -5587,13 +5601,18 @@ async function doVerifyInvitedOtp() {
   }
 
   try {
-    const res = await fetch('/api/auth/verify-invited-otp', {
+    // 1. Verify with Firebase
+    const result = await window.confirmationResult.confirm(otp);
+    const idToken = await result.user.getIdToken();
+
+    // 2. Register user on backend
+    const res = await fetch('/api/auth/register-invited', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, mobileNumber, otp })
+      body: JSON.stringify({ token, fullName, mobileNumber, password, phoneVerified: true, idToken })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Verification failed');
+    if (!res.ok) throw new Error(data.error || 'Registration failed');
 
     localStorage.setItem('dsr_token', data.token);
     localStorage.setItem('dsr_user', JSON.stringify(data));
