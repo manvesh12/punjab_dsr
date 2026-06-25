@@ -14484,7 +14484,24 @@ const pdfPreview = {
         delete this._pdfRenderJobs[jobKey];
       });
   },
-  cleanupAnnexurePreviewClone(clone) {
+  cleanupAnnexurePreviewClone(clone, viewId) {
+    if (viewId) {
+      const hasAttachments = typeof getMergedAnnexureAttachmentPages === 'function'
+        ? getMergedAnnexureAttachmentPages(viewId).length > 0
+        : false;
+      const infoEl = clone.querySelector(`#${viewId}-attachment-info`);
+      if (infoEl) {
+        const uploadSection = infoEl.closest('.anx-section');
+        if (uploadSection) {
+          if (!hasAttachments) {
+            uploadSection.remove();
+          } else {
+            const header = uploadSection.querySelector('.anx-section-header');
+            if (header) header.remove();
+          }
+        }
+      }
+    }
     clone.querySelectorAll('table').forEach(table => {
       // First, compute the printable cells for each row while the table is fully intact.
       const rows = Array.from(table.querySelectorAll('tr'));
@@ -14579,7 +14596,7 @@ const pdfPreview = {
       const keep = [];
       const style = el.getAttribute('style') || '';
       style.split(';').forEach(part => {
-        if (/grid-template-columns|min-width|text-align/i.test(part)) keep.push(part);
+        if (/grid-template-columns|min-width|text-align|font-weight/i.test(part)) keep.push(part);
       });
       if (keep.length) el.setAttribute('style', keep.join(';'));
       else el.removeAttribute('style');
@@ -14590,7 +14607,7 @@ const pdfPreview = {
   buildAnnexureHtmlDocument(viewId) {
     const source = this.getAnnexureSourceView(viewId);
     if (!source) return '';
-    const clone = this.cleanupAnnexurePreviewClone(source.cloneNode(true));
+    const clone = this.cleanupAnnexurePreviewClone(source.cloneNode(true), viewId);
     const title = this.SECTION_TITLES[viewId] || 'Annexure Preview';
     const district = (window.S && S.frontMatter && S.frontMatter.district) || 'Jalandhar';
     const year = (window.S && S.frontMatter && S.frontMatter.year) || '2025-26';
@@ -14629,6 +14646,7 @@ const pdfPreview = {
             th,td{border:1px solid #111827;padding:6px 7px;vertical-align:top;word-break:break-word;overflow-wrap:anywhere;}
             th{background:#f3f4f6;font-weight:700;text-align:left;}
             .field-value{display:inline-block;min-width:80px;padding:4px 6px;border-bottom:1px solid #cbd5e1;color:#111827;}
+            .editable-title{font-weight:600;}
             .empty{padding:24px;border:1px dashed #cbd5e1;border-radius:8px;text-align:center;}
             img{max-width:100%;height:auto;}
             .annexure-uploaded-pages { margin-top: 24px; border-top: 2px dashed #cbd5e1; padding-top: 20px; }
@@ -15666,6 +15684,7 @@ function makeAllSectionTitlesEditable(viewId) {
 
   // 3. Apply Admin vs Non-Admin attributes, borders, cursor, events & icons visibility
   view.querySelectorAll('.editable-title').forEach(span => {
+    span.style.fontWeight = '600';
     if (!span.dataset.listenerAdded) {
       setupEditableTitleEvents(span, viewId);
     }
