@@ -4,265 +4,206 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light">
-  <title>DSR Portal | IIT Ropar</title>
-  <script src="js/theme.js"></script>
+  <title>Punjab DSR Portal | Government of Punjab</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Syne:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <!-- Link only the self-contained premium theme with version parameter to prevent browser caching -->
-  <link rel="stylesheet" href="css/reference-home.css?v={{ASSET_VERSION}}">
-  <script defer src="https://cdn.jsdelivr.net/npm/lucide@0.363.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/government-home.css?v=1">
 </head>
-<body class="premium-body intro-active">
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <img class="global-watermark" src="logo/CoE-SEnSRS.jpeg" alt="Watermark" loading="lazy" decoding="async" style="position: fixed; top: 60%; left: 75%; transform: translate(-50%, -50%); z-index: -1; pointer-events: none; width: 800px; height: 800px; max-width: none; opacity: 0.05; mix-blend-mode: multiply;">
+  <div class="tricolour" aria-hidden="true"></div>
 
-  <!-- Interactive Live Grid Background -->
-  <div class="interactive-grid-bg"></div>
-
-  <!-- Faded Background Watermark Logo -->
-  <img class="global-watermark" src="assets/smart-dsr-logo.png" alt="" loading="lazy" decoding="async">
-
-  <!-- Ambient Gradient Glow Orbs -->
-  <div class="ambient-glow">
-    <div class="glow-orb glow-orb-1"></div>
-    <div class="glow-orb glow-orb-2"></div>
-    <div class="glow-orb glow-orb-3"></div>
-  </div>
-
-  <!-- Scroll-Driven Morphing Branding (Logo + Title Text) -->
-  <div class="intro-branding" id="intro-logo">
-    <img class="intro-logo-img" src="assets/smart-dsr-logo.png" alt="IIT Ropar DSR Logo" decoding="async" fetchpriority="high">
-    <div class="intro-text">
-      <span class="let">D</span>
-      <span class="let">S</span>
-      <span class="let">R</span>
-      <span class="let">&nbsp;</span>
-      <span class="let">R</span>
-      <span class="let">E</span>
-      <span class="let">P</span>
-      <span class="let">O</span>
-      <span class="let">R</span>
-      <span class="let">T</span>
-    </div>
-  </div>
-
-  <!-- Bouncing Scroll Guide Prompt -->
-  <div class="scroll-prompt" id="scroll-hint">
-    <span>Scroll to Enter</span>
-    <i data-lucide="chevron-down" style="width: 20px; height: 20px;"></i>
-  </div>
-
-  <!-- Official Government Bilingual Top Bar -->
-  <div class="official-gov-bar">
-    <span>भारतीय प्रौद्योगिकी संस्थान रोपड़ | INDIAN INSTITUTE OF TECHNOLOGY ROPAR</span>
-    <span>COE-SENSRS SECURE SYSTEMS</span>
-  </div>
-
-  <!-- Floating Glass Navigation Hub -->
-  <div class="floating-nav-container">
-    <nav class="floating-nav">
-      <!-- Morphing logo container aligns to the left padding automatically -->
-      <div class="nav-links-hub" aria-label="Primary navigation">
-        <a class="nav-brand-link" href="home.html" style="display: flex; align-items: center; gap: 12px;">
-          <img class="nav-brand-logo-img" src="assets/smart-dsr-logo.png" alt="DSR Logo" decoding="async" style="width: 65px; height: 65px; border-radius: 50%; object-fit: cover; background: #fff; border: 1.5px solid var(--border);">
-          <span class="nav-brand-logo-text">DSR REPORT</span>
-        </a>
-        <a class="nav-link-item" href="login.html">Workflow</a>
-        <a class="nav-link-item" href="login.html">Reliability</a>
-        <a class="nav-link-item" href="login.html">Library</a>
-        <a class="nav-link-item" href="login.html">Login</a>
-        <a class="nav-link-item btn-premium-cta" href="login.html">Sign In</a>
+  <header style="position: relative; z-index: 10; background: #fff;">
+    <div class="utility-bar" style="position: relative; z-index: 1;">
+      <div class="site-wrap utility-inner">
+        <span>भारत सरकार / Government of Punjab</span>
+        <div class="utility-links"><a href="#main-content">मुख्य सामग्री पर जाएँ</a><a href="#footer">साइटमैप</a><button type="button" aria-label="Increase font size">A+</button><button type="button" aria-label="Reset font size">A</button><a href="home.html" lang="hi">हिंदी</a></div>
       </div>
-      <div class="nav-actions">
-        <button class="btn-premium-toggle" type="button" onclick="toggleDarkMode()" aria-label="Toggle theme" data-theme-toggle>
-          <i data-lucide="moon"></i>
-        </button>
+    </div>
+    <div class="site-wrap identity-row" style="position: relative; z-index: 1;">
+      <img class="gov-logo" src="logo/CoE-SEnSRS.jpeg" alt="SEnSRS Logo" style="width: 85px; height: 85px; border-radius: 50%; object-fit: contain; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+      <div class="identity-copy">
+        <p>Government of Punjab</p>
+        <h1>District Survey Report Portal</h1>
+        <span>Department of Mining and Geology</span>
+      </div>
+      <div class="partner-mark" style="display: flex; align-items: center; gap: 15px;"><img src="assets/smart-dsr-logo.png" alt="IIT Ropar Logo" style="width: 85px; height: 85px; margin: 0 10px; object-fit: contain; border-radius: 50%;"><span>Technical Support<br><strong>IIT Ropar</strong></span></div>
+    </div>
+    <nav class="main-nav" aria-label="Primary navigation" style="position: relative; z-index: 1;">
+      <div class="site-wrap nav-inner">
+        <a class="active" href="home.html">Home</a>
+        <a href="login.html">About DSR</a>
+        <a href="login.html">Services</a>
+        <a href="login.html">District Reports</a>
+        <a href="login.html">Guidelines</a>
+        <a href="login.html">Helpdesk</a>
+        <a class="login-link" href="login.html">Official Login</a>
       </div>
     </nav>
-  </div>
+  </header>
 
-  <!-- Immersive Hero Section -->
-  <main>
-    <section class="premium-hero">
-      <div class="hero-layout">
-
-        <div class="hero-left-content">
-          <span class="hero-badge">
-            <i data-lucide="shield-check" style="width: 14px; height: 14px; margin-right: 4px; vertical-align: middle;"></i>
-            Secured District Surveying
-          </span>
-          <h1 class="hero-title">Build a Digitized<br><span class="gradient-text">District Survey Report</span></h1>
-          <p class="hero-description">Create, review, and finalize District Survey Reports in a modern, secured portal powered by IIT Ropar.</p>
-
-          <div class="hero-buttons-row">
-            <a class="btn-premium-cta" href="login.html" style="padding: 14px 32px; font-size: 1rem;">Get Started</a>
-            <a class="btn-secondary-glow" href="login.html">Sign Up</a>
-          </div>
+  <main id="main-content">
+    <section class="hero">
+      <div class="site-wrap hero-inner">
+        <div class="hero-copy">
+          <p class="eyebrow">Digital public service platform</p>
+          <h2>District Survey Reports<br>for a transparent Punjab</h2>
+          <p>Access, prepare and monitor District Survey Reports through a unified, secure portal for the Department of Mining and Geology, Government of Punjab.</p>
+          <div class="hero-actions"><a class="button primary" href="login.html">Access DSR Portal</a><a class="button outline" href="login.html">View District Reports</a></div>
         </div>
-
-        <div class="hero-right-preview" style="display: flex; justify-content: center; align-items: center;">
-          <div class="preview-glow-bg"></div>
-          <img class="hero-logo-img" src="assets/smart-dsr-logo.png" alt="IIT Ropar DSR Logo" decoding="async" style="width: 280px; height: 280px; border-radius: 50%; object-fit: cover; border: 4px solid var(--p-accent-gold); box-shadow: 0 20px 40px rgba(0,0,0,0.2); background: #fff; position: relative; z-index: 10;">
-        </div>
-
+      <div class="hero-visual"><img src="logo/CoE-SEnSRS.jpeg" alt="SEnSRS Logo" style="border-radius: 50%; box-shadow: 0 10px 30px rgba(0,0,0,0.1); background: #fff; border: 2px solid #e2e8f0; width: 100%; height: 100%; object-fit: contain; padding: 15px;"></div>
       </div>
+    </section>
+
+    <section class="notice-strip" aria-label="Latest notice"><div class="site-wrap notice-inner"><strong>Latest Updates</strong><p>District Survey Report preparation and review services are available through the portal.</p><a href="login.html">View all notices →</a></div></section>
+
+    <section class="site-wrap section registration-section" id="register-section" style="background: #f8fafc; padding: 40px; border-radius: 12px; margin-top: 40px; border: 1px solid #e2e8f0;">
+      <div class="section-heading" style="margin-bottom: 24px;">
+        <div>
+          <p class="section-kicker">New User?</p>
+          <h2>Register for DSR Portal</h2>
+        </div>
+      </div>
+      <div class="registration-form-card" style="max-width: 450px;" id="reg-step-1">
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div>
+            <label style="font-size: 14px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">Full Name</label>
+            <input type="text" id="reg-name" placeholder="Enter your full name" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 15px; box-sizing: border-box;">
+          </div>
+          <div>
+            <label style="font-size: 14px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">Email Address</label>
+            <input type="email" id="reg-email" placeholder="name@domain.gov.in" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 15px; box-sizing: border-box;">
+          </div>
+          <div>
+            <label style="font-size: 14px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">Create Password</label>
+            <input type="password" id="reg-pass" placeholder="********" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 15px; box-sizing: border-box;">
+            <span style="font-size: 12px; color: #64748b; margin-top: 4px; display: block;">Must be at least 10 characters with letters and numbers.</span>
+          </div>
+          <p id="reg-msg" style="font-size: 14px; font-weight: 600; margin: 0; display: none;"></p>
+          <button type="button" onclick="submitHomeRegistration()" class="button primary" style="width: 100%; justify-content: center; margin-top: 10px; font-size: 16px;">Register Now</button>
+        </div>
+      </div>
+
+      <div class="registration-form-card" style="max-width: 450px; display: none;" id="reg-step-2">
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div>
+            <label style="font-size: 14px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">Enter OTP sent to your email</label>
+            <input type="text" id="reg-otp" placeholder="6-digit OTP" maxlength="6" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 15px; box-sizing: border-box; text-align: center; letter-spacing: 2px;">
+          </div>
+          <p id="otp-msg" style="font-size: 14px; font-weight: 600; margin: 0; display: none;"></p>
+          <button type="button" onclick="verifyRegisterOtp()" class="button primary" style="width: 100%; justify-content: center; margin-top: 10px; font-size: 16px;">Verify OTP</button>
+        </div>
+      </div>
+    </section>
+    <section class="site-wrap section services">
+      <div class="section-heading"><div><p class="section-kicker">Citizen & department services</p><h2>Quick access</h2></div><a href="login.html">View all services →</a></div>
+      <div class="service-list">
+        <a href="login.html"><span class="service-number">01</span><span><strong>District Survey Reports</strong><small>Browse published reports district-wise</small></span><b>→</b></a>
+        <a href="login.html"><span class="service-number">02</span><span><strong>Track DSR Status</strong><small>Check the progress of a submitted report</small></span><b>→</b></a>
+        <a href="login.html"><span class="service-number">03</span><span><strong>Department Login</strong><small>Secure access for authorised officials</small></span><b>→</b></a>
+        <a href="login.html"><span class="service-number">04</span><span><strong>Guidelines & Downloads</strong><small>Forms, manuals and reference documents</small></span><b>→</b></a>
+      </div>
+    </section>
+
+    <section class="process-band"><div class="site-wrap"><div class="section-heading light"><div><p class="section-kicker">Simple & accountable process</p><h2>How the portal works</h2></div></div><ol class="process-list"><li><span>1</span><div><strong>Prepare</strong><p>Authorised officers create the district report.</p></div></li><li><span>2</span><div><strong>Review</strong><p>Data is reviewed through the departmental workflow.</p></div></li><li><span>3</span><div><strong>Publish</strong><p>Approved reports are made available for reference.</p></div></li></ol></div></section>
+
+    <section class="site-wrap section information-grid">
+      <article class="updates"><div class="section-heading"><div><p class="section-kicker">Information corner</p><h2>Notices & announcements</h2></div><a href="login.html">Archive →</a></div><ul><li><time>18 JUN 2026</time><a href="login.html">Instructions for submission and review of District Survey Reports</a></li><li><time>10 JUN 2026</time><a href="login.html">Updated user manual for departmental officers</a></li><li><time>02 JUN 2026</time><a href="login.html">Portal maintenance and service availability notice</a></li></ul></article>
+      <aside class="help-panel"><p>Need assistance?</p><h2>DSR Helpdesk</h2><span>For technical support and portal-related queries, contact the departmental helpdesk during working hours.</span><a href="login.html">Contact Helpdesk</a></aside>
     </section>
   </main>
 
-  <!-- Premium Footer -->
-  <footer class="home-footer">
-    <div>
-      <a class="home-brand footer-brand" href="#">
-        <img src="assets/smart-dsr-logo.png" alt="IIT Ropar Logo" loading="lazy" decoding="async">
-        <span style="font-weight: 800; color: var(--p-accent);">COE-SENSRS</span>
-      </a>
-      <p style="margin-top: 10px; opacity: 0.8; font-size: 0.9rem;">IIT Ropar Centre of Excellence on Secured Way For Reports</p>
-    </div>
-    <div>
-      <strong>Features</strong>
-      <a href="login.html">Core pipeline</a>
-      <a href="login.html">Pro experiences</a>
-      <a href="login.html">Data integration</a>
-    </div>
-    <div>
-      <strong>Learn More</strong>
-      <a href="login.html">Documentation</a>
-      <a href="login.html">Case studies</a>
-      <a href="login.html">Publications</a>
-    </div>
-    <div>
-      <strong>Support</strong>
-      <a href="login.html">Contact</a>
-      <a href="login.html">Help Desk</a>
-      <a href="login.html">Compliance</a>
-    </div>
-  </footer>
-
+  <footer id="footer"><div class="site-wrap footer-grid"><div><h2>District Survey Report Portal</h2><p>Department of Mining and Geology<br>Government of Punjab</p></div><div><h3>Important Links</h3><a href="login.html">About the Department</a><a href="login.html">Privacy Policy</a><a href="login.html">Terms of Use</a></div><div><h3>Support</h3><a href="login.html">Helpdesk</a><a href="login.html">Accessibility Statement</a><a href="login.html">Feedback</a></div></div><div class="site-wrap copyright"><span>© 2026 Government of Punjab. All Rights Reserved.</span><span>Designed & developed with technical support from IIT Ropar.</span></div></footer>
   <script>
-    // Force browser to start at scroll position 0 on load/refresh and disable scroll restoration
-    if ('scrollRestoration' in history) {
-      history.scrollRestoration = 'manual';
-    }
-    window.scrollTo(0, 0);
+    let userRegEmail = "";
 
-    // Initialize Lucide Icons
-    if (window.lucide) window.lucide.createIcons();
-
-    let isTransitioning = false;
-    let touchStartY = 0;
-
-    function enterSite() {
-      if (isTransitioning || document.body.classList.contains('page-scrolled')) return;
-      isTransitioning = true;
-
-      document.body.classList.remove('intro-active');
-      document.body.classList.add('page-scrolled');
-      document.body.classList.add('lock-scroll');
-
-      setTimeout(() => {
-        document.body.classList.remove('lock-scroll');
-        isTransitioning = false;
-      }, 800); // 800ms locks scroll during the morph animation
-    }
-
-    function exitSite() {
-      if (isTransitioning || !document.body.classList.contains('page-scrolled')) return;
-      isTransitioning = true;
-
-      document.body.classList.add('intro-active');
-      document.body.classList.remove('page-scrolled');
-      document.body.classList.add('lock-scroll');
-
-      window.scrollTo({ top: 0 });
-
-      setTimeout(() => {
-        document.body.classList.remove('lock-scroll');
-        isTransitioning = false;
-      }, 800);
-    }
-
-    // Wheel event detection for intro state
-    window.addEventListener('wheel', (e) => {
-      if (document.body.classList.contains('intro-active')) {
-        if (e.deltaY > 0) {
-          e.preventDefault();
-          enterSite();
-        }
+    async function submitHomeRegistration() {
+      const name = document.getElementById('reg-name').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const pass = document.getElementById('reg-pass').value;
+      const msg = document.getElementById('reg-msg');
+      const btn = document.querySelector('button[onclick="submitHomeRegistration()"]');
+      
+      if (!name || !email || !pass) {
+        msg.style.display = 'block'; msg.style.color = '#ef4444'; msg.textContent = 'Please fill all fields.'; return;
       }
-    }, { passive: false });
-
-    // Touch event detection for intro state
-    window.addEventListener('touchstart', (e) => {
-      if (e.touches && e.touches[0]) {
-        touchStartY = e.touches[0].clientY;
+      if (pass.length < 10 || !/[A-Za-z]/.test(pass) || !/[0-9]/.test(pass)) {
+        msg.style.display = 'block'; msg.style.color = '#ef4444'; msg.textContent = 'Password must be at least 10 chars with letters and numbers.'; return;
       }
-    }, { passive: true });
+      
+      msg.style.display = 'none';
+      const oldBtnText = btn.textContent;
+      btn.textContent = 'Sending OTP...';
+      btn.disabled = true;
+      btn.style.opacity = '0.7';
 
-    window.addEventListener('touchmove', (e) => {
-      if (document.body.classList.contains('intro-active')) {
-        if (e.touches && e.touches[0]) {
-          const touchEndY = e.touches[0].clientY;
-          const diffY = touchStartY - touchEndY; // Positive means swiping up (scrolling down)
-          if (diffY > 2) { // Extremely sensitive threshold (2px)
-            e.preventDefault();
-            enterSite();
-          }
-        }
-      }
-    }, { passive: false });
-
-    // Keyboard event detection for intro state
-    window.addEventListener('keydown', (e) => {
-      if (document.body.classList.contains('intro-active')) {
-        const keys = ['ArrowDown', 'PageDown', ' ', 'End'];
-        if (keys.includes(e.key)) {
-          e.preventDefault();
-          enterSite();
-        }
-      }
-    });
-
-    // Scroll listener for exit trigger
-    window.addEventListener('scroll', () => {
-      if (document.body.classList.contains('page-scrolled') && !isTransitioning) {
-        if (window.scrollY === 0) {
-          exitSite();
-        }
-      }
-    });
-
-    // Check initial scroll state
-    function checkInitialState() {
-      if (window.scrollY > 2) {
-        document.body.classList.remove('intro-active');
-        document.body.classList.add('page-scrolled');
-      } else {
-        document.body.classList.add('intro-active');
-      }
-    }
-    document.addEventListener('DOMContentLoaded', checkInitialState);
-
-    // Mouse movement live grid spotlight tracker
-    window.addEventListener('mousemove', (e) => {
-      document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`);
-      document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`);
-    });
-
-    // Page transition fade-out handler
-    document.addEventListener('DOMContentLoaded', () => {
-      const transitionLinks = document.querySelectorAll('a[href$=".html"], a.nav-link-item, a.btn-premium-cta');
-      transitionLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-          const targetUrl = this.getAttribute('href');
-          if (targetUrl && !targetUrl.startsWith('#') && !targetUrl.startsWith('javascript:')) {
-            e.preventDefault();
-            document.body.classList.add('slide-to-left');
-            setTimeout(() => {
-              window.location.href = targetUrl;
-            }, 400);
-          }
+      try {
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fullName: name, username: email, email: email, password: pass })
         });
-      });
-    });
+        
+        const data = await response.json();
+        if (response.ok) {
+          userRegEmail = email;
+          document.getElementById('reg-step-1').style.display = 'none';
+          document.getElementById('reg-step-2').style.display = 'block';
+        } else {
+          msg.style.display = 'block'; msg.style.color = '#ef4444'; msg.textContent = data.error || 'Registration failed.';
+          btn.textContent = oldBtnText;
+          btn.disabled = false;
+          btn.style.opacity = '1';
+        }
+      } catch (e) {
+        msg.style.display = 'block'; msg.style.color = '#ef4444'; msg.textContent = 'Network error. Please try again.';
+        btn.textContent = oldBtnText;
+        btn.disabled = false;
+        btn.style.opacity = '1';
+      }
+    }
+
+    async function verifyRegisterOtp() {
+      const otp = document.getElementById('reg-otp').value.trim();
+      const msg = document.getElementById('otp-msg');
+      const btn = document.querySelector('button[onclick="verifyRegisterOtp()"]');
+
+      if (!otp || otp.length !== 6) {
+        msg.style.display = 'block'; msg.style.color = '#ef4444'; msg.textContent = 'Please enter a valid 6-digit OTP.'; return;
+      }
+
+      msg.style.display = 'none';
+      const oldBtnText = btn.textContent;
+      btn.textContent = 'Verifying...';
+      btn.disabled = true;
+      btn.style.opacity = '0.7';
+
+      try {
+        const response = await fetch('/api/auth/verify-register-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: userRegEmail, otp })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          msg.style.display = 'block'; msg.style.color = '#10b981'; msg.textContent = 'Registration verified! Redirecting to login...';
+          setTimeout(() => { window.location.href = 'login.html'; }, 2000);
+        } else {
+          msg.style.display = 'block'; msg.style.color = '#ef4444'; msg.textContent = data.error || 'Verification failed.';
+          btn.textContent = oldBtnText;
+          btn.disabled = false;
+          btn.style.opacity = '1';
+        }
+      } catch (e) {
+        msg.style.display = 'block'; msg.style.color = '#ef4444'; msg.textContent = 'Network error. Please try again.';
+        btn.textContent = oldBtnText;
+        btn.disabled = false;
+        btn.style.opacity = '1';
+      }
+    }
   </script>
 </body>
 </html>
