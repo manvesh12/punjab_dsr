@@ -23,8 +23,8 @@ async function getTransporter() {
 
   transporter = nodemailer.createTransport({
     host: hostIp,
-    port: parseInt(process.env.SMTP_PORT || '587', 10),
-    secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+    port: 465, // Force Port 465 (SSL) because Render often blocks Port 587
+    secure: true, // true for 465
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
