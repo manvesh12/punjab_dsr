@@ -216,7 +216,10 @@ usersRouter.post("/invite/bulk", upload.single("file"), async (req, res) => {
           create: { email, token, role, expiresAt, createdBy: req.user!.id }
         });
 
-        await sendInvitationEmail(email, token, role);
+        // Send email in background (fire-and-forget) to speed up API response
+        sendInvitationEmail(email, token, role).catch(err => {
+          console.error(`Background email failed for ${email}:`, err);
+        });
         successCount++;
       } catch (e: any) {
         failedCount++;
