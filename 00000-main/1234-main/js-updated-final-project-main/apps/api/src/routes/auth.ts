@@ -482,8 +482,16 @@ authRouter.post("/register-invited", async (req, res) => {
     }
   });
 
-  // Mock SMS dispatch
-  console.log(`[MOCK SMS] Registration OTP for ${mobileNumber} is ${otp}`);
+  // Send real OTP via Email to the invited user
+  try {
+    // Fire and forget OTP email to prevent blocking
+    sendOtpEmail(invitation.email, otp).catch(err => {
+      console.error(`Background OTP email failed for ${invitation.email}:`, err);
+    });
+    console.log(`[EMAIL OTP] Registration OTP for ${invitation.email} (Mobile: ${mobileNumber}) sent successfully.`);
+  } catch (error) {
+    console.error(`Failed to trigger OTP email for ${invitation.email}`, error);
+  }
 
   // Create the inactive user so we have the password and mobileNumber saved temporarily.
   // We can just update the existing logic or create an inactive user directly.
