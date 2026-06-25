@@ -66,7 +66,7 @@ function buildJsBundle() {
 function compile() {
   console.log('Compiling DSR Portal...');
   try {
-    buildJsBundle();
+    // buildJsBundle();
 
     // 1. Start with head
     let html = applyAssetVersion(fs.readFileSync(path.join(SRC_DIR, 'templates', 'head.html'), 'utf8'));

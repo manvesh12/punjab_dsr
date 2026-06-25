@@ -14,34 +14,11 @@
   <link
     href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=3">
-  <link rel="stylesheet" href="css/premium-theme.css?v=3">
+  <link rel="stylesheet" href="css/styles.css?v=site-zoom-20260612i">
+  <link rel="stylesheet" href="css/premium-theme.css?v=site-zoom-20260612i">
   <script defer src="https://cdn.jsdelivr.net/npm/lucide@0.363.0/dist/umd/lucide.min.js"></script>
-  <link rel="stylesheet" href="css/mobile-overrides.css">
-  <style>
-    /* Hide Google Translate UI elements */
-    body { top: 0 !important; }
-    .skiptranslate { display: none !important; }
-    #goog-gt-tt { display: none !important; }
-    .goog-te-banner-frame { display: none !important; }
-    .goog-te-menu-value { margin: 0px; }
-    .goog-tooltip { display: none !important; }
-    .goog-tooltip:hover { display: none !important; }
-    .goog-text-highlight { background-color: transparent !important; box-shadow: none !important; }
-  </style>
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#1e293b">
-  <link rel="apple-touch-icon" href="assets/smart-dsr-logo.png">
 </head>
-<body class="sidebar-hidden premium-body auth-page">
-  <div id="google_translate_element" style="display:none;"></div>
-  <script>
-    function googleTranslateElementInit() {
-      new google.translate.TranslateElement({pageLanguage: 'en', includedLanguages: 'en,hi,pa', autoDisplay: false}, 'google_translate_element');
-    }
-  </script>
-  <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-
+<body class="sidebar-hidden premium-body">
 
   <!-- Interactive Live Grid Background -->
   <div class="interactive-grid-bg"></div>
@@ -54,7 +31,7 @@
   </div>
 
   <!-- UNIVERSAL TRANSLUCENT BACKGROUND WATERMARK -->
-  <img class="global-watermark" src="logo/CoE-SEnSRS.jpeg" alt="Watermark" loading="lazy" decoding="async" style="position: fixed; top: 60%; left: 50%; transform: translate(-50%, -50%); z-index: -1; pointer-events: none; width: 700px; height: 700px; max-width: none; opacity: 0.05; mix-blend-mode: multiply;">
+  <img class="global-watermark" src="assets/smart-dsr-logo.png" alt="Watermark" loading="lazy" decoding="async">
 
   <!-- ═══════════════════════════════════════════════════════════════
      SCREEN 1 - AUTH
@@ -81,14 +58,14 @@
 
     <!-- Top Branding -->
     <header
-      style="display:flex; justify-content:space-between; align-items:center; padding:25px 20px; background:#fff; position:absolute; top:38px; left:0; width:100%; z-index:100; border-bottom:1px solid var(--border); box-shadow:0 4px 12px rgba(0,0,0,0.05); box-sizing:border-box;">
+      style="display:flex; justify-content:space-between; align-items:center; padding:25px 60px; background:var(--card); position:absolute; top:38px; left:0; width:100%; z-index:100; border-bottom:1px solid var(--border); box-shadow:0 4px 12px rgba(0,0,0,0.05); box-sizing:border-box;">
       <div class="logo"
-        style="display:flex; align-items:center; gap:15px; font-size:52px; font-weight:800; color:var(--text); position: relative; z-index: 1;">
-        <img src="logo/CoE-SEnSRS.jpeg" alt="DSR Logo" decoding="async" fetchpriority="high"
-          style="width:85px; height:85px; object-fit:contain; border-radius:50%; background:#fff; border:1.5px solid var(--border);">
+        style="display:flex; align-items:center; gap:15px; font-size:52px; font-weight:800; color:var(--text);">
+        <img src="assets/smart-dsr-logo.png" alt="DSR Logo" decoding="async" fetchpriority="high"
+          style="width:70px; height:70px; object-fit:contain; border-radius:12px;">
         <span>DSR REPORT</span>
       </div>
-      <nav style="display:flex; align-items:center; gap:12px; position: relative; z-index: 1;">
+      <nav style="display:flex; align-items:center; gap:12px;">
         <a href="home.html"
           style="text-decoration:none; color:var(--text); padding:10px 18px; border:1px solid var(--border); border-radius:10px; background:var(--card); font-size:16px; font-weight:500; transition:all 0.2s;"
           onmouseover="this.style.background='var(--off)'" onmouseout="this.style.background='var(--card)'">Home</a>
@@ -231,56 +208,95 @@
           <div class="auth-form-title">Create Account</div>
           <div class="auth-form-sub">Register as a new Coordinator / Staff</div>
 
-          <div id="signup-step-1">
-            <div class="f-field">
-              <label>Full Name</label>
-              <div class="input-wrap">
-                <input type="text" id="signup-name" placeholder="Enter your full name">
-              </div>
+          <div class="f-field">
+            <label>Full Name</label>
+            <div class="input-wrap">
+              <input type="text" id="signup-name" placeholder="Enter your full name">
             </div>
-
-            <div class="f-field">
-              <label>Email Address</label>
-              <div class="input-wrap">
-                <input type="email" id="signup-email" placeholder="name@domain.gov.in">
-              </div>
-            </div>
-
-            <div class="f-field">
-              <label>Create Password</label>
-              <div class="input-wrap">
-                <input type="password" id="signup-pass" placeholder="********">
-              </div>
-            </div>
-
-            <div class="form-err" id="signup-error" style="display:none; color:red; font-size:12px; margin-bottom:10px;"></div>
-            <div class="form-err" id="signup-success" style="display:none; color:green; font-size:12px; margin-bottom:10px;"></div>
-
-            <button class="btn-primary"
-              onclick="doSignup()"
-              style="margin-top: 10px;" id="btn-signup">
-              Register ->
-            </button>
           </div>
 
-          <div id="signup-step-2" style="display: none;">
-            <div class="f-field">
-              <label>Enter OTP sent to your email</label>
-              <div class="input-wrap">
-                <input type="text" id="signup-otp" placeholder="6-digit OTP" maxlength="6" style="text-align: center; letter-spacing: 2px;">
-              </div>
+          <div class="f-field">
+            <label>Email Address</label>
+            <div class="input-wrap">
+              <input type="email" id="signup-email" placeholder="name@domain.gov.in">
             </div>
-            <div class="form-err" id="signup-otp-error" style="display:none; color:red; font-size:12px; margin-bottom:10px;"></div>
-            <button class="btn-primary"
-              onclick="doVerifySignupOtp()"
-              style="margin-top: 10px;" id="btn-verify-otp">
-              Verify OTP
-            </button>
           </div>
+
+          <div class="f-field">
+            <label>Create Password</label>
+            <div class="input-wrap">
+              <input type="password" id="signup-pass" placeholder="********">
+            </div>
+          </div>
+
+          <div class="form-err" id="signup-error" style="display:none; color:red; font-size:12px; margin-bottom:10px;"></div>
+          <div class="form-err" id="signup-success" style="display:none; color:green; font-size:12px; margin-bottom:10px;"></div>
+
+          <button class="btn-primary"
+            onclick="doSignup()"
+            style="margin-top: 10px;">
+            Register ->
+          </button>
 
           <div style="text-align:center; margin-top: 24px; font-size: 14px; color: var(--text-soft);">
             Already have an account? <a href="#" onclick="toggleSignUp(false); return false;"
               style="color: #2563eb; font-weight: 700; text-decoration: none;">Login</a>
+          </div>
+        </div>
+
+        <!-- Invited User Registration Form -->
+        <div id="auth-form-invited" class="auth-form" style="display:none;">
+          <div class="auth-form-title">Complete Registration</div>
+          <div class="auth-form-sub" id="invited-subtext">You have been invited to join the portal.</div>
+
+          <div class="f-field">
+            <label>Email Address</label>
+            <div class="input-wrap">
+              <input type="email" id="invited-email" readonly style="background-color: var(--bg); cursor: not-allowed; color: var(--text-soft);">
+            </div>
+          </div>
+
+          <div class="f-field">
+            <label>Full Name</label>
+            <div class="input-wrap">
+              <input type="text" id="invited-name" placeholder="Enter your full name">
+            </div>
+          </div>
+
+          <div class="f-field">
+            <label>Mobile Number</label>
+            <div class="input-wrap">
+              <input type="text" id="invited-mobile" placeholder="10-digit mobile number">
+            </div>
+          </div>
+
+          <div class="f-field">
+            <label>Create Password</label>
+            <div class="input-wrap">
+              <input type="password" id="invited-pass" placeholder="********">
+            </div>
+          </div>
+
+          <div class="form-err" id="invited-error" style="display:none; color:red; font-size:12px; margin-bottom:10px;"></div>
+          <div class="form-err" id="invited-success" style="display:none; color:green; font-size:12px; margin-bottom:10px;"></div>
+
+          <button class="btn-primary"
+            onclick="doInvitedRegister()"
+            id="invited-btn-submit"
+            style="margin-top: 10px;">
+            Verify Mobile Number ->
+          </button>
+
+          <div id="invited-otp-section" style="display:none; margin-top:15px;">
+            <div class="f-field">
+              <label>Enter 6-digit OTP sent to mobile</label>
+              <div class="input-wrap">
+                <input type="text" id="invited-otp" placeholder="------" maxlength="6">
+              </div>
+            </div>
+            <button class="btn-primary" style="background:#10b981;" onclick="doVerifyInvitedOtp()">
+              Complete Registration ->
+            </button>
           </div>
         </div>
 
@@ -289,6 +305,7 @@
     </div>
 
   </div>
+
 <!-- ═══════════════════════════════════════════════════════════════
      SCREEN 2 - MAIN APP
 ═══════════════════════════════════════════════════════════════ -->
@@ -2873,7 +2890,7 @@
               <div id="section-a-wrapper-anx1">
                 <div class="anx-section section-a-block-anx1">
                   <div class="anx-section-header"
-                  style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+                    style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
                     <div class="anx-section-title" style="font-weight:bold; font-size:14px;">a) Rivers:</div>
                   <button class="btn btn-excel-template btn-xs" onclick="downloadSectionTemplate('A')"
                     style="display:inline-flex; align-items:center; gap:6px;">
@@ -2942,6 +2959,11 @@
                       style="display:none; align-items:center; gap:6px;">
                       <i data-lucide="trash-2" style="width:12px; height:12px;"></i>
                       <span>Remove This Table</span>
+                    </button>
+                  
+                    <button class="btn btn-xs btn-outline" onclick="window.addGenericTableBlock(this)" style="display:inline-flex; align-items:center; gap:6px; margin-left: auto;">
+                      <i data-lucide="copy" style="width:12px; height:12px;"></i>
+                      <span>Add Another Table</span>
                     </button>
                   </div>
                 </div>
@@ -3029,7 +3051,12 @@
                     <span>Upload Excel (De-Siltation)</span>
                     <input type="file" accept=".xlsx,.xls,.csv" hidden onchange="handleSectionUpload(event, 'B')">
                   </label>
-                </div>
+                
+                    <button class="btn btn-xs btn-outline" onclick="window.addGenericTableBlock(this)" style="display:inline-flex; align-items:center; gap:6px; margin-left: auto;">
+                      <i data-lucide="copy" style="width:12px; height:12px;"></i>
+                      <span>Add Another Table</span>
+                    </button>
+                  </div>
               </div>
               <div class="anx-section" style="margin-top:32px;">
                 <div class="anx-section-header"
@@ -3092,7 +3119,12 @@
                     <span>Upload Excel (Patta Lands)</span>
                     <input type="file" accept=".xlsx,.xls,.csv" hidden onchange="handleSectionUpload(event, 'C')">
                   </label>
-                </div>
+                
+                    <button class="btn btn-xs btn-outline" onclick="window.addGenericTableBlock(this)" style="display:inline-flex; align-items:center; gap:6px; margin-left: auto;">
+                      <i data-lucide="copy" style="width:12px; height:12px;"></i>
+                      <span>Add Another Table</span>
+                    </button>
+                  </div>
               </div>
               <div class="anx-section" style="margin-top:32px;">
                 <div class="anx-section-header"
@@ -3151,7 +3183,12 @@
                     <span>Upload Excel (M-Sand)</span>
                     <input type="file" accept=".xlsx,.xls,.csv" hidden onchange="handleSectionUpload(event, 'D')">
                   </label>
-                </div>
+                
+                    <button class="btn btn-xs btn-outline" onclick="window.addGenericTableBlock(this)" style="display:inline-flex; align-items:center; gap:6px; margin-left: auto;">
+                      <i data-lucide="copy" style="width:12px; height:12px;"></i>
+                      <span>Add Another Table</span>
+                    </button>
+                  </div>
               </div>
                 <div class="final-actions" style="margin-top:32px; display:flex; justify-content:center;">
                   
@@ -3303,6 +3340,11 @@
                       <i data-lucide="trash-2" style="width:12px; height:12px;"></i>
                       <span>Remove This Table</span>
                     </button>
+                  
+                    <button class="btn btn-xs btn-outline" onclick="window.addGenericTableBlock(this)" style="display:inline-flex; align-items:center; gap:6px; margin-left: auto;">
+                      <i data-lucide="copy" style="width:12px; height:12px;"></i>
+                      <span>Add Another Table</span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -3414,7 +3456,12 @@
                     <span>Upload Excel (Patta Lands)</span>
                     <input type="file" accept=".xlsx,.xls,.csv" hidden onchange="handleSectionUploadAnx2(event, 'B')">
                   </label>
-                </div>
+                
+                    <button class="btn btn-xs btn-outline" onclick="window.addGenericTableBlock(this)" style="display:inline-flex; align-items:center; gap:6px; margin-left: auto;">
+                      <i data-lucide="copy" style="width:12px; height:12px;"></i>
+                      <span>Add Another Table</span>
+                    </button>
+                  </div>
               </div>
               <div class="anx-section" style="margin-top:32px;">
                 <div class="anx-section-header"
@@ -3491,7 +3538,12 @@
                     <span>Upload Excel (De-Siltation)</span>
                     <input type="file" accept=".xlsx,.xls,.csv" hidden onchange="handleSectionUploadAnx2(event, 'C')">
                   </label>
-                </div>
+                
+                    <button class="btn btn-xs btn-outline" onclick="window.addGenericTableBlock(this)" style="display:inline-flex; align-items:center; gap:6px; margin-left: auto;">
+                      <i data-lucide="copy" style="width:12px; height:12px;"></i>
+                      <span>Add Another Table</span>
+                    </button>
+                  </div>
               </div>
               <div class="anx-section" style="margin-top:32px;">
                 <div class="anx-section-header"
@@ -3556,7 +3608,12 @@
                     <span>Upload Excel (M-Sand)</span>
                     <input type="file" accept=".xlsx,.xls,.csv" hidden onchange="handleSectionUploadAnx2(event, 'D')">
                   </label>
-                </div>
+                
+                    <button class="btn btn-xs btn-outline" onclick="window.addGenericTableBlock(this)" style="display:inline-flex; align-items:center; gap:6px; margin-left: auto;">
+                      <i data-lucide="copy" style="width:12px; height:12px;"></i>
+                      <span>Add Another Table</span>
+                    </button>
+                  </div>
               </div>
               <div class="final-actions" style="margin-top:32px; display:flex; justify-content:center;">
                 
@@ -3623,7 +3680,12 @@
                     <i data-lucide="plus" style="width:12px; height:12px;"></i>
                     <span>Add Cluster Row</span>
                   </button>
-                </div>
+                
+                    <button class="btn btn-xs btn-outline" onclick="window.addGenericTableBlock(this)" style="display:inline-flex; align-items:center; gap:6px; margin-left: auto;">
+                      <i data-lucide="copy" style="width:12px; height:12px;"></i>
+                      <span>Add Another Table</span>
+                    </button>
+                  </div>
               </div>
               <div class="anx-section" style="margin-top: 32px;">
                 <div class="anx-section-header"
@@ -3671,7 +3733,12 @@
                     <i data-lucide="plus" style="width:12px; height:12px;"></i>
                     <span>Add Contiguous Row</span>
                   </button>
-                </div>
+                
+                    <button class="btn btn-xs btn-outline" onclick="window.addGenericTableBlock(this)" style="display:inline-flex; align-items:center; gap:6px; margin-left: auto;">
+                      <i data-lucide="copy" style="width:12px; height:12px;"></i>
+                      <span>Add Another Table</span>
+                    </button>
+                  </div>
               </div>
               <div class="final-actions" style="margin-top: 32px; display: flex; justify-content: center;">
                 
@@ -3897,7 +3964,12 @@
               <i data-lucide="trash-2" style="width:12px; height:12px;"></i>
               <span>Remove This Table</span>
             </button>
-          </div>
+          
+                    <button class="btn btn-xs btn-outline" onclick="window.addGenericTableBlock(this)" style="display:inline-flex; align-items:center; gap:6px; margin-left: auto;">
+                      <i data-lucide="copy" style="width:12px; height:12px;"></i>
+                      <span>Add Another Table</span>
+                    </button>
+                  </div>
         </div>
         </div>
       </div>
@@ -4007,7 +4079,12 @@
               <i data-lucide="trash-2" style="width:12px; height:12px;"></i>
               <span>Remove This Table</span>
             </button>
-          </div>
+          
+                    <button class="btn btn-xs btn-outline" onclick="window.addGenericTableBlock(this)" style="display:inline-flex; align-items:center; gap:6px; margin-left: auto;">
+                      <i data-lucide="copy" style="width:12px; height:12px;"></i>
+                      <span>Add Another Table</span>
+                    </button>
+                  </div>
         </div>
       </div>
       <div style="margin-bottom:30px; margin-top:12px;">
@@ -4104,7 +4181,12 @@
               <i data-lucide="trash-2" style="width:12px; height:12px;"></i>
               <span>Remove This Table</span>
             </button>
-          </div>
+          
+                    <button class="btn btn-xs btn-outline" onclick="window.addGenericTableBlock(this)" style="display:inline-flex; align-items:center; gap:6px; margin-left: auto;">
+                      <i data-lucide="copy" style="width:12px; height:12px;"></i>
+                      <span>Add Another Table</span>
+                    </button>
+                  </div>
         </div>
       </div>
       <div style="margin-bottom:30px; margin-top:12px;">
@@ -4189,7 +4271,12 @@
               <i data-lucide="trash-2" style="width:12px; height:12px;"></i>
               <span>Remove This Table</span>
             </button>
-          </div>
+          
+                    <button class="btn btn-xs btn-outline" onclick="window.addGenericTableBlock(this)" style="display:inline-flex; align-items:center; gap:6px; margin-left: auto;">
+                      <i data-lucide="copy" style="width:12px; height:12px;"></i>
+                      <span>Add Another Table</span>
+                    </button>
+                  </div>
         </div>
       </div>
       <div style="margin-bottom:30px; margin-top:12px;">
@@ -4268,7 +4355,12 @@
             <i data-lucide="plus" style="width:12px; height:12px;"></i>
             <span>Add Cluster Row</span>
           </button>
-        </div>
+        
+                    <button class="btn btn-xs btn-outline" onclick="window.addGenericTableBlock(this)" style="display:inline-flex; align-items:center; gap:6px; margin-left: auto;">
+                      <i data-lucide="copy" style="width:12px; height:12px;"></i>
+                      <span>Add Another Table</span>
+                    </button>
+                  </div>
       </div>
       <div class="anx-section" style="margin-top: 32px;">
         <div class="anx-section-header"
@@ -4319,7 +4411,12 @@
             <i data-lucide="plus" style="width:12px; height:12px;"></i>
             <span>Add Contiguous Row</span>
           </button>
-        </div>
+        
+                    <button class="btn btn-xs btn-outline" onclick="window.addGenericTableBlock(this)" style="display:inline-flex; align-items:center; gap:6px; margin-left: auto;">
+                      <i data-lucide="copy" style="width:12px; height:12px;"></i>
+                      <span>Add Another Table</span>
+                    </button>
+                  </div>
       </div>
       <div class="final-actions" style="margin-top: 32px; display: flex; justify-content: center;">
         
@@ -4597,7 +4694,7 @@
                 <td contenteditable="true">Mandi Kalu railway Bridge (Top Level on Bridge)</td>
                 <td contenteditable="true" class="coord-input">31.137186 N, 75.108104 E</td>
                 <td contenteditable="true">219.094 m</td>
-                <td contenteditable="true">NA</td>
+                <td contenteditable="true">NUL</td>
                 <td><button class="btn btn-xs btn-danger" onclick="delRowAnnexureF(this)" style="display:inline-flex; align-items:center; justify-content:center; padding:4px;"><i data-lucide="trash-2" style="width:12px; height:12px;"></i></button></td>
               </tr>
               <tr>
@@ -5343,7 +5440,10 @@
       <div class="page-title">User Management</div>
       <div class="page-sub">Manage portal users, roles, upload/review rights, and assigned access scopes</div>
     </div>
-    <button class="btn btn-saffron btn-sm" onclick="openAddUserPrompt()">+ Add User</button>
+    <div style="display:flex; gap:8px;">
+      <button class="btn btn-outline btn-sm" onclick="openModal('modal-bulk-invite')">Bulk Invite</button>
+      <button class="btn btn-saffron btn-sm" onclick="openAddUserPrompt()">+ Add User</button>
+    </div>
   </div>
   <div class="card">
     <div class="card-bd">
@@ -5851,236 +5951,105 @@
       </div>
     </div>
   </div>
+
+  <div id="modal-invite-user" class="modal-overlay">
+    <div class="modal-box" style="max-width:400px;">
+      <div class="modal-hd">
+        <h3>Invite Single User</h3><button class="modal-close" onclick="closeModal('modal-invite-user')">×</button>
+      </div>
+      <div class="modal-bd">
+        <div class="field-group">
+          <div class="field"><label>Email Address</label><input type="email" id="invite-single-email" placeholder="user@domain.gov.in"></div>
+          <div class="field"><label>Role</label>
+            <select id="invite-single-role">
+              <option value="SDO">SDO</option>
+              <option value="AXEN">AXEN</option>
+              <option value="REVIEWER">REVIEWER</option>
+              <option value="REVIEWER_1">REVIEWER 1</option>
+              <option value="REVIEWER_2">REVIEWER 2</option>
+              <option value="OFFICER">OFFICER (Data Entry)</option>
+              <option value="DISTRICT_OWNER">DISTRICT OWNER</option>
+              <option value="ADMIN">ADMIN</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-ft">
+        <button class="btn btn-outline" onclick="closeModal('modal-invite-user')">Cancel</button>
+        <button class="btn btn-saffron" onclick="doSingleInvite()">Send Invitation -></button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-bulk-invite" class="modal-overlay">
+    <div class="modal-box" style="max-width:500px;">
+      <div class="modal-hd">
+        <h3>Bulk Invite Users</h3><button class="modal-close" onclick="closeModal('modal-bulk-invite')">×</button>
+      </div>
+      <div class="modal-bd">
+        <div class="notif notif-info" style="margin-bottom:14px; display:flex; align-items:flex-start; gap:8px;">
+          <i data-lucide="info" style="width:16px; height:16px; flex-shrink:0;"></i>
+          <span>Upload an Excel (.xlsx) or CSV file with headers: <strong>Email</strong>, <strong>Role</strong>. Invitations will be sent automatically to valid rows.</span>
+        </div>
+        <div class="field-group">
+          <div class="field">
+            <label>Upload File</label>
+            <input type="file" id="bulk-invite-file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
+          </div>
+        </div>
+        <div style="margin-top: 10px;">
+          <a href="#" onclick="downloadBulkInviteTemplate(); return false;" style="font-size: 13px; color: #2563eb; text-decoration: none; font-weight: 600;">Download Template</a>
+        </div>
+      </div>
+      <div class="modal-ft">
+        <button class="btn btn-outline" onclick="closeModal('modal-bulk-invite')">Cancel</button>
+        <button class="btn btn-saffron" onclick="doBulkInvite()">Upload & Process</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-bulk-invite-results" class="modal-overlay">
+    <div class="modal-box" style="max-width:600px;">
+      <div class="modal-hd">
+        <h3>Bulk Invite Results</h3><button class="modal-close" onclick="closeModal('modal-bulk-invite-results')">×</button>
+      </div>
+      <div class="modal-bd">
+        <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
+          <div style="padding:12px; background:#eef2ff; color:#4f46e5; border-radius:8px; font-weight:600; text-align:center; flex:1; margin-right:8px;">
+            <div style="font-size:24px;" id="bulk-res-success">0</div>
+            <div style="font-size:12px; opacity:0.8;">Invitations Sent</div>
+          </div>
+          <div style="padding:12px; background:#fef2f2; color:#ef4444; border-radius:8px; font-weight:600; text-align:center; flex:1; margin-left:8px;">
+            <div style="font-size:24px;" id="bulk-res-failed">0</div>
+            <div style="font-size:12px; opacity:0.8;">Failed Rows</div>
+          </div>
+        </div>
+        
+        <div id="bulk-errors-container" style="display:none;">
+          <label style="display:block; font-size:13px; font-weight:600; margin-bottom:8px; color:var(--text);">Error Details</label>
+          <div style="max-height:200px; overflow-y:auto; border:1px solid var(--border-2); border-radius:8px;">
+            <table class="tbl" style="margin:0;">
+              <thead style="position:sticky; top:0; background:var(--bg);">
+                <tr>
+                  <th style="padding:8px 12px; width:60px;">Row</th>
+                  <th style="padding:8px 12px;">Email</th>
+                  <th style="padding:8px 12px;">Reason</th>
+                </tr>
+              </thead>
+              <tbody id="bulk-errors-body">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="modal-ft">
+        <button class="btn btn-outline" onclick="closeModal('modal-bulk-invite-results')">Close</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
-  <style>
-    /* STRICT REVIEWER BOX OVERRIDES */
-    #reviewer-floating-notes {
-      position: fixed !important;
-      right: 24px !important;
-      bottom: 24px !important;
-      z-index: 999999 !important;
-      width: 360px !important;
-      height: auto !important;
-      display: none; /* Managed by JS */
-      background: #fff !important;
-      border: 1px solid #ccc !important;
-      border-radius: 12px !important;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.2) !important;
-      flex-direction: column !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      top: auto !important;
-      left: auto !important;
-      transform: none !important;
-    }
-    html.dark #reviewer-floating-notes {
-      background: #0d1a2b !important;
-      border-color: rgba(196,154,88,0.3) !important;
-    }
-    /* When minimized */
-    #reviewer-floating-notes.is-minimized {
-      width: 60px !important;
-      height: 60px !important;
-      border-radius: 50% !important;
-      cursor: pointer !important;
-      overflow: hidden !important;
-      background: linear-gradient(135deg, #17324D, #0f2439) !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;
-    }
-    #reviewer-floating-notes.is-minimized > * {
-      display: none !important;
-    }
-    #reviewer-floating-notes.is-minimized::before {
-      content: "";
-      display: block !important;
-      width: 24px;
-      height: 24px;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7'%3E%3C/path%3E%3Cpath d='M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z'%3E%3C/path%3E%3C/svg%3E");
-      background-size: cover;
-    }
-    #reviewer-floating-notes.is-minimized::after {
-      content: "";
-      position: absolute;
-      right: 2px;
-      top: 2px;
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: #22c55e;
-      border: 2px solid #fff;
-    }
-  </style>
-  <script>
-    setInterval(() => {
-      const box = document.getElementById('reviewer-floating-notes');
-      if (!box) return;
-      
-      // Setup dragging
-      if (!box.dataset.dragBound) {
-         box.dataset.dragBound = "true";
-         
-         let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-         let isDragging = false;
-         
-         const header = box.querySelector('.reviewer-notes-header');
-         if (header) {
-             header.onmousedown = dragMouseDown;
-         }
-         
-         box.onmousedown = function(e) {
-             // Allow dragging the minimized circle
-             if (box.classList.contains('is-minimized')) {
-                 dragMouseDown(e);
-             }
-         };
-         
-         function dragMouseDown(e) {
-             if (e.target.closest('button')) return; // Ignore button clicks
-             isDragging = false;
-             e = e || window.event;
-             e.preventDefault();
-             pos3 = e.clientX;
-             pos4 = e.clientY;
-             document.onmouseup = closeDragElement;
-             document.onmousemove = elementDrag;
-         }
-         
-         function elementDrag(e) {
-             e = e || window.event;
-             e.preventDefault();
-             
-             let moveX = Math.abs(pos3 - e.clientX);
-             let moveY = Math.abs(pos4 - e.clientY);
-             if (moveX > 3 || moveY > 3) isDragging = true;
-             
-             pos1 = pos3 - e.clientX;
-             pos2 = pos4 - e.clientY;
-             pos3 = e.clientX;
-             pos4 = e.clientY;
-             
-             box.style.setProperty('top', (box.offsetTop - pos2) + 'px', 'important');
-             box.style.setProperty('left', (box.offsetLeft - pos1) + 'px', 'important');
-             box.style.setProperty('bottom', 'auto', 'important');
-             box.style.setProperty('right', 'auto', 'important');
-         }
-         
-         function closeDragElement() {
-             document.onmouseup = null;
-             document.onmousemove = null;
-             
-             // Expand if clicked (not dragged) while minimized
-             if (!isDragging && box.classList.contains('is-minimized')) {
-                 if (typeof toggleReviewerNotesMinimized === 'function') {
-                     toggleReviewerNotesMinimized();
-                 }
-             }
-         }
-      }
-      
-      // Auto-reset position when minimized
-      if (!box.dataset.lastState) {
-          box.dataset.lastState = box.classList.contains('is-minimized') ? 'min' : 'exp';
-      } else {
-          const currentState = box.classList.contains('is-minimized') ? 'min' : 'exp';
-          if (box.dataset.lastState === 'exp' && currentState === 'min') {
-              // Just minimized! Snap back to bottom right
-              box.style.setProperty('top', 'auto', 'important');
-              box.style.setProperty('left', 'auto', 'important');
-              box.style.setProperty('bottom', '24px', 'important');
-              box.style.setProperty('right', '24px', 'important');
-          }
-          box.dataset.lastState = currentState;
-      }
-    }, 500);
-  </script>
-  <script defer src="js/portal.bundle.js?v=15"></script>
-
-<script>
-// --- DYNAMIC HEADINGS INJECTION ---
-document.addEventListener('DOMContentLoaded', () => {
-  // Make page titles editable
-  document.querySelectorAll('.page-title').forEach(t => {
-    t.setAttribute('contenteditable', 'true');
-    t.addEventListener('blur', function() {
-      const viewEl = this.closest('.view');
-      if (viewEl) {
-         const viewId = viewEl.id;
-         if (!S.frontMatter) S.frontMatter = {};
-         if (!S.frontMatter.customTitles) S.frontMatter.customTitles = {};
-         S.frontMatter.customTitles[viewId] = this.innerText.trim();
-         const menuId = viewId.replace('view-', 'menu-');
-         const menuEl = document.querySelector('#' + menuId + ' .menu-label');
-         if (menuEl) menuEl.innerText = this.innerText.trim();
-         if(window.debouncedSaveState) debouncedSaveState(); let viewIdToUpdate = viewId || ""; if (!viewIdToUpdate) { const parentMenu = this.closest(".menu-item"); if (parentMenu) viewIdToUpdate = parentMenu.id.replace("menu-", "view-"); } if (viewIdToUpdate) { const expName = "export" + viewIdToUpdate.replace("view-","").toUpperCase() + "PDF"; if (typeof window[expName] === "function") window[expName](null, true); else if (typeof window["export" + viewIdToUpdate.replace("view-","").charAt(0).toUpperCase() + viewIdToUpdate.replace("view-","").slice(1) + "PDF"] === "function") window["export" + viewIdToUpdate.replace("view-","").charAt(0).toUpperCase() + viewIdToUpdate.replace("view-","").slice(1) + "PDF"](null, true); }
-      }
-    });
-  });
-
-  // Make menu labels editable
-  document.querySelectorAll('.menu-label').forEach(t => {
-    t.setAttribute('contenteditable', 'true');
-    // Prevent clicking menu item from navigating if we are just focusing the text
-    t.addEventListener('click', (e) => e.stopPropagation());
-    t.addEventListener('blur', function() {
-      const parentMenu = this.closest('.menu-item');
-      if (parentMenu) {
-         const viewId = parentMenu.id.replace('menu-', 'view-');
-         if (!S.frontMatter) S.frontMatter = {};
-         if (!S.frontMatter.customTitles) S.frontMatter.customTitles = {};
-         S.frontMatter.customTitles[viewId] = this.innerText.trim();
-         const pageTitle = document.querySelector('#' + viewId + ' .page-title');
-         if (pageTitle) pageTitle.innerText = this.innerText.trim();
-         if(window.debouncedSaveState) debouncedSaveState(); let viewIdToUpdate = viewId || ""; if (!viewIdToUpdate) { const parentMenu = this.closest(".menu-item"); if (parentMenu) viewIdToUpdate = parentMenu.id.replace("menu-", "view-"); } if (viewIdToUpdate) { const expName = "export" + viewIdToUpdate.replace("view-","").toUpperCase() + "PDF"; if (typeof window[expName] === "function") window[expName](null, true); else if (typeof window["export" + viewIdToUpdate.replace("view-","").charAt(0).toUpperCase() + viewIdToUpdate.replace("view-","").slice(1) + "PDF"] === "function") window["export" + viewIdToUpdate.replace("view-","").charAt(0).toUpperCase() + viewIdToUpdate.replace("view-","").slice(1) + "PDF"](null, true); }
-      }
-    });
-  });
-
-  // Intercept openProject to apply custom titles
-  if (typeof window.openProject === 'function') {
-    const originalOpenProject = window.openProject;
-    window.openProject = async function(...args) {
-      await originalOpenProject.apply(this, args);
-      if (S.frontMatter && S.frontMatter.customTitles) {
-         for (const viewId in S.frontMatter.customTitles) {
-            const title = S.frontMatter.customTitles[viewId];
-            const pageTitle = document.querySelector('#' + viewId + ' .page-title');
-            if (pageTitle && pageTitle.innerText !== title) pageTitle.innerText = title;
-            const menuId = viewId.replace('view-', 'menu-');
-            const menuEl = document.querySelector('#' + menuId + ' .menu-label');
-            if (menuEl && menuEl.innerText !== title) menuEl.innerText = title;
-         }
-      }
-    };
-  }
-});
-</script>
-
-<script>
-// The clone implementation lives in portal.bundle.js. Keep this block only as
-// a compatibility guard so older cached pages do not overwrite the bundle logic.
-if (typeof window.addGenericTableBlock !== 'function') {
-  window.addGenericTableBlock = function() {};
-}
-</script>
-
-
-  <!-- PWA Service Worker Registration -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(registration => {
-            console.log('ServiceWorker registration successful with scope: ', registration.scope);
-          })
-          .catch(err => {
-            console.log('ServiceWorker registration failed: ', err);
-          });
-      });
-    }
-  </script>
+<script defer src="js/portal.bundle.js?v=site-zoom-20260612i"></script>
 </body>
 </html>
