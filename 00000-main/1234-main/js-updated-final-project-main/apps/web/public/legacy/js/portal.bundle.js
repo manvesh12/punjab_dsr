@@ -12642,15 +12642,11 @@ function renderAnnexureAttachmentPreview(viewId) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
   return `
-    <section class="annexure-uploaded-pages">
-      <h2>Uploaded PDF / Image Pages</h2>
-      ${pages.map((page, index) => `
-        <figure class="annexure-uploaded-page">
-          <img src="${escape(page.src)}" alt="${escape(page.label || `Uploaded page ${index + 1}`)}">
-          <figcaption>${escape(page.label || `Uploaded page ${index + 1}`)}</figcaption>
-        </figure>
+    <div class="annexure-uploaded-pages-simple" style="margin-top: 20px; display: flex; flex-direction: column; gap: 20px;">
+      ${pages.map(page => `
+        <img src="${escape(page.src)}" style="max-width: 100%; height: auto; display: block; margin: 0 auto;" alt="Uploaded page">
       `).join('')}
-    </section>`;
+    </div>`;
 }
 window.renderAnnexureAttachmentPreview = renderAnnexureAttachmentPreview;
 function renderAnnexureK() {
