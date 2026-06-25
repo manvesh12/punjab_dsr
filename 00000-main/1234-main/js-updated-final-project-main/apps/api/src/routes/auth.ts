@@ -422,3 +422,199 @@ authRouter.post("/reset-password", async (req, res) => {
 
   res.json({ success: true, message: "Password reset successful" });
 });
+
+authRouter.get("/invitation/:token", async (req, res) => {
+  const token = req.params.token;
+  const invitation = await prisma.invitation.findUnique({
+    where: { token, status: "PENDING" }
+  });
+
+  if (!invitation || invitation.expiresAt < new Date()) {
+    res.status(400).json({ error: "Invalid or expired invitation link" });
+    return;
+  }
+
+  res.json(jsonSafe({ email: invitation.email, role: invitation.role }));
+});
+
+const registerInvitedSchema = z.object({
+  token: z.string().min(1),
+  fullName: z.string().min(1),
+  mobileNumber: z.string().min(10),
+  password: z.string().min(10).max(128).regex(/[A-Za-z]/).regex(/[0-9]/)
+});
+
+authRouter.post("/register-invited", async (req, res) => {
+  const parsed = registerInvitedSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid registration details" });
+    return;
+  }
+
+  const { token, fullName, mobileNumber, password } = parsed.data;
+
+  const invitation = await prisma.invitation.findUnique({
+    where: { token, status: "PENDING" }
+  });
+
+  if (!invitation || invitation.expiresAt < new Date()) {
+    res.status(400).json({ error: "Invalid or expired invitation link" });
+    return;
+  }
+
+  // Generate 6-digit OTP for Mobile (mocked via console)
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const otpHash = await bcrypt.hash(otp, 10);
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+
+  // Invalidate old OTPs
+  await prisma.otpVerification.updateMany({
+    where: { identifier: mobileNumber, purpose: "REGISTER", used: false },
+    data: { used: true }
+  });
+
+  await prisma.otpVerification.create({
+    data: {
+      identifier: mobileNumber,
+      otpHash,
+      purpose: "REGISTER",
+      expiresAt
+    }
+  });
+
+  // Mock SMS dispatch
+  console.log(`[MOCK SMS] Registration OTP for ${mobileNumber} is ${otp}`);
+
+  // Create the inactive user so we have the password and mobileNumber saved temporarily.
+  // We can just update the existing logic or create an inactive user directly.
+  let user = await prisma.user.findFirst({ where: { email: invitation.email } });
+  
+  if (!user) {
+    user = await prisma.user.create({
+      data: {
+        username: invitation.email,
+        email: invitation.email,
+        fullName,
+        mobileNumber,
+        password: await bcrypt.hash(password, 10),
+        role: invitation.role,
+        active: false // Wait for Mobile OTP
+      }
+    });
+  } else if (!user.active) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: await bcrypt.hash(password, 10),
+        fullName,
+        mobileNumber
+      }
+    });
+  }
+
+  res.json({ success: true, message: "OTP sent to your mobile number" });
+});
+
+authRouter.post("/verify-invited-otp", async (req, res) => {
+  const parsed = z.object({
+    token: z.string().min(1),
+    mobileNumber: z.string().min(10),
+    otp: z.string().length(6)
+  }).safeParse(req.body);
+
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid payload. Need valid token, mobile and 6-digit OTP." });
+    return;
+  }
+
+  const { token, mobileNumber, otp } = parsed.data;
+
+  const invitation = await prisma.invitation.findUnique({
+    where: { token, status: "PENDING" }
+  });
+
+  if (!invitation || invitation.expiresAt < new Date()) {
+    res.status(400).json({ error: "Invalid or expired invitation link" });
+    return;
+  }
+
+  const otpRecord = await prisma.otpVerification.findFirst({
+    where: { identifier: mobileNumber, purpose: "REGISTER", used: false },
+    orderBy: { createdAt: 'desc' }
+  });
+
+  if (!otpRecord || otpRecord.expiresAt < new Date()) {
+    res.status(400).json({ error: "Invalid or expired OTP." });
+    return;
+  }
+
+  if (otpRecord.attemptCount >= 5) {
+    res.status(429).json({ error: "Too many attempts. Please request a new OTP." });
+    return;
+  }
+
+  const isValid = await bcrypt.compare(otp, otpRecord.otpHash);
+  if (!isValid) {
+    await prisma.otpVerification.update({
+      where: { id: otpRecord.id },
+      data: { attemptCount: { increment: 1 } }
+    });
+    res.status(400).json({ error: "Invalid OTP" });
+    return;
+  }
+
+  // Mark OTP used
+  await prisma.otpVerification.update({
+    where: { id: otpRecord.id },
+    data: { used: true }
+  });
+
+  // Activate the user
+  const user = await prisma.user.update({
+    where: { email: invitation.email },
+    data: { active: true }
+  });
+
+  // Mark invitation as ACCEPTED
+  await prisma.invitation.update({
+    where: { id: invitation.id },
+    data: { status: "ACCEPTED" }
+  });
+
+  // Automatically log them in
+  const sessionToken = signToken(user);
+  
+  const refreshTokenStr = crypto.randomBytes(40).toString("hex");
+  await prisma.refreshToken.create({
+    data: {
+      token: refreshTokenStr,
+      userId: user.id,
+      expiresAt: new Date(Date.now() + refreshTokenCookieOptions.maxAge)
+    }
+  });
+
+  res.cookie(config.sessionCookieName, sessionToken, cookieOptions);
+  res.cookie("dsr_refresh_token", refreshTokenStr, refreshTokenCookieOptions);
+  
+  recordAudit(req, "AUTH_REGISTER_INVITED_SUCCESS", { username: user.username, role: user.role }, 200);
+
+  res.json(
+    jsonSafe({
+      success: true,
+      message: "Registration completed successfully",
+      token: sessionToken,
+      username: user.username,
+      email: user.email,
+      fullName: user.fullName,
+      role: `ROLE_${user.role}`,
+      uiRole: roleToFrontend(user.role),
+      permissions: permissionsFor(user.role),
+      scope: {
+        district: user.district,
+        blockName: user.blockName,
+        sectionName: user.sectionName
+      },
+      accessLabel: user.accessScope || user.role.replaceAll("_", " ")
+    })
+  );
+});

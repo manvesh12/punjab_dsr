@@ -244,3 +244,15 @@ model OtpVerification {
   used          Boolean  @default(false)
   createdAt     DateTime @default(now())
 }
+
+model Invitation {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  role      Role
+  token     String   @unique
+  status    String   @default("PENDING") // PENDING, ACCEPTED
+  expiresAt DateTime
+  createdBy BigInt
+  createdAt DateTime @default(now())
+}
+

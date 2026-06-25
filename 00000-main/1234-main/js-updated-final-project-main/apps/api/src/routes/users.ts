@@ -1,12 +1,18 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
 import { Role } from "@prisma/client";
+import crypto from "crypto";
+import multer from "multer";
+import * as xlsx from "xlsx";
 import { canAdmin, permissionsFor } from "../lib/auth.js";
 import { jsonSafe } from "../lib/json.js";
 import { prisma } from "../lib/prisma.js";
 import { parseBigIntParam } from "../lib/validation.js";
+import { sendInvitationEmail } from "../lib/email.js";
 
 export const usersRouter = Router();
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 function normalizeRole(value: unknown) {
   const role = String(value || "OFFICER").toUpperCase();
@@ -115,4 +121,111 @@ usersRouter.delete("/:id", async (req, res) => {
   if (!id) return;
   await prisma.user.delete({ where: { id } });
   res.json({ success: true });
+});
+
+usersRouter.post("/invite", async (req, res) => {
+  const email = String(req.body?.email || "").trim().toLowerCase();
+  if (!email) {
+    res.status(400).json({ error: "Email is required" });
+    return;
+  }
+  const role = normalizeRole(req.body?.role);
+
+  const existingUser = await prisma.user.findUnique({ where: { email } });
+  if (existingUser) {
+    res.status(400).json({ error: "User with this email already exists" });
+    return;
+  }
+
+  const token = crypto.randomBytes(32).toString("hex");
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+  // Upsert invitation
+  await prisma.invitation.upsert({
+    where: { email },
+    update: { token, role, expiresAt, status: "PENDING", createdBy: req.user!.id },
+    create: { email, token, role, expiresAt, createdBy: req.user!.id }
+  });
+
+  try {
+    await sendInvitationEmail(email, token, role);
+  } catch (e) {
+    console.error("Failed to send invitation email", e);
+  }
+
+  res.json({ success: true, message: "Invitation sent successfully" });
+});
+
+usersRouter.post("/invite/bulk", upload.single("file"), async (req, res) => {
+  if (!req.file) {
+    res.status(400).json({ error: "No file uploaded" });
+    return;
+  }
+
+  try {
+    const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
+    const firstSheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[firstSheetName];
+    const rows = xlsx.utils.sheet_to_json(worksheet) as any[];
+
+    let successCount = 0;
+    let failedCount = 0;
+    const errors: any[] = [];
+
+    const validRoles = Object.values(Role);
+
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      const email = String(row.email || row.Email || "").trim().toLowerCase();
+      const rawRole = String(row.role || row.Role || "").toUpperCase();
+
+      if (!email) {
+        failedCount++;
+        errors.push({ row: i + 2, email: "", reason: "Email is required" });
+        continue;
+      }
+      
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        failedCount++;
+        errors.push({ row: i + 2, email, reason: "Invalid email format" });
+        continue;
+      }
+
+      if (!validRoles.includes(rawRole as Role)) {
+        failedCount++;
+        errors.push({ row: i + 2, email, reason: `Invalid role: ${rawRole}` });
+        continue;
+      }
+
+      const existingUser = await prisma.user.findUnique({ where: { email } });
+      if (existingUser) {
+        failedCount++;
+        errors.push({ row: i + 2, email, reason: "User already exists" });
+        continue;
+      }
+
+      const token = crypto.randomBytes(32).toString("hex");
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+      const role = rawRole as Role;
+
+      try {
+        await prisma.invitation.upsert({
+          where: { email },
+          update: { token, role, expiresAt, status: "PENDING", createdBy: req.user!.id },
+          create: { email, token, role, expiresAt, createdBy: req.user!.id }
+        });
+
+        await sendInvitationEmail(email, token, role);
+        successCount++;
+      } catch (e: any) {
+        failedCount++;
+        errors.push({ row: i + 2, email, reason: e.message || "Failed to create invitation" });
+      }
+    }
+
+    res.json({ success: true, successCount, failedCount, errors });
+  } catch (error: any) {
+    res.status(500).json({ error: "Failed to process the uploaded file: " + error.message });
+  }
 });

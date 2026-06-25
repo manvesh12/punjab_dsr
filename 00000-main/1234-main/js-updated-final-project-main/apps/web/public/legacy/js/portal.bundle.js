@@ -5375,36 +5375,195 @@ async function editUserScope(userId) {
     toast(e.message || 'Failed to update scope', 'error');
   }
 }
-async function openAddUserPrompt() {
-  const username = prompt('Email / username for new user:', '');
-  if (!username) return;
-  const fullName = prompt('Full name:', username) || username;
-  const role = prompt(`Role (${USER_ROLE_OPTIONS.join(', ')}):`, 'SDO') || 'SDO';
-  const district = prompt('Assigned district:', 'Jalandhar') || '';
+function openAddUserPrompt() {
+  openModal('modal-invite-user');
+}
+
+async function doSingleInvite() {
+  const email = document.getElementById('invite-single-email').value.trim();
+  const role = document.getElementById('invite-single-role').value;
+  if (!email) {
+    toast('Please enter an email address', 'error');
+    return;
+  }
   try {
-    await apiFetch('/users', {
+    await apiFetch('/users/invite', {
       method: 'POST',
-      body: JSON.stringify({
-        username,
-        email: username,
-        fullName,
-        role,
-        district,
-        password: 'password123',
-        active: 'true'
-      })
+      body: JSON.stringify({ email, role })
     });
-    toast('User created with password password123', 'success');
-    renderUsers();
+    toast(`Invitation sent to ${email}`, 'success');
+    closeModal('modal-invite-user');
+    document.getElementById('invite-single-email').value = '';
   } catch (e) {
-    toast(e.message || 'Failed to create user', 'error');
+    toast(e.message || 'Failed to send invitation', 'error');
   }
 }
+
+function downloadBulkInviteTemplate() {
+  const csvContent = "data:text/csv;charset=utf-8,Email,Role\nexample@domain.gov.in,SDO\n";
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", "bulk_invite_template.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+async function doBulkInvite() {
+  const fileInput = document.getElementById('bulk-invite-file');
+  if (!fileInput.files || fileInput.files.length === 0) {
+    toast('Please select a file to upload', 'error');
+    return;
+  }
+  
+  const formData = new FormData();
+  formData.append('file', fileInput.files[0]);
+  
+  try {
+    const token = localStorage.getItem('dsr_token');
+    const res = await fetch('/api/users/invite/bulk', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: formData
+    });
+    
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Upload failed');
+    
+    closeModal('modal-bulk-invite');
+    fileInput.value = '';
+    
+    // Show results modal
+    document.getElementById('bulk-res-success').textContent = data.successCount;
+    document.getElementById('bulk-res-failed').textContent = data.failedCount;
+    
+    const errorsBody = document.getElementById('bulk-errors-body');
+    errorsBody.innerHTML = '';
+    if (data.errors && data.errors.length > 0) {
+      document.getElementById('bulk-errors-container').style.display = 'block';
+      data.errors.forEach(err => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${err.row}</td>
+          <td>${err.email || 'N/A'}</td>
+          <td style="color:var(--text-soft); font-size:12px;">${err.reason}</td>
+        `;
+        errorsBody.appendChild(tr);
+      });
+    } else {
+      document.getElementById('bulk-errors-container').style.display = 'none';
+    }
+    
+    openModal('modal-bulk-invite-results');
+    renderUsers();
+  } catch (e) {
+    toast(e.message || 'Failed to process bulk upload', 'error');
+  }
+}
+
 window.renderUsers = renderUsers;
 window.updateUserRole = updateUserRole;
 window.toggleUserActive = toggleUserActive;
 window.editUserScope = editUserScope;
 window.openAddUserPrompt = openAddUserPrompt;
+window.doSingleInvite = doSingleInvite;
+window.downloadBulkInviteTemplate = downloadBulkInviteTemplate;
+window.doBulkInvite = doBulkInvite;
+
+async function doInvitedRegister() {
+  const token = new URLSearchParams(window.location.search).get('invite');
+  const fullName = document.getElementById('invited-name').value.trim();
+  const mobileNumber = document.getElementById('invited-mobile').value.trim();
+  const password = document.getElementById('invited-pass').value;
+
+  if (!fullName || !mobileNumber || !password) {
+    document.getElementById('invited-error').textContent = 'All fields are required';
+    document.getElementById('invited-error').style.display = 'block';
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/auth/register-invited', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, fullName, mobileNumber, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to register');
+
+    document.getElementById('invited-error').style.display = 'none';
+    document.getElementById('invited-success').textContent = data.message;
+    document.getElementById('invited-success').style.display = 'block';
+    
+    document.getElementById('invited-btn-submit').style.display = 'none';
+    document.getElementById('invited-otp-section').style.display = 'block';
+  } catch (e) {
+    document.getElementById('invited-error').textContent = e.message;
+    document.getElementById('invited-error').style.display = 'block';
+  }
+}
+
+async function doVerifyInvitedOtp() {
+  const token = new URLSearchParams(window.location.search).get('invite');
+  const mobileNumber = document.getElementById('invited-mobile').value.trim();
+  const otp = document.getElementById('invited-otp').value.trim();
+
+  if (!otp || otp.length !== 6) {
+    document.getElementById('invited-error').textContent = 'Please enter a valid 6-digit OTP';
+    document.getElementById('invited-error').style.display = 'block';
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/auth/verify-invited-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, mobileNumber, otp })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Verification failed');
+
+    localStorage.setItem('dsr_token', data.token);
+    localStorage.setItem('dsr_user', JSON.stringify(data));
+    
+    window.location.href = 'index.html';
+  } catch (e) {
+    document.getElementById('invited-error').textContent = e.message;
+    document.getElementById('invited-error').style.display = 'block';
+  }
+}
+
+window.doInvitedRegister = doInvitedRegister;
+window.doVerifyInvitedOtp = doVerifyInvitedOtp;
+
+// Initialization logic for invites
+setTimeout(async () => {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('invite');
+  if (token && document.getElementById('auth-form-invited')) {
+    // Hide all auth forms
+    document.querySelectorAll('.auth-form').forEach(el => el.style.display = 'none');
+    document.querySelector('.auth-tabs').style.display = 'none';
+    
+    document.getElementById('auth-form-invited').style.display = 'block';
+
+    try {
+      const res = await fetch(`/api/auth/invitation/${token}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Invalid link');
+
+      document.getElementById('invited-email').value = data.email;
+      document.getElementById('invited-subtext').textContent = `You have been invited as ${data.role}. Please complete your profile.`;
+    } catch (e) {
+      document.getElementById('invited-error').textContent = e.message;
+      document.getElementById('invited-error').style.display = 'block';
+      document.getElementById('invited-btn-submit').style.display = 'none';
+    }
+  }
+}, 500);
 
 ;
 
