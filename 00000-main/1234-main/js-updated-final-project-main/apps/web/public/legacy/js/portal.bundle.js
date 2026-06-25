@@ -8106,7 +8106,6 @@ function addRouteTableBlock(prefill = false) {
     <div class="card-hd" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
       <div class="card-title-group" style="display:flex; align-items:center; gap:8px;">
         <span class="card-title" contenteditable="true" style="font-weight: 600; border-bottom: 1px dashed var(--border-2); outline: none;">${title}</span>
-        <span class="text-soft" style="font-size:11px;">(Click to edit title)</span>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
         <button class="btn btn-excel-template btn-xs" onclick="downloadRouteTemplate(this)" style="display:inline-flex; align-items:center; gap:6px;">
@@ -8176,7 +8175,6 @@ function addClusterTableBlock(prefill = false) {
     <div class="card-hd" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
       <div class="card-title-group" style="display:flex; align-items:center; gap:8px;">
         <span class="card-title" contenteditable="true" style="font-weight: 600; border-bottom: 1px dashed var(--border-2); outline: none;">${title}</span>
-        <span class="text-soft" style="font-size:11px;">(Click to edit title)</span>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
         <button class="btn btn-excel-template btn-xs" onclick="downloadClusterTemplate(this)" style="display:inline-flex; align-items:center; gap:6px;">
@@ -10293,7 +10291,6 @@ function addRouteTableBlockAnx7(prefill = false, rows = null, title = '') {
     <div class="card-hd" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
       <div class="card-title-group" style="display:flex; align-items:center; gap:8px;">
         <span class="card-title" contenteditable="true" style="font-weight: 600; border-bottom: 1px dashed var(--border-2); outline: none;">${escapeHtmlAnx7(safeTitle)}</span>
-        <span class="text-soft" style="font-size:11px;">(Click to edit title)</span>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
         <button class="btn btn-excel-template btn-xs" onclick="downloadRouteTemplateAnx7(this)" style="display:inline-flex; align-items:center; gap:6px;">
@@ -10361,7 +10358,6 @@ function addClusterTableBlockAnx7(prefill = false, rows = null, title = '') {
     <div class="card-hd" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
       <div class="card-title-group" style="display:flex; align-items:center; gap:8px;">
         <span class="card-title" contenteditable="true" style="font-weight: 600; border-bottom: 1px dashed var(--border-2); outline: none;">${escapeHtmlAnx7(safeTitle)}</span>
-        <span class="text-soft" style="font-size:11px;">(Click to edit title)</span>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
         <button class="btn btn-excel-template btn-xs" onclick="downloadClusterTemplateAnx7(this)" style="display:inline-flex; align-items:center; gap:6px;">
