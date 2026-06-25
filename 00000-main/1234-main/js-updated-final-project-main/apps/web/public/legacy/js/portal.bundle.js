@@ -12846,8 +12846,7 @@ function renderFinalChecklist() {
     { name: 'Annexure II - Mining Leases', sub: 'All potential leases listed', ok: anx2Ok },
     { name: 'Annexure III - Clusters', sub: 'Cluster and contiguous cluster details', ok: anx3Ok },
     { name: 'Annexure IV - Transportation', sub: 'Route details for all leases', ok: anx4Ok },
-    { name: 'Demand & Summary Tables', sub: 'District-wise projections', ok: demandOk },
-    { name: `E-Signatures (${sigs}/5)`, sub: 'Sequential authority signing', ok: sigs === 5 }
+    { name: 'Demand & Summary Tables', sub: 'District-wise projections', ok: demandOk }
   ];
   el.innerHTML = items.map(it => `
     <div class="checklist-item ${it.ok ? 'done' : ''}" style="margin-bottom:8px">
@@ -13184,15 +13183,7 @@ function generateFinalPDF() {
       }
     }
   });
-  doc.addPage(); addPageHeader('DIGITAL SIGNATURES'); y=25;
-  doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(...navyArr);
-  doc.text('DIGITAL SIGNATURE REGISTER', W/2, y, {align:'center'}); y+=12;
-  doc.autoTable({
-    startY:y, margin:{left:pad,right:pad}, styles:{fontSize:9},
-    headStyles:{fillColor:navyArr},
-    head:[['#','Role','Officer','Status','Signed At','Method']],
-    body:S.signatures.map(s=>[s.order,s.role,s.name,s.signed?'SIGNED':'PENDING',s.signedAt||'-',s.method||'-'])
-  });
+
   if (S.sdlcData && S.sdlcData.projectId === S.activeProject.id && S.sdlcData.verified) {
     doc.addPage();
     addPageHeader('SDLC RECONCILIATION REPORT');
@@ -13792,24 +13783,7 @@ async function generateFinalPDF(regenerate = false) {
       setProgress(`Merging Sections... ${title}`, 52 + Math.min(24, Math.round(annexureIndex * 1.4)));
       await addAnnexureFromPreview(title, viewId);
     }
-    if (Array.isArray(S.signatures) && S.signatures.length) {
-      let y = beginSection('Digital Signature Register');
-      doc.autoTable({
-        startY: y,
-        margin: { left: pad, right: pad },
-        head: [['#', 'Role', 'Officer', 'Status', 'Signed At', 'Method']],
-        body: S.signatures.map(sig => [
-          sig.order || '',
-          sig.role || '',
-          sig.name || '',
-          sig.signed ? 'SIGNED' : 'PENDING',
-          sig.signedAt || '-',
-          sig.method || '-'
-        ]),
-        styles: { fontSize: 8, cellPadding: 2 },
-        headStyles: { fillColor: navy }
-      });
-    }
+
     setProgress('Finalizing Document...', 78);
     doc.setPage(tocPage);
     addHeader('Table of Contents');
