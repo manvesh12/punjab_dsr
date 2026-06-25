@@ -14550,12 +14550,20 @@ const pdfPreview = {
     const title = this.SECTION_TITLES[viewId] || 'Annexure Preview';
     const district = (window.S && S.frontMatter && S.frontMatter.district) || 'Jalandhar';
     const year = (window.S && S.frontMatter && S.frontMatter.year) || '2025-26';
-    let bodyHtml = clone.innerHTML.trim() || '<p class="empty">No annexure data entered yet.</p>';
+    
+    let attachmentHtml = '';
     if (typeof renderAnnexureAttachmentPreview === 'function') {
-      const attachmentHtml = renderAnnexureAttachmentPreview(viewId);
-      if (attachmentHtml) {
-        bodyHtml += attachmentHtml;
-      }
+      attachmentHtml = renderAnnexureAttachmentPreview(viewId);
+    }
+    
+    const infoEl = clone.querySelector(`#${viewId}-attachment-info`);
+    if (infoEl) {
+      infoEl.innerHTML = attachmentHtml || '';
+    }
+    
+    let bodyHtml = clone.innerHTML.trim() || '<p class="empty">No annexure data entered yet.</p>';
+    if (attachmentHtml && (!infoEl || !bodyHtml.includes(attachmentHtml))) {
+      bodyHtml += attachmentHtml;
     }
     return `<!doctype html>
       <html>
