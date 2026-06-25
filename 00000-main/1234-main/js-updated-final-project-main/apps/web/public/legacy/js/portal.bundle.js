@@ -17090,3 +17090,86 @@ function updateLiveProgressUI(progress) {
     pctEl.textContent = typeof S !== 'undefined' && S.activeProject ? 'Project Progress: ' + progress + '%' : '';
   }
 }
+
+document.addEventListener('focusin', (e) => {
+  const select = e.target;
+  if (select && select.tagName === 'SELECT' && select.closest('table')) {
+    const view = select.closest('.view');
+    if (!view) return;
+    const viewId = view.id.replace('view-', '');
+    const isAnnexure = /^(anx[1-7]|annexure-[b-k])$/i.test(viewId);
+    if (!isAnnexure) return;
+
+    const isAdmin = !!(
+      window.S && (
+        S.role === 'admin' || 
+        (S.user && (
+          S.user.role === 'admin' || 
+          String(S.user.email || '').toLowerCase().includes('admin')
+        ))
+      )
+    );
+
+    if (!isAdmin) return;
+
+    select.dataset.prevValue = select.value;
+
+    let hasCustomOption = false;
+    for (let i = 0; i < select.options.length; i++) {
+      if (select.options[i].value === '__custom__' || select.options[i].text === 'Enter custom value') {
+        hasCustomOption = true;
+        break;
+      }
+    }
+
+    if (!hasCustomOption) {
+      const opt = document.createElement('option');
+      opt.value = '__custom__';
+      opt.text = 'Enter custom value';
+      select.appendChild(opt);
+    }
+  }
+});
+
+document.addEventListener('change', (e) => {
+  const select = e.target;
+  if (select && select.tagName === 'SELECT' && select.closest('table')) {
+    const view = select.closest('.view');
+    if (!view) return;
+    const viewId = view.id.replace('view-', '');
+    const isAnnexure = /^(anx[1-7]|annexure-[b-k])$/i.test(viewId);
+    if (!isAnnexure) return;
+
+    if (select.value === '__custom__') {
+      const customVal = prompt('Enter custom value:');
+      if (customVal && customVal.trim() !== '') {
+        const trimmed = customVal.trim();
+        let opt = Array.from(select.options).find(o => o.text === trimmed || o.value === trimmed);
+        if (!opt) {
+          opt = document.createElement('option');
+          opt.value = trimmed;
+          opt.text = trimmed;
+          const customOpt = Array.from(select.options).find(o => o.value === '__custom__');
+          if (customOpt) {
+            select.insertBefore(opt, customOpt);
+          } else {
+            select.appendChild(opt);
+          }
+        }
+        select.value = trimmed;
+        select.dataset.prevValue = trimmed;
+
+        select.dispatchEvent(new Event('input', { bubbles: true }));
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+        
+        if (window.refreshCurrentLivePreview) {
+          window.refreshCurrentLivePreview(120);
+        }
+      } else {
+        select.value = select.dataset.prevValue || '';
+      }
+    } else {
+      select.dataset.prevValue = select.value;
+    }
+  }
+});
