@@ -5559,7 +5559,7 @@ async function doInvitedRegister() {
 
   try {
     if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new window.RecaptchaVerifier(window.firebaseAuth, 'recaptcha-container', {
+      window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
         'size': 'invisible'
       });
     }
@@ -5568,7 +5568,7 @@ async function doInvitedRegister() {
     const oldText = btn.innerHTML;
     btn.innerHTML = 'Sending SMS...';
 
-    window.confirmationResult = await window.signInWithPhoneNumber(window.firebaseAuth, phone, window.recaptchaVerifier);
+    window.confirmationResult = await firebase.auth().signInWithPhoneNumber(phone, window.recaptchaVerifier);
 
     btn.innerHTML = oldText;
     document.getElementById('invited-error').style.display = 'none';
