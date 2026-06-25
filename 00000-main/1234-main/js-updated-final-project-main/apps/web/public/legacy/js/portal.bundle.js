@@ -5420,6 +5420,13 @@ async function doBulkInvite() {
   const formData = new FormData();
   formData.append('file', fileInput.files[0]);
   
+  const btn = document.querySelector('button[onclick="doBulkInvite()"]');
+  const originalText = btn ? btn.innerText : 'Upload & Process';
+  if (btn) {
+    btn.innerText = 'Processing... Please wait';
+    btn.disabled = true;
+  }
+  
   try {
     const token = localStorage.getItem('dsr_token');
     const res = await fetch('/api/users/invite/bulk', {
@@ -5430,7 +5437,19 @@ async function doBulkInvite() {
       body: formData
     });
     
-    const data = await res.json();
+    // reset button before processing response
+    if (btn) {
+      btn.innerText = originalText;
+      btn.disabled = false;
+    }
+    
+    let data;
+    try {
+      data = await res.json();
+    } catch(err) {
+      throw new Error('Server is restarting or returned invalid response. Please try again in 1-2 minutes.');
+    }
+    
     if (!res.ok) throw new Error(data.error || 'Upload failed');
     
     closeModal('modal-bulk-invite');
@@ -5460,6 +5479,10 @@ async function doBulkInvite() {
     openModal('modal-bulk-invite-results');
     renderUsers();
   } catch (e) {
+    if (btn) {
+      btn.innerText = originalText;
+      btn.disabled = false;
+    }
     toast(e.message || 'Failed to process bulk upload', 'error');
   }
 }
