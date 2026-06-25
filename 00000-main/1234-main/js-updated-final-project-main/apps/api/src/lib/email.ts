@@ -15,7 +15,7 @@ const transporter = nodemailer.createTransport({
 export const sendOtpEmail = async (toEmail: string, otp: string) => {
   if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
     console.warn(`[WARNING] SMTP credentials not configured. OTP for ${toEmail} is ${otp}`);
-    return;
+    throw new Error('SMTP email credentials not configured in .env file.');
   }
 
   try {
@@ -48,7 +48,7 @@ export const sendInvitationEmail = async (toEmail: string, token: string, role: 
   
   if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
     console.warn(`[WARNING] SMTP credentials not configured. Invite link for ${toEmail} (Role: ${role}) is ${inviteLink}`);
-    return;
+    throw new Error('SMTP email credentials not configured in .env file.');
   }
 
   try {
