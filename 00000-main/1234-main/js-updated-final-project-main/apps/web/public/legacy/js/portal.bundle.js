@@ -12634,7 +12634,12 @@ function getMergedAnnexureAttachmentPages(viewId) {
 }
 function renderAnnexureAttachmentPreview(viewId) {
   const pages = getMergedAnnexureAttachmentPages(viewId).filter(page => page && page.src);
-  if (!pages.length) return '';
+  if (!pages.length) {
+    return `
+      <div style="padding:14px 16px; border:1px dashed #cbd5e1; border-radius:8px; color:#64748b; font-size:13.5px; background:#f8fafc; text-align:center; margin-top:10px;">
+        No supporting PDF/image uploaded yet.
+      </div>`;
+  }
   const escape = value => String(value ?? '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -14485,23 +14490,6 @@ const pdfPreview = {
       });
   },
   cleanupAnnexurePreviewClone(clone, viewId) {
-    if (viewId) {
-      const hasAttachments = typeof getMergedAnnexureAttachmentPages === 'function'
-        ? getMergedAnnexureAttachmentPages(viewId).length > 0
-        : false;
-      const infoEl = clone.querySelector(`#${viewId}-attachment-info`);
-      if (infoEl) {
-        const uploadSection = infoEl.closest('.anx-section');
-        if (uploadSection) {
-          if (!hasAttachments) {
-            uploadSection.remove();
-          } else {
-            const header = uploadSection.querySelector('.anx-section-header');
-            if (header) header.remove();
-          }
-        }
-      }
-    }
     clone.querySelectorAll('table').forEach(table => {
       // First, compute the printable cells for each row while the table is fully intact.
       const rows = Array.from(table.querySelectorAll('tr'));
