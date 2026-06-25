@@ -14485,12 +14485,23 @@ const pdfPreview = {
       });
   },
   cleanupAnnexurePreviewClone(clone, viewId) {
-    // Remove only the helper text under the upload section title
-    clone.querySelectorAll('div').forEach(el => {
-      if (el.textContent.includes('Uploaded PDF pages or images will be appended')) {
-        el.remove();
+    if (viewId) {
+      const hasAttachments = typeof getMergedAnnexureAttachmentPages === 'function'
+        ? getMergedAnnexureAttachmentPages(viewId).length > 0
+        : false;
+      const infoEl = clone.querySelector(`#${viewId}-attachment-info`);
+      if (infoEl) {
+        const uploadSection = infoEl.closest('.anx-section');
+        if (uploadSection) {
+          if (!hasAttachments) {
+            uploadSection.remove();
+          } else {
+            const header = uploadSection.querySelector('.anx-section-header');
+            if (header) header.remove();
+          }
+        }
       }
-    });
+    }
     clone.querySelectorAll('table').forEach(table => {
       // First, compute the printable cells for each row while the table is fully intact.
       const rows = Array.from(table.querySelectorAll('tr'));
