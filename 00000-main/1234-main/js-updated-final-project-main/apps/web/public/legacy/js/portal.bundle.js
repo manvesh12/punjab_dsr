@@ -2016,6 +2016,9 @@ function showView(id, btn, push = true) {
   if (S.activeProject && typeof updateActiveProjectCardUI === 'function') updateActiveProjectCardUI();
   normalizeAnnexureViewLayout(id);
   addCoreAnnexureTableControls(id);
+  if (typeof makeAllSectionTitlesEditable === 'function') {
+    makeAllSectionTitlesEditable(id);
+  }
   const previewSections = ['front-matter', 'chapters', 'plates', 'anx1', 'anx2', 'anx3', 'anx4', 'anx5', 'anx6', 'anx7', 'annexure-b', 'annexure-c', 'annexure-d', 'annexure-e', 'annexure-f', 'annexure-g', 'annexure-h', 'annexure-i', 'annexure-j', 'annexure-k'];
   if (window.portalPreviewTimer) {
     clearTimeout(window.portalPreviewTimer);
@@ -14509,7 +14512,11 @@ const pdfPreview = {
       '.page-title',
       '.page-sub',
       '.annexure-line-instructions',
-      '.annexure-instructions-card'
+      '.annexure-instructions-card',
+      'i[data-lucide="pencil-line"]',
+      'svg.lucide-pencil-line',
+      'svg.lucide',
+      '[data-lucide]'
     ].join(',')).forEach(el => el.remove());
 
     // Convert inputs/selects to static values
@@ -15471,6 +15478,130 @@ function setAnnexurePreviewIframeSrc(viewId, src) {
   iframe.src = src || 'about:blank';
   return iframe;
 }
+function refreshCurrentLivePreview(delay = 80) {
+  if (!window.pdfPreview || !pdfPreview.currentView) return;
+  const id = pdfPreview.currentView;
+  clearTimeout(window.__globalPreviewRefreshTimer);
+  window.__globalPreviewRefreshTimer = setTimeout(() => {
+    if (id.startsWith('annexure-')) {
+      if (id === 'annexure-f' || id === 'annexure-j' || id === 'annexure-k') {
+        pdfPreview.generateAnnexureLivePreview(id, 0);
+      } else {
+        pdfPreview.refresh();
+      }
+    } else {
+      if (typeof refreshCoreAnnexurePreview === 'function' && isCoreAnnexureViewId(id)) {
+        refreshCoreAnnexurePreview(id);
+      } else {
+        pdfPreview.refresh();
+      }
+    }
+  }, delay);
+}
+
+function setupEditableTitleEvents(span, viewId) {
+  const key = span.getAttribute('data-key');
+  if (!key) return;
+  
+  span.dataset.listenerAdded = 'true';
+  
+  // Restore saved value
+  let saved = localStorage.getItem('global_title_' + key);
+  if (!saved) {
+    if (key.startsWith('anx5-')) {
+      saved = localStorage.getItem('anx5_heading_' + key);
+    } else if (key.startsWith('anx6-')) {
+      saved = localStorage.getItem('anx6_heading_' + key);
+    }
+  }
+  if (saved) {
+    span.innerText = saved;
+  }
+  
+  const saveVal = () => {
+    const val = span.innerText.trim();
+    localStorage.setItem('global_title_' + key, val);
+    if (key.startsWith('anx5-')) {
+      localStorage.setItem('anx5_heading_' + key, val);
+    } else if (key.startsWith('anx6-')) {
+      localStorage.setItem('anx6_heading_' + key, val);
+    }
+  };
+  
+  span.addEventListener('input', () => {
+    saveVal();
+    if (window.debouncedSaveState) window.debouncedSaveState();
+    refreshCurrentLivePreview(120);
+  });
+  
+  span.addEventListener('blur', () => {
+    saveVal();
+    if (window.debouncedSaveState) window.debouncedSaveState();
+    refreshCurrentLivePreview(50);
+  });
+  
+  span.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      span.blur();
+    }
+  });
+}
+
+function makeAllSectionTitlesEditable(viewId) {
+  const view = document.getElementById('view-' + viewId);
+  if (!view) return;
+  
+  // First setup listeners on any pre-existing editable-title elements (like in anx5/anx6)
+  view.querySelectorAll('.editable-title').forEach(span => {
+    if (!span.dataset.listenerAdded) {
+      setupEditableTitleEvents(span, viewId);
+    }
+  });
+  
+  // Find all other section titles to make them editable
+  const headings = view.querySelectorAll('.anx-section-title, .annexure-f-block-title, .annexure-k-block-title');
+  headings.forEach((heading, idx) => {
+    if (heading.querySelector('.editable-title') || heading.classList.contains('editable-title')) return;
+    
+    const originalText = heading.innerText.trim();
+    heading.innerHTML = '';
+    
+    // Lucide edit/pencil icon
+    const icon = document.createElement('i');
+    icon.setAttribute('data-lucide', 'pencil-line');
+    icon.style.width = '14px';
+    icon.style.height = '14px';
+    icon.style.color = 'var(--primary)';
+    icon.style.flexShrink = '0';
+    heading.appendChild(icon);
+    
+    // Editable span title
+    const span = document.createElement('span');
+    span.className = 'editable-title';
+    span.setAttribute('data-key', `${viewId}-title-auto-${idx}`);
+    span.contentEditable = 'true';
+    span.style.borderBottom = '2px dashed #94a3b8';
+    span.style.outline = 'none';
+    span.style.cursor = 'text';
+    span.style.padding = '2px 6px';
+    span.style.borderRadius = '4px';
+    span.style.minWidth = '80px';
+    span.style.marginLeft = '6px';
+    span.innerText = originalText;
+    
+    heading.appendChild(span);
+    
+    setupEditableTitleEvents(span, viewId);
+  });
+  
+  if (window.initLucide) window.initLucide();
+}
+
+window.refreshCurrentLivePreview = refreshCurrentLivePreview;
+window.setupEditableTitleEvents = setupEditableTitleEvents;
+window.makeAllSectionTitlesEditable = makeAllSectionTitlesEditable;
+
 window.getAnnexurePreviewIframe = getAnnexurePreviewIframe;
 window.setAnnexurePreviewIframeSrc = setAnnexurePreviewIframeSrc;
 window.pdfPreview = pdfPreview;
