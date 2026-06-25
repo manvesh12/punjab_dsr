@@ -1,5 +1,10 @@
 import nodemailer from 'nodemailer';
 import { config } from './config.js';
+import dns from 'node:dns';
+
+// Force Node.js to use IPv4 first. This prevents 'ENETUNREACH' errors on platforms like Render 
+// which sometimes fail to route outbound IPv6 connections to Google's SMTP.
+dns.setDefaultResultOrder('ipv4first');
 
 // Setup Nodemailer transport using SMTP credentials from environment
 const transporter = nodemailer.createTransport({
@@ -10,6 +15,10 @@ const transporter = nodemailer.createTransport({
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
+  tls: {
+    // Helps prevent SSL/TLS timeout issues
+    rejectUnauthorized: false
+  }
 });
 
 export const sendOtpEmail = async (toEmail: string, otp: string) => {
