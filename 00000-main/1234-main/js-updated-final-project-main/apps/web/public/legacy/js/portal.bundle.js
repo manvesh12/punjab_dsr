@@ -1428,6 +1428,10 @@ function normalizeAnnexureViewLayout(id) {
 function refreshCoreAnnexurePreview(id) {
   if (id && id.startsWith('annexure-')) {
     if (window.pdfPreview && window.pdfPreview.currentView === id) {
+      if (id === 'annexure-f' || id === 'annexure-j' || id === 'annexure-k') {
+        window.pdfPreview.generateAnnexureLivePreview(id, 80);
+        return;
+      }
       const fn = {
         'annexure-f': window.exportAnnexureFPDF,
         'annexure-j': window.exportAnnexureJPDF,
@@ -11354,6 +11358,12 @@ async function exportAnnexureFPDF(btn, isLivePreview = false) {
     isLivePreview = btn;
     btn = null;
   }
+  if (isLivePreview) {
+    if (window.pdfPreview && window.pdfPreview.currentView === 'annexure-f') {
+      window.pdfPreview.generateAnnexureLivePreview('annexure-f', 0);
+      return;
+    }
+  }
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF('p', 'pt', 'a4');
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -11882,6 +11892,12 @@ async function appendAnnexureJAttachmentPages(doc) {
 }
 async function exportAnnexureJPDF(btn, isLivePreview = false, previewRequestId = null) {
   if (typeof btn === 'boolean') { isLivePreview = btn; btn = null; }
+  if (isLivePreview) {
+    if (window.pdfPreview && window.pdfPreview.currentView === 'annexure-j') {
+      window.pdfPreview.generateAnnexureLivePreview('annexure-j', 0);
+      return;
+    }
+  }
   const requestId = isLivePreview ? (previewRequestId || ((window.annexureJPreviewRequest || 0) + 1)) : null;
   if (isLivePreview && previewRequestId === null) window.annexureJPreviewRequest = requestId;
   if (!window.jspdf?.jsPDF || !window.jspdf.jsPDF.API.autoTable) await ensurePortalVendors(['jspdf', 'autotable']);
@@ -12272,6 +12288,12 @@ async function exportAnnexureKPDF(btn, isLivePreview = false) {
   if (typeof btn === 'boolean') {
     isLivePreview = btn;
     btn = null;
+  }
+  if (isLivePreview) {
+    if (window.pdfPreview && window.pdfPreview.currentView === 'annexure-k') {
+      window.pdfPreview.generateAnnexureLivePreview('annexure-k', 0);
+      return;
+    }
   }
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF('p', 'pt', 'a4');
@@ -14124,7 +14146,9 @@ const pdfPreview = {
     'annexure-k': 'pdf-iframe-annexure-k-preview'
   },
   isAnnexureView(viewId) {
-    return !!viewId && viewId.startsWith('anx') && !viewId.startsWith('annexure-');
+    if (!viewId) return false;
+    if (viewId.startsWith('anx') && !viewId.startsWith('annexure-')) return true;
+    return viewId === 'annexure-f' || viewId === 'annexure-j' || viewId === 'annexure-k';
   },
   FM_ORDER: ['cover', 'toc', 'pref', 'ack', 'cert'],
   FM_LABELS: {
@@ -14216,7 +14240,8 @@ const pdfPreview = {
         iframe.style.display = 'block';
         iframe.id = this.IFRAME_IDS[viewId] || 'pdf-preview-iframe';
         const savedPdf = S.activeProject && S.activeProject.pdfData && S.activeProject.pdfData[viewId];
-        if (savedPdf) {
+        const isLiveAnnexure = viewId === 'annexure-f' || viewId === 'annexure-j' || viewId === 'annexure-k';
+        if (savedPdf && !isLiveAnnexure) {
           iframe.src = this.fitPdfViewerUrl(savedPdf);
         } else {
           iframe.src = 'about:blank';
@@ -14296,9 +14321,10 @@ const pdfPreview = {
           iframe.style.display = 'block';
           const savedPdf = S.activeProject && S.activeProject.pdfData && S.activeProject.pdfData[viewId];
           const fittedPdf = this.fitPdfViewerUrl(savedPdf);
-          if (savedPdf && iframe.src !== fittedPdf) {
+          const isLiveAnnexure = viewId === 'annexure-f' || viewId === 'annexure-j' || viewId === 'annexure-k';
+          if (savedPdf && !isLiveAnnexure && iframe.src !== fittedPdf) {
             iframe.src = fittedPdf;
-          } else if (!savedPdf) {
+          } else if (!savedPdf || isLiveAnnexure) {
             iframe.src = 'about:blank';
             this.generateAnnexureLivePreview(viewId, 300);
           }

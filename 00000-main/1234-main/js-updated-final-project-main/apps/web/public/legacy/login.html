@@ -4927,7 +4927,7 @@
   </div>
 </div>
 
-<div id="view-annexure-j" class="view">
+      <div id="view-annexure-j" class="view">
   <div class="header-row">
     <div>
       <div class="page-title">Annexure J</div>
@@ -4952,16 +4952,25 @@
             </div>
             <div id="annexure-j-attachment-info" style="margin-top:10px;"></div>
           </div>
+
           <div class="anx-section" style="margin-top:32px;">
             <div class="anx-section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
               <div>
                 <div class="anx-section-title" style="font-weight:bold; font-size:14px;">Projected Demand of Gravel:</div>
                 <div style="font-size:12px; color:var(--text-soft); margin-top:3px;">Use the supplied Demand Table Excel template or upload a completed workbook.</div>
               </div>
-              <button type="button" class="btn btn-excel-template btn-xs" onclick="downloadAnnexureJTemplate()" style="display:inline-flex; align-items:center; gap:6px;"><i data-lucide="file-spreadsheet" style="width:12px; height:12px;"></i><span>Excel Template</span></button>
+              <button type="button" class="btn btn-excel-template btn-xs" onclick="downloadAnnexureJTemplate()" style="display:inline-flex; align-items:center; gap:6px;">
+                <i data-lucide="file-spreadsheet" style="width:12px; height:12px;"></i>
+                <span>Excel Template</span>
+              </button>
             </div>
             <div id="annexure-j-demand-container" class="annexure-j-table-container"></div>
-            <div style="margin-top:12px;"><button type="button" class="btn btn-sm btn-pdf-upload" onclick="addAnnexureJTableBlock()" style="display:inline-flex; align-items:center; gap:6px;"><i data-lucide="plus-circle" style="width:14px; height:14px;"></i><span>Add Another Table</span></button></div>
+            <div style="margin-top:12px;">
+              <button type="button" class="btn btn-sm btn-pdf-upload" onclick="addAnnexureJTableBlock()" style="display:inline-flex; align-items:center; gap:6px;">
+                <i data-lucide="plus-circle" style="width:14px; height:14px;"></i>
+                <span>Add Another Table</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
