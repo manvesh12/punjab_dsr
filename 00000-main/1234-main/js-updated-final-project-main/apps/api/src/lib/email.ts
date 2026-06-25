@@ -72,7 +72,7 @@ export const sendOtpEmail = async (toEmail: string, otp: string) => {
 
 export const sendInvitationEmail = async (toEmail: string, token: string, role: string) => {
   const host = process.env.PUBLIC_APP_URL || 'https://punjab-dsr.vercel.app/legacy';
-  const inviteLink = `${host}/auth.html?invite=${token}`;
+  const inviteLink = `${host}/login.html?invite=${token}`;
   
   const roleDisplay = role.replace(/_/g, ' ').replace(/\w\S*/g, (w) => (w.replace(/^\w/, (c) => c.toUpperCase())));
   
