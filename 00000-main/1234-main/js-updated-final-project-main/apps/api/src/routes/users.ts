@@ -149,8 +149,10 @@ usersRouter.post("/invite", async (req, res) => {
 
   try {
     await sendInvitationEmail(email, token, role);
-  } catch (e) {
+  } catch (e: any) {
     console.error("Failed to send invitation email", e);
+    res.status(500).json({ error: "Failed to send email: " + (e.message || "Unknown error") });
+    return;
   }
 
   res.json({ success: true, message: "Invitation sent successfully" });
