@@ -1761,6 +1761,9 @@ function addGenericTableBlock(btn) {
   rewriteInlineReferences(clone, idMap);
   sourceBlock.insertAdjacentElement('afterend', clone);
   prepareGenericClonedTableBlock(clone, sourceTable, clone.querySelector('table'), viewId);
+  if (typeof makeAllSectionTitlesEditable === 'function') {
+    makeAllSectionTitlesEditable(viewId);
+  }
   if (window.debouncedSaveState) window.debouncedSaveState();
 }
 window.addGenericTableBlock = addGenericTableBlock;
@@ -6927,6 +6930,9 @@ function addSectionABlock() {
   tbody.innerHTML = '';
   wrapper.appendChild(newBlock);
   addNewLeaseRow(newBlock.querySelector('.section-footer button'));
+  if (typeof makeAllSectionTitlesEditable === 'function') {
+    makeAllSectionTitlesEditable('anx2');
+  }
 }
 function getCellText(td) {
   return annexurePrintableValue(td);
@@ -9102,6 +9108,9 @@ function addAnx5SectionBlock(sectionType) {
   const addRowBtn = newBlock.querySelector('.section-footer button');
   if (addRowBtn) {
     addRowBtn.click();
+  }
+  if (typeof makeAllSectionTitlesEditable === 'function') {
+    makeAllSectionTitlesEditable('anx5');
   }
 }
 window.addAnx5SectionBlock = addAnx5SectionBlock;
@@ -11328,6 +11337,9 @@ function addAnnexureFTableBlock(sectionType) {
   renumberAnnexureFTableBlocks(sectionType);
   if (typeof applyMoreAnnexureAccess === 'function') applyMoreAnnexureAccess(document.getElementById('view-annexure-f'));
   if (typeof addCoreAnnexureTableControls === 'function') addCoreAnnexureTableControls('annexure-f');
+  if (typeof makeAllSectionTitlesEditable === 'function') {
+    makeAllSectionTitlesEditable('annexure-f');
+  }
   if (window.initLucide) window.initLucide();
   if (window.debouncedSaveState) window.debouncedSaveState();
   if (window.pdfPreview && window.pdfPreview.currentView === 'annexure-f') {
@@ -11759,6 +11771,9 @@ function renderAnnexureJDemandTables() {
   }).join('');
   if (typeof addCoreAnnexureTableControls === 'function') addCoreAnnexureTableControls('annexure-j');
   if (typeof applyMoreAnnexureAccess === 'function') applyMoreAnnexureAccess(document.getElementById('view-annexure-j'));
+  if (typeof makeAllSectionTitlesEditable === 'function') {
+    makeAllSectionTitlesEditable('annexure-j');
+  }
   if (window.initLucide) window.initLucide();
 }
 function renderAnnexureJ() {
@@ -12268,6 +12283,9 @@ function addAnnexureKTableBlock(sectionType) {
   renumberAnnexureKTableBlocks(sectionType);
   if (typeof applyMoreAnnexureAccess === 'function') applyMoreAnnexureAccess(document.getElementById('view-annexure-k'));
   if (typeof addCoreAnnexureTableControls === 'function') addCoreAnnexureTableControls('annexure-k');
+  if (typeof makeAllSectionTitlesEditable === 'function') {
+    makeAllSectionTitlesEditable('annexure-k');
+  }
   if (window.initLucide) window.initLucide();
   if (window.debouncedSaveState) window.debouncedSaveState();
   if (window.pdfPreview && window.pdfPreview.currentView === 'annexure-k') {
@@ -15552,47 +15570,105 @@ function makeAllSectionTitlesEditable(viewId) {
   const view = document.getElementById('view-' + viewId);
   if (!view) return;
   
-  // First setup listeners on any pre-existing editable-title elements (like in anx5/anx6)
+  const isAdmin = !!(
+    window.S && (
+      S.role === 'admin' || 
+      (S.user && (
+        S.user.role === 'admin' || 
+        String(S.user.email || '').toLowerCase().includes('admin')
+      ))
+    )
+  );
+
+  // 1. Process all section titles / card titles
+  let headingsSelector = '.anx-section-title, .annexure-f-block-title, .annexure-k-block-title';
+  if (viewId === 'anx5') {
+    headingsSelector += ', .card-title';
+  }
+  const headings = view.querySelectorAll(headingsSelector);
+  headings.forEach((heading, idx) => {
+    if (!heading.querySelector('.editable-title') && !heading.classList.contains('editable-title')) {
+      const originalText = heading.innerText.trim();
+      heading.innerHTML = '';
+      
+      const span = document.createElement('span');
+      span.className = 'editable-title';
+      span.setAttribute('data-key', `${viewId}-title-auto-${idx}`);
+      span.innerText = originalText;
+      heading.appendChild(span);
+      
+      const icon = document.createElement('i');
+      icon.setAttribute('data-lucide', 'pencil-line');
+      icon.style.width = '14px';
+      icon.style.height = '14px';
+      icon.style.color = 'var(--primary)';
+      icon.style.flexShrink = '0';
+      heading.appendChild(icon);
+    }
+  });
+
+  // 2. Process all table headers in Annexures 1-7 and B-K
+  const isAnnexure = /^(anx[1-7]|annexure-[b-k])$/i.test(viewId);
+  if (isAnnexure) {
+    const tables = view.querySelectorAll('table.anx-tbl, table');
+    tables.forEach((table, tIdx) => {
+      const tableId = table.id || `table-idx-${tIdx}`;
+      const headers = table.querySelectorAll('thead th');
+      headers.forEach((th, thIdx) => {
+        const text = th.textContent.trim();
+        if (!text || /action|sl\s*no|sl\.no|s\.no|select|delete|edit/i.test(text)) return;
+        
+        let span = th.querySelector('.editable-title');
+        const expectedKey = `${viewId}-${tableId}-th-${thIdx}`;
+        if (!span) {
+          const originalText = th.innerText.trim();
+          th.innerHTML = '';
+          
+          span = document.createElement('span');
+          span.className = 'editable-title';
+          span.setAttribute('data-key', expectedKey);
+          span.innerText = originalText;
+          th.appendChild(span);
+          
+          const icon = document.createElement('i');
+          icon.setAttribute('data-lucide', 'pencil-line');
+          icon.style.width = '11px';
+          icon.style.height = '11px';
+          icon.style.color = 'var(--primary)';
+          icon.style.flexShrink = '0';
+          icon.style.marginLeft = '4px';
+          th.appendChild(icon);
+        } else {
+          span.setAttribute('data-key', expectedKey);
+        }
+      });
+    });
+  }
+
+  // 3. Apply Admin vs Non-Admin attributes, borders, cursor, events & icons visibility
   view.querySelectorAll('.editable-title').forEach(span => {
     if (!span.dataset.listenerAdded) {
       setupEditableTitleEvents(span, viewId);
     }
+    
+    if (isAdmin) {
+      span.contentEditable = 'true';
+      span.style.borderBottom = span.tagName === 'TH' || span.parentElement?.tagName === 'TH' ? '1px dashed #94a3b8' : '2px dashed #94a3b8';
+      span.style.cursor = 'text';
+      span.style.outline = 'none';
+      span.style.padding = span.tagName === 'TH' || span.parentElement?.tagName === 'TH' ? '1px 3px' : '2px 6px';
+      span.style.borderRadius = '3px';
+    } else {
+      span.contentEditable = 'false';
+      span.style.borderBottom = 'none';
+      span.style.cursor = 'default';
+      span.style.outline = 'none';
+      span.style.padding = '0';
+    }
   });
-  
-  // Find all other section titles to make them editable
-  const headings = view.querySelectorAll('.anx-section-title, .annexure-f-block-title, .annexure-k-block-title');
-  headings.forEach((heading, idx) => {
-    if (heading.querySelector('.editable-title') || heading.classList.contains('editable-title')) return;
-    
-    const originalText = heading.innerText.trim();
-    heading.innerHTML = '';
-    
-    // Lucide edit/pencil icon
-    const icon = document.createElement('i');
-    icon.setAttribute('data-lucide', 'pencil-line');
-    icon.style.width = '14px';
-    icon.style.height = '14px';
-    icon.style.color = 'var(--primary)';
-    icon.style.flexShrink = '0';
-    heading.appendChild(icon);
-    
-    // Editable span title
-    const span = document.createElement('span');
-    span.className = 'editable-title';
-    span.setAttribute('data-key', `${viewId}-title-auto-${idx}`);
-    span.contentEditable = 'true';
-    span.style.borderBottom = '2px dashed #94a3b8';
-    span.style.outline = 'none';
-    span.style.cursor = 'text';
-    span.style.padding = '2px 6px';
-    span.style.borderRadius = '4px';
-    span.style.minWidth = '80px';
-    span.style.marginLeft = '6px';
-    span.innerText = originalText;
-    
-    heading.appendChild(span);
-    
-    setupEditableTitleEvents(span, viewId);
+
+  view.querySelectorAll('i[data-lucide="pencil-line"], svg.lucide-pencil-line').forEach(el => {
+    el.style.display = isAdmin ? '' : 'none';
   });
   
   if (window.initLucide) window.initLucide();
