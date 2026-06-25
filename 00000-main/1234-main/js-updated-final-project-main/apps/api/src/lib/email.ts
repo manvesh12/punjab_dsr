@@ -15,11 +15,15 @@ const transporter = nodemailer.createTransport({
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
+  pool: true,             // Use pooled connections instead of creating a new connection for every email
+  maxConnections: 1,      // Limit simultaneous connections to 1 to avoid ETIMEDOUT from rapid concurrent bursts
+  maxMessages: 50,        // Max messages per connection
+  family: 4,              // Force IPv4
   tls: {
-    // Helps prevent SSL/TLS timeout issues
     rejectUnauthorized: false
   }
 });
+
 
 export const sendOtpEmail = async (toEmail: string, otp: string) => {
   if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
