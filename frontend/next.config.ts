@@ -20,7 +20,7 @@ const nextConfig: NextConfig = {
           {
             key: "Content-Security-Policy",
             value:
-              `default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src ${connectSrc}; frame-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'self'`
+              `default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src ${connectSrc} https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com; frame-src 'self' blob: https://punjab-dsr1.firebaseapp.com https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/; object-src 'none'; base-uri 'self'; frame-ancestors 'self'`
           }
         ]
       }
