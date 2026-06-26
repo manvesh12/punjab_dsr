@@ -34,7 +34,7 @@ services:
 
   api:
     build:
-      context: .
+      context: ../..
       dockerfile: backend/Dockerfile
     restart: always
     depends_on:
@@ -45,11 +45,11 @@ services:
       - .env.production
     ports:
       - "8080:8080"
-    command: npm run start --workspace @dsr/api
+    command: npm run start
 
   worker:
     build:
-      context: .
+      context: ../..
       dockerfile: backend/Dockerfile
     restart: always
     depends_on:
@@ -58,11 +58,11 @@ services:
       - minio
     env_file:
       - .env.production
-    command: npm run start:worker --workspace @dsr/api
+    command: npm run start:worker
 
   web:
     build:
-      context: .
+      context: ../..
       dockerfile: frontend/Dockerfile
     restart: always
     depends_on:
@@ -71,7 +71,7 @@ services:
       - .env.production
     ports:
       - "3000:3000"
-    command: npm run start --workspace @dsr/web
+    command: npm run start
 
 volumes:
   postgres_data:

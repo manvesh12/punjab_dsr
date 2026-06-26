@@ -24,11 +24,15 @@ The new structure is easier to understand for Vercel, Render, future developers 
 ```text
 punjab_dsr/
   backend/
+    deployment/
+    docs/
     prisma/
+    reports/
     scripts/
     src/
     Dockerfile
     package.json
+    package-lock.json
     tsconfig.json
 
   frontend/
@@ -39,19 +43,9 @@ punjab_dsr/
     Dockerfile
     next.config.ts
     package.json
+    package-lock.json
     tsconfig.json
     vercel.json
-
-  docs/
-  reports/
-  scripts/
-  docs/
-  reports/
-  scripts/
-  docker-compose.yml
-  docker-compose.prod.yml
-  package.json
-  package-lock.json
 ```
 
 ## Files and Folders Moved
@@ -74,14 +68,13 @@ punjab_dsr/
 
 | File | Change |
 |---|---|
-| `package.json` | Workspaces changed from `apps/*` and `packages/*` to `backend` and `frontend`. |
-| `backend/Dockerfile` | Updated copy paths from `apps/api` to `backend`. |
-| `frontend/Dockerfile` | Updated copy paths from `apps/web` to `frontend`. |
-| `docker-compose.prod.yml` | Updated Dockerfile paths to `backend/Dockerfile` and `frontend/Dockerfile`. |
-| `deployment_guide.md` | Updated Render and Vercel roots and commands. |
-| `FREE_HOSTING_DEPLOYMENT_STEPS.md` | Updated no-card deployment steps for `backend` and `frontend`. |
-| `scripts/windows/*.bat` | Updated helper scripts to use new folder paths. |
-| `README.md` and docs | Updated project structure references. |
+| `backend/package.json` | Backend is standalone for Render and local API work. |
+| `frontend/package.json` | Frontend is standalone for Vercel and local web work. |
+| `backend/Dockerfile` | Uses backend-local `package.json` and build/start commands. |
+| `frontend/Dockerfile` | Uses frontend-local `package.json` and build/start commands. |
+| `backend/deployment` | Contains Docker Compose and environment templates. |
+| `backend/docs` | Contains deployment guides, project report and archived docs. |
+| `frontend/scripts/maintenance` | Contains frontend-only maintenance scripts. |
 
 ## Security Cleanup
 
@@ -143,18 +136,13 @@ SMTP_USER=<verified sender email>
 Run from project root:
 
 ```bash
-npm install --legacy-peer-deps
-npm run build
+cd backend && npm install --legacy-peer-deps && npm run build
+cd ../frontend && npm install --legacy-peer-deps && npm run build
 ```
 
-The build verifies both workspaces:
-
-```text
-@dsr/api
-@dsr/web
-```
+The backend and frontend are intentionally built separately.
 
 ## Notes
 
-- The repository still contains historical documents and generated reports outside this project folder. They were not included in this restructure commit.
+- The repository root is intentionally kept minimal. Supporting docs and scripts live inside `backend` or `frontend`.
 - Free hosting remains suitable for demo/testing only. Paid production should move file storage away from Render local disk.
