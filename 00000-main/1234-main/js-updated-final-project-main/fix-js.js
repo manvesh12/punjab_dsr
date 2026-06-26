@@ -1,5 +1,5 @@
 const fs = require('fs');
-const file = 'apps/web/public/legacy/js/portal.bundle.js';
+const file = 'frontend/public/legacy/js/portal.bundle.js';
 let content = fs.readFileSync(file, 'utf8');
 
 const target = `    if (typeof loadReviewerNoteForView === 'function') {

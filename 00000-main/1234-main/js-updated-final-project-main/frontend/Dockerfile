@@ -1,8 +1,7 @@
 FROM node:22-alpine AS deps
 WORKDIR /app
 COPY package.json ./
-COPY apps/web/package.json apps/web/package.json
-COPY packages/shared/package.json packages/shared/package.json
+COPY frontend/package.json frontend/package.json
 RUN npm install --no-audit --no-fund --legacy-peer-deps
 
 FROM node:22-alpine AS build
@@ -15,10 +14,10 @@ FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=build /app/package.json ./package.json
-COPY --from=build /app/apps/web/package.json ./apps/web/package.json
+COPY --from=build /app/frontend/package.json ./frontend/package.json
 COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/apps/web/.next ./apps/web/.next
-COPY --from=build /app/apps/web/public ./apps/web/public
-COPY --from=build /app/apps/web/next.config.ts ./apps/web/next.config.ts
+COPY --from=build /app/frontend/.next ./frontend/.next
+COPY --from=build /app/frontend/public ./frontend/public
+COPY --from=build /app/frontend/next.config.ts ./frontend/next.config.ts
 EXPOSE 3000
 CMD ["npm", "run", "start", "--workspace", "@dsr/web"]

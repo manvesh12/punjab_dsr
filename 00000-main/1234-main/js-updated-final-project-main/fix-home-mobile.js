@@ -1,5 +1,5 @@
 const fs = require('fs');
-const cssFile = 'apps/web/public/legacy/css/reference-home.css';
+const cssFile = 'frontend/public/legacy/css/reference-home.css';
 
 let css = fs.readFileSync(cssFile, 'utf8');
 

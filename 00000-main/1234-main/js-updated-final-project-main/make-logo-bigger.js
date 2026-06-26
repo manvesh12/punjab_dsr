@@ -18,7 +18,7 @@ function getHtmlFiles(dir) {
 const targetRegex = /width:72px; height:72px;/g;
 const replacement = `width:96px; height:96px;`;
 
-const baseDir = 'apps/web/public/legacy';
+const baseDir = 'frontend/public/legacy';
 const htmlFiles = getHtmlFiles(baseDir);
 
 let count = 0;

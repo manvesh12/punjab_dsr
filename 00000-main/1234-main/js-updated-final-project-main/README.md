@@ -4,9 +4,9 @@ Organized final webstack.
 
 ## Structure
 
-- `apps/web` - Next.js web app
-- `apps/web/public/legacy` - current working portal
-- `apps/api` - API backend
+- `frontend` - Next.js web app
+- `frontend/public/legacy` - current working portal
+- `backend` - API backend
 - `packages` - shared packages
 - `scripts/windows` - Windows start/stop/helper scripts
 - `docs` - deployment and migration notes

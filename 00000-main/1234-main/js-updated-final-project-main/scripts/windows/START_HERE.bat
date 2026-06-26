@@ -12,8 +12,8 @@ if not exist .env (
   copy .env.example .env >nul
 )
 
-copy .env apps\api\.env >nul
-copy .env apps\web\.env.local >nul
+copy .env backend\.env >nul
+copy .env frontend\.env.local >nul
 
 if not exist node_modules\.bin\next.cmd (
   echo Installing dependencies. First run can take time...
@@ -113,7 +113,7 @@ if errorlevel 1 (
 )
 
 echo Building latest legacy portal UI...
-pushd apps\web\public\legacy
+pushd frontend\public\legacy
 node build.js
 if errorlevel 1 (
   popd
@@ -152,4 +152,3 @@ echo iit@demo.com / password123
 echo sdlc@demo.com / password123
 echo.
 pause
-

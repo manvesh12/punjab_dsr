@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const loginFile = 'apps/web/public/legacy/login.html';
+const loginFile = 'frontend/public/legacy/login.html';
 let content = fs.readFileSync(loginFile, 'utf8');
 
 // Add manifest to head if not present

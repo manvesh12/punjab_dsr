@@ -2,8 +2,7 @@
 setlocal
 cd /d "%~dp0..\.."
 if not exist .env copy .env.example .env >nul
-copy .env apps\api\.env >nul
-copy .env apps\web\.env.local >nul
-echo Env synced to apps\api\.env and apps\web\.env.local
+copy .env backend\.env >nul
+copy .env frontend\.env.local >nul
+echo Env synced to backend\.env and frontend\.env.local
 pause
-

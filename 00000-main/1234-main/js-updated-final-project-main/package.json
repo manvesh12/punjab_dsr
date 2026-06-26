@@ -4,8 +4,8 @@
   "private": true,
   "description": "Modern Smart DSR portal stack: Next.js, Express, PostgreSQL, S3, JWT auth",
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "backend",
+    "frontend"
   ],
   "scripts": {
     "dev": "npm run dev:web",

@@ -8,14 +8,14 @@ Use `START_HERE.bat` from this folder. It installs dependencies if missing, star
 
 Frontend:
 
-- Project root: `apps/web`
+- Project root: `frontend`
 - Framework: Next.js
 - Env: `NEXT_PUBLIC_API_BASE_URL=https://your-api-domain`
-- Rewrite `/api/*` to backend through `apps/web/vercel.json`
+- Rewrite `/api/*` to backend through `frontend/vercel.json`
 
 Backend on AWS:
 
-- Use `apps/api/Dockerfile`
+- Use `backend/Dockerfile`
 - Required env: `DATABASE_URL`, `JWT_SECRET`, `WEB_ORIGIN`, `AWS_REGION`, `AWS_S3_BUCKET`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `QUEUE_REDIS_URL`
 - Run once after deploy: `npm run prisma:migrate --workspace @dsr/api`
 - Run worker separately: `npm run start:worker --workspace @dsr/api`

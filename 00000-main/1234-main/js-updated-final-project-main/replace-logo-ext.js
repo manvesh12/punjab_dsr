@@ -18,7 +18,7 @@ function getHtmlFiles(dir) {
 const targetRegex = /<img src="assets\/smart-dsr-logo\.svg"/g;
 const replacement = `<img src="assets/smart-dsr-logo.png"`;
 
-const baseDir = 'apps/web/public/legacy';
+const baseDir = 'frontend/public/legacy';
 const htmlFiles = getHtmlFiles(baseDir);
 
 let count = 0;

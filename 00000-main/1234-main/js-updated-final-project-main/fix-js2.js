@@ -1,5 +1,5 @@
 const fs = require('fs');
-const file = 'apps/web/public/legacy/js/portal.bundle.js';
+const file = 'frontend/public/legacy/js/portal.bundle.js';
 let content = fs.readFileSync(file, 'utf8');
 
 const regex = /(loadReviewerNoteForView\(id,\s*titles\[id\]\s*\|\|\s*id\);\s*\})/g;

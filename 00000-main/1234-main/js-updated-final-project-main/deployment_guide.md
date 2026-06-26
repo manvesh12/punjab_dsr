@@ -28,12 +28,12 @@ We will avoid paid storage (like S3 or R2) for now. The backend is already confi
 
 ## 4. Backend API (Render) - Free Web Service
 1. Go to [Render.com](https://render.com) and log in with GitHub.
-2. Click **New** → **Web Service**. Connect your `manvesh12/1234` repository.
+2. Click **New** -> **Web Service**. Connect your `manvesh12/punjab_dsr` repository.
 3. Select the **Free** instance type.
 4. **Settings:**
-   - Build Command: `npm install && npm run build --workspace @dsr/api`
-   - Start Command: `npm run start --workspace @dsr/api`
-   - Root Directory: `apps/api`
+   - Build Command: `npm install --legacy-peer-deps && npm run build`
+   - Start Command: `npm run start`
+   - Root Directory: `backend`
 5. **Environment Variables:**
    - `NODE_ENV=production`
    - `DATABASE_URL=` *(paste Neon URL)*
@@ -44,8 +44,8 @@ We will avoid paid storage (like S3 or R2) for now. The backend is already confi
 
 ## 5. Frontend (Vercel) - Free Plan
 1. Go to [Vercel.com](https://vercel.com) and log in with GitHub.
-2. Click **Add New Project** and import `manvesh12/1234`.
-3. Set **Root Directory** to `apps/web` and Framework to **Next.js**.
+2. Click **Add New Project** and import `manvesh12/punjab_dsr`.
+3. Set **Root Directory** to `frontend` and Framework to **Next.js**.
 4. **Environment Variables:**
    - `NEXT_PUBLIC_API_BASE_URL=` *(paste your Render API URL here)*
 5. Click **Deploy**. Vercel will give you a public URL (e.g., `https://dsr-portal.vercel.app`).

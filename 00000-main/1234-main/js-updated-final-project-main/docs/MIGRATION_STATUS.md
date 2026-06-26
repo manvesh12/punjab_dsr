@@ -3,7 +3,7 @@
 ## Files completed
 
 - Frontend scaffold: Next.js, TypeScript, Tailwind CSS, shadcn-style `Button` and `Badge`
-- Legacy portal bridge: existing HTML/CSS/JS copied into `apps/web/public/legacy`
+- Legacy portal bridge: existing HTML/CSS/JS copied into `frontend/public/legacy`
 - Backend scaffold: Express, TypeScript, JWT auth, RBAC helpers
 - PostgreSQL schema: Prisma models for users, projects, reports, workflow history, files
 - File storage: S3-compatible storage with local fallback

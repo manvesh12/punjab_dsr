@@ -21,11 +21,11 @@ echo Setting up environment variables...
 if not exist "%~dp0.env" (
   copy "%~dp0.env.example" "%~dp0.env" >nul
 )
-if not exist "%~dp0apps\api\.env" (
-  copy "%~dp0.env.example" "%~dp0apps\api\.env" >nul
+if not exist "%~dp0backend\.env" (
+  copy "%~dp0.env.example" "%~dp0backend\.env" >nul
 )
-if not exist "%~dp0apps\web\.env" (
-  copy "%~dp0.env.example" "%~dp0apps\web\.env" >nul
+if not exist "%~dp0frontend\.env" (
+  copy "%~dp0.env.example" "%~dp0frontend\.env" >nul
 )
 
 if not exist "%~dp0node_modules\" (

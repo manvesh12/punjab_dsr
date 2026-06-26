@@ -1,5 +1,5 @@
 const fs = require('fs');
-const cssFile = 'apps/web/public/legacy/css/mobile-overrides.css';
+const cssFile = 'frontend/public/legacy/css/mobile-overrides.css';
 
 let css = fs.readFileSync(cssFile, 'utf8');
 

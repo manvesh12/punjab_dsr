@@ -354,9 +354,9 @@ def build_pdf_report():
         pdf_table(
             [
                 ["Layer", "Current implementation", "Purpose"],
-                ["Workspace", "npm workspaces: apps/* and packages/*", "Keeps API and web packages under one project root."],
+                ["Workspace", "npm workspaces: backend and frontend", "Keeps API and web packages under one project root with clear production folders."],
                 ["Web", "Next.js 15, React 19, TypeScript, Tailwind-related utilities", "Modern app shell and local dev server on port 3000."],
-                ["Legacy UI", "Static HTML/CSS/JS bundle under apps/web/public/legacy", "Current DSR portal screens, dashboard, annexures, PDF preview, auth UI, and theme system."],
+                ["Legacy UI", "Static HTML/CSS/JS bundle under frontend/public/legacy", "Current DSR portal screens, dashboard, annexures, PDF preview, auth UI, and theme system."],
                 ["API", "Express 4, TypeScript, helmet, cors, rate limits, cookie-parser, JWT", "Authenticated backend routes for projects, files, reports, users, dashboard, and PDF actions."],
                 ["Database", "Prisma 6 with PostgreSQL datasource", "Users, projects, reports, workflow history, audit logs, and uploaded DSR files."],
                 ["Jobs/files", "BullMQ, multer, AWS S3 SDK", "Background job and file upload/storage foundation."],
@@ -501,9 +501,9 @@ def build_report():
         doc,
         ["Layer", "Current implementation", "Purpose"],
         [
-            ["Workspace", "npm workspaces: apps/* and packages/*", "Keeps API and web packages under one project root."],
+            ["Workspace", "npm workspaces: backend and frontend", "Keeps API and web packages under one project root with clear production folders."],
             ["Web", "Next.js 15, React 19, TypeScript, Tailwind-related utilities", "Modern app shell and local dev server on port 3000."],
-            ["Legacy UI", "Static HTML/CSS/JS bundle under apps/web/public/legacy", "Current DSR portal screens, dashboard, annexures, PDF preview, auth UI, and theme system."],
+            ["Legacy UI", "Static HTML/CSS/JS bundle under frontend/public/legacy", "Current DSR portal screens, dashboard, annexures, PDF preview, auth UI, and theme system."],
             ["API", "Express 4, TypeScript, helmet, cors, rate limits, cookie-parser, JWT", "Authenticated backend routes for projects, files, reports, users, dashboard, and PDF actions."],
             ["Database", "Prisma 6 with PostgreSQL datasource", "Users, projects, reports, workflow history, audit logs, and uploaded DSR files."],
             ["Jobs/files", "BullMQ, multer, AWS S3 SDK", "Background job and file upload/storage foundation."],

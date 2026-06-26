@@ -11,21 +11,21 @@ for %%F in (
   "docker-compose.yml"
   "START_HERE.bat"
   "STOP_ALL.bat"
-  "apps\web\package.json"
-  "apps\web\app\page.tsx"
-  "apps\web\app\globals.css"
-  "apps\web\public\legacy\index.html"
-  "apps\api\package.json"
-  "apps\api\src\server.ts"
-  "apps\api\src\worker.ts"
-  "apps\api\src\routes\auth.ts"
-  "apps\api\src\routes\projects.ts"
-  "apps\api\src\routes\reports.ts"
-  "apps\api\src\routes\pdf.ts"
-  "apps\api\src\routes\users.ts"
-  "apps\api\src\routes\files.ts"
-  "apps\api\prisma\schema.prisma"
-  "apps\api\prisma\seed.ts"
+  "frontend\package.json"
+  "frontend\app\page.tsx"
+  "frontend\app\globals.css"
+  "frontend\public\legacy\index.html"
+  "backend\package.json"
+  "backend\src\server.ts"
+  "backend\src\worker.ts"
+  "backend\src\routes\auth.ts"
+  "backend\src\routes\projects.ts"
+  "backend\src\routes\reports.ts"
+  "backend\src\routes\pdf.ts"
+  "backend\src\routes\users.ts"
+  "backend\src\routes\files.ts"
+  "backend\prisma\schema.prisma"
+  "backend\prisma\seed.ts"
 ) do (
   if exist %%F (
     echo OK      %%F
@@ -42,4 +42,3 @@ if "%missing%"=="0" (
   echo Some files are missing.
 )
 pause
-

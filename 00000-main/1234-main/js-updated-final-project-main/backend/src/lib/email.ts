@@ -1,12 +1,10 @@
-import { config } from './config.js';
-
-// We use the Brevo API key provided by the user. 
-// Fallback to env var if they add it to Render later.
-const keyPart1 = 'xkeysib-4af34edb4b71571785bde480ca9c919';
-const keyPart2 = '1e3a2d9d6205ce6bcea25a0b4eb82e9ac-CzUHdfwEJv9sxUna';
-const BREVO_API_KEY = process.env.BREVO_API_KEY || (keyPart1 + keyPart2);
+const BREVO_API_KEY = process.env.BREVO_API_KEY;
 
 async function sendEmailViaBrevo(to: string, subject: string, text: string, html: string) {
+  if (!BREVO_API_KEY) {
+    throw new Error('BREVO_API_KEY is not configured');
+  }
+
   // Use the SMTP_USER as the sender email, since the user already configured it on Render.
   // It should ideally match the email they used to sign up for Brevo.
   const senderEmail = process.env.SMTP_USER || 'no-reply@punjab-dsr.onrender.com';
