@@ -22,7 +22,7 @@ The new structure is easier to understand for Vercel, Render, future developers 
 ## Final Structure
 
 ```text
-js-updated-final-project-main/
+punjab_dsr/
   backend/
     prisma/
     scripts/
@@ -42,6 +42,9 @@ js-updated-final-project-main/
     tsconfig.json
     vercel.json
 
+  docs/
+  reports/
+  scripts/
   docs/
   reports/
   scripts/
@@ -91,7 +94,7 @@ js-updated-final-project-main/
 Vercel settings:
 
 ```text
-Root Directory: 00000-main/1234-main/js-updated-final-project-main/frontend
+Root Directory: frontend
 Install Command: npm install --legacy-peer-deps
 Build Command: npm run build
 Output Directory: .next
@@ -108,7 +111,7 @@ NEXT_PUBLIC_API_BASE_URL=https://<render-backend-url>.onrender.com
 Render settings:
 
 ```text
-Root Directory: 00000-main/1234-main/js-updated-final-project-main/backend
+Root Directory: backend
 Build Command: npm install --legacy-peer-deps && npm run build
 Start Command: npm run start
 ```

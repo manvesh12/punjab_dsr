@@ -12,13 +12,7 @@ This is a demo/free-hosting setup, not a permanent government production setup. 
 
 ## 1. Repository Path
 
-Use this project root:
-
-```text
-00000-main/1234-main/js-updated-final-project-main
-```
-
-The application is a Node monorepo:
+The application is now organized directly at the repository root:
 
 ```text
 backend    Express + Prisma API
@@ -58,7 +52,7 @@ Recommended settings:
 
 ```text
 Repository: manvesh12/punjab_dsr
-Root Directory: 00000-main/1234-main/js-updated-final-project-main/backend
+Root Directory: backend
 Runtime: Node
 Build Command: npm install --legacy-peer-deps && npm run build
 Start Command: npm run start
@@ -101,7 +95,7 @@ Recommended settings:
 
 ```text
 Framework Preset: Next.js
-Root Directory: 00000-main/1234-main/js-updated-final-project-main/frontend
+Root Directory: frontend
 Install Command: npm install --legacy-peer-deps
 Build Command: npm run build
 Output Directory: .next
