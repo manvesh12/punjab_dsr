@@ -5558,6 +5558,10 @@ async function doInvitedRegister() {
   const phone = mobileNumber.startsWith('+') ? mobileNumber : '+91' + mobileNumber;
 
   try {
+    if (typeof firebase === 'undefined') {
+      throw new Error('Firebase failed to load. Please disable any adblockers or check your connection and refresh the page.');
+    }
+    
     if (!window.recaptchaVerifier) {
       window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
         'size': 'invisible'
