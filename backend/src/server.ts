@@ -17,6 +17,7 @@ import { reportsRouter } from "./routes/reports.js";
 import { usersRouter } from "./routes/users.js";
 import { modelDsrRouter } from "./routes/model-dsr.js";
 import { replenishmentRouter } from "./routes/replenishment.js";
+import { settingsRouter } from "./routes/settings.js";
 
 const app = express();
 app.set("trust proxy", 1);
@@ -68,6 +69,7 @@ app.use("/api/projects", requireAuth, auditMutations, projectsRouter);
 app.use("/api/reports", requireAuth, auditMutations, reportsRouter);
 app.use("/api/users", requireAuth, auditMutations, usersRouter);
 app.use("/api/model-dsrs", requireAuth, auditMutations, modelDsrRouter);
+app.use("/api/settings", settingsRouter);
 app.use("/api", requireAuth, auditMutations, replenishmentRouter);
 app.use("/api", requireAuth, uploadLimiter, auditMutations, pdfRouter);
 

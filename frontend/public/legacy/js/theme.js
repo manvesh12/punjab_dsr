@@ -49,9 +49,30 @@ function updateDarkModeIcon() {
   });
   if (window.lucide) window.lucide.createIcons();
 }
+async function fetchNoticeSettings() {
+  try {
+    const res = await fetch('/api/settings/noticeText');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.value) {
+        updateNoticeUI(data.value);
+      }
+    }
+  } catch (e) {
+    console.error('Error fetching notice settings:', e);
+  }
+}
+
+function updateNoticeUI(text) {
+  document.querySelectorAll('.dash-notice-marquee-text span, [data-i18n="noticeText"]').forEach(el => {
+    el.innerText = text;
+  });
+}
+
 /* Apply before first paint when loaded from <head> */
 initThemeFromStorage();
 document.addEventListener('DOMContentLoaded', () => {
   initThemeFromStorage();
   updateDarkModeIcon();
+  fetchNoticeSettings();
 });

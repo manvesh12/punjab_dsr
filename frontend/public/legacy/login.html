@@ -6123,7 +6123,8 @@
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     if(document.getElementById('dash-interactive-map')) {
-        var map = L.map('dash-interactive-map').setView([31.1471, 75.3412], 7);
+        window.dashboardMap = L.map('dash-interactive-map').setView([31.1471, 75.3412], 7);
+        var map = window.dashboardMap;
         
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
             attribution: 'Tiles &copy; Esri'
@@ -6154,6 +6155,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
                 // Restrict the map entirely to Punjab
                 var bounds = geoLayer.getBounds();
+                window.dashboardMapBounds = bounds;
                 map.fitBounds(bounds);
                 map.setMaxBounds(bounds.pad(0.1));
                 

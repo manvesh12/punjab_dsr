@@ -1917,6 +1917,15 @@ function showView(id, btn, push = true) {
           mainContent.scrollTop = 0;
           mainContent.scrollLeft = 0;
         }
+        setTimeout(() => {
+          if (window.dashboardMap) {
+            window.dashboardMap.invalidateSize();
+            if (window.dashboardMapBounds) {
+              window.dashboardMap.fitBounds(window.dashboardMapBounds);
+            }
+          }
+          window.dispatchEvent(new Event('resize'));
+        }, 100);
       } else {
         el.scrollIntoView({ behavior: 'auto', block: 'start', inline: 'nearest' });
         if (mainContent) mainContent.scrollLeft = 0;
