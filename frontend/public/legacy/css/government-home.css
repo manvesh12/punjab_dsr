@@ -144,3 +144,5 @@ footer { background: #0f172a; color: #cbd5e1; }
 }
 
 .sensrs-logo-right { height: 75px !important; object-fit: contain; border-radius: 50%; border: 2px solid rgba(0,0,0,0.1); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+
+.iit-logo-left { height: 65px !important; object-fit: contain; }
