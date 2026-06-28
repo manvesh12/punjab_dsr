@@ -255,34 +255,33 @@ window.showView = function(viewId, caller) {
     initReplenishmentView();
   }
 };
-w i n d o w . s e l e c t R e p l e n i s h m e n t P r o j e c t   =   f u n c t i o n ( p r o j e c t I d )   { 
-     i f   ( ! p r o j e c t I d )   r e t u r n ; 
-     c o n s t   p r o j   =   ( w i n d o w . _ r e p l e n i s h m e n t P r o j e c t s C a c h e   | |   [ ] ) . f i n d ( p   = >   p . i d   = = =   p r o j e c t I d ) ; 
-     i f   ( p r o j )   { 
-         w i n d o w . c u r r e n t P r o j e c t   =   p r o j ; 
-         / /   S h o w   t h e   D S R   S e c t i o n s   n a v   i n   s i d e b a r   i f   i t ' s   h i d d e n 
-         c o n s t   r e p o r t N a v   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' r e p o r t - n a v ' ) ; 
-         i f   ( r e p o r t N a v )   r e p o r t N a v . s t y l e . d i s p l a y   =   ' b l o c k ' ; 
-         
-         / /   A l s o   s h o w   a n n e x u r e   n a v 
-         c o n s t   a n n e x u r e N a v   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' a n n e x u r e - n a v ' ) ; 
-         i f   ( a n n e x u r e N a v )   a n n e x u r e N a v . s t y l e . d i s p l a y   =   ' b l o c k ' ; 
- 
-         i n i t R e p l e n i s h m e n t V i e w ( ) ; 
-     } 
- } ;  
- 
- i f   ( w i n d o w . l o c a t i o n . h a s h   = = =   ' # r e p l e n i s h m e n t '   | |   w i n d o w . c u r r e n t V i e w I d   = = =   ' r e p l e n i s h m e n t ' )   { 
-     s e t T i m e o u t ( ( )   = >   i n i t R e p l e n i s h m e n t V i e w ( ) ,   1 0 0 ) ; 
- }  
- 
- / /   S y n c   s i d e b a r   v i s i b i l i t y 
- c o n s t   a n n e x u r e N a v   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' a n n e x u r e - n a v ' ) ; 
- c o n s t   r e p l e n i s h m e n t N a v   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' r e p l e n i s h m e n t - n a v ' ) ; 
- i f   ( a n n e x u r e N a v   & &   r e p l e n i s h m e n t N a v )   { 
-     r e p l e n i s h m e n t N a v . s t y l e . d i s p l a y   =   a n n e x u r e N a v . s t y l e . d i s p l a y ; 
-     n e w   M u t a t i o n O b s e r v e r ( ( )   = >   { 
-         r e p l e n i s h m e n t N a v . s t y l e . d i s p l a y   =   a n n e x u r e N a v . s t y l e . d i s p l a y ; 
-     } ) . o b s e r v e ( a n n e x u r e N a v ,   {   a t t r i b u t e s :   t r u e ,   a t t r i b u t e F i l t e r :   [ ' s t y l e ' ]   } ) ; 
- }  
- 
+window.selectReplenishmentProject = function(projectId) {
+  if (!projectId) return;
+  const proj = (window._replenishmentProjectsCache || []).find(p => p.id === projectId);
+  if (proj) {
+    window.currentProject = proj;
+    // Show the DSR Sections nav in sidebar if it's hidden
+    const reportNav = document.getElementById('report-nav');
+    if (reportNav) reportNav.style.display = 'block';
+    
+    // Also show annexure nav
+    const annexureNav = document.getElementById('annexure-nav');
+    if (annexureNav) annexureNav.style.display = 'block';
+
+    initReplenishmentView();
+  }
+};
+
+if (window.location.hash === '#replenishment' || window.currentViewId === 'replenishment') {
+  setTimeout(() => initReplenishmentView(), 100);
+}
+
+// Sync sidebar visibility
+const annexureNav = document.getElementById('annexure-nav');
+const replenishmentNav = document.getElementById('replenishment-nav');
+if (annexureNav && replenishmentNav) {
+  replenishmentNav.style.display = annexureNav.style.display;
+  new MutationObserver(() => {
+    replenishmentNav.style.display = annexureNav.style.display;
+  }).observe(annexureNav, { attributes: true, attributeFilter: ['style'] });
+}
