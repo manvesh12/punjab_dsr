@@ -172,7 +172,7 @@ model DsrFile {
 
 model ModelDsr {
   id          String           @id @default(uuid())
-  modelId     String           @unique // e.g. MODEL-DSR-0001
+  modelId     String?          @unique // e.g. MODEL-DSR-0001
   title       String           @unique
   description String?
   category    String?
