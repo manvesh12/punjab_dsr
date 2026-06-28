@@ -27,7 +27,7 @@ function initReplenishmentView() {
     return;
   }
   
-  // Render main option cards
+  // Show the main option cards
   window.showReplenishmentOptions(editorContainer);
 }
 
@@ -292,6 +292,8 @@ function downloadCustomReportPDFDirect(reportId) {
   }
   
   const allActiveIds = [...checkedIds];
+  const hasFm = checkedIds.some(id => id.startsWith('fm-'));
+  if (hasFm && !allActiveIds.includes('front-matter')) allActiveIds.push('front-matter');
   const hasChapter = checkedIds.some(id => id.startsWith('chapter-'));
   if (hasChapter && !allActiveIds.includes('chapters')) allActiveIds.push('chapters');
   const hasPlate = checkedIds.some(id => id.startsWith('plate-'));
@@ -358,7 +360,7 @@ function hydrateCheckboxStates(checkedIds) {
     if (chk) chk.checked = true;
   });
   
-  ['chapters', 'plates'].forEach(parentId => {
+  ['front-matter', 'chapters', 'plates'].forEach(parentId => {
     const parentChk = document.getElementById(`chk-${parentId}`);
     if (!parentChk) return;
     
@@ -417,7 +419,22 @@ function onSubCheckboxChange(parentId, reportName, reportId) {
 function renderCustomReportGenerator(container, report) {
   const reportName = report.name;
   const sections = [
-    { id: 'front-matter', name: 'Front Matter (Title, Preface, Acknowledgement)', type: 'DSR' },
+    { 
+      id: 'front-matter', 
+      name: 'Front Matter', 
+      type: 'DSR', 
+      hasSubsections: true,
+      subsections: [
+        { id: 'fm-cover', name: 'Cover Page' },
+        { id: 'fm-pref', name: 'Preface' },
+        { id: 'fm-ack', name: 'Acknowledgement' },
+        { id: 'fm-cert', name: 'Certificate of Compliance' },
+        { id: 'fm-toc', name: 'Table of Contents' },
+        { id: 'fm-lot', name: 'List of Tables' },
+        { id: 'fm-lof', name: 'List of Figures' },
+        { id: 'fm-abbr', name: 'Abbreviations' }
+      ]
+    },
     { 
       id: 'chapters', 
       name: 'Chapters Outline', 
@@ -538,7 +555,18 @@ function renderCustomReportGenerator(container, report) {
   updateCustomReportPreview(reportName, report.id);
 }
 
+// Debouncer for rendering preview to fix lagging/freezing
+let previewTimeout = null;
 function updateCustomReportPreview(reportName, reportId) {
+  if (previewTimeout) {
+    clearTimeout(previewTimeout);
+  }
+  previewTimeout = setTimeout(() => {
+    realUpdateCustomReportPreview(reportName, reportId);
+  }, 200);
+}
+
+function realUpdateCustomReportPreview(reportName, reportId) {
   const checkboxes = document.querySelectorAll('input[id^="chk-"]:checked');
   const checkedIds = Array.from(checkboxes).map(c => c.value);
   
@@ -602,86 +630,293 @@ function cloneSourceWithValues(source) {
 function compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds) {
   const district = (window.S && S.frontMatter && S.frontMatter.district) || 'Jalandhar';
   const year = (window.S && S.frontMatter && S.frontMatter.year) || '2025-26';
+  const title = document.getElementById('fm-title')?.value || (S.frontMatter && S.frontMatter.title) || 'District Survey Report for Sand Mining';
+  const state = document.getElementById('fm-state')?.value || (S.frontMatter && S.frontMatter.state) || 'Punjab';
+  const version = document.getElementById('fm-version')?.value || (S.frontMatter && S.frontMatter.version) || 'Final Draft';
+  const preparedBy = document.getElementById('fm-prepared-by')?.value || (S.frontMatter && S.frontMatter.preparedBy) || 'Sub-Divisional Committee, Jalandhar District';
+  const assistedBy = document.getElementById('fm-assisted-by')?.value || (S.frontMatter && S.frontMatter.assistedBy) || 'IIT Ropar';
+  const preface = document.getElementById('fm-preface')?.value || (S.frontMatter && S.frontMatter.preface) || '';
+  const ack = document.getElementById('fm-acknowledgement')?.value || (S.frontMatter && S.frontMatter.acknowledgement) || '';
+
+  // Order checked sections according to sidebar structure
+  const orderedIds = [];
   
+  // 1. Front Matter subsections
+  const fmSubsections = ['fm-cover', 'fm-pref', 'fm-ack', 'fm-cert', 'fm-toc', 'fm-lot', 'fm-lof', 'fm-abbr'];
+  const activeFmSubs = fmSubsections.filter(id => checkedIds.includes(id));
+  if (activeFmSubs.length > 0) {
+    orderedIds.push({ id: 'front-matter', subIds: activeFmSubs });
+  }
+  
+  // 2. Chapters
+  const checkedChapters = (S.chapters || []).filter(ch => checkedIds.includes(`chapter-${ch.id}`));
+  if (checkedChapters.length > 0) {
+    orderedIds.push({ id: 'chapters', subIds: checkedChapters.map(ch => `chapter-${ch.id}`) });
+  }
+  
+  // 3. Plates
+  const checkedPlates = (S.plates || []).filter(pl => checkedIds.includes(`plate-${pl.id}`));
+  if (checkedPlates.length > 0) {
+    orderedIds.push({ id: 'plates', subIds: checkedPlates.map(pl => `plate-${pl.id}`) });
+  }
+  
+  // 4. Graphs
+  if (checkedIds.includes('graphs')) {
+    orderedIds.push({ id: 'graphs' });
+  }
+  
+  // 5. Annexures
+  const annexureIds = ['anx1', 'anx2', 'anx3', 'anx4', 'anx5', 'anx6', 'anx7', 'annexure-b', 'annexure-c', 'annexure-d', 'annexure-e', 'annexure-f', 'annexure-g', 'annexure-h', 'annexure-i', 'annexure-j', 'annexure-k'];
+  annexureIds.forEach(anxId => {
+    if (checkedIds.includes(anxId)) {
+      orderedIds.push({ id: anxId });
+    }
+  });
+
   let combinedContent = '';
-  
-  allActiveIds.forEach(id => {
+
+  orderedIds.forEach(item => {
     let sectionHtml = '';
     
-    if (id === 'front-matter') {
-      const title = document.getElementById('fm-title')?.value || (S.frontMatter && S.frontMatter.title) || 'District Survey Report for Sand Mining';
-      const state = document.getElementById('fm-state')?.value || (S.frontMatter && S.frontMatter.state) || 'Punjab';
-      const version = document.getElementById('fm-version')?.value || (S.frontMatter && S.frontMatter.version) || 'Final Draft';
-      const preparedBy = document.getElementById('fm-prepared-by')?.value || (S.frontMatter && S.frontMatter.preparedBy) || 'Sub-Divisional Committee';
-      const assistedBy = document.getElementById('fm-assisted-by')?.value || (S.frontMatter && S.frontMatter.assistedBy) || '';
-      const preface = document.getElementById('fm-preface')?.value || (S.frontMatter && S.frontMatter.preface) || '';
-      const ack = document.getElementById('fm-acknowledgement')?.value || (S.frontMatter && S.frontMatter.acknowledgement) || '';
-      
-      sectionHtml = `
-        <div class="section-block">
-          <div class="cover-page" style="text-align:center; padding: 40px 0; border-bottom: 2px solid #17324d; margin-bottom: 40px; page-break-after:always;">
-            <h1 style="font-size:28px; margin-bottom:10px;">${title}</h1>
-            <h2 style="font-size:20px; color:#475569; margin-bottom:40px;">District: ${district} | State: ${state}</h2>
-            <div style="margin: 40px 0; font-size:14px; color:#64748b;">
-              <p><strong>Year:</strong> ${year}</p>
-              <p><strong>Version:</strong> ${version}</p>
+    if (item.id === 'front-matter') {
+      item.subIds.forEach(subId => {
+        let subHtml = '';
+        if (subId === 'fm-cover') {
+          const uploaded = S.uploadedPDFs && S.uploadedPDFs['cover'];
+          if (uploaded && uploaded.length) {
+            subHtml = `<div class="cover-page" style="page-break-after:always; text-align:center;">
+              ${uploaded.map(src => `<img src="${src}" style="max-width:100%; height:auto; display:block; margin:0 auto 10px;">`).join('')}
+            </div>`;
+          } else {
+            subHtml = `
+              <div class="cover-page" style="text-align:center; padding: 60px 0; border: 3px double #17324d; margin-bottom: 40px; page-break-after:always; background: #fff; min-height: 800px; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                  <h3 style="font-size:14px; text-transform:uppercase; letter-spacing:2px; color:#64748b; margin-top:20px;">Government of Punjab</h3>
+                  <h1 style="font-size:26px; margin: 30px 0 10px 0; color:#17324d; font-family:'Outfit', sans-serif;">${title}</h1>
+                  <h2 style="font-size:18px; color:#475569; margin: 0 0 40px 0;">District: ${district} | State: ${state}</h2>
+                </div>
+                <div style="margin: 40px 0; font-size:14px; color:#475569;">
+                  <p><strong>Year:</strong> ${year}</p>
+                  <p><strong>Version:</strong> ${version}</p>
+                  <p><strong>Prepared in compliance with EMGSM 2020 Guidelines</strong></p>
+                </div>
+                <div style="margin-bottom:20px; font-size:13px; line-height:1.6; text-align:left; background:#f8fafc; padding:20px; border-radius:8px; border:1px solid #e2e8f0; max-width: 480px; margin-left: auto; margin-right: auto;">
+                  <p style="margin:0 0 4px 0;"><strong>Prepared By:</strong> ${preparedBy}</p>
+                  <p style="margin:0;"><strong>Assisted By:</strong> ${assistedBy}</p>
+                </div>
+              </div>
+            `;
+          }
+        } 
+        else if (subId === 'fm-pref') {
+          const uploaded = S.uploadedPDFs && S.uploadedPDFs['pref'];
+          if (uploaded && uploaded.length) {
+            subHtml = `<div style="page-break-after:always;">
+              <h2 class="section-title">Preface</h2>
+              ${uploaded.map(src => `<img src="${src}" style="max-width:100%; height:auto; display:block; margin:0 auto 10px;">`).join('')}
+            </div>`;
+          } else {
+            subHtml = `
+              <div style="margin-bottom: 40px; page-break-after:always;">
+                <h2 class="section-title">Preface</h2>
+                <p style="font-size:13.5px; line-height:1.7; white-space:pre-wrap; color:#334155;">${preface || 'No preface text available.'}</p>
+              </div>
+            `;
+          }
+        } 
+        else if (subId === 'fm-ack') {
+          subHtml = `
+            <div style="margin-bottom: 40px; page-break-after:always;">
+              <h2 class="section-title">Acknowledgement</h2>
+              <p style="font-size:13.5px; line-height:1.7; white-space:pre-wrap; color:#334155;">${ack || 'No acknowledgement text available.'}</p>
             </div>
-            <div style="margin-top:60px; font-size:13px; line-height:1.6; text-align:left; background:#f8fafc; padding:20px; border-radius:8px; border:1px solid #e2e8f0;">
-              <p><strong>Prepared By:</strong> ${preparedBy}</p>
-              <p><strong>Assisted By:</strong> ${assistedBy}</p>
+          `;
+        } 
+        else if (subId === 'fm-cert') {
+          const uploaded = S.uploadedPDFs && S.uploadedPDFs['cert'];
+          if (uploaded && uploaded.length) {
+            subHtml = `<div style="page-break-after:always;">
+              <h2 class="section-title">Certificate of Compliance</h2>
+              ${uploaded.map(src => `<img src="${src}" style="max-width:100%; height:auto; display:block; margin:0 auto 10px;">`).join('')}
+            </div>`;
+          } else {
+            subHtml = `
+              <div style="margin-bottom: 40px; page-break-after:always;">
+                <h2 class="section-title">Certificate of Compliance</h2>
+                <div style="border: 2px solid #17324d; padding: 30px; border-radius: 8px; background: #fafafa; margin-top: 20px;">
+                  <h3 style="text-align: center; margin-top: 0; text-transform: uppercase; color: #17324d;">Certificate</h3>
+                  <p style="font-size: 14px; line-height: 1.8; color: #334155; margin-bottom: 30px;">
+                    This is to certify that the District Survey Report for Sand Mining for <strong>District ${district}</strong>, State of <strong>${state}</strong> for the year <strong>${year}</strong> has been compiled in strict accordance with the Sustainable Sand Mining Management Guidelines 2016 and the Enforcement & Monitoring Guidelines for Sand Mining (EMGSM) 2020.
+                  </p>
+                  <p style="font-size: 14px; line-height: 1.8; color: #334155; margin-bottom: 40px;">
+                    All geomorphological assessments, mineral reserve calculations, replenishment studies, and environmental safeguards have been verified by the Sub-Divisional Committee.
+                  </p>
+                  <div style="display: flex; justify-content: space-between; margin-top: 60px; font-size: 13px;">
+                    <div>
+                      <p style="margin: 0; font-weight: bold;">Sub-Divisional Magistrate</p>
+                      <p style="margin: 0; color: #64748b;">Committee Chairman</p>
+                    </div>
+                    <div style="text-align: right;">
+                      <p style="margin: 0; font-weight: bold;">Mining Officer</p>
+                      <p style="margin: 0; color: #64748b;">Committee Member Secretary</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+          }
+        } 
+        else if (subId === 'fm-toc') {
+          const uploaded = S.uploadedPDFs && S.uploadedPDFs['toc'];
+          if (uploaded && uploaded.length) {
+            subHtml = `<div style="page-break-after:always;">
+              <h2 class="section-title">Table of Contents</h2>
+              ${uploaded.map(src => `<img src="${src}" style="max-width:100%; height:auto; display:block; margin:0 auto 10px;">`).join('')}
+            </div>`;
+          } else {
+            subHtml = `
+              <div style="margin-bottom: 40px; page-break-after:always;">
+                <h2 class="section-title">Table of Contents</h2>
+                <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 20px;">
+                  <thead>
+                    <tr style="border-bottom: 2px solid #17324d; background: #f8fafc;">
+                      <th style="padding: 10px; text-align: left;">S.No.</th>
+                      <th style="padding: 10px; text-align: left;">Section Description</th>
+                      <th style="padding: 10px; text-align: right;">Page Reference</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 8px 10px;">1</td><td style="padding: 8px 10px; font-weight: bold;">Front Matter</td><td style="padding: 8px 10px; text-align: right;">i-v</td></tr>
+                    <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 8px 10px;">2</td><td style="padding: 8px 10px; font-weight: bold;">Report Chapters Outline</td><td style="padding: 8px 10px; text-align: right;">1-45</td></tr>
+                    <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 8px 10px;">3</td><td style="padding: 8px 10px; font-weight: bold;">Plate Section</td><td style="padding: 8px 10px; text-align: right;">46-55</td></tr>
+                    <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 8px 10px;">4</td><td style="padding: 8px 10px; font-weight: bold;">Cross Section Elevation Graphs</td><td style="padding: 8px 10px; text-align: right;">56-62</td></tr>
+                    <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 8px 10px;">5</td><td style="padding: 8px 10px; font-weight: bold;">Annexures (I to VII & B to K)</td><td style="padding: 8px 10px; text-align: right;">63-120</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            `;
+          }
+        } 
+        else if (subId === 'fm-lot') {
+          subHtml = `
+            <div style="margin-bottom: 40px; page-break-after:always;">
+              <h2 class="section-title">List of Tables</h2>
+              <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 20px;">
+                <thead>
+                  <tr style="border-bottom: 2px solid #17324d; background: #f8fafc;">
+                    <th style="padding: 10px; text-align: left;">Table No.</th>
+                    <th style="padding: 10px; text-align: left;">Table Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 8px 10px;">Table 1.1</td><td style="padding: 8px 10px;">Temperature, Humidity & Climate Trends</td></tr>
+                  <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 8px 10px;">Table 2.1</td><td style="padding: 8px 10px;">Geological Succession of Jalandhar District</td></tr>
+                  <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 8px 10px;">Table 3.1</td><td style="padding: 8px 10px;">Active Mining Leases & Production Capacity</td></tr>
+                  <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 8px 10px;">Table 4.1</td><td style="padding: 8px 10px;">Cross Section Elevation & Distance Readings</td></tr>
+                  <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 8px 10px;">Table 5.1</td><td style="padding: 8px 10px;">Replenishment Assessment Data & Safe Yield</td></tr>
+                </tbody>
+              </table>
             </div>
-          </div>
-          
-          <div style="margin-bottom: 40px; page-break-after:always;">
-            <h2 class="section-title">Preface</h2>
-            <p style="font-size:14px; line-height:1.6; white-space:pre-wrap;">${preface || 'No preface text available.'}</p>
-          </div>
-          
-          <div style="margin-bottom: 40px;">
-            <h2 class="section-title">Acknowledgement</h2>
-            <p style="font-size:14px; line-height:1.6; white-space:pre-wrap;">${ack || 'No acknowledgement text available.'}</p>
-          </div>
-        </div>
-      `;
-    } 
-    else if (id === 'chapters') {
-      const checkedChapters = (S.chapters || []).filter(ch => checkedIds.includes(`chapter-${ch.id}`));
-      if (checkedChapters.length > 0) {
-        const chaptersListHtml = checkedChapters.map(ch => `
-          <div style="margin-bottom:20px; padding:15px; border:1px solid #e2e8f0; border-radius:8px; background:#f8fafc;">
-            <h4 style="margin:0 0 6px; font-size:13.5px; color:#1e293b; font-weight:700;">${ch.name}</h4>
-            <p style="margin:0; font-size:12px; color:#475569; line-height:1.5;">${ch.summary || 'Summary not defined.'}</p>
-          </div>
-        `).join('');
+          `;
+        } 
+        else if (subId === 'fm-lof') {
+          subHtml = `
+            <div style="margin-bottom: 40px; page-break-after:always;">
+              <h2 class="section-title">List of Figures</h2>
+              <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 20px;">
+                <thead>
+                  <tr style="border-bottom: 2px solid #17324d; background: #f8fafc;">
+                    <th style="padding: 10px; text-align: left;">Figure No.</th>
+                    <th style="padding: 10px; text-align: left;">Figure/Map Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 8px 10px;">Figure 1.1</td><td style="padding: 8px 10px;">Location Map of District ${district}</td></tr>
+                  <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 8px 10px;">Figure 2.1</td><td style="padding: 8px 10px;">Drainage & River System Map</td></tr>
+                  <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 8px 10px;">Figure 3.1</td><td style="padding: 8px 10px;">Geological and Soil Classification Map</td></tr>
+                  <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 8px 10px;">Figure 4.1</td><td style="padding: 8px 10px;">DGPS Survey & Cluster Boundary Map</td></tr>
+                  <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 8px 10px;">Figure 5.1</td><td style="padding: 8px 10px;">Cross-Section Elevation Graphs (Pre & Post-Monsoon)</td></tr>
+                </tbody>
+              </table>
+            </div>
+          `;
+        } 
+        else if (subId === 'fm-abbr') {
+          subHtml = `
+            <div style="margin-bottom: 40px; page-break-after:always;">
+              <h2 class="section-title">Abbreviations</h2>
+              <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 20px;">
+                <thead>
+                  <tr style="border-bottom: 2px solid #17324d; background: #f8fafc;">
+                    <th style="padding: 10px; text-align: left; width: 25%;">Abbreviation</th>
+                    <th style="padding: 10px; text-align: left;">Full Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 8px 10px; font-weight:bold;">DSR</td><td style="padding: 8px 10px;">District Survey Report</td></tr>
+                  <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 8px 10px; font-weight:bold;">EMGSM</td><td style="padding: 8px 10px;">Enforcement and Monitoring Guidelines for Sand Mining</td></tr>
+                  <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 8px 10px; font-weight:bold;">CORS</td><td style="padding: 8px 10px;">Continuously Operating Reference Stations</td></tr>
+                  <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 8px 10px; font-weight:bold;">DGPS</td><td style="padding: 8px 10px;">Differential Global Positioning System</td></tr>
+                  <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 8px 10px; font-weight:bold;">MoEFCC</td><td style="padding: 8px 10px;">Ministry of Environment, Forest and Climate Change</td></tr>
+                  <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 8px 10px; font-weight:bold;">SEIAA</td><td style="padding: 8px 10px;">State Level Environment Impact Assessment Authority</td></tr>
+                </tbody>
+              </table>
+            </div>
+          `;
+        }
         
-        sectionHtml = `
+        combinedContent += subHtml;
+      });
+    }
+    else if (item.id === 'chapters') {
+      const activeChapters = (S.chapters || []).filter(ch => item.subIds.includes(`chapter-${ch.id}`));
+      activeChapters.forEach((ch, idx) => {
+        const chapterNo = S.chapters.indexOf(ch) + 1;
+        const uploaded = S.chapterPDFs && S.chapterPDFs[ch.id];
+        let chContentHtml = '';
+        if (uploaded && uploaded.length) {
+          chContentHtml = `
+            <div style="display:flex; flex-direction:column; gap:10px; margin-top:12px;">
+              ${uploaded.map(src => `<img src="${src}" style="max-width:100%; height:auto; border:1px solid #cbd5e1; border-radius:4px; display:block; margin:0 auto;">`).join('')}
+            </div>
+          `;
+        }
+        
+        sectionHtml += `
           <div class="section-block">
-            <h2 class="section-title">Report Chapters Outline</h2>
-            <p style="font-size:12.5px; color:#64748b; margin-bottom:15px;">headings and summaries as per EMGSM 2020 guidelines</p>
-            ${chaptersListHtml}
+            <h2 class="section-title">Chapter ${chapterNo}: ${ch.name}</h2>
+            <p style="font-size:13.5px; line-height:1.6; color:#334155; white-space:pre-wrap; margin-bottom:12px;">${ch.summary || ''}</p>
+            ${chContentHtml}
           </div>
         `;
-      }
-    } 
-    else if (id === 'plates') {
-      const checkedPlates = (S.plates || []).filter(pl => checkedIds.includes(`plate-${pl.id}`));
-      if (checkedPlates.length > 0) {
-        const platesListHtml = checkedPlates.map(pl => `
-          <div style="margin-bottom:15px; padding:12px; border:1px solid #e2e8f0; border-radius:6px; background:#f8fafc;">
-            <h4 style="margin:0 0 4px; font-size:13px; color:#1e293b;">${pl.name}</h4>
-            <p style="margin:0; font-size:11.5px; color:#475569;">${pl.summary || 'Summary not defined.'}</p>
-          </div>
-        `).join('');
+      });
+      combinedContent += sectionHtml;
+    }
+    else if (item.id === 'plates') {
+      const activePlates = (S.plates || []).filter(pl => item.subIds.includes(`plate-${pl.id}`));
+      activePlates.forEach((pl, idx) => {
+        const plateIndex = S.plates.indexOf(pl) + 1;
+        const uploaded = pl.pages;
+        let plateContentHtml = '';
+        if (uploaded && uploaded.length) {
+          plateContentHtml = `
+            <div style="display:flex; flex-direction:column; gap:10px; margin-top:12px;">
+              ${uploaded.map(src => `<img src="${src}" style="max-width:100%; height:auto; border:1px solid #cbd5e1; border-radius:4px; display:block; margin:0 auto;">`).join('')}
+            </div>
+          `;
+        }
         
-        sectionHtml = `
+        sectionHtml += `
           <div class="section-block">
-            <h2 class="section-title">Report Plates Section</h2>
-            ${platesListHtml}
+            <h2 class="section-title">Plate P${plateIndex}: ${pl.name}</h2>
+            <p style="font-size:13.5px; line-height:1.6; color:#334155; white-space:pre-wrap; margin-bottom:12px;">${pl.summary || ''}</p>
+            ${plateContentHtml}
           </div>
         `;
-      }
-    } 
-    else if (id === 'graphs') {
+      });
+      combinedContent += sectionHtml;
+    }
+    else if (item.id === 'graphs') {
       const graphsRows = (S.graphs || []).map(g => `
         <tr>
           <td><strong>${g.name}</strong></td>
@@ -715,20 +950,32 @@ function compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds) {
           </table>
         </div>
       `;
-    } 
-    else if (id.startsWith('chapter-') || id.startsWith('plate-')) {
-      return;
+      combinedContent += sectionHtml;
     }
     else {
-      const source = document.getElementById(`view-${id}`);
+      const source = document.getElementById(`view-${item.id}`);
       if (source) {
         const cleanedClone = cloneSourceWithValues(source);
-        const clone = window.pdfPreview.cleanupAnnexurePreviewClone(cleanedClone, id);
+        const clone = window.pdfPreview.cleanupAnnexurePreviewClone(cleanedClone, item.id);
+        
+        let attachmentHtml = '';
+        if (typeof renderAnnexureAttachmentPreview === 'function') {
+          attachmentHtml = renderAnnexureAttachmentPreview(item.id);
+        }
+        
+        const infoEl = clone.querySelector(`#${item.id}-attachment-info`);
+        if (infoEl) {
+          infoEl.innerHTML = attachmentHtml || '';
+        }
         
         clone.querySelectorAll('.upload-zone, button, input[type="file"], select, label:has(input[type="file"]), .modal').forEach(el => el.remove());
         
-        const bodyHtml = clone.innerHTML.trim() || '<p class="empty">No annexure data entered yet.</p>';
-        const title = window.pdfPreview.SECTION_TITLES[id] || id.toUpperCase();
+        let bodyHtml = clone.innerHTML.trim() || '<p class="empty">No annexure data entered yet.</p>';
+        if (attachmentHtml && (!infoEl || !bodyHtml.includes(attachmentHtml))) {
+          bodyHtml += attachmentHtml;
+        }
+        
+        const title = window.pdfPreview.SECTION_TITLES[item.id] || item.id.toUpperCase();
         
         sectionHtml = `
           <div class="section-block">
@@ -739,16 +986,15 @@ function compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds) {
       } else {
         sectionHtml = `
           <div class="section-block">
-            <h2 class="section-title">${id.toUpperCase()}</h2>
+            <h2 class="section-title">${item.id.toUpperCase()}</h2>
             <p class="empty">Section view element not found. Please load the section page in the portal once to initialize it.</p>
           </div>
         `;
       }
+      combinedContent += sectionHtml;
     }
-    
-    combinedContent += sectionHtml;
   });
-  
+
   return `<!doctype html>
     <html>
       <head>
@@ -787,7 +1033,9 @@ function compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds) {
           .field-value{display:inline-block;min-width:80px;padding:4px 6px;border-bottom:1px solid #cbd5e1;color:#111827;}
           .editable-title{font-weight:600;}
           .empty{padding:24px;border:1px dashed #cbd5e1;border-radius:8px;text-align:center;}
-          img{max-width:100%;height:auto;}
+          img{max-width:100%;height:auto;display:block;margin:0 auto 10px;}
+          .annexure-uploaded-pages-simple { display: flex; flex-direction: column; gap: 20px; margin-top: 20px; }
+          .annexure-uploaded-pages-simple img { max-width: 100%; height: auto; display: block; margin: 0 auto; }
           
           /* Flatten form elements for flat text printing */
           input, textarea, select {
@@ -822,19 +1070,46 @@ function compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds) {
 }
 
 function downloadCustomReportPDF(reportName, reportId) {
-  const iframe = document.getElementById('custom-report-preview-iframe');
-  if (!iframe) return;
-  const doc = iframe.contentWindow || iframe.contentDocument;
-  const content = doc.document || doc;
-  const element = content.body;
+  const reports = loadLocalReports();
+  const report = reports.find(r => r.id === reportId);
+  const checkedIds = report ? (report.sections || []) : [];
+  
+  if (checkedIds.length === 0) {
+    const checkboxes = document.querySelectorAll('input[id^="chk-"]:checked');
+    checkedIds.push(...Array.from(checkboxes).map(c => c.value));
+  }
+  
+  if (checkedIds.length === 0) {
+    toast("No sections selected to download.", "error");
+    return;
+  }
+  
+  const allActiveIds = [...checkedIds];
+  const hasFm = checkedIds.some(id => id.startsWith('fm-'));
+  if (hasFm && !allActiveIds.includes('front-matter')) allActiveIds.push('front-matter');
+  const hasChapter = checkedIds.some(id => id.startsWith('chapter-'));
+  if (hasChapter && !allActiveIds.includes('chapters')) allActiveIds.push('chapters');
+  const hasPlate = checkedIds.some(id => id.startsWith('plate-'));
+  if (hasPlate && !allActiveIds.includes('plates')) allActiveIds.push('plates');
+
+  const html = compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds);
+  
+  const tempDiv = document.createElement('div');
+  tempDiv.style.position = 'absolute';
+  tempDiv.style.left = '-9999px';
+  tempDiv.style.top = '-9999px';
+  tempDiv.innerHTML = html;
+  document.body.appendChild(tempDiv);
   
   if (typeof html2pdf === 'undefined') {
     toast('Preparing PDF compilation tools...', 'info');
     if (typeof ensurePortalVendors === 'function') {
       ensurePortalVendors(['html2pdf', 'pdfjs']).then(() => {
+        document.body.removeChild(tempDiv);
         downloadCustomReportPDF(reportName, reportId);
       }).catch(() => {
-        toast('PDF tools could not be loaded. Please refresh and try again.', 'error');
+        document.body.removeChild(tempDiv);
+        toast('PDF tools failed to load.', 'error');
       });
     }
     return;
@@ -849,10 +1124,21 @@ function downloadCustomReportPDF(reportName, reportId) {
   };
   
   toast('Generating replenishment report PDF...', 'info');
-  html2pdf().set(opt).from(element).save().then(() => {
+  html2pdf().set(opt).from(tempDiv).save().then(() => {
     toast('Replenishment Report PDF downloaded successfully!', 'success');
+    document.body.removeChild(tempDiv);
   }).catch(err => {
     console.error(err);
     toast('PDF generation failed.', 'error');
+    document.body.removeChild(tempDiv);
   });
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
