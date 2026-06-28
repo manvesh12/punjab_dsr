@@ -2503,7 +2503,7 @@ html.dark .dash-notice-marquee-text, html.dark .dash-notice-marquee-text span {
 
 
 body:not(.view-dashboard-active):not(.view-projects-active) {
-  --topbar-h: 238px !important;
+  --topbar-h: 272px !important;
 }
 body:not(.view-dashboard-active):not(.view-projects-active) .topbar.dash-global-topbar {
   top: 0 !important;
@@ -2754,7 +2754,7 @@ html.dark .dash-global-topbar .dash-btn-new-project svg {
 }
 @media (max-width: 1180px) {
   body:not(.view-dashboard-active):not(.view-projects-active) {
-    --topbar-h: 290px !important;
+    --topbar-h: 324px !important;
   }
   body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar .dash-gov-brand-row,
   body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar .dash-gov-menu-bar,
@@ -2772,7 +2772,7 @@ html.dark .dash-global-topbar .dash-btn-new-project svg {
 }
 @media (max-width: 760px) {
   body:not(.view-dashboard-active):not(.view-projects-active) {
-    --topbar-h: 390px !important;
+    --topbar-h: 424px !important;
   }
   body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar .dash-switcher-bar,
   body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar .dash-gov-utility-strip,

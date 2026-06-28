@@ -3063,7 +3063,7 @@ html.dark .reviewer-notes-footer {
 
 /* Dashboard-style global topbar for every non-dashboard/non-project app view */
 body:not(.view-dashboard-active):not(.view-projects-active) {
-  --topbar-h: 238px !important;
+  --topbar-h: 272px !important;
 }
 
 body:not(.view-dashboard-active):not(.view-projects-active) .topbar.dash-global-topbar {
@@ -3272,7 +3272,7 @@ html.dark body:not(.view-dashboard-active):not(.view-projects-active) .dash-glob
 
 @media (max-width: 1180px) {
   body:not(.view-dashboard-active):not(.view-projects-active) {
-    --topbar-h: 290px !important;
+    --topbar-h: 324px !important;
   }
 
   body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar .dash-gov-brand-row,
@@ -3294,7 +3294,7 @@ html.dark body:not(.view-dashboard-active):not(.view-projects-active) .dash-glob
 
 @media (max-width: 760px) {
   body:not(.view-dashboard-active):not(.view-projects-active) {
-    --topbar-h: 390px !important;
+    --topbar-h: 424px !important;
   }
 
   body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar .dash-switcher-bar,
