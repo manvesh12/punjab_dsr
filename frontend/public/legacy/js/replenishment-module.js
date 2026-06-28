@@ -426,13 +426,10 @@ function renderCustomReportGenerator(container, report) {
       hasSubsections: true,
       subsections: [
         { id: 'fm-cover', name: 'Cover Page' },
+        { id: 'fm-toc', name: 'Content Page' },
         { id: 'fm-pref', name: 'Preface' },
         { id: 'fm-ack', name: 'Acknowledgement' },
-        { id: 'fm-cert', name: 'Certificate of Compliance' },
-        { id: 'fm-toc', name: 'Table of Contents' },
-        { id: 'fm-lot', name: 'List of Tables' },
-        { id: 'fm-lof', name: 'List of Figures' },
-        { id: 'fm-abbr', name: 'Abbreviations' }
+        { id: 'fm-cert', name: 'Certificate of Compliance' }
       ]
     },
     { 
@@ -642,7 +639,7 @@ function compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds) {
   const orderedIds = [];
   
   // 1. Front Matter subsections
-  const fmSubsections = ['fm-cover', 'fm-pref', 'fm-ack', 'fm-cert', 'fm-toc', 'fm-lot', 'fm-lof', 'fm-abbr'];
+  const fmSubsections = ['fm-cover', 'fm-toc', 'fm-pref', 'fm-ack', 'fm-cert'];
   const activeFmSubs = fmSubsections.filter(id => checkedIds.includes(id));
   if (activeFmSubs.length > 0) {
     orderedIds.push({ id: 'front-matter', subIds: activeFmSubs });
