@@ -291,62 +291,7 @@ function downloadCustomReportPDFDirect(reportId) {
     return;
   }
   
-  const allActiveIds = [...checkedIds];
-  const hasFm = checkedIds.some(id => id.startsWith('fm-'));
-  if (hasFm && !allActiveIds.includes('front-matter')) allActiveIds.push('front-matter');
-  const hasChapter = checkedIds.some(id => id.startsWith('chapter-'));
-  if (hasChapter && !allActiveIds.includes('chapters')) allActiveIds.push('chapters');
-  const hasPlate = checkedIds.some(id => id.startsWith('plate-'));
-  if (hasPlate && !allActiveIds.includes('plates')) allActiveIds.push('plates');
-
-  const html = compileSelectedSectionsHtml(report.name, checkedIds, allActiveIds);
-  
-  if (typeof html2pdf === 'undefined') {
-    toast('Preparing PDF compilation tools...', 'info');
-    if (typeof ensurePortalVendors === 'function') {
-      ensurePortalVendors(['html2pdf', 'pdfjs']).then(() => {
-        downloadCustomReportPDFDirect(reportId);
-      }).catch(() => {
-        toast('PDF tools failed to load.', 'error');
-      });
-    }
-    return;
-  }
-  
-  const tempIframe = document.createElement('iframe');
-  tempIframe.style.position = 'absolute';
-  tempIframe.style.left = '-9999px';
-  tempIframe.style.top = '0';
-  tempIframe.style.width = '1024px';
-  tempIframe.style.height = '768px';
-  tempIframe.style.border = 'none';
-  document.body.appendChild(tempIframe);
-  
-  tempIframe.srcdoc = html;
-  
-  toast('Compiling and rendering PDF pages...', 'info');
-  
-  tempIframe.onload = function() {
-    setTimeout(() => {
-      const opt = {
-        margin: 10,
-        filename: `${report.name.replace(/\s+/g, '_')}_Replenishment_Report.pdf`,
-        image: { type: 'jpeg', quality: 0.95 },
-        html2canvas: { scale: 1.5, useCORS: true, logging: false },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['css', 'legacy'] }
-      };
-      
-      html2pdf().set(opt).from(tempIframe.contentWindow.document.body).save().then(() => {
-        toast('Replenishment Report PDF downloaded successfully!', 'success');
-        document.body.removeChild(tempIframe);
-      }).catch(err => {
-        console.error(err);
-        toast('PDF generation failed.', 'error');
-        document.body.removeChild(tempIframe);
-      });
-    }, 800);
-  };
+  generateReplenishmentPDF(report.name, checkedIds);
 }
 
 function saveReportSelection(reportId) {
@@ -1084,7 +1029,58 @@ function downloadCustomReportPDF(reportName, reportId) {
     checkedIds.push(...Array.from(checkboxes).map(c => c.value));
   }
   
-  if (checkedIds.length === 0) {
+  generateReplenishmentPDF(reportName, checkedIds);
+}
+
+function showPdfProgressToast(message) {
+  let loader = document.getElementById('pdf-loader-overlay');
+  if (!loader) {
+    loader = document.createElement('div');
+    loader.id = 'pdf-loader-overlay';
+    loader.style.position = 'fixed';
+    loader.style.left = '0';
+    loader.style.top = '0';
+    loader.style.width = '100%';
+    loader.style.height = '100%';
+    loader.style.backgroundColor = 'rgba(15, 23, 42, 0.75)';
+    loader.style.backdropFilter = 'blur(5px)';
+    loader.style.zIndex = '999999';
+    loader.style.display = 'flex';
+    loader.style.flexDirection = 'column';
+    loader.style.justifyContent = 'center';
+    loader.style.alignItems = 'center';
+    loader.style.color = '#ffffff';
+    loader.style.fontFamily = 'system-ui, sans-serif';
+    
+    loader.innerHTML = `
+      <div style="background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15); text-align: center; color: #1e293b; max-width: 320px; width: 90%;">
+        <div style="border: 4px solid #f1f5f9; border-top: 4px solid #f59e0b; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 15px auto;"></div>
+        <div id="pdf-loader-status" style="font-weight: 700; font-size: 15px; margin-bottom: 5px; color: #1e293b;">Compiling Report</div>
+        <div id="pdf-loader-sub" style="font-size: 12px; color: #64748b;">Please wait while we assemble your document...</div>
+      </div>
+      <style>
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      </style>
+    `;
+    document.body.appendChild(loader);
+  }
+  
+  const statusEl = loader.querySelector('#pdf-loader-status');
+  if (statusEl) statusEl.textContent = message;
+}
+
+function hidePdfProgressToast() {
+  const loader = document.getElementById('pdf-loader-overlay');
+  if (loader) {
+    loader.remove();
+  }
+}
+
+async function generateReplenishmentPDF(reportName, checkedIds) {
+  if (!checkedIds || checkedIds.length === 0) {
     toast("No sections selected to download.", "error");
     return;
   }
@@ -1097,54 +1093,199 @@ function downloadCustomReportPDF(reportName, reportId) {
   const hasPlate = checkedIds.some(id => id.startsWith('plate-'));
   if (hasPlate && !allActiveIds.includes('plates')) allActiveIds.push('plates');
 
-  const html = compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds);
-  
-  if (typeof html2pdf === 'undefined') {
-    toast('Preparing PDF compilation tools...', 'info');
-    if (typeof ensurePortalVendors === 'function') {
-      ensurePortalVendors(['html2pdf', 'pdfjs']).then(() => {
-        downloadCustomReportPDF(reportName, reportId);
-      }).catch(() => {
-        toast('PDF tools failed to load.', 'error');
-      });
+  // 1. Ensure jspdf and html2canvas are available
+  if (typeof jspdf === 'undefined' || typeof html2canvas === 'undefined') {
+    showPdfProgressToast('Loading PDF compiler tools...');
+    try {
+      await ensurePortalVendors(['html2pdf', 'pdfjs']);
+      hidePdfProgressToast();
+    } catch (err) {
+      hidePdfProgressToast();
+      toast('Failed to load PDF library vendors.', 'error');
+      return;
     }
+  }
+
+  showPdfProgressToast('Assembling selected sections...');
+  
+  // 2. Compile full HTML string
+  const fullHtml = compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds);
+  
+  // 3. Parse and split HTML into page items (HTML blocks or Images)
+  const itemsToRender = [];
+  const parser = new DOMParser();
+  const docObj = parser.parseFromString(fullHtml, 'text/html');
+  const sectionBlocks = docObj.querySelectorAll('.section-block');
+  
+  if (sectionBlocks.length === 0) {
+    itemsToRender.push({ type: 'html', html: fullHtml });
+  } else {
+    sectionBlocks.forEach(block => {
+      const titleEl = block.querySelector('.section-title');
+      const titleText = titleEl ? titleEl.textContent : 'Section';
+      if (titleEl) titleEl.remove();
+      
+      let currentHtmlGroup = [];
+      
+      function flushHtmlGroup() {
+        if (currentHtmlGroup.length > 0) {
+          const htmlBlock = `
+            <div class="sheet">
+              <div class="section-block">
+                <h2 class="section-title">${titleText}</h2>
+                ${currentHtmlGroup.join('\n')}
+              </div>
+            </div>
+          `;
+          itemsToRender.push({ type: 'html', html: htmlBlock });
+          currentHtmlGroup = [];
+        }
+      }
+      
+      Array.from(block.childNodes).forEach(node => {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          if (node.tagName === 'IMG') {
+            flushHtmlGroup();
+            itemsToRender.push({ type: 'image', src: node.getAttribute('src') });
+          } else if (node.classList.contains('annexure-uploaded-pages-simple') || (node.style.display === 'flex' && node.innerHTML.includes('<img'))) {
+            flushHtmlGroup();
+            const imgs = node.querySelectorAll('img');
+            imgs.forEach(img => {
+              itemsToRender.push({ type: 'image', src: img.getAttribute('src') });
+            });
+          } else {
+            currentHtmlGroup.push(node.outerHTML);
+          }
+        } else if (node.nodeType === Node.TEXT_NODE) {
+          const text = node.textContent.trim();
+          if (text) {
+            currentHtmlGroup.push(`<p>${text}</p>`);
+          }
+        }
+      });
+      
+      flushHtmlGroup();
+    });
+  }
+  
+  if (itemsToRender.length === 0) {
+    toast("No printable content found.", "error");
     return;
   }
   
-  const tempIframe = document.createElement('iframe');
-  tempIframe.style.position = 'absolute';
-  tempIframe.style.left = '-9999px';
-  tempIframe.style.top = '0';
-  tempIframe.style.width = '1024px';
-  tempIframe.style.height = '768px';
-  tempIframe.style.border = 'none';
-  document.body.appendChild(tempIframe);
+  // 4. Initialize jsPDF
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const pdfWidth = 210;
+  const pdfHeight = 297;
   
-  tempIframe.srcdoc = html;
+  // Create off-screen rendering element
+  const renderDiv = document.createElement('div');
+  renderDiv.style.position = 'fixed';
+  renderDiv.style.left = '-9999px';
+  renderDiv.style.top = '0';
+  renderDiv.style.width = '794px'; // 210mm A4 width at 96 DPI
+  renderDiv.style.minHeight = '1122px'; // 297mm A4 height at 96 DPI
+  renderDiv.style.backgroundColor = '#ffffff';
+  renderDiv.style.padding = '45px 50px';
+  renderDiv.style.boxSizing = 'border-box';
+  renderDiv.style.zIndex = '-99999';
+  document.body.appendChild(renderDiv);
   
-  toast('Compiling and rendering PDF pages...', 'info');
-  
-  tempIframe.onload = function() {
-    setTimeout(() => {
-      const opt = {
-        margin: 10,
-        filename: `${reportName.replace(/\s+/g, '_')}_Replenishment_Report.pdf`,
-        image: { type: 'jpeg', quality: 0.95 },
-        html2canvas: { scale: 1.5, useCORS: true, logging: false },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['css', 'legacy'] }
-      };
+  const styles = `
+    <style>
+      * { box-sizing: border-box; }
+      body { font-family: Arial, Helvetica, sans-serif; color: #111827; background: #ffffff; padding: 0; margin: 0; }
+      .sheet { width: 100%; }
+      .section-title {
+        color: #17324d;
+        border-bottom: 2px solid #17324d;
+        padding-bottom: 8px;
+        margin-bottom: 20px;
+        font-size: 18px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      table { width: 100%; border-collapse: collapse; margin: 10px 0 18px; font-size: 11px; }
+      th, td { border: 1px solid #111827; padding: 6px 7px; vertical-align: top; word-break: break-word; }
+      th { background: #f3f4f6; font-weight: 700; text-align: left; }
+      p { font-size: 13px; line-height: 1.55; color: #374151; margin-top: 0; margin-bottom: 12px; }
+      .cover-page {
+        text-align: center;
+        padding: 40px 0;
+        border: 3px double #17324d;
+        background: #fff;
+        min-height: 1000px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-sizing: border-box;
+      }
+      .field-value { display: inline-block; min-width: 80px; padding: 4px 6px; border-bottom: 1px solid #cbd5e1; }
+      input, textarea, select { border: none !important; background: transparent !important; color: #111827 !important; padding: 0 !important; font-size: 13px !important; }
+      .btn, button, .upload-zone, .card-hd, .modal, .file-item, .alert-box, .hint { display: none !important; }
+    </style>
+  `;
+
+  // 5. Render loop
+  try {
+    for (let i = 0; i < itemsToRender.length; i++) {
+      const item = itemsToRender[i];
       
-      html2pdf().set(opt).from(tempIframe.contentWindow.document.body).save().then(() => {
-        toast('Replenishment Report PDF downloaded successfully!', 'success');
-        document.body.removeChild(tempIframe);
-      }).catch(err => {
-        console.error(err);
-        toast('PDF generation failed.', 'error');
-        document.body.removeChild(tempIframe);
-      });
-    }, 800);
-  };
+      if (i > 0) {
+        doc.addPage();
+      }
+      
+      showPdfProgressToast(`Generating page ${i + 1} of ${itemsToRender.length}...`);
+      
+      if (item.type === 'image') {
+        try {
+          doc.addImage(item.src, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+        } catch (e) {
+          try {
+            doc.addImage(item.src, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+          } catch (err) {
+            console.error(`Error adding image to PDF at page ${i + 1}:`, err);
+            doc.setFontSize(14);
+            doc.text(`[Page ${i + 1}: Image could not be loaded]`, pdfWidth / 2, pdfHeight / 2, { align: 'center' });
+          }
+        }
+      } else {
+        renderDiv.innerHTML = styles + item.html;
+        
+        try {
+          const canvas = await html2canvas(renderDiv, {
+            scale: 2, // High resolution scale
+            useCORS: true,
+            logging: false,
+            backgroundColor: '#ffffff'
+          });
+          const imgData = canvas.toDataURL('image/jpeg', 0.95);
+          doc.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+        } catch (err) {
+          console.error(`Error rendering HTML to canvas at page ${i + 1}:`, err);
+          doc.setFontSize(14);
+          doc.text(`[Page ${i + 1}: Render error]`, pdfWidth / 2, pdfHeight / 2, { align: 'center' });
+        }
+      }
+      
+      // Yield to main thread to keep UI smooth and prevent lagging/loafing
+      await new Promise(resolve => setTimeout(resolve, 30));
+    }
+    
+    const filename = `${reportName.replace(/\s+/g, '_')}_Replenishment_Report.pdf`;
+    doc.save(filename);
+    hidePdfProgressToast();
+    toast('Replenishment Report PDF downloaded successfully!', 'success');
+  } catch (err) {
+    console.error('Unified report generation crashed:', err);
+    hidePdfProgressToast();
+    toast('PDF compilation failed.', 'error');
+  } finally {
+    if (document.body.contains(renderDiv)) {
+      document.body.removeChild(renderDiv);
+    }
+  }
 }
 
 function escapeHtml(value) {
