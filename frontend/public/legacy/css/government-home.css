@@ -91,7 +91,6 @@ a { color: inherit; text-decoration: none; }
 
 /* HERO VISUAL (RIGHT SIDE) */
 .hero-visual { position: relative; width: 100%; height: 100%; display: block; }
-.hero-emblem { width: 450px; height: 450px; border-radius: 50%; box-shadow: 0 20px 40px rgba(0,0,0,0.15); object-fit: cover; border: 8px solid #fff; position: absolute; right: -50px; z-index: 5; }
 
 /* LATEST UPDATES STRIP */
 .notice-strip { background: #f1f5f9; border-bottom: 1px solid var(--line); padding: 16px 0; }
