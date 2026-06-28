@@ -3876,7 +3876,7 @@ html.dark body.view-projects-active .dash-brand-subtitle {
 }
 .dash-punjab-map-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(260px, 0.55fr);
+  grid-template-columns: 1fr;
   gap: 18px;
   align-items: stretch;
 }
