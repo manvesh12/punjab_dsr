@@ -15,7 +15,7 @@ function initReplenishmentView() {
   
   if (editorContainer) editorContainer.style.display = 'none';
 
-  if (!window.currentProject || !window.currentProject.id) {
+  if (!S.activeProject || !S.activeProject.id) {
     if (selectContainer) selectContainer.style.display = 'block';
     if (contentContainer) contentContainer.style.display = 'none';
     if (headerBtn) headerBtn.style.display = 'none';
@@ -44,7 +44,7 @@ function initReplenishmentView() {
     if (selectContainer) selectContainer.style.display = 'none';
     if (contentContainer) contentContainer.style.display = 'block';
     if (headerBtn) headerBtn.style.display = 'inline-flex';
-    if (subTitle) subTitle.textContent = `Manage Replenishment Studies for ${window.currentProject.projectName || window.currentProject.district || 'this project'}. The DSR acts as the single source of truth.`;
+    if (subTitle) subTitle.textContent = `Manage Replenishment Studies for ${S.activeProject.projectName || S.activeProject.district || 'this project'}. The DSR acts as the single source of truth.`;
     
     fetchReplenishmentStudies();
   }
@@ -52,10 +52,10 @@ function initReplenishmentView() {
 
 async function fetchReplenishmentStudies() {
   const list = document.getElementById('replenishment-list');
-  if (!list || !window.currentProject) return;
+  if (!list || !S.activeProject) return;
 
   try {
-    const studies = await apiFetch(`/api/projects/${window.currentProject.id}/replenishment`);
+    const studies = await apiFetch(`/api/projects/${S.activeProject.id}/replenishment`);
     currentReplenishmentStudies = studies;
     
     if (studies.length === 0) {
@@ -95,13 +95,13 @@ async function fetchReplenishmentStudies() {
 }
 
 async function createReplenishmentStudy() {
-  if (!window.currentProject) return;
+  if (!S.activeProject) return;
   try {
     const title = prompt("Enter Title for Replenishment Study:");
     if (!title) return;
     
     // Automatically hits the backend to extract DSR Base data
-    const res = await apiFetch(`/api/projects/${window.currentProject.id}/replenishment`, {
+    const res = await apiFetch(`/api/projects/${S.activeProject.id}/replenishment`, {
       method: 'POST',
       body: JSON.stringify({ title })
     });
@@ -124,8 +124,8 @@ async function openReplenishmentStudy(id) {
   if (editorContainer) editorContainer.style.display = 'block';
 
   // Re-fetch studies if not loaded
-  if (currentReplenishmentStudies.length === 0 && window.currentProject) {
-      currentReplenishmentStudies = await apiFetch(`/api/projects/${window.currentProject.id}/replenishment`);
+  if (currentReplenishmentStudies.length === 0 && S.activeProject) {
+      currentReplenishmentStudies = await apiFetch(`/api/projects/${S.activeProject.id}/replenishment`);
   }
 
   const study = currentReplenishmentStudies.find(s => s.id === id);
@@ -229,7 +229,7 @@ async function saveReplenishmentStudy(id) {
     toast("Replenishment Study Saved Successfully!", "success");
     
     // Refresh list in background
-    const studies = await apiFetch(`/api/projects/${window.currentProject.id}/replenishment`);
+    const studies = await apiFetch(`/api/projects/${S.activeProject.id}/replenishment`);
     currentReplenishmentStudies = studies;
   } catch (err) {
     toast("Save failed: " + err.message, "error");
@@ -259,7 +259,7 @@ window.selectReplenishmentProject = function(projectId) {
   if (!projectId) return;
   const proj = (window._replenishmentProjectsCache || []).find(p => p.id === projectId);
   if (proj) {
-    window.currentProject = proj;
+    S.activeProject = proj;
     // Show the DSR Sections nav in sidebar if it's hidden
     const reportNav = document.getElementById('report-nav');
     if (reportNav) reportNav.style.display = 'block';
