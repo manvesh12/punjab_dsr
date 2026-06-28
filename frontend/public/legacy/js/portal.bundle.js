@@ -2673,6 +2673,8 @@ async function doLogin() {
           accessLabel: data.accessLabel || ''
       };
       S.role = uiRole;
+      localStorage.setItem('dsr_user', JSON.stringify(S.user));
+      localStorage.setItem('dsr_role', S.role);
       if (typeof currentDistrictFilter !== 'undefined') currentDistrictFilter = 'ALL';
   await showAppScreen();
       setTimeout(() => {
@@ -2704,11 +2706,15 @@ function doAuthorityVerify() {
   err.style.display = 'none';
   S.user = { name: 'Dr. Suresh Verma', email: 'dmo@punjab.gov.in', role: 'authority' };
   S.role = 'authority';
+  localStorage.setItem('dsr_user', JSON.stringify(S.user));
+  localStorage.setItem('dsr_role', S.role);
   showAuthorityScreen();
 }
 function doAuthorityQuickLogin() {
   S.user = { name:'Dr. Suresh Verma', email:'dmo@punjab.gov.in', role:'authority' };
   S.role = 'authority';
+  localStorage.setItem('dsr_user', JSON.stringify(S.user));
+  localStorage.setItem('dsr_role', S.role);
   showAuthorityScreen();
 }
 function togglePinReveal() {
@@ -2789,6 +2795,8 @@ function doLogout() {
     apiFetch('/auth/logout', { method: 'POST' }).catch(() => {});
   } catch (e) {}
   localStorage.removeItem('dsr_token');
+  localStorage.removeItem('dsr_user');
+  localStorage.removeItem('dsr_role');
   if (typeof clearActiveProject === 'function') {
     clearActiveProject();
   }
@@ -2844,6 +2852,8 @@ async function doSdlcLogin() {
       accessLabel: data.accessLabel || ''
     };
     S.role = 'sdlc';
+    localStorage.setItem('dsr_user', JSON.stringify(S.user));
+    localStorage.setItem('dsr_role', S.role);
     await showAppScreen();
   } catch (error) {
     err.style.display='block';
