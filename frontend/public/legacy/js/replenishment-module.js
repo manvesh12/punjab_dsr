@@ -266,7 +266,7 @@ function renameCustomReport(reportId) {
     saveLocalReports(reports);
     toast("Report renamed successfully!", "success");
     showExistingReportsList();
-  });
+  }, "Rename");
 }
 
 function deleteCustomReport(reportId) {
@@ -1350,7 +1350,7 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
-function showCustomPromptModal(title, defaultValue, onConfirm) {
+function showCustomPromptModal(title, defaultValue, onConfirm, buttonText = "Confirm") {
   const existing = document.getElementById('custom-prompt-modal-overlay');
   if (existing) existing.remove();
   
@@ -1366,8 +1366,8 @@ function showCustomPromptModal(title, defaultValue, onConfirm) {
   overlay.style.zIndex = '999999';
   overlay.style.display = 'flex';
   overlay.style.justifyContent = 'center';
-  overlay.style.alignItems = 'flex-end'; // Place at lower side
-  overlay.style.paddingBottom = '100px'; // Shifted up slightly from the absolute bottom for best visibility
+  overlay.style.alignItems = 'center'; // Vertically centered
+  overlay.style.paddingBottom = '100px'; // Shunted up slightly for visual balance (upside)
   
   overlay.innerHTML = `
     <div style="background: #ffffff; padding: 24px; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); text-align: left; color: #1e293b; max-width: 420px; width: 90%; animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1); border: 1px solid #e2e8f0;">
@@ -1375,7 +1375,7 @@ function showCustomPromptModal(title, defaultValue, onConfirm) {
       <input type="text" id="custom-prompt-input" value="${defaultValue.replace(/"/g, '&quot;')}" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; margin-bottom: 16px; outline: none; transition: border-color 0.2s; color: #0f172a; background: #fff;" />
       <div style="display: flex; justify-content: flex-end; gap: 10px;">
         <button id="custom-prompt-cancel" style="padding: 8px 16px; font-size: 13px; cursor: pointer; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; color: #475569; font-weight:600;">Cancel</button>
-        <button id="custom-prompt-confirm" style="padding: 8px 16px; font-size: 13px; cursor: pointer; border-radius: 8px; border: none; background: #8c4f00; color: #fff; font-weight:600;">Rename</button>
+        <button id="custom-prompt-confirm" style="padding: 8px 16px; font-size: 13px; cursor: pointer; border-radius: 8px; border: none; background: #8c4f00; color: #fff; font-weight:600;">${buttonText}</button>
       </div>
     </div>
     <style>
@@ -1430,4 +1430,6 @@ function showCustomPromptModal(title, defaultValue, onConfirm) {
     });
   }
 }
+
+window.showCustomPromptModal = showCustomPromptModal;
 
