@@ -7,7 +7,7 @@ const urlsToCache = [
   './js/portal.bundle.js',
   './js/auth.js',
   './js/theme.js',
-  './assets/smart-dsr-logo.png'
+  './assets/dsr-logo.png'
 ];
 
 self.addEventListener('install', event => {

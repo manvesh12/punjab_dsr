@@ -16,7 +16,7 @@ function getHtmlFiles(dir) {
 }
 
 const targetRegex = /<svg viewBox="0 0 100 100" width="54" height="54" style="flex-shrink:0;">[\s\S]*?<\/svg>/g;
-const replacement = `<img src="assets/smart-dsr-logo.png" alt="Smart DSR Punjab Logo" style="width:54px; height:54px; flex-shrink:0; border-radius:50%; object-fit: cover;">`;
+const replacement = `<img src="assets/dsr-logo.png" alt="Smart DSR Punjab Logo" style="width:54px; height:54px; flex-shrink:0; border-radius:50%; object-fit: cover;">`;
 
 const baseDir = 'frontend/public/legacy';
 const htmlFiles = getHtmlFiles(baseDir);

@@ -7,7 +7,7 @@ let content = fs.readFileSync(loginFile, 'utf8');
 if (!content.includes('manifest.json')) {
   content = content.replace(
     '</head>',
-    `  <link rel="manifest" href="manifest.json">\n  <meta name="theme-color" content="#1e293b">\n  <link rel="apple-touch-icon" href="assets/smart-dsr-logo.png">\n</head>`
+    `  <link rel="manifest" href="manifest.json">\n  <meta name="theme-color" content="#1e293b">\n  <link rel="apple-touch-icon" href="assets/dsr-logo.png">\n</head>`
   );
 }
 
