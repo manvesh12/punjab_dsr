@@ -27,25 +27,36 @@ function initReplenishmentView() {
     return;
   }
   
-  // If already has an active custom report view, don't overwrite it
-  const titleDisplay = document.getElementById('custom-report-title-display');
-  if (titleDisplay) return;
-  
-  // Show the starter card
+  // Render the attractive welcome card form in-place
   editorContainer.innerHTML = `
-    <div class="card" style="margin-top:20px; padding:40px; text-align:center; max-width:600px; margin:20px auto;">
-      <i data-lucide="file-text" style="width:48px;height:48px;color:#17324d;display:block;margin:0 auto 16px;"></i>
-      <h2 style="color:#17324d;">Create Replenishment Studies Report</h2>
-      <p style="color:#64748b; margin-top:8px; margin-bottom:20px;">Generate a custom replenishment report by selecting specific sections and annexures from this DSR project.</p>
-      <button class="btn btn-primary" onclick="window.triggerCustomReportPrompt()" style="margin:0 auto;">Start Report Generator</button>
+    <div class="card" style="margin-top: 40px; padding: 32px; max-width: 540px; margin: 40px auto; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.05);">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <div style="display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; background: #eff6ff; border-radius: 12px; margin-bottom: 16px;">
+          <i data-lucide="file-text" style="width: 28px; height: 28px; color: #2563eb;"></i>
+        </div>
+        <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; font-weight: 800; color: #1e293b; margin: 0 0 8px 0;">New Replenishment Report</h2>
+        <p style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; color: #64748b; margin: 0; line-height: 1.5;">Enter a name for your custom report to start selecting DSR sections and compiling the PDF.</p>
+      </div>
+      
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div class="field" style="display: flex; flex-direction: column; gap: 6px; text-align: left;">
+          <label for="new-report-name-input" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">Report Title</label>
+          <input type="text" id="new-report-name-input" placeholder="e.g. Monsoon Replenishment Report 2026" style="padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s;" onkeydown="if(event.key==='Enter') window.submitCustomReportName()">
+        </div>
+        <button class="btn btn-primary" onclick="window.submitCustomReportName()" style="display: flex; align-items: center; justify-content: center; height: 42px; gap: 8px; font-weight: 700; font-size: 14px; border-radius: 8px; width: 100%; border: none; cursor: pointer;">
+          <span>Create Custom Report</span>
+          <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
+        </button>
+      </div>
     </div>
   `;
   if (window.lucide) lucide.createIcons();
   
-  // Automatically trigger the prompt to make it fast
+  // Focus the input box automatically
   setTimeout(() => {
-    window.triggerCustomReportPrompt();
-  }, 50);
+    const input = document.getElementById('new-report-name-input');
+    if (input) input.focus();
+  }, 100);
 }
 
 // Hook into existing navigation system
@@ -72,15 +83,20 @@ if (annexureNav && replenishmentNav) {
 }
 
 // Expose functions to window
-window.triggerCustomReportPrompt = triggerCustomReportPrompt;
+window.submitCustomReportName = submitCustomReportName;
 window.onParentCheckboxChange = onParentCheckboxChange;
 window.onSubCheckboxChange = onSubCheckboxChange;
 window.updateCustomReportPreview = updateCustomReportPreview;
 window.downloadCustomReportPDF = downloadCustomReportPDF;
 
-function triggerCustomReportPrompt() {
-  const reportName = prompt("Enter Custom Replenishment Report Name:");
-  if (!reportName) return;
+function submitCustomReportName() {
+  const input = document.getElementById('new-report-name-input');
+  if (!input) return;
+  const reportName = input.value.trim();
+  if (!reportName) {
+    toast("Please enter a report name", "error");
+    return;
+  }
   const editorContainer = document.getElementById('repl-editor-container');
   if (editorContainer) {
     renderCustomReportGenerator(editorContainer, reportName);
