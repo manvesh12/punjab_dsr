@@ -1,376 +1,293 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light">
-  <title>Punjab DSR Portal | Government of Punjab</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap"
-    rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-  <link rel="stylesheet" href="css/government-home.css?v=1.5">
+  <title>District Survey Report Portal - Government of Punjab</title>
+  <link rel="stylesheet" href="css/home-design.css?v=20260628">
 </head>
-
-<body>
+<body class="home-body">
   <a class="skip-link" href="#main-content">Skip to main content</a>
 
-  <div class="tricolour" aria-hidden="true"></div>
+  <div class="top-strip">
+    <div class="site-wrap top-strip-inner">
+      <strong>भारत सरकार / Government of Punjab</strong>
+      <div class="utility-links">
+        <a href="#main-content">मुख्य सामग्री पर जाएँ</a>
+        <a href="#footer">साइटमैप</a>
+        <button type="button" data-font-size="large" aria-label="Increase font size">A+</button>
+        <button type="button" data-font-size="normal" aria-label="Reset font size">A</button>
+        <a href="home.html" lang="hi">हिंदी</a>
+      </div>
+    </div>
+  </div>
 
-  <header style="position: relative; z-index: 10; background: #fff;">
-    <div class="utility-bar">
-      <div class="site-wrap utility-inner">
-        <span>भारत सरकार / Government of Punjab</span>
-        <div class="utility-links">
-          <a href="#main-content">मुख्य सामग्री पर जाएँ</a>
-          <a href="#footer">साइटमैप</a>
-          <button type="button" aria-label="Increase font size">A+</button>
-          <button type="button" aria-label="Reset font size">A</button>
-          <a href="home.html" lang="hi">हिंदी</a>
+  <header class="identity-header">
+    <div class="site-wrap identity-row">
+      <div class="brand-block">
+        <img class="brand-logo" src="logo/COE-SENSRS-2.jpeg" alt="Centre of Excellence SEnSRS logo" loading="eager">
+        <div class="brand-divider" aria-hidden="true"></div>
+        <div class="brand-copy">
+          <p>Government of Punjab</p>
+          <h1>District Survey Report Portal</h1>
+          <span>Department of Mining and Geology</span>
+        </div>
+      </div>
+      <div class="support-block">
+        <img class="support-logo" src="logo/IITRPR.jpeg" alt="IIT Ropar logo" loading="eager">
+        <div class="support-copy">
+          <span>Technical Support</span>
+          <strong>IIT Ropar</strong>
         </div>
       </div>
     </div>
+  </header>
 
-    <div class="site-wrap identity-row">
-      <div class="header-left" style="display: flex; align-items: center; gap: 15px;">
-        <img class="gov-emblem" src="assets/Emblem_of_India.svg.png" alt="State Emblem of India">
-      </div>
-
-      <div class="identity-copy">
-        <p>DSR PORTAL - DISTRICT SURVEY REPORTS</p>
-        <h1>District Survey Report Portal</h1>
-        <span>Department of Mining and Geology</span>
-      </div>
-
-      <div class="header-right">
-        <div>Technical Support: IIT Ropar<br><strong>SEnSRS - IIT Ropar</strong></div>
-        <img class="sensrs-logo-right" src="logo/COE-SENSRS-2.jpeg" alt="SEnSRS Logo">
-      </div>
-    </div>
-
-    <nav class="main-nav" aria-label="Primary navigation">
-      <div class="site-wrap nav-inner">
+  <nav class="main-nav" aria-label="Primary navigation">
+    <div class="site-wrap nav-inner">
+      <div class="nav-links">
         <a class="active" href="home.html">Home</a>
         <a href="login.html">About DSR</a>
         <a href="login.html">Services</a>
-        <a href="login.html">Reports</a>
+        <a href="login.html">District Reports</a>
         <a href="login.html">Guidelines</a>
         <a href="login.html">Helpdesk</a>
-        <div class="nav-actions">
-          <a class="login-link" href="login.html">Official Login</a>
-        </div>
       </div>
-    </nav>
-  </header>
+      <div class="nav-actions">
+        <button class="nav-icon" type="button" aria-label="Language">◎</button>
+        <button class="nav-icon" type="button" aria-label="Search">⌕</button>
+        <a class="login-link" href="login.html">Official Login</a>
+      </div>
+    </div>
+  </nav>
+  <a class="mobile-login-link" href="login.html">Official Login</a>
 
   <main id="main-content">
-    <section class="hero" style="position: relative;">
-      <div id="hero-map" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1;"></div>
-      <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0.85) 45%, rgba(255,255,255,0) 100%); z-index: 2; pointer-events: none;"></div>
-      
-      <div class="site-wrap hero-inner" style="position: relative; z-index: 3;">
+    <section class="hero">
+      <div class="site-wrap hero-inner">
         <div class="hero-copy">
-          <div class="hero-filters">
-            <select>
-              <option>Districts</option>
-            </select>
-            <select>
-              <option>Select one</option>
-            </select>
-          </div>
-          <p class="eyebrow">DSR PLATFORM: TRANSPARENT PUNJAB</p>
-          <h2>District Survey</h2>
-          <p>Access, visualize, prepare, and monitor all District Survey Reports through a advanced, unified digital
-            portal. Powered by ground-truth data from SEnSRS and satellite intelligence from ESA. Committed to
-            sustainable mineral management in the State of Punjab.</p>
+          <p class="eyebrow">Digital public service platform</p>
+          <h2>District Survey Reports<br><span>for a transparent Punjab</span></h2>
+          <p>Access, prepare and monitor District Survey Reports through a unified, secure portal for the Department of Mining and Geology, Government of Punjab.</p>
           <div class="hero-actions">
-            <a class="button primary" href="login.html">Access DSR Portal →</a>
-            <a class="button outline" href="login.html">View District Reports 📄</a>
+            <a class="button primary" href="login.html">Access DSR Portal <span aria-hidden="true">→</span></a>
+            <a class="button outline" href="login.html">View District Reports <span aria-hidden="true">□</span></a>
           </div>
         </div>
-        <div class="hero-visual" style="display: flex; align-items: center; justify-content: center;">
-          <img class="hero-emblem" src="assets/dsr-logo.png" alt="SEnSRS Emblem" style="max-width: 85%; height: auto; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.4));">
+        <div class="hero-visual" aria-hidden="true">
+          <img class="hero-logo" src="assets/dsr-logo.png" alt="">
         </div>
       </div>
     </section>
 
     <section class="notice-strip" aria-label="Latest notice">
       <div class="site-wrap notice-inner">
-        <span class="notice-label">LATEST UPDATES</span>
-        <div class="notice-items">
-          <span>District Survey Report preparation service now available state-wide.</span>
-          <span>New satellite data overlays from ESA added for all districts.</span>
-          <span>IIT Ropar conducting DGPS survey training sessions.</span>
+        <div class="notice-copy">
+          <span class="notice-label">Latest Updates</span>
+          <p>District Survey Report preparation and review services are available through the portal.</p>
         </div>
-        <a href="login.html">View all notices →</a>
+        <a class="inline-link" href="login.html">View all notices <span aria-hidden="true">→</span></a>
       </div>
     </section>
 
-    <section class="quick-access-section">
+    <section class="section soft-section">
       <div class="site-wrap">
-        <div class="quick-access-header">
+        <div class="section-heading">
           <div>
-            <p class="section-kicker">CITIZEN & DEPARTMENT SERVICES</p>
+            <span class="section-kicker">Citizen &amp; department services</span>
             <h2>Quick access</h2>
           </div>
-          <a href="login.html">View all services →</a>
+          <a class="inline-link" href="login.html">View all services <span aria-hidden="true">→</span></a>
         </div>
-
-        <div class="quick-cards">
-          <a href="login.html" class="quick-card">
-            <div class="card-num">01</div>
-            <div class="card-content">
-              <div class="card-title">District Survey Reports</div>
-              <p class="card-desc">Browse published reports district-wise</p>
-            </div>
-            <div class="card-arrow">→</div>
+        <div class="quick-grid">
+          <a class="quick-card" href="login.html">
+            <span class="service-number">01</span>
+            <span><strong>District Survey Reports</strong><small>Browse published reports district-wise</small></span>
+            <span class="card-arrow" aria-hidden="true">→</span>
           </a>
-
-          <a href="login.html" class="quick-card">
-            <div class="card-num">02</div>
-            <div class="card-content">
-              <div class="card-title">Track DSR Status <span class="badge">In Review (50%)</span></div>
-              <p class="card-desc">Check the progress of a submitted report</p>
-            </div>
-            <div class="card-arrow">→</div>
+          <a class="quick-card" href="login.html">
+            <span class="service-number">02</span>
+            <span><strong>Track DSR Status</strong><small>Check the progress of a submitted report</small></span>
+            <span class="card-arrow" aria-hidden="true">→</span>
           </a>
-
-          <a href="login.html" class="quick-card">
-            <div class="card-num">03</div>
-            <div class="card-content">
-              <div class="card-title">Department Login</div>
-              <p class="card-desc">Secure access for authorised officials</p>
-            </div>
-            <div class="card-arrow">→</div>
+          <a class="quick-card" href="login.html">
+            <span class="service-number">03</span>
+            <span><strong>Department Login</strong><small>Secure access for authorised officials</small></span>
+            <span class="card-arrow" aria-hidden="true">→</span>
           </a>
-
-          <a href="login.html" class="quick-card">
-            <div class="card-num">04</div>
-            <div class="card-content">
-              <div class="card-title">Guidelines & Downloads</div>
-              <p class="card-desc">Forms, manuals and reference documents</p>
-            </div>
-            <div class="card-arrow">→</div>
+          <a class="quick-card" href="login.html">
+            <span class="service-number">04</span>
+            <span><strong>Guidelines &amp; Downloads</strong><small>Forms, manuals and reference documents</small></span>
+            <span class="card-arrow" aria-hidden="true">→</span>
           </a>
         </div>
       </div>
     </section>
 
-    <section class="process-band">
+    <section class="section process-band">
       <div class="site-wrap">
-        <div class="section-heading light">
-          <div>
-            <p class="section-kicker">Simple & accountable process</p>
-            <h2>How the portal works</h2>
-          </div>
-        </div>
+        <span class="section-kicker">Simple &amp; accountable process</span>
+        <h2>How the portal works</h2>
         <ol class="process-list">
-          <li><span>1</span>
-            <div><strong>Prepare</strong>
-              <p>Authorised officers create the district report.</p>
-            </div>
-          </li>
-          <li><span>2</span>
-            <div><strong>Review</strong>
-              <p>Data is reviewed through the departmental workflow.</p>
-            </div>
-          </li>
-          <li><span>3</span>
-            <div><strong>Publish</strong>
-              <p>Approved reports are made available for reference.</p>
-            </div>
-          </li>
+          <li><span>1</span><strong>Prepare</strong><p>Authorised officers create the district report.</p></li>
+          <li><span>2</span><strong>Review</strong><p>Data is reviewed through the departmental workflow.</p></li>
+          <li><span>3</span><strong>Publish</strong><p>Approved reports are made available for reference.</p></li>
         </ol>
       </div>
     </section>
 
-    <section class="site-wrap section information-grid">
-      <article class="updates">
-        <div class="section-heading">
-          <div>
-            <p class="section-kicker">Information corner</p>
-            <h2>Notices & announcements</h2>
-          </div><a href="login.html">Archive →</a>
-        </div>
-        <ul>
-          <li><time>18 JUN 2026</time><a href="login.html">Instructions for submission and review of District Survey
-              Reports</a></li>
-          <li><time>10 JUN 2026</time><a href="login.html">Updated user manual for departmental officers</a></li>
-          <li><time>02 JUN 2026</time><a href="login.html">Portal maintenance and service availability notice</a></li>
-        </ul>
-      </article>
-      <aside class="help-panel">
-        <p>Need assistance?</p>
-        <h2>DSR Helpdesk</h2><span>For technical support and portal-related queries, contact the departmental helpdesk
-          during working hours.</span><a href="login.html">Contact Helpdesk</a>
-      </aside>
+    <section class="section">
+      <div class="site-wrap info-grid">
+        <article class="updates">
+          <div class="section-heading">
+            <div>
+              <span class="section-kicker">Information corner</span>
+              <h2>Notices &amp; announcements</h2>
+            </div>
+            <a class="inline-link" href="login.html">Archive <span aria-hidden="true">→</span></a>
+          </div>
+          <ul class="updates-list">
+            <li><a href="login.html"><time>18 JUN 2026</time><span>Instructions for submission and review of District Survey Reports</span></a></li>
+            <li><a href="login.html"><time>10 JUN 2026</time><span>Updated user manual for departmental officers</span></a></li>
+            <li><a href="login.html"><time>02 JUN 2026</time><span>Portal maintenance and service availability notice</span></a></li>
+          </ul>
+        </article>
+        <aside class="help-panel">
+          <span class="section-kicker">Need assistance?</span>
+          <h2>DSR Helpdesk</h2>
+          <p>For technical support and portal-related queries, contact the departmental helpdesk during working hours.</p>
+          <a class="help-button" href="login.html">Contact Helpdesk</a>
+        </aside>
+      </div>
     </section>
   </main>
 
-  <footer id="footer">
+  <footer class="home-footer" id="footer">
     <div class="site-wrap footer-grid">
       <div>
+        <div class="footer-logo-row">
+          <img src="logo/IITRPR.jpeg" alt="IIT Ropar logo" loading="lazy">
+          <img src="assets/Emblem_of_India.svg.png" alt="State Emblem of India" loading="lazy">
+          <img src="assets/sensrs-final-logo.webp" alt="SEnSRS circular logo" loading="lazy">
+        </div>
+        <img class="footer-main-logo" src="assets/dsr-logo.png" alt="District Survey Report Portal logo" loading="lazy">
         <h2>District Survey Report Portal</h2>
-        <p>Department of Mining and Geology<br>Government of Punjab</p>
+        <p>A digital platform by the Department of Mining and Geology, Government of Punjab, developed with technical support from IIT Ropar and SEnSRS for managing District Survey Reports and related mining workflow data.</p>
       </div>
       <div>
-        <h3>Important Links</h3><a href="login.html">About the Department</a><a href="login.html">Privacy Policy</a><a
-          href="login.html">Terms of Use</a>
+        <h3>Important Links</h3>
+        <ul>
+          <li><a href="login.html">About the Department</a></li>
+          <li><a href="login.html">Privacy Policy</a></li>
+          <li><a href="login.html">Terms of Use</a></li>
+          <li><a href="login.html">Contact Helpdesk</a></li>
+        </ul>
       </div>
       <div>
-        <h3>Support</h3><a href="login.html">Helpdesk</a><a href="login.html">Accessibility Statement</a><a
-          href="login.html">Feedback</a>
+        <h3>Support</h3>
+        <ul>
+          <li><a href="login.html">Helpdesk</a></li>
+          <li><a href="login.html">Accessibility Statement</a></li>
+          <li><a href="login.html">Feedback</a></li>
+        </ul>
       </div>
     </div>
-    <div class="site-wrap copyright"><span>© 2026 Government of Punjab. All Rights Reserved.</span><span>Designed &
-        developed with technical support from IIT Ropar.</span></div>
+    <div class="copyright">
+      <div class="site-wrap">© 2026 Department of Mines &amp; Geology, Government of Punjab. Technical Support, Design &amp; Development by IIT Ropar.</div>
+    </div>
   </footer>
+
   <script>
     let userRegEmail = "";
 
-    async function submitHomeRegistration() {
-      const name = document.getElementById('reg-name').value.trim();
-      const email = document.getElementById('reg-email').value.trim();
-      const pass = document.getElementById('reg-pass').value;
-      const msg = document.getElementById('reg-msg');
-      const btn = document.querySelector('button[onclick="submitHomeRegistration()"]');
+    document.querySelectorAll("[data-font-size]").forEach((button) => {
+      button.addEventListener("click", () => {
+        document.body.classList.toggle("font-large", button.dataset.fontSize === "large");
+      });
+    });
 
+    async function submitHomeRegistration() {
+      const nameInput = document.getElementById("reg-name");
+      const emailInput = document.getElementById("reg-email");
+      const passInput = document.getElementById("reg-pass");
+      const msg = document.getElementById("reg-msg");
+      const btn = document.querySelector('button[onclick="submitHomeRegistration()"]');
+      if (!nameInput || !emailInput || !passInput || !msg || !btn) return;
+
+      const name = nameInput.value.trim();
+      const email = emailInput.value.trim();
+      const pass = passInput.value;
       if (!name || !email || !pass) {
-        msg.style.display = 'block'; msg.style.color = '#ef4444'; msg.textContent = 'Please fill all fields.'; return;
+        msg.style.display = "block"; msg.style.color = "#ef4444"; msg.textContent = "Please fill all fields."; return;
       }
       if (pass.length < 10 || !/[A-Za-z]/.test(pass) || !/[0-9]/.test(pass)) {
-        msg.style.display = 'block'; msg.style.color = '#ef4444'; msg.textContent = 'Password must be at least 10 chars with letters and numbers.'; return;
+        msg.style.display = "block"; msg.style.color = "#ef4444"; msg.textContent = "Password must be at least 10 chars with letters and numbers."; return;
       }
 
-      msg.style.display = 'none';
+      msg.style.display = "none";
       const oldBtnText = btn.textContent;
-      btn.textContent = 'Sending OTP...';
+      btn.textContent = "Sending OTP...";
       btn.disabled = true;
-      btn.style.opacity = '0.7';
+      btn.style.opacity = "0.7";
 
       try {
-        const response = await fetch('/api/auth/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        const response = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ fullName: name, username: email, email: email, password: pass })
         });
-
         const data = await response.json();
         if (response.ok) {
           userRegEmail = email;
-          document.getElementById('reg-step-1').style.display = 'none';
-          document.getElementById('reg-step-2').style.display = 'block';
+          document.getElementById("reg-step-1").style.display = "none";
+          document.getElementById("reg-step-2").style.display = "block";
         } else {
-          msg.style.display = 'block'; msg.style.color = '#ef4444'; msg.textContent = data.error || 'Registration failed.';
-          btn.textContent = oldBtnText;
-          btn.disabled = false;
-          btn.style.opacity = '1';
+          msg.style.display = "block"; msg.style.color = "#ef4444"; msg.textContent = data.error || "Registration failed.";
+          btn.textContent = oldBtnText; btn.disabled = false; btn.style.opacity = "1";
         }
       } catch (e) {
-        msg.style.display = 'block'; msg.style.color = '#ef4444'; msg.textContent = 'Network error. Please try again.';
-        btn.textContent = oldBtnText;
-        btn.disabled = false;
-        btn.style.opacity = '1';
+        msg.style.display = "block"; msg.style.color = "#ef4444"; msg.textContent = "Network error. Please try again.";
+        btn.textContent = oldBtnText; btn.disabled = false; btn.style.opacity = "1";
       }
     }
 
     async function verifyRegisterOtp() {
-      const otp = document.getElementById('reg-otp').value.trim();
-      const msg = document.getElementById('otp-msg');
+      const otpInput = document.getElementById("reg-otp");
+      const msg = document.getElementById("otp-msg");
       const btn = document.querySelector('button[onclick="verifyRegisterOtp()"]');
+      if (!otpInput || !msg || !btn) return;
 
+      const otp = otpInput.value.trim();
       if (!otp || otp.length !== 6) {
-        msg.style.display = 'block'; msg.style.color = '#ef4444'; msg.textContent = 'Please enter a valid 6-digit OTP.'; return;
+        msg.style.display = "block"; msg.style.color = "#ef4444"; msg.textContent = "Please enter a valid 6-digit OTP."; return;
       }
 
-      msg.style.display = 'none';
+      msg.style.display = "none";
       const oldBtnText = btn.textContent;
-      btn.textContent = 'Verifying...';
+      btn.textContent = "Verifying...";
       btn.disabled = true;
-      btn.style.opacity = '0.7';
+      btn.style.opacity = "0.7";
 
       try {
-        const response = await fetch('/api/auth/verify-register-otp', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        const response = await fetch("/api/auth/verify-register-otp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: userRegEmail, otp })
         });
-
         const data = await response.json();
         if (response.ok) {
-          msg.style.display = 'block'; msg.style.color = '#10b981'; msg.textContent = 'Registration verified! Redirecting to login...';
-          setTimeout(() => { window.location.href = 'login.html'; }, 2000);
+          msg.style.display = "block"; msg.style.color = "#10b981"; msg.textContent = "Registration verified! Redirecting to login...";
+          setTimeout(() => { window.location.href = "login.html"; }, 2000);
         } else {
-          msg.style.display = 'block'; msg.style.color = '#ef4444'; msg.textContent = data.error || 'Verification failed.';
-          btn.textContent = oldBtnText;
-          btn.disabled = false;
-          btn.style.opacity = '1';
+          msg.style.display = "block"; msg.style.color = "#ef4444"; msg.textContent = data.error || "Verification failed.";
+          btn.textContent = oldBtnText; btn.disabled = false; btn.style.opacity = "1";
         }
       } catch (e) {
-        msg.style.display = 'block'; msg.style.color = '#ef4444'; msg.textContent = 'Network error. Please try again.';
-        btn.textContent = oldBtnText;
-        btn.disabled = false;
-        btn.style.opacity = '1';
+        msg.style.display = "block"; msg.style.color = "#ef4444"; msg.textContent = "Network error. Please try again.";
+        btn.textContent = oldBtnText; btn.disabled = false; btn.style.opacity = "1";
       }
     }
   </script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      if (typeof L !== 'undefined' && document.getElementById('hero-map')) {
-        const map = L.map('hero-map', {
-          zoomControl: false,
-          attributionControl: false,
-          scrollWheelZoom: false,
-          dragging: false
-        }).setView([31.1471, 75.3412], 7);
-
-        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
-
-        fetch('assets/punjab.geojson')
-          .then(res => res.json())
-          .then(data => {
-            const geoJsonLayer = L.geoJSON(data, {
-              style: {
-                color: '#fbbf24',
-                weight: 2,
-                fillOpacity: 0.1
-              },
-              onEachFeature: function (feature, layer) {
-                if (feature.properties && feature.properties.NAME_2) {
-                  layer.bindTooltip(feature.properties.NAME_2, {
-                    permanent: true,
-                    direction: 'center',
-                    className: 'map-district-label'
-                  });
-                }
-              }
-            }).addTo(map);
-            map.fitBounds(geoJsonLayer.getBounds(), { padding: [20, 20] });
-          })
-          .catch(err => console.error("Error loading GeoJSON:", err));
-      }
-    });
-  </script>
-  <style>
-    .map-district-label {
-      background: rgba(0, 0, 0, 0.6);
-      border: none;
-      color: white;
-      font-weight: 600;
-      font-size: 11px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      box-shadow: none;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-    }
-    .leaflet-tooltip-left::before, .leaflet-tooltip-right::before, .leaflet-tooltip-top::before, .leaflet-tooltip-bottom::before {
-      display: none;
-    }
-  </style>
 </body>
-
 </html>
