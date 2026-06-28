@@ -10,10 +10,34 @@ function initReplenishmentView() {
   // currentProject is a global variable from portal.bundle.js
   if (!window.currentProject || !window.currentProject.id) {
     container.innerHTML = `
-      <div class="empty-state">
-        <h3>No Project Selected</h3>
-        <p>Please select a DSR project to view its Replenishment Studies.</p>
+      <div class="empty-state" style="padding: 40px; text-align: center;">
+        <h3 style="margin-bottom: 10px;">Select a DSR Project</h3>
+        <p style="color: var(--text-mid); margin-bottom: 20px;">Please select a DSR project below to view its Replenishment Studies.</p>
+        <select id="repl-project-selector" style="padding: 10px; width: 300px; border-radius: 6px; border: 1px solid var(--border);" onchange="window.selectReplenishmentProject(this.value)">
+          <option value="">Loading projects...</option>
+        </select>
       </div>`;
+      
+    // Fetch projects and populate the dropdown
+    apiFetch('/api/projects')
+      .then(projects => {
+        const sel = document.getElementById('repl-project-selector');
+        if (!sel) return;
+        if (!projects || projects.length === 0) {
+           sel.innerHTML = '<option value="">No projects available</option>';
+           return;
+        }
+        window._replenishmentProjectsCache = projects;
+        let html = '<option value="">-- Select Project --</option>';
+        projects.forEach(p => {
+          html += `<option value="${p.id}">${p.projectName || p.district + ' (' + p.year + ')'}</option>`;
+        });
+        sel.innerHTML = html;
+      })
+      .catch(err => {
+         const sel = document.getElementById('repl-project-selector');
+         if (sel) sel.innerHTML = '<option value="">Failed to load projects</option>';
+      });
     return;
   }
 
@@ -233,3 +257,20 @@ window.showView = function(viewId, caller) {
     initReplenishmentView();
   }
 };
+w i n d o w . s e l e c t R e p l e n i s h m e n t P r o j e c t   =   f u n c t i o n ( p r o j e c t I d )   { 
+     i f   ( ! p r o j e c t I d )   r e t u r n ; 
+     c o n s t   p r o j   =   ( w i n d o w . _ r e p l e n i s h m e n t P r o j e c t s C a c h e   | |   [ ] ) . f i n d ( p   = >   p . i d   = = =   p r o j e c t I d ) ; 
+     i f   ( p r o j )   { 
+         w i n d o w . c u r r e n t P r o j e c t   =   p r o j ; 
+         / /   S h o w   t h e   D S R   S e c t i o n s   n a v   i n   s i d e b a r   i f   i t ' s   h i d d e n 
+         c o n s t   r e p o r t N a v   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' r e p o r t - n a v ' ) ; 
+         i f   ( r e p o r t N a v )   r e p o r t N a v . s t y l e . d i s p l a y   =   ' b l o c k ' ; 
+         
+         / /   A l s o   s h o w   a n n e x u r e   n a v 
+         c o n s t   a n n e x u r e N a v   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' a n n e x u r e - n a v ' ) ; 
+         i f   ( a n n e x u r e N a v )   a n n e x u r e N a v . s t y l e . d i s p l a y   =   ' b l o c k ' ; 
+ 
+         i n i t R e p l e n i s h m e n t V i e w ( ) ; 
+     } 
+ } ;  
+ 
