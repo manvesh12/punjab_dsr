@@ -20,43 +20,15 @@ function initReplenishmentView() {
       <div class="card" style="margin-top:20px; padding:40px; text-align:center; max-width:600px; margin:20px auto;">
         <i data-lucide="info" style="width:48px;height:48px;color:#3b82f6;display:block;margin:0 auto 16px;"></i>
         <h2 style="color:#17324d;">No Active Project</h2>
-        <p style="color:#64748b; margin-top:8px;">Please select a DSR project from the projects list first to generate its Replenishment Report.</p>
+        <p style="color:#64748b; margin-top:8px;">Please select a DSR project from the projects list first to manage its Replenishment Reports.</p>
       </div>
     `;
     if (window.lucide) lucide.createIcons();
     return;
   }
   
-  // Render the attractive welcome card form in-place
-  editorContainer.innerHTML = `
-    <div class="card" style="margin-top: 40px; padding: 32px; max-width: 540px; margin: 40px auto; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.05);">
-      <div style="text-align: center; margin-bottom: 24px;">
-        <div style="display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; background: #eff6ff; border-radius: 12px; margin-bottom: 16px;">
-          <i data-lucide="file-text" style="width: 28px; height: 28px; color: #2563eb;"></i>
-        </div>
-        <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; font-weight: 800; color: #1e293b; margin: 0 0 8px 0;">New Replenishment Report</h2>
-        <p style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; color: #64748b; margin: 0; line-height: 1.5;">Enter a name for your custom report to start selecting DSR sections and compiling the PDF.</p>
-      </div>
-      
-      <div style="display: flex; flex-direction: column; gap: 16px;">
-        <div class="field" style="display: flex; flex-direction: column; gap: 6px; text-align: left;">
-          <label for="new-report-name-input" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">Report Title</label>
-          <input type="text" id="new-report-name-input" placeholder="e.g. Monsoon Replenishment Report 2026" style="padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s;" onkeydown="if(event.key==='Enter') window.submitCustomReportName()">
-        </div>
-        <button class="btn btn-primary" onclick="window.submitCustomReportName()" style="display: flex; align-items: center; justify-content: center; height: 42px; gap: 8px; font-weight: 700; font-size: 14px; border-radius: 8px; width: 100%; border: none; cursor: pointer;">
-          <span>Create Custom Report</span>
-          <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
-        </button>
-      </div>
-    </div>
-  `;
-  if (window.lucide) lucide.createIcons();
-  
-  // Focus the input box automatically
-  setTimeout(() => {
-    const input = document.getElementById('new-report-name-input');
-    if (input) input.focus();
-  }, 100);
+  // Render main option cards
+  window.showReplenishmentOptions(editorContainer);
 }
 
 // Hook into existing navigation system
@@ -82,12 +54,106 @@ if (annexureNav && replenishmentNav) {
   }).observe(annexureNav, { attributes: true, attributeFilter: ['style'] });
 }
 
+// Helper: load reports from localStorage
+function loadLocalReports() {
+  if (!S.activeProject) return [];
+  const key = `repl_reports_${S.activeProject.id}`;
+  try {
+    return JSON.parse(localStorage.getItem(key) || '[]');
+  } catch (e) {
+    return [];
+  }
+}
+
+// Helper: save reports to localStorage
+function saveLocalReports(reports) {
+  if (!S.activeProject) return;
+  const key = `repl_reports_${S.activeProject.id}`;
+  localStorage.setItem(key, JSON.stringify(reports));
+}
+
 // Expose functions to window
+window.showReplenishmentOptions = showReplenishmentOptions;
+window.showCreateReportForm = showCreateReportForm;
+window.showExistingReportsList = showExistingReportsList;
 window.submitCustomReportName = submitCustomReportName;
+window.openCustomReport = openCustomReport;
+window.renameCustomReport = renameCustomReport;
+window.deleteCustomReport = deleteCustomReport;
+window.downloadCustomReportPDFDirect = downloadCustomReportPDFDirect;
 window.onParentCheckboxChange = onParentCheckboxChange;
 window.onSubCheckboxChange = onSubCheckboxChange;
 window.updateCustomReportPreview = updateCustomReportPreview;
 window.downloadCustomReportPDF = downloadCustomReportPDF;
+
+function showReplenishmentOptions(container) {
+  container.innerHTML = `
+    <div style="max-width: 800px; margin: 40px auto; padding: 0 20px;">
+      <div style="text-align: center; margin-bottom: 40px;">
+        <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 24px; font-weight: 800; color: #1e293b; margin: 0 0 10px 0;">Replenishment Studies</h2>
+        <p style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; color: #64748b; margin: 0;">Create and compile custom reports for replenishment studies by selecting specific DSR sections.</p>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+        <!-- Card 1: Create New Report -->
+        <div class="card" onclick="window.showCreateReportForm()" style="padding: 32px; text-align: center; cursor: pointer; border: 1.5px solid #e2e8f0; border-radius: 12px; transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; background: #ffffff; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center;">
+          <div style="display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; background: #eff6ff; border-radius: 12px; margin-bottom: 20px;">
+            <i data-lucide="file-plus" style="width: 28px; height: 28px; color: #2563eb;"></i>
+          </div>
+          <h3 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px; font-weight: 700; color: #1e293b; margin: 0 0 8px 0;">Create New Report</h3>
+          <p style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; color: #64748b; margin: 0; line-height: 1.5;">Define a report name, choose custom sections, and generate a printable PDF.</p>
+        </div>
+        
+        <!-- Card 2: Open Existing Report -->
+        <div class="card" onclick="window.showExistingReportsList()" style="padding: 32px; text-align: center; cursor: pointer; border: 1.5px solid #e2e8f0; border-radius: 12px; transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; background: #ffffff; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center;">
+          <div style="display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; background: #f0fdf4; border-radius: 12px; margin-bottom: 20px;">
+            <i data-lucide="folder-open" style="width: 28px; height: 28px; color: #16a34a;"></i>
+          </div>
+          <h3 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px; font-weight: 700; color: #1e293b; margin: 0 0 8px 0;">Open Existing Report</h3>
+          <p style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; color: #64748b; margin: 0; line-height: 1.5;">Open, edit, rename, delete or download previously compiled reports.</p>
+        </div>
+      </div>
+    </div>
+  `;
+  if (window.lucide) lucide.createIcons();
+}
+
+function showCreateReportForm() {
+  const editorContainer = document.getElementById('repl-editor-container');
+  if (!editorContainer) return;
+  
+  editorContainer.innerHTML = `
+    <div class="card" style="margin-top: 40px; padding: 32px; max-width: 540px; margin: 40px auto; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.05);">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <div style="display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; background: #eff6ff; border-radius: 12px; margin-bottom: 16px;">
+          <i data-lucide="file-plus" style="width: 28px; height: 28px; color: #2563eb;"></i>
+        </div>
+        <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; font-weight: 800; color: #1e293b; margin: 0 0 8px 0;">New Replenishment Report</h2>
+        <p style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; color: #64748b; margin: 0; line-height: 1.5;">Enter a name for your custom report to start selecting DSR sections and compiling the PDF.</p>
+      </div>
+      
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div class="field" style="display: flex; flex-direction: column; gap: 6px; text-align: left;">
+          <label for="new-report-name-input" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">Report Title</label>
+          <input type="text" id="new-report-name-input" placeholder="e.g. Monsoon Replenishment Report 2026" style="padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s;" onkeydown="if(event.key==='Enter') window.submitCustomReportName()">
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-outline" onclick="window.showReplenishmentOptions(document.getElementById('repl-editor-container'))" style="flex:1; height: 42px; border-radius: 8px; cursor: pointer;">Back</button>
+          <button class="btn btn-primary" onclick="window.submitCustomReportName()" style="flex:2; display: flex; align-items: center; justify-content: center; height: 42px; gap: 8px; font-weight: 700; font-size: 14px; border-radius: 8px; border: none; cursor: pointer;">
+            <span>Create Report</span>
+            <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  if (window.lucide) lucide.createIcons();
+  
+  setTimeout(() => {
+    const input = document.getElementById('new-report-name-input');
+    if (input) input.focus();
+  }, 100);
+}
 
 function submitCustomReportName() {
   const input = document.getElementById('new-report-name-input');
@@ -97,13 +163,222 @@ function submitCustomReportName() {
     toast("Please enter a report name", "error");
     return;
   }
+  
+  const reports = loadLocalReports();
+  const newReport = {
+    id: 'rep_' + Date.now(),
+    name: reportName,
+    createdAt: new Date().toISOString(),
+    sections: []
+  };
+  reports.unshift(newReport);
+  saveLocalReports(reports);
+  
   const editorContainer = document.getElementById('repl-editor-container');
   if (editorContainer) {
-    renderCustomReportGenerator(editorContainer, reportName);
+    renderCustomReportGenerator(editorContainer, newReport);
   }
 }
 
-function onParentCheckboxChange(parentId, reportName) {
+function showExistingReportsList() {
+  const editorContainer = document.getElementById('repl-editor-container');
+  if (!editorContainer) return;
+  
+  const reports = loadLocalReports();
+  
+  let rowsHtml = '';
+  if (reports.length === 0) {
+    rowsHtml = `
+      <tr>
+        <td colspan="4" style="text-align:center; padding: 30px; color: #64748b;">No saved reports found. Click 'Back' and create a new report.</td>
+      </tr>
+    `;
+  } else {
+    reports.forEach(r => {
+      const dateStr = new Date(r.createdAt).toLocaleDateString();
+      const count = r.sections ? r.sections.length : 0;
+      
+      rowsHtml += `
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 12px; font-weight: 600; color: #1e293b;">${r.name}</td>
+          <td style="padding: 12px; color: #475569;">${dateStr}</td>
+          <td style="padding: 12px; color: #64748b;">
+            <span style="font-size:11px; background:#f1f5f9; color:#475569; padding:2px 8px; border-radius:10px; font-weight:600;">${count} sections</span>
+          </td>
+          <td style="padding: 12px; display:flex; gap:8px; align-items:center;">
+            <button class="btn btn-sm btn-primary" onclick="window.openCustomReport('${r.id}')" style="padding: 4px 8px; font-size: 11.5px; height: auto; cursor: pointer;">Open</button>
+            <button class="btn btn-sm btn-outline" onclick="window.renameCustomReport('${r.id}')" style="padding: 4px 8px; font-size: 11.5px; height: auto; cursor: pointer;">Rename</button>
+            <button class="btn btn-sm btn-saffron" onclick="window.downloadCustomReportPDFDirect('${r.id}')" style="padding: 4px 8px; font-size: 11.5px; height: auto; cursor: pointer;">📥 PDF</button>
+            <button class="btn btn-sm btn-outline text-danger" onclick="window.deleteCustomReport('${r.id}')" style="padding: 4px 8px; font-size: 11.5px; height: auto; border-color:#f87171 !important; color:#ef4444 !important; cursor: pointer;">Delete</button>
+          </td>
+        </tr>
+      `;
+    });
+  }
+  
+  editorContainer.innerHTML = `
+    <div class="card" style="margin-top: 20px; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <div>
+          <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px; font-weight: 800; color: #1e293b; margin:0 0 4px 0;">Saved Replenishment Reports</h2>
+          <p style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; color: #64748b; margin:0;">Saved reports for DSR project: ${S.activeProject.projectName || S.activeProject.district}</p>
+        </div>
+        <button class="btn btn-outline" onclick="window.showReplenishmentOptions(document.getElementById('repl-editor-container'))" style="cursor: pointer;">Back</button>
+      </div>
+      
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px;">
+          <thead>
+            <tr style="border-bottom: 2px solid #cbd5e1; background:#f8fafc; font-weight:700; color:#334155;">
+              <th style="padding:10px 12px;">Report Name</th>
+              <th style="padding:10px 12px;">Date Created</th>
+              <th style="padding:10px 12px;">Coverage</th>
+              <th style="padding:10px 12px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function openCustomReport(reportId) {
+  const reports = loadLocalReports();
+  const report = reports.find(r => r.id === reportId);
+  if (!report) return;
+  
+  const editorContainer = document.getElementById('repl-editor-container');
+  if (editorContainer) {
+    renderCustomReportGenerator(editorContainer, report);
+  }
+}
+
+function renameCustomReport(reportId) {
+  const reports = loadLocalReports();
+  const report = reports.find(r => r.id === reportId);
+  if (!report) return;
+  
+  const newName = prompt("Enter new name for the report:", report.name);
+  if (!newName || newName.trim() === '') return;
+  
+  report.name = newName.trim();
+  saveLocalReports(reports);
+  toast("Report renamed successfully!", "success");
+  showExistingReportsList();
+}
+
+function deleteCustomReport(reportId) {
+  if (!confirm("Are you sure you want to delete this report?")) return;
+  
+  let reports = loadLocalReports();
+  reports = reports.filter(r => r.id !== reportId);
+  saveLocalReports(reports);
+  toast("Report deleted successfully!", "success");
+  showExistingReportsList();
+}
+
+function downloadCustomReportPDFDirect(reportId) {
+  const reports = loadLocalReports();
+  const report = reports.find(r => r.id === reportId);
+  if (!report) return;
+  
+  const checkedIds = report.sections || [];
+  if (checkedIds.length === 0) {
+    toast("No sections selected in this report to download.", "error");
+    return;
+  }
+  
+  const allActiveIds = [...checkedIds];
+  const hasChapter = checkedIds.some(id => id.startsWith('chapter-'));
+  if (hasChapter && !allActiveIds.includes('chapters')) allActiveIds.push('chapters');
+  const hasPlate = checkedIds.some(id => id.startsWith('plate-'));
+  if (hasPlate && !allActiveIds.includes('plates')) allActiveIds.push('plates');
+
+  const html = compileSelectedSectionsHtml(report.name, checkedIds, allActiveIds);
+  
+  const tempDiv = document.createElement('div');
+  tempDiv.style.position = 'absolute';
+  tempDiv.style.left = '-9999px';
+  tempDiv.style.top = '-9999px';
+  tempDiv.innerHTML = html;
+  document.body.appendChild(tempDiv);
+  
+  if (typeof html2pdf === 'undefined') {
+    toast('Preparing PDF compilation tools...', 'info');
+    if (typeof ensurePortalVendors === 'function') {
+      ensurePortalVendors(['html2pdf', 'pdfjs']).then(() => {
+        document.body.removeChild(tempDiv);
+        downloadCustomReportPDFDirect(reportId);
+      }).catch(() => {
+        document.body.removeChild(tempDiv);
+        toast('PDF tools failed to load.', 'error');
+      });
+    }
+    return;
+  }
+  
+  const opt = {
+    margin: 10,
+    filename: `${report.name.replace(/\s+/g, '_')}_Replenishment_Report.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+  
+  toast('Generating replenishment report PDF...', 'info');
+  html2pdf().set(opt).from(tempDiv).save().then(() => {
+    toast('Replenishment Report PDF downloaded successfully!', 'success');
+    document.body.removeChild(tempDiv);
+  }).catch(err => {
+    console.error(err);
+    toast('PDF generation failed.', 'error');
+    document.body.removeChild(tempDiv);
+  });
+}
+
+function saveReportSelection(reportId) {
+  const reports = loadLocalReports();
+  const report = reports.find(r => r.id === reportId);
+  if (!report) return;
+  
+  const checkboxes = document.querySelectorAll('input[id^="chk-"]:checked, input[id^="chk-"][data-parent]:checked');
+  report.sections = Array.from(checkboxes).map(c => c.value);
+  
+  saveLocalReports(reports);
+}
+
+function hydrateCheckboxStates(checkedIds) {
+  if (!checkedIds) return;
+  
+  checkedIds.forEach(id => {
+    const chk = document.getElementById(`chk-${id}`);
+    if (chk) chk.checked = true;
+  });
+  
+  ['chapters', 'plates'].forEach(parentId => {
+    const parentChk = document.getElementById(`chk-${parentId}`);
+    if (!parentChk) return;
+    
+    const children = Array.from(document.querySelectorAll(`input[data-parent="${parentId}"]`));
+    const checkedChildren = children.filter(c => c.checked);
+    
+    if (checkedChildren.length === children.length && children.length > 0) {
+      parentChk.checked = true;
+      parentChk.indeterminate = false;
+    } else if (checkedChildren.length === 0) {
+      parentChk.checked = false;
+      parentChk.indeterminate = false;
+    } else {
+      parentChk.checked = false;
+      parentChk.indeterminate = true;
+    }
+  });
+}
+
+function onParentCheckboxChange(parentId, reportName, reportId) {
   const parentChk = document.getElementById(`chk-${parentId}`);
   if (!parentChk) return;
   const isChecked = parentChk.checked;
@@ -113,10 +388,11 @@ function onParentCheckboxChange(parentId, reportName) {
     child.checked = isChecked;
   });
   
-  window.updateCustomReportPreview(reportName);
+  saveReportSelection(reportId);
+  window.updateCustomReportPreview(reportName, reportId);
 }
 
-function onSubCheckboxChange(parentId, reportName) {
+function onSubCheckboxChange(parentId, reportName, reportId) {
   const parentChk = document.getElementById(`chk-${parentId}`);
   if (!parentChk) return;
   
@@ -134,10 +410,12 @@ function onSubCheckboxChange(parentId, reportName) {
     parentChk.indeterminate = true;
   }
   
-  window.updateCustomReportPreview(reportName);
+  saveReportSelection(reportId);
+  window.updateCustomReportPreview(reportName, reportId);
 }
 
-function renderCustomReportGenerator(container, reportName) {
+function renderCustomReportGenerator(container, report) {
+  const reportName = report.name;
   const sections = [
     { id: 'front-matter', name: 'Front Matter (Title, Preface, Acknowledgement)', type: 'DSR' },
     { 
@@ -182,7 +460,7 @@ function renderCustomReportGenerator(container, reportName) {
       s.subsections.forEach(sub => {
         subHtml += `
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-            <input type="checkbox" id="chk-${sub.id}" value="${sub.id}" data-parent="${s.id}" onchange="window.onSubCheckboxChange('${s.id}', '${escapedReportName}')" style="width:14px; height:14px; cursor:pointer;">
+            <input type="checkbox" id="chk-${sub.id}" value="${sub.id}" data-parent="${s.id}" onchange="window.onSubCheckboxChange('${s.id}', '${escapedReportName}', '${report.id}')" style="width:14px; height:14px; cursor:pointer;">
             <label for="chk-${sub.id}" style="font-size:12px; cursor:pointer; color:#475569; margin:0;">
               ${sub.name}
             </label>
@@ -193,7 +471,7 @@ function renderCustomReportGenerator(container, reportName) {
       checklistHtml += `
         <div style="margin-bottom:12px; padding:8px; background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0;">
           <div style="display:flex; align-items:center; gap:10px;">
-            <input type="checkbox" id="chk-${s.id}" value="${s.id}" onchange="window.onParentCheckboxChange('${s.id}', '${escapedReportName}')" style="width:16px; height:16px; cursor:pointer;">
+            <input type="checkbox" id="chk-${s.id}" value="${s.id}" onchange="window.onParentCheckboxChange('${s.id}', '${escapedReportName}', '${report.id}')" style="width:16px; height:16px; cursor:pointer;">
             <label for="chk-${s.id}" style="font-size:13px; font-weight:700; cursor:pointer; color:#1e293b; display:flex; align-items:center; gap:6px; margin:0; width:100%;">
               <span style="font-size:9px; padding:2px 6px; background:#cbd5e1; border-radius:10px; text-transform:uppercase; color:#475569; font-weight:700;">${s.type}</span>
               <span>${s.name}</span>
@@ -207,7 +485,7 @@ function renderCustomReportGenerator(container, reportName) {
     } else {
       checklistHtml += `
         <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px; padding:8px; background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0;">
-          <input type="checkbox" id="chk-${s.id}" value="${s.id}" onchange="window.updateCustomReportPreview('${escapedReportName}')" style="width:16px; height:16px; cursor:pointer;">
+          <input type="checkbox" id="chk-${s.id}" value="${s.id}" onchange="window.updateCustomReportPreview('${escapedReportName}', '${report.id}')" style="width:16px; height:16px; cursor:pointer;">
           <label for="chk-${s.id}" style="font-size:13px; font-weight:700; cursor:pointer; color:#1e293b; display:flex; align-items:center; gap:6px; margin:0; width:100%;">
             <span style="font-size:9px; padding:2px 6px; background:#e2e8f0; border-radius:10px; text-transform:uppercase; color:#475569; font-weight:700;">${s.type}</span>
             <span>${s.name}</span>
@@ -227,8 +505,8 @@ function renderCustomReportGenerator(container, reportName) {
             <div class="card-sub" style="font-size:12px; color:#64748b;">Select DSR sections & annexures to compile into a Replenishment Studies report</div>
           </div>
           <div style="display:flex; gap:10px;">
-            <button class="btn btn-outline" onclick="initReplenishmentView()">Back</button>
-            <button class="btn btn-primary" onclick="window.downloadCustomReportPDF('${escapedReportName}')">📥 Download PDF</button>
+            <button class="btn btn-outline" onclick="window.showExistingReportsList()" style="cursor: pointer;">Back</button>
+            <button class="btn btn-primary" onclick="window.downloadCustomReportPDF('${escapedReportName}', '${report.id}')" style="cursor: pointer;">📥 Download PDF</button>
           </div>
         </div>
       </div>
@@ -252,9 +530,15 @@ function renderCustomReportGenerator(container, reportName) {
       </div>
     </div>
   `;
+  
+  // Hydrate checkbox states
+  hydrateCheckboxStates(report.sections);
+  
+  // Render live preview on load
+  updateCustomReportPreview(reportName, report.id);
 }
 
-function updateCustomReportPreview(reportName) {
+function updateCustomReportPreview(reportName, reportId) {
   const checkboxes = document.querySelectorAll('input[id^="chk-"]:checked');
   const checkedIds = Array.from(checkboxes).map(c => c.value);
   
@@ -273,6 +557,10 @@ function updateCustomReportPreview(reportName) {
   if (allActiveIds.length === 0) {
     iframe.srcdoc = `<html><body style='font-family:sans-serif; color:#64748b; padding:40px; text-align:center;'><p>No sections selected yet. Please select sections on the left to see the live preview.</p></body></html>`;
     return;
+  }
+  
+  if (reportId) {
+    saveReportSelection(reportId);
   }
   
   const selectedHtml = compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds);
@@ -321,13 +609,13 @@ function compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds) {
     let sectionHtml = '';
     
     if (id === 'front-matter') {
-      const title = document.getElementById('fm-title')?.value || 'District Survey Report for Sand Mining';
-      const state = document.getElementById('fm-state')?.value || 'Punjab';
-      const version = document.getElementById('fm-version')?.value || 'Final Draft';
-      const preparedBy = document.getElementById('fm-prepared-by')?.value || 'Sub-Divisional Committee';
-      const assistedBy = document.getElementById('fm-assisted-by')?.value || 'IIT Ropar';
-      const preface = document.getElementById('fm-preface')?.value || '';
-      const ack = document.getElementById('fm-acknowledgement')?.value || '';
+      const title = document.getElementById('fm-title')?.value || (S.frontMatter && S.frontMatter.title) || 'District Survey Report for Sand Mining';
+      const state = document.getElementById('fm-state')?.value || (S.frontMatter && S.frontMatter.state) || 'Punjab';
+      const version = document.getElementById('fm-version')?.value || (S.frontMatter && S.frontMatter.version) || 'Final Draft';
+      const preparedBy = document.getElementById('fm-prepared-by')?.value || (S.frontMatter && S.frontMatter.preparedBy) || 'Sub-Divisional Committee';
+      const assistedBy = document.getElementById('fm-assisted-by')?.value || (S.frontMatter && S.frontMatter.assistedBy) || '';
+      const preface = document.getElementById('fm-preface')?.value || (S.frontMatter && S.frontMatter.preface) || '';
+      const ack = document.getElementById('fm-acknowledgement')?.value || (S.frontMatter && S.frontMatter.acknowledgement) || '';
       
       sectionHtml = `
         <div class="section-block">
@@ -533,16 +821,7 @@ function compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds) {
     </html>`;
 }
 
-function escapeHtml(value) {
-  return String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function downloadCustomReportPDF(reportName) {
+function downloadCustomReportPDF(reportName, reportId) {
   const iframe = document.getElementById('custom-report-preview-iframe');
   if (!iframe) return;
   const doc = iframe.contentWindow || iframe.contentDocument;
@@ -553,7 +832,7 @@ function downloadCustomReportPDF(reportName) {
     toast('Preparing PDF compilation tools...', 'info');
     if (typeof ensurePortalVendors === 'function') {
       ensurePortalVendors(['html2pdf', 'pdfjs']).then(() => {
-        downloadCustomReportPDF(reportName);
+        downloadCustomReportPDF(reportName, reportId);
       }).catch(() => {
         toast('PDF tools could not be loaded. Please refresh and try again.', 'error');
       });
