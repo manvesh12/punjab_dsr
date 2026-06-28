@@ -274,3 +274,17 @@ w i n d o w . s e l e c t R e p l e n i s h m e n t P r o j e c t   =   f u n c 
      } 
  } ;  
  
+ i f   ( w i n d o w . l o c a t i o n . h a s h   = = =   ' # r e p l e n i s h m e n t '   | |   w i n d o w . c u r r e n t V i e w I d   = = =   ' r e p l e n i s h m e n t ' )   { 
+     s e t T i m e o u t ( ( )   = >   i n i t R e p l e n i s h m e n t V i e w ( ) ,   1 0 0 ) ; 
+ }  
+ 
+ / /   S y n c   s i d e b a r   v i s i b i l i t y 
+ c o n s t   a n n e x u r e N a v   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' a n n e x u r e - n a v ' ) ; 
+ c o n s t   r e p l e n i s h m e n t N a v   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' r e p l e n i s h m e n t - n a v ' ) ; 
+ i f   ( a n n e x u r e N a v   & &   r e p l e n i s h m e n t N a v )   { 
+     r e p l e n i s h m e n t N a v . s t y l e . d i s p l a y   =   a n n e x u r e N a v . s t y l e . d i s p l a y ; 
+     n e w   M u t a t i o n O b s e r v e r ( ( )   = >   { 
+         r e p l e n i s h m e n t N a v . s t y l e . d i s p l a y   =   a n n e x u r e N a v . s t y l e . d i s p l a y ; 
+     } ) . o b s e r v e ( a n n e x u r e N a v ,   {   a t t r i b u t e s :   t r u e ,   a t t r i b u t e F i l t e r :   [ ' s t y l e ' ]   } ) ; 
+ }  
+ 
