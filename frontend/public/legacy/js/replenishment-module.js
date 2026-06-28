@@ -208,7 +208,7 @@ function showExistingReportsList() {
           <td style="padding: 12px; display:flex; gap:8px; align-items:center;">
             <button class="btn btn-sm btn-primary" onclick="window.openCustomReport('${r.id}')" style="padding: 4px 8px; font-size: 11.5px; height: auto; cursor: pointer;">Open</button>
             <button class="btn btn-sm btn-outline" onclick="window.renameCustomReport('${r.id}')" style="padding: 4px 8px; font-size: 11.5px; height: auto; cursor: pointer;">Rename</button>
-            <button class="btn btn-sm btn-saffron" onclick="window.downloadCustomReportPDFDirect('${r.id}')" style="padding: 4px 8px; font-size: 11.5px; height: auto; cursor: pointer;">📥 PDF</button>
+            <button class="btn btn-sm btn-saffron" onclick="window.downloadCustomReportPDFDirect('${r.id}')" style="padding: 4px 8px; font-size: 11.5px; height: auto; cursor: pointer;">Download PDF</button>
             <button class="btn btn-sm btn-outline text-danger" onclick="window.deleteCustomReport('${r.id}')" style="padding: 4px 8px; font-size: 11.5px; height: auto; border-color:#f87171 !important; color:#ef4444 !important; cursor: pointer;">Delete</button>
           </td>
         </tr>
@@ -301,21 +301,12 @@ function downloadCustomReportPDFDirect(reportId) {
 
   const html = compileSelectedSectionsHtml(report.name, checkedIds, allActiveIds);
   
-  const tempDiv = document.createElement('div');
-  tempDiv.style.position = 'absolute';
-  tempDiv.style.left = '-9999px';
-  tempDiv.style.top = '-9999px';
-  tempDiv.innerHTML = html;
-  document.body.appendChild(tempDiv);
-  
   if (typeof html2pdf === 'undefined') {
     toast('Preparing PDF compilation tools...', 'info');
     if (typeof ensurePortalVendors === 'function') {
       ensurePortalVendors(['html2pdf', 'pdfjs']).then(() => {
-        document.body.removeChild(tempDiv);
         downloadCustomReportPDFDirect(reportId);
       }).catch(() => {
-        document.body.removeChild(tempDiv);
         toast('PDF tools failed to load.', 'error');
       });
     }
@@ -326,18 +317,17 @@ function downloadCustomReportPDFDirect(reportId) {
     margin: 10,
     filename: `${report.name.replace(/\s+/g, '_')}_Replenishment_Report.pdf`,
     image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    html2canvas: { scale: 2, useCORS: true, logging: false },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak: { mode: ['css', 'legacy'] }
   };
   
   toast('Generating replenishment report PDF...', 'info');
-  html2pdf().set(opt).from(tempDiv).save().then(() => {
+  html2pdf().set(opt).from(html).save().then(() => {
     toast('Replenishment Report PDF downloaded successfully!', 'success');
-    document.body.removeChild(tempDiv);
   }).catch(err => {
     console.error(err);
     toast('PDF generation failed.', 'error');
-    document.body.removeChild(tempDiv);
   });
 }
 
@@ -520,7 +510,7 @@ function renderCustomReportGenerator(container, report) {
           </div>
           <div style="display:flex; gap:10px;">
             <button class="btn btn-outline" onclick="window.showExistingReportsList()" style="cursor: pointer;">Back</button>
-            <button class="btn btn-primary" onclick="window.downloadCustomReportPDF('${escapedReportName}', '${report.id}')" style="cursor: pointer;">📥 Download PDF</button>
+            <button class="btn btn-primary" onclick="window.downloadCustomReportPDF('${escapedReportName}', '${report.id}')" style="cursor: pointer;">Download PDF</button>
           </div>
         </div>
       </div>
@@ -1091,21 +1081,12 @@ function downloadCustomReportPDF(reportName, reportId) {
 
   const html = compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds);
   
-  const tempDiv = document.createElement('div');
-  tempDiv.style.position = 'absolute';
-  tempDiv.style.left = '-9999px';
-  tempDiv.style.top = '-9999px';
-  tempDiv.innerHTML = html;
-  document.body.appendChild(tempDiv);
-  
   if (typeof html2pdf === 'undefined') {
     toast('Preparing PDF compilation tools...', 'info');
     if (typeof ensurePortalVendors === 'function') {
       ensurePortalVendors(['html2pdf', 'pdfjs']).then(() => {
-        document.body.removeChild(tempDiv);
         downloadCustomReportPDF(reportName, reportId);
       }).catch(() => {
-        document.body.removeChild(tempDiv);
         toast('PDF tools failed to load.', 'error');
       });
     }
@@ -1116,18 +1097,17 @@ function downloadCustomReportPDF(reportName, reportId) {
     margin: 10,
     filename: `${reportName.replace(/\s+/g, '_')}_Replenishment_Report.pdf`,
     image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    html2canvas: { scale: 2, useCORS: true, logging: false },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak: { mode: ['css', 'legacy'] }
   };
   
   toast('Generating replenishment report PDF...', 'info');
-  html2pdf().set(opt).from(tempDiv).save().then(() => {
+  html2pdf().set(opt).from(html).save().then(() => {
     toast('Replenishment Report PDF downloaded successfully!', 'success');
-    document.body.removeChild(tempDiv);
   }).catch(err => {
     console.error(err);
     toast('PDF generation failed.', 'error');
-    document.body.removeChild(tempDiv);
   });
 }
 
