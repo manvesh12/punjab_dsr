@@ -17176,3 +17176,25 @@ document.addEventListener('change', (e) => {
     }
   }
 });
+
+function restoreSession() {
+  const token = localStorage.getItem('dsr_token');
+  const userJson = localStorage.getItem('dsr_user');
+  if (token && userJson) {
+    try {
+      S.user = JSON.parse(userJson);
+      S.role = localStorage.getItem('dsr_role') || S.user.role || 'user';
+      S.backendRole = S.user.backendRole || 'ROLE_OFFICER';
+      S.permissions = S.user.permissions || [];
+      S.scope = S.user.scope || {};
+      S.accessLabel = S.user.accessLabel || '';
+      showAppScreen();
+    } catch(e) {
+      console.error('Failed to restore session', e);
+      localStorage.removeItem('dsr_token');
+      localStorage.removeItem('dsr_user');
+      localStorage.removeItem('dsr_role');
+    }
+  }
+}
+window.addEventListener('DOMContentLoaded', restoreSession);
