@@ -16,30 +16,47 @@
   <div class="tricolour" aria-hidden="true"></div>
 
   <header style="position: relative; z-index: 10; background: #fff;">
-    <div class="utility-bar" style="position: relative; z-index: 1;">
+    <div class="utility-bar">
       <div class="site-wrap utility-inner">
         <span>भारत सरकार / Government of Punjab</span>
-        <div class="utility-links"><a href="#main-content">मुख्य सामग्री पर जाएँ</a><a href="#footer">साइटमैप</a><button type="button" aria-label="Increase font size">A+</button><button type="button" aria-label="Reset font size">A</button><a href="home.html" lang="hi">हिंदी</a></div>
+        <div class="utility-links">
+          <a href="#main-content">मुख्य सामग्री पर जाएँ</a>
+          <a href="#footer">साइटमैप</a>
+          <button type="button" aria-label="Increase font size">A+</button>
+          <button type="button" aria-label="Reset font size">A</button>
+          <a href="home.html" lang="hi">हिंदी</a>
+        </div>
       </div>
     </div>
-    <div class="site-wrap identity-row" style="position: relative; z-index: 1;">
-      <img class="gov-logo" src="logo/CoE-SEnSRS.jpeg" alt="SEnSRS Logo" style="width: 85px; height: 85px; border-radius: 50%; object-fit: contain; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+    
+    <div class="site-wrap identity-row">
+      <div class="header-left">
+        <img class="gov-logo" src="logo/CoE-SEnSRS.jpeg" alt="SEnSRS Logo">
+      </div>
+      
       <div class="identity-copy">
-        <p>Government of Punjab</p>
+        <p>DSR PORTAL - DISTRICT SURVEY REPORTS</p>
         <h1>District Survey Report Portal</h1>
         <span>Department of Mining and Geology</span>
       </div>
-      <div class="partner-mark" style="display: flex; align-items: center; gap: 15px;"><img src="assets/smart-dsr-logo.png" alt="IIT Ropar Logo" style="width: 85px; height: 85px; margin: 0 10px; object-fit: contain; border-radius: 50%;"><span>Technical Support<br><strong>IIT Ropar</strong></span></div>
+      
+      <div class="header-right">
+        <div>Technical Support: IIT Ropar<br><strong>SEnSRS - IIT Ropar</strong></div>
+        <img src="assets/smart-dsr-logo.png" alt="ESA Logo">
+      </div>
     </div>
-    <nav class="main-nav" aria-label="Primary navigation" style="position: relative; z-index: 1;">
+    
+    <nav class="main-nav" aria-label="Primary navigation">
       <div class="site-wrap nav-inner">
         <a class="active" href="home.html">Home</a>
         <a href="login.html">About DSR</a>
         <a href="login.html">Services</a>
-        <a href="login.html">District Reports</a>
+        <a href="login.html">Reports</a>
         <a href="login.html">Guidelines</a>
         <a href="login.html">Helpdesk</a>
-        <a class="login-link" href="login.html">Official Login</a>
+        <div class="nav-actions">
+          <a class="login-link" href="login.html">Official Login</a>
+        </div>
       </div>
     </nav>
   </header>
@@ -48,62 +65,83 @@
     <section class="hero">
       <div class="site-wrap hero-inner">
         <div class="hero-copy">
-          <p class="eyebrow">Digital public service platform</p>
-          <h2>District Survey Reports<br>for a transparent Punjab</h2>
-          <p>Access, prepare and monitor District Survey Reports through a unified, secure portal for the Department of Mining and Geology, Government of Punjab.</p>
-          <div class="hero-actions"><a class="button primary" href="login.html">Access DSR Portal</a><a class="button outline" href="login.html">View District Reports</a></div>
+          <div class="hero-filters">
+            <select><option>Districts</option></select>
+            <select><option>Select one</option></select>
+          </div>
+          <p class="eyebrow">DSR PLATFORM: TRANSPARENT PUNJAB</p>
+          <h2>District Survey</h2>
+          <p>Access, visualize, prepare, and monitor all District Survey Reports through a advanced, unified digital portal. Powered by ground-truth data from SEnSRS and satellite intelligence from ESA. Committed to sustainable mineral management in the State of Punjab.</p>
+          <div class="hero-actions">
+            <a class="button primary" href="login.html">Access DSR Portal →</a>
+            <a class="button outline" href="login.html">View District Reports 📄</a>
+          </div>
         </div>
-      <div class="hero-visual"><img src="logo/CoE-SEnSRS.jpeg" alt="SEnSRS Logo" style="border-radius: 50%; box-shadow: 0 10px 30px rgba(0,0,0,0.1); background: #fff; border: 2px solid #e2e8f0; width: 100%; height: 100%; object-fit: contain; padding: 15px;"></div>
-      </div>
-    </section>
-
-    <section class="notice-strip" aria-label="Latest notice"><div class="site-wrap notice-inner"><strong>Latest Updates</strong><p>District Survey Report preparation and review services are available through the portal.</p><a href="login.html">View all notices →</a></div></section>
-
-    <section class="site-wrap section registration-section" id="register-section" style="background: #f8fafc; padding: 40px; border-radius: 12px; margin-top: 40px; border: 1px solid #e2e8f0;">
-      <div class="section-heading" style="margin-bottom: 24px;">
-        <div>
-          <p class="section-kicker">New User?</p>
-          <h2>Register for DSR Portal</h2>
-        </div>
-      </div>
-      <div class="registration-form-card" style="max-width: 450px;" id="reg-step-1">
-        <div style="display: flex; flex-direction: column; gap: 16px;">
-          <div>
-            <label style="font-size: 14px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">Full Name</label>
-            <input type="text" id="reg-name" placeholder="Enter your full name" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 15px; box-sizing: border-box;">
-          </div>
-          <div>
-            <label style="font-size: 14px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">Email Address</label>
-            <input type="email" id="reg-email" placeholder="name@domain.gov.in" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 15px; box-sizing: border-box;">
-          </div>
-          <div>
-            <label style="font-size: 14px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">Create Password</label>
-            <input type="password" id="reg-pass" placeholder="********" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 15px; box-sizing: border-box;">
-            <span style="font-size: 12px; color: #64748b; margin-top: 4px; display: block;">Must be at least 10 characters with letters and numbers.</span>
-          </div>
-          <p id="reg-msg" style="font-size: 14px; font-weight: 600; margin: 0; display: none;"></p>
-          <button type="button" onclick="submitHomeRegistration()" class="button primary" style="width: 100%; justify-content: center; margin-top: 10px; font-size: 16px;">Register Now</button>
-        </div>
-      </div>
-
-      <div class="registration-form-card" style="max-width: 450px; display: none;" id="reg-step-2">
-        <div style="display: flex; flex-direction: column; gap: 16px;">
-          <div>
-            <label style="font-size: 14px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">Enter OTP sent to your email</label>
-            <input type="text" id="reg-otp" placeholder="6-digit OTP" maxlength="6" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 15px; box-sizing: border-box; text-align: center; letter-spacing: 2px;">
-          </div>
-          <p id="otp-msg" style="font-size: 14px; font-weight: 600; margin: 0; display: none;"></p>
-          <button type="button" onclick="verifyRegisterOtp()" class="button primary" style="width: 100%; justify-content: center; margin-top: 10px; font-size: 16px;">Verify OTP</button>
+        <div class="hero-visual">
+          <img class="hero-emblem" src="assets/esa-trees.png" alt="ESA Emblem">
         </div>
       </div>
     </section>
-    <section class="site-wrap section services">
-      <div class="section-heading"><div><p class="section-kicker">Citizen & department services</p><h2>Quick access</h2></div><a href="login.html">View all services →</a></div>
-      <div class="service-list">
-        <a href="login.html"><span class="service-number">01</span><span><strong>District Survey Reports</strong><small>Browse published reports district-wise</small></span><b>→</b></a>
-        <a href="login.html"><span class="service-number">02</span><span><strong>Track DSR Status</strong><small>Check the progress of a submitted report</small></span><b>→</b></a>
-        <a href="login.html"><span class="service-number">03</span><span><strong>Department Login</strong><small>Secure access for authorised officials</small></span><b>→</b></a>
-        <a href="login.html"><span class="service-number">04</span><span><strong>Guidelines & Downloads</strong><small>Forms, manuals and reference documents</small></span><b>→</b></a>
+
+    <section class="notice-strip" aria-label="Latest notice">
+      <div class="site-wrap notice-inner">
+        <span class="notice-label">LATEST UPDATES</span>
+        <div class="notice-items">
+          <span>District Survey Report preparation service now available state-wide.</span>
+          <span>New satellite data overlays from ESA added for all districts.</span>
+          <span>IIT Ropar conducting DGPS survey training sessions.</span>
+        </div>
+        <a href="login.html">View all notices →</a>
+      </div>
+    </section>
+
+    <section class="quick-access-section">
+      <div class="site-wrap">
+        <div class="quick-access-header">
+          <div>
+            <p class="section-kicker">CITIZEN & DEPARTMENT SERVICES</p>
+            <h2>Quick access</h2>
+          </div>
+          <a href="login.html">View all services →</a>
+        </div>
+        
+        <div class="quick-cards">
+          <a href="login.html" class="quick-card">
+            <div class="card-num">01</div>
+            <div class="card-content">
+              <div class="card-title">District Survey Reports</div>
+              <p class="card-desc">Browse published reports district-wise</p>
+            </div>
+            <div class="card-arrow">→</div>
+          </a>
+          
+          <a href="login.html" class="quick-card">
+            <div class="card-num">02</div>
+            <div class="card-content">
+              <div class="card-title">Track DSR Status <span class="badge">In Review (50%)</span></div>
+              <p class="card-desc">Check the progress of a submitted report</p>
+            </div>
+            <div class="card-arrow">→</div>
+          </a>
+          
+          <a href="login.html" class="quick-card">
+            <div class="card-num">03</div>
+            <div class="card-content">
+              <div class="card-title">Department Login</div>
+              <p class="card-desc">Secure access for authorised officials</p>
+            </div>
+            <div class="card-arrow">→</div>
+          </a>
+          
+          <a href="login.html" class="quick-card">
+            <div class="card-num">04</div>
+            <div class="card-content">
+              <div class="card-title">Guidelines & Downloads</div>
+              <p class="card-desc">Forms, manuals and reference documents</p>
+            </div>
+            <div class="card-arrow">→</div>
+          </a>
+        </div>
       </div>
     </section>
 
