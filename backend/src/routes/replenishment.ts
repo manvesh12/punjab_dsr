@@ -2,7 +2,7 @@ import { Router } from "express";
 import { ReportStatus, Prisma } from "@prisma/client";
 import { prisma } from "../lib/prisma.js";
 import { jsonSafe } from "../lib/json.js";
-import { requireAuth } from "../middleware/auth.js";
+import { requireAuth } from "../lib/auth.js";
 
 export const replenishmentRouter = Router();
 
@@ -14,7 +14,7 @@ export const replenishmentRouter = Router();
 replenishmentRouter.get("/projects/:projectId/replenishment", requireAuth, async (req, res) => {
   try {
     const { projectId } = req.params;
-    const parsedProjectId = BigInt(projectId);
+    const parsedProjectId = BigInt(projectId as string);
 
     const studies = await prisma.replenishmentStudy.findMany({
       where: { projectId: parsedProjectId },
@@ -31,7 +31,7 @@ replenishmentRouter.get("/projects/:projectId/replenishment", requireAuth, async
 replenishmentRouter.post("/projects/:projectId/replenishment", requireAuth, async (req, res) => {
   try {
     const { projectId } = req.params;
-    const parsedProjectId = BigInt(projectId);
+    const parsedProjectId = BigInt(projectId as string);
     const body = req.body || {};
 
     const project = await prisma.project.findUnique({
@@ -87,7 +87,7 @@ replenishmentRouter.get("/replenishment/:id", requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const study = await prisma.replenishmentStudy.findUnique({
-      where: { id },
+      where: { id: id as string },
       include: { project: true }
     });
 
@@ -108,14 +108,14 @@ replenishmentRouter.put("/replenishment/:id", requireAuth, async (req, res) => {
     const { id } = req.params;
     const body = req.body || {};
 
-    const existing = await prisma.replenishmentStudy.findUnique({ where: { id } });
+    const existing = await prisma.replenishmentStudy.findUnique({ where: { id: id as string } });
     if (!existing) {
       res.status(404).json({ error: "Study not found" });
       return;
     }
 
     const study = await prisma.replenishmentStudy.update({
-      where: { id },
+      where: { id: id as string },
       data: {
         title: body.title !== undefined ? body.title : existing.title,
         status: body.status !== undefined ? body.status : existing.status,
@@ -134,7 +134,7 @@ replenishmentRouter.put("/replenishment/:id", requireAuth, async (req, res) => {
 replenishmentRouter.delete("/replenishment/:id", requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
-    await prisma.replenishmentStudy.delete({ where: { id } });
+    await prisma.replenishmentStudy.delete({ where: { id: id as string } });
     res.json(jsonSafe({ message: "Replenishment study deleted" }));
   } catch (error: any) {
     res.status(500).json({ error: error.message });
