@@ -313,22 +313,40 @@ function downloadCustomReportPDFDirect(reportId) {
     return;
   }
   
-  const opt = {
-    margin: 10,
-    filename: `${report.name.replace(/\s+/g, '_')}_Replenishment_Report.pdf`,
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true, logging: false },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-    pagebreak: { mode: ['css', 'legacy'] }
-  };
+  const tempIframe = document.createElement('iframe');
+  tempIframe.style.position = 'absolute';
+  tempIframe.style.left = '-9999px';
+  tempIframe.style.top = '0';
+  tempIframe.style.width = '1024px';
+  tempIframe.style.height = '768px';
+  tempIframe.style.border = 'none';
+  document.body.appendChild(tempIframe);
   
-  toast('Generating replenishment report PDF...', 'info');
-  html2pdf().set(opt).from(html).save().then(() => {
-    toast('Replenishment Report PDF downloaded successfully!', 'success');
-  }).catch(err => {
-    console.error(err);
-    toast('PDF generation failed.', 'error');
-  });
+  tempIframe.srcdoc = html;
+  
+  toast('Compiling and rendering PDF pages...', 'info');
+  
+  tempIframe.onload = function() {
+    setTimeout(() => {
+      const opt = {
+        margin: 10,
+        filename: `${report.name.replace(/\s+/g, '_')}_Replenishment_Report.pdf`,
+        image: { type: 'jpeg', quality: 0.95 },
+        html2canvas: { scale: 1.5, useCORS: true, logging: false },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css', 'legacy'] }
+      };
+      
+      html2pdf().set(opt).from(tempIframe.contentWindow.document.body).save().then(() => {
+        toast('Replenishment Report PDF downloaded successfully!', 'success');
+        document.body.removeChild(tempIframe);
+      }).catch(err => {
+        console.error(err);
+        toast('PDF generation failed.', 'error');
+        document.body.removeChild(tempIframe);
+      });
+    }, 800);
+  };
 }
 
 function saveReportSelection(reportId) {
@@ -1093,22 +1111,40 @@ function downloadCustomReportPDF(reportName, reportId) {
     return;
   }
   
-  const opt = {
-    margin: 10,
-    filename: `${reportName.replace(/\s+/g, '_')}_Replenishment_Report.pdf`,
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true, logging: false },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-    pagebreak: { mode: ['css', 'legacy'] }
-  };
+  const tempIframe = document.createElement('iframe');
+  tempIframe.style.position = 'absolute';
+  tempIframe.style.left = '-9999px';
+  tempIframe.style.top = '0';
+  tempIframe.style.width = '1024px';
+  tempIframe.style.height = '768px';
+  tempIframe.style.border = 'none';
+  document.body.appendChild(tempIframe);
   
-  toast('Generating replenishment report PDF...', 'info');
-  html2pdf().set(opt).from(html).save().then(() => {
-    toast('Replenishment Report PDF downloaded successfully!', 'success');
-  }).catch(err => {
-    console.error(err);
-    toast('PDF generation failed.', 'error');
-  });
+  tempIframe.srcdoc = html;
+  
+  toast('Compiling and rendering PDF pages...', 'info');
+  
+  tempIframe.onload = function() {
+    setTimeout(() => {
+      const opt = {
+        margin: 10,
+        filename: `${reportName.replace(/\s+/g, '_')}_Replenishment_Report.pdf`,
+        image: { type: 'jpeg', quality: 0.95 },
+        html2canvas: { scale: 1.5, useCORS: true, logging: false },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css', 'legacy'] }
+      };
+      
+      html2pdf().set(opt).from(tempIframe.contentWindow.document.body).save().then(() => {
+        toast('Replenishment Report PDF downloaded successfully!', 'success');
+        document.body.removeChild(tempIframe);
+      }).catch(err => {
+        console.error(err);
+        toast('PDF generation failed.', 'error');
+        document.body.removeChild(tempIframe);
+      });
+    }, 800);
+  };
 }
 
 function escapeHtml(value) {
