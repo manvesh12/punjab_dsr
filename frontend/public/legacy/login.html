@@ -6124,12 +6124,60 @@
 document.addEventListener("DOMContentLoaded", function() {
     if(document.getElementById('dash-interactive-map')) {
         var map = L.map('dash-interactive-map').setView([31.1471, 75.3412], 7);
+        
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
             attribution: 'Tiles &copy; Esri'
         }).addTo(map);
+
+        fetch('assets/punjab_districts.geojson')
+            .then(res => res.json())
+            .then(data => {
+                var geoLayer = L.geoJSON(data, {
+                    style: function(feature) {
+                        return {
+                            color: '#F2A123', // Gold border
+                            weight: 2,
+                            fillColor: '#000',
+                            fillOpacity: 0.1
+                        };
+                    },
+                    onEachFeature: function (feature, layer) {
+                        if (feature.properties && feature.properties.NAME_2) {
+                            layer.bindTooltip(feature.properties.NAME_2, {
+                                permanent: true, 
+                                direction: "center",
+                                className: "map-district-label"
+                            });
+                        }
+                    }
+                }).addTo(map);
+
+                // Restrict the map entirely to Punjab
+                var bounds = geoLayer.getBounds();
+                map.fitBounds(bounds);
+                map.setMaxBounds(bounds.pad(0.1));
+                
+                // Prevent user from zooming out beyond Punjab's fit bound
+                map.on('zoomend', function() {
+                    if (map.getZoom() < 7) {
+                        map.setZoom(7);
+                    }
+                });
+            });
     }
 });
 </script>
+<style>
+.map-district-label {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    color: #fff;
+    font-weight: 700;
+    font-size: 11px;
+    text-shadow: 1px 1px 2px #000, -1px -1px 2px #000, 1px -1px 2px #000, -1px 1px 2px #000;
+}
+</style>
 </body>
 
 </html>
