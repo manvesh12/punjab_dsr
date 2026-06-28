@@ -101,10 +101,77 @@ function compile() {
     // 5. Append modals & toast overlay
     html += applyAssetVersion(fs.readFileSync(path.join(SRC_DIR, 'templates', 'modals.html'), 'utf8'));
 
-    // 6. Append one bundled JS file instead of dozens of network requests.
-    html += `\n<script defer src="${JS_BUNDLE_FILE}?v=${ASSET_VERSION}"></script>`;
+    // 6. Append bundled and extra JS modules + Leaflet map script + styles
+    html += `\n<script defer src="${JS_BUNDLE_FILE}?v=${ASSET_VERSION}-v3"></script>`;
+    html += `\n<script defer src="js/model-dsr-module.js?v=2"></script>`;
+    html += `\n<script defer src="js/replenishment-module.js?v=4"></script>`;
+    
+    html += `\n<script>
+document.addEventListener("DOMContentLoaded", function() {
+    if(document.getElementById('dash-interactive-map')) {
+        window.dashboardMap = L.map('dash-interactive-map', {
+            zoomControl: true,
+            scrollWheelZoom: true
+        }).setView([31.1471, 75.3412], 8);
+        var map = window.dashboardMap;
+        
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri'
+        }).addTo(map);
 
-    // 7. Close body and html
+        // Force invalidate size after a short delay (fixes render in hidden/tabbed containers)
+        setTimeout(function() { map.invalidateSize(); }, 300);
+
+        fetch('assets/punjab_districts.geojson')
+            .then(res => res.json())
+            .then(data => {
+                var geoLayer = L.geoJSON(data, {
+                    style: function(feature) {
+                        return {
+                            color: '#F2A123',
+                            weight: 2.5,
+                            fillColor: 'rgba(242, 161, 35, 0.15)',
+                            fillOpacity: 0.15
+                        };
+                    },
+                    onEachFeature: function (feature, layer) {
+                        if (feature.properties && feature.properties.NAME_2) {
+                            layer.bindTooltip(feature.properties.NAME_2, {
+                                permanent: true, 
+                                direction: "center",
+                                className: "map-district-label"
+                            });
+                        }
+                        layer.on('mouseover', function() {
+                            this.setStyle({ fillOpacity: 0.35, weight: 3 });
+                        });
+                        layer.on('mouseout', function() {
+                            geoLayer.resetStyle(this);
+                        });
+                    }
+                }).addTo(map);
+
+                // Fit map exactly to Punjab bounds with padding
+                var bounds = geoLayer.getBounds();
+                window.dashboardMapBounds = bounds;
+                map.fitBounds(bounds, { padding: [20, 20] });
+                map.setMaxBounds(bounds.pad(0.15));
+                map.setMinZoom(map.getZoom() - 1);
+            });
+    }
+});
+</script>
+<style>
+.map-district-label {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    color: #fff;
+    font-weight: 700;
+    font-size: 11px;
+    text-shadow: 1px 1px 2px #000, -1px -1px 2px #000, 1px -1px 2px #000, -1px 1px 2px #000;
+}
+</style>`;
     html += '\n</body>\n</html>';
 
     // Write built file (App / Login portal)
