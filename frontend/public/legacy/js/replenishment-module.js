@@ -815,7 +815,7 @@ function compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds) {
           `;
         }
         
-        combinedContent += subHtml;
+        combinedContent += `<div class="section-block">${subHtml}</div>`;
       });
     }
     else if (item.id === 'chapters') {
@@ -1227,6 +1227,44 @@ async function generateReplenishmentPDF(reportName, checkedIds) {
     </style>
   `;
 
+async function renderHtmlToCanvasWithFallback(renderDiv, pageIndex) {
+  renderDiv.querySelectorAll('.leaflet-container, .leaflet-control-container, .leaflet-pane, .leaflet-top, .leaflet-bottom').forEach(el => el.remove());
+  renderDiv.querySelectorAll('script, style, iframe, button, .btn, .upload-zone, .modal').forEach(el => el.remove());
+  renderDiv.querySelectorAll('svg').forEach(el => el.remove());
+  renderDiv.querySelectorAll('img').forEach(img => {
+    const src = img.getAttribute('src');
+    if (!src || src === 'null' || src === 'undefined' || src.trim() === '') {
+      img.remove();
+    }
+  });
+
+  try {
+    const canvas = await html2canvas(renderDiv, {
+      scale: 1.5,
+      useCORS: true,
+      logging: false,
+      backgroundColor: '#ffffff'
+    });
+    return canvas.toDataURL('image/jpeg', 0.95);
+  } catch (err) {
+    console.warn(`HTML rendering Attempt 1 failed for page ${pageIndex + 1}:`, err);
+  }
+  
+  try {
+    const canvas = await html2canvas(renderDiv, {
+      scale: 1.0,
+      useCORS: false,
+      logging: false,
+      backgroundColor: '#ffffff'
+    });
+    return canvas.toDataURL('image/jpeg', 0.9);
+  } catch (err) {
+    console.warn(`HTML rendering Attempt 2 failed for page ${pageIndex + 1}:`, err);
+  }
+  
+  return null;
+}
+
   // 5. Render loop
   try {
     for (let i = 0; i < itemsToRender.length; i++) {
@@ -1253,19 +1291,35 @@ async function generateReplenishmentPDF(reportName, checkedIds) {
       } else {
         renderDiv.innerHTML = styles + item.html;
         
-        try {
-          const canvas = await html2canvas(renderDiv, {
-            scale: 2, // High resolution scale
-            useCORS: true,
-            logging: false,
-            backgroundColor: '#ffffff'
-          });
-          const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        const imgData = await renderHtmlToCanvasWithFallback(renderDiv, i);
+        if (imgData) {
           doc.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-        } catch (err) {
-          console.error(`Error rendering HTML to canvas at page ${i + 1}:`, err);
-          doc.setFontSize(14);
-          doc.text(`[Page ${i + 1}: Render error]`, pdfWidth / 2, pdfHeight / 2, { align: 'center' });
+        } else {
+          doc.setFont('Helvetica', 'normal');
+          doc.setTextColor(17, 24, 39);
+          
+          const titleEl = renderDiv.querySelector('.section-title');
+          const title = titleEl ? titleEl.textContent : 'Section';
+          doc.setFontSize(16);
+          doc.text(title, 20, 20);
+          doc.setLineWidth(0.5);
+          doc.line(20, 23, 190, 23);
+          
+          doc.setFontSize(10);
+          doc.setTextColor(75, 85, 99);
+          
+          let y = 32;
+          const paragraphs = Array.from(renderDiv.querySelectorAll('p, td, th')).map(el => el.textContent.trim()).filter(Boolean);
+          
+          for (const text of paragraphs) {
+            if (y > 275) {
+              doc.addPage();
+              y = 20;
+            }
+            const splitText = doc.splitTextToSize(text, 170);
+            doc.text(splitText, 20, y);
+            y += (splitText.length * 5) + 4;
+          }
         }
       }
       
