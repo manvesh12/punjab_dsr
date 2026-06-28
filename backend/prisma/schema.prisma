@@ -114,6 +114,7 @@ model Project {
   childPhases       Project[]     @relation("ProjectPhaseChain")
   generatedDsrs     GeneratedDsr[]
   modelImportHistory ModelImportHistory[]
+  replenishmentStudies ReplenishmentStudy[]
 
   @@index([parentPhaseId])
   @@index([district, phaseNo])
@@ -342,5 +343,24 @@ model Invitation {
   expiresAt DateTime
   createdBy BigInt
   createdAt DateTime @default(now())
+}
+
+model ReplenishmentStudy {
+  id              String   @id @default(uuid())
+  projectId       BigInt
+  title           String
+  status          ReportStatus @default(DRAFT)
+  
+  // JSON field storing all unique survey data (DGPS, Drone, DEM, Cross Sections)
+  surveyData      Json     @default("{}") 
+  
+  // JSON field storing the synced DSR data and AI computations
+  reportState     Json     @default("{}") 
+  
+  createdBy       BigInt?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  project         Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 

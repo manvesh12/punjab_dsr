@@ -331,6 +331,7 @@
           <button class="sb-item" onclick="showView('chapters',this)"><span class="sb-ico"><i data-lucide="book-open"></i></span>Chapters (10)</button>
           <button class="sb-item" onclick="showView('plates',this)"><span class="sb-ico"><i data-lucide="map"></i></span>Plate Section</button>
           <button class="sb-item" onclick="showView('graphs',this)" style="padding-left: 24px; font-size: 11px;"><span class="sb-ico" style="width: 24px; height: 24px; font-size: 11px;"><i data-lucide="line-chart"></i></span>Cross Section Graphs</button>
+          <button class="sb-item" onclick="showView('replenishment',this)"><span class="sb-ico"><i data-lucide="refresh-cw"></i></span>Replenishment Studies</button>
         </div>
         <div class="sb-section" id="annexure-nav" style="display:none">
           <div class="sb-section-lbl" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 800; color: var(--p-accent); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; padding: 0 4px;">Annexures</div>
@@ -2858,7 +2859,9 @@
           <div id="plate-list"></div>
         </div>
 
-              <div id="view-graphs" class="view">
+        <div id="view-replenishment" class="view"></div>
+
+        <div id="view-graphs" class="view">
           <div class="header-row">
             <div>
               <div class="page-title">Cross Section Graph Generator</div>
@@ -6088,5 +6091,6 @@
 
 <script defer src="js/portal.bundle.js?v=site-zoom-20260612i"></script>
 <script defer src="js/model-dsr-module.js"></script>
+<script defer src="js/replenishment-module.js"></script>
 </body>
 </html>
