@@ -1,7 +1,5 @@
 // Replenishment Study Module
-// Handles the UI, fetching, and syncing for Replenishment Studies
-
-let currentReplenishmentStudies = [];
+// Handles the UI, compilation, and custom PDF generation for Replenishment Studies
 
 function initReplenishmentView() {
   const container = document.getElementById('view-replenishment');
@@ -10,241 +8,44 @@ function initReplenishmentView() {
   const selectContainer = document.getElementById('repl-project-select-container');
   const contentContainer = document.getElementById('repl-content-container');
   const editorContainer = document.getElementById('repl-editor-container');
-  const headerBtn = container.querySelector('.header-row button');
-  const subTitle = container.querySelector('.page-sub');
-  
-  if (editorContainer) editorContainer.style.display = 'none';
-
-  if (!S.activeProject || !S.activeProject.id) {
-    if (selectContainer) selectContainer.style.display = 'block';
-    if (contentContainer) contentContainer.style.display = 'none';
-    if (headerBtn) headerBtn.style.display = 'none';
-    if (subTitle) subTitle.textContent = 'Please select a project to manage its Replenishment Studies.';
-    
-    apiFetch('/projects')
-      .then(projects => {
-        const sel = document.getElementById('repl-project-selector');
-        if (!sel) return;
-        if (!projects || projects.length === 0) {
-           sel.innerHTML = '<option value="">No projects available</option>';
-           return;
-        }
-        window._replenishmentProjectsCache = projects;
-        let html = '<option value="">-- Select Project --</option>';
-        projects.forEach(p => {
-          html += `<option value="${p.id}">${p.projectName || p.district + ' (' + p.year + ')'}</option>`;
-        });
-        sel.innerHTML = html;
-      })
-      .catch(err => {
-         const sel = document.getElementById('repl-project-selector');
-         if (sel) sel.innerHTML = '<option value="">Failed to load projects</option>';
-      });
-  } else {
-    if (selectContainer) selectContainer.style.display = 'none';
-    if (contentContainer) contentContainer.style.display = 'block';
-    if (headerBtn) headerBtn.style.display = 'inline-flex';
-    if (subTitle) subTitle.textContent = `Manage Replenishment Studies for ${S.activeProject.projectName || S.activeProject.district || 'this project'}. The DSR acts as the single source of truth.`;
-    
-    fetchReplenishmentStudies();
-  }
-}
-
-async function fetchReplenishmentStudies() {
-  const list = document.getElementById('replenishment-list');
-  if (!list || !S.activeProject) return;
-
-  try {
-    const studies = await apiFetch(`/projects/${S.activeProject.id}/replenishment`);
-    currentReplenishmentStudies = studies;
-    
-    if (studies.length === 0) {
-      list.innerHTML = `<div style="padding:20px; text-align:center; color:var(--text-light);">No Replenishment Studies found for this project.</div>`;
-      return;
-    }
-
-    let html = `<table class="table">
-      <thead>
-        <tr>
-          <th>Title</th>
-          <th>Status</th>
-          <th>Created</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>`;
-      
-    studies.forEach(study => {
-      html += `
-        <tr>
-          <td><strong>${study.title}</strong></td>
-          <td><span class="badge ${study.status.toLowerCase()}">${study.status}</span></td>
-          <td>${new Date(study.createdAt).toLocaleDateString()}</td>
-          <td>
-            <button class="btn btn-sm btn-outline" onclick="openReplenishmentStudy('${study.id}')">Open Editor</button>
-            <button class="btn btn-sm btn-outline text-danger" onclick="deleteReplenishmentStudy('${study.id}')">Delete</button>
-          </td>
-        </tr>`;
-    });
-    
-    html += `</tbody></table>`;
-    list.innerHTML = html;
-  } catch (err) {
-    list.innerHTML = `<div style="padding:20px; color:red;">Failed to load studies: ${err.message}</div>`;
-  }
-}
-
-async function createReplenishmentStudy() {
-  if (!S.activeProject) return;
-  try {
-    const title = prompt("Enter Title for Replenishment Study:");
-    if (!title) return;
-    
-    // Automatically hits the backend to extract DSR Base data
-    const res = await apiFetch(`/projects/${S.activeProject.id}/replenishment`, {
-      method: 'POST',
-      body: JSON.stringify({ title })
-    });
-    
-    toast("Replenishment Study created and synchronized with DSR!", "success");
-    fetchReplenishmentStudies();
-    openReplenishmentStudy(res.id);
-  } catch (err) {
-    toast("Error creating study: " + err.message, "error");
-  }
-}
-
-async function openReplenishmentStudy(id) {
-  const selectContainer = document.getElementById('repl-project-select-container');
-  const contentContainer = document.getElementById('repl-content-container');
-  const editorContainer = document.getElementById('repl-editor-container');
   
   if (selectContainer) selectContainer.style.display = 'none';
   if (contentContainer) contentContainer.style.display = 'none';
-  if (editorContainer) editorContainer.style.display = 'block';
+  if (!editorContainer) return;
+  
+  editorContainer.style.display = 'block';
 
-  // Re-fetch studies if not loaded
-  if (currentReplenishmentStudies.length === 0 && S.activeProject) {
-      currentReplenishmentStudies = await apiFetch(`/projects/${S.activeProject.id}/replenishment`);
+  if (!S.activeProject || !S.activeProject.id) {
+    editorContainer.innerHTML = `
+      <div class="card" style="margin-top:20px; padding:40px; text-align:center; max-width:600px; margin:20px auto;">
+        <i data-lucide="info" style="width:48px;height:48px;color:#3b82f6;display:block;margin:0 auto 16px;"></i>
+        <h2 style="color:#17324d;">No Active Project</h2>
+        <p style="color:#64748b; margin-top:8px;">Please select a DSR project from the projects list first to generate its Replenishment Report.</p>
+      </div>
+    `;
+    if (window.lucide) lucide.createIcons();
+    return;
   }
-
-  const study = currentReplenishmentStudies.find(s => s.id === id);
-  if (!study) return;
-
-  const dsrData = study.reportState || {};
-  const surveyData = study.surveyData || {};
-
-  // Form matching Government structure
+  
+  // If already has an active custom report view, don't overwrite it
+  const titleDisplay = document.getElementById('custom-report-title-display');
+  if (titleDisplay) return;
+  
+  // Show the starter card
   editorContainer.innerHTML = `
-    <div class="card">
-      <div class="card-hd">
-        <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
-          <div>
-            <div class="card-title">Editor: ${study.title}</div>
-            <div class="card-sub">Single Source of Truth Synchronization Active</div>
-          </div>
-          <div style="display:flex; gap:10px;">
-            <button class="btn btn-outline" onclick="initReplenishmentView()">Back</button>
-            <button class="btn btn-primary" onclick="saveReplenishmentStudy('${id}')">Save Changes</button>
-          </div>
-        </div>
-      </div>
-      <div class="card-bd">
-        <div class="layout-grid" style="grid-template-columns: 1fr 1fr; gap: 20px;">
-          <!-- LEFT: Synced DSR Data (Read-only reference) -->
-          <div class="panel">
-            <div class="panel-hd" style="display:flex; justify-content:space-between;">
-              <span>Synced DSR Data</span>
-              <span class="badge" style="background:#e6f4ea; color:#137333; padding:2px 8px; border-radius:12px; font-size:11px;">In Sync</span>
-            </div>
-            <div class="panel-bd" style="max-height:600px; overflow-y:auto; background:#f9f9fa;">
-              <p class="text-light" style="font-size:12px; margin-bottom:15px;">
-                This data is automatically inherited from the parent DSR. To change this, modify the DSR project directly.
-              </p>
-              <div class="field-row">
-                <div class="field"><label>District</label><input disabled value="${dsrData.district || 'Data to be updated after survey.'}"></div>
-                <div class="field"><label>Year</label><input disabled value="${dsrData.year || 'Data to be updated after survey.'}"></div>
-              </div>
-              <div class="field"><label>Rivers</label><input disabled value="${dsrData.rivers || 'Pending Field Verification'}"></div>
-              
-              <div style="margin-top:20px; font-weight:600; font-size:13px; margin-bottom:4px;">Geomorphology & Drainage</div>
-              <textarea disabled style="min-height:80px; width:100%; border:1px solid #ddd; background:#eee; padding:8px; border-radius:4px;">${dsrData.drainage?.description || 'Data to be updated after survey.'}</textarea>
-              
-              <div style="margin-top:20px; font-weight:600; font-size:13px; margin-bottom:4px;">Rainfall Climate</div>
-              <textarea disabled style="min-height:80px; width:100%; border:1px solid #ddd; background:#eee; padding:8px; border-radius:4px;">${dsrData.rainfall?.climateDetails || 'Data to be updated after survey.'}</textarea>
-            </div>
-          </div>
-          
-          <!-- RIGHT: New Survey Data Input -->
-          <div class="panel">
-            <div class="panel-hd">Survey Data (Unique to Replenishment)</div>
-            <div class="panel-bd" style="max-height:600px; overflow-y:auto;" id="form-repl-survey">
-              <p class="text-light" style="font-size:12px; margin-bottom:15px;">
-                Input fresh survey data here. The AI will merge this with the synced DSR data to generate the final Government report.
-              </p>
-              
-              <div class="field">
-                <label>DGPS Survey File Link (S3 or URL)</label>
-                <input type="text" id="repl-dgps" value="${surveyData.dgpsLink || ''}" placeholder="https://s3...">
-              </div>
-              
-              <div class="field">
-                <label>Drone Survey & DEM Highlights</label>
-                <textarea id="repl-drone" style="min-height:100px;">${surveyData.droneSurvey || ''}</textarea>
-              </div>
-              
-              <div class="field">
-                <label>Current Year Rainfall Updates (mm)</label>
-                <input type="number" id="repl-rainfall-update" value="${surveyData.rainfallUpdate || ''}">
-              </div>
-              
-              <div class="field">
-                <label>Survey Observations & Remarks</label>
-                <textarea id="repl-remarks" style="min-height:100px;">${surveyData.remarks || ''}</textarea>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div class="card" style="margin-top:20px; padding:40px; text-align:center; max-width:600px; margin:20px auto;">
+      <i data-lucide="file-text" style="width:48px;height:48px;color:#17324d;display:block;margin:0 auto 16px;"></i>
+      <h2 style="color:#17324d;">Create Replenishment Studies Report</h2>
+      <p style="color:#64748b; margin-top:8px; margin-bottom:20px;">Generate a custom replenishment report by selecting specific sections and annexures from this DSR project.</p>
+      <button class="btn btn-primary" onclick="window.triggerCustomReportPrompt()" style="margin:0 auto;">Start Report Generator</button>
     </div>
   `;
-}
-
-async function saveReplenishmentStudy(id) {
-  try {
-    const payload = {
-      surveyData: {
-        dgpsLink: document.getElementById('repl-dgps').value,
-        droneSurvey: document.getElementById('repl-drone').value,
-        rainfallUpdate: document.getElementById('repl-rainfall-update').value,
-        remarks: document.getElementById('repl-remarks').value
-      }
-    };
-    
-    await apiFetch(`/replenishment/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(payload)
-    });
-    
-    toast("Replenishment Study Saved Successfully!", "success");
-    
-    // Refresh list in background
-    const studies = await apiFetch(`/projects/${S.activeProject.id}/replenishment`);
-    currentReplenishmentStudies = studies;
-  } catch (err) {
-    toast("Save failed: " + err.message, "error");
-  }
-}
-
-async function deleteReplenishmentStudy(id) {
-  if (!confirm("Are you sure you want to delete this Replenishment Study?")) return;
-  try {
-    await apiFetch(`/replenishment/${id}`, { method: 'DELETE' });
-    toast("Deleted successfully", "success");
-    fetchReplenishmentStudies();
-  } catch (err) {
-    toast("Delete failed: " + err.message, "error");
-  }
+  if (window.lucide) lucide.createIcons();
+  
+  // Automatically trigger the prompt to make it fast
+  setTimeout(() => {
+    window.triggerCustomReportPrompt();
+  }, 50);
 }
 
 // Hook into existing navigation system
@@ -252,22 +53,6 @@ const originalShowViewReplenishmentHook = window.showView;
 window.showView = function(viewId, caller) {
   if (originalShowViewReplenishmentHook) originalShowViewReplenishmentHook(viewId, caller);
   if (viewId === 'replenishment') {
-    initReplenishmentView();
-  }
-};
-window.selectReplenishmentProject = function(projectId) {
-  if (!projectId) return;
-  const proj = (window._replenishmentProjectsCache || []).find(p => p.id === projectId);
-  if (proj) {
-    S.activeProject = proj;
-    // Show the DSR Sections nav in sidebar if it's hidden
-    const reportNav = document.getElementById('report-nav');
-    if (reportNav) reportNav.style.display = 'block';
-    
-    // Also show annexure nav
-    const annexureNav = document.getElementById('annexure-nav');
-    if (annexureNav) annexureNav.style.display = 'block';
-
     initReplenishmentView();
   }
 };
@@ -287,35 +72,72 @@ if (annexureNav && replenishmentNav) {
 }
 
 // Expose functions to window
-window.createCustomReplenishmentReport = createCustomReplenishmentReport;
+window.triggerCustomReportPrompt = triggerCustomReportPrompt;
+window.onParentCheckboxChange = onParentCheckboxChange;
+window.onSubCheckboxChange = onSubCheckboxChange;
 window.updateCustomReportPreview = updateCustomReportPreview;
 window.downloadCustomReportPDF = downloadCustomReportPDF;
 
-function createCustomReplenishmentReport() {
-  if (!S.activeProject) {
-    toast("Please select a project first", "info");
-    return;
-  }
+function triggerCustomReportPrompt() {
   const reportName = prompt("Enter Custom Replenishment Report Name:");
   if (!reportName) return;
-  
-  const selectContainer = document.getElementById('repl-project-select-container');
-  const contentContainer = document.getElementById('repl-content-container');
   const editorContainer = document.getElementById('repl-editor-container');
-  
-  if (selectContainer) selectContainer.style.display = 'none';
-  if (contentContainer) contentContainer.style.display = 'none';
   if (editorContainer) {
-    editorContainer.style.display = 'block';
     renderCustomReportGenerator(editorContainer, reportName);
   }
+}
+
+function onParentCheckboxChange(parentId, reportName) {
+  const parentChk = document.getElementById(`chk-${parentId}`);
+  if (!parentChk) return;
+  const isChecked = parentChk.checked;
+  
+  const children = document.querySelectorAll(`input[data-parent="${parentId}"]`);
+  children.forEach(child => {
+    child.checked = isChecked;
+  });
+  
+  window.updateCustomReportPreview(reportName);
+}
+
+function onSubCheckboxChange(parentId, reportName) {
+  const parentChk = document.getElementById(`chk-${parentId}`);
+  if (!parentChk) return;
+  
+  const children = Array.from(document.querySelectorAll(`input[data-parent="${parentId}"]`));
+  const checkedChildren = children.filter(c => c.checked);
+  
+  if (checkedChildren.length === children.length) {
+    parentChk.checked = true;
+    parentChk.indeterminate = false;
+  } else if (checkedChildren.length === 0) {
+    parentChk.checked = false;
+    parentChk.indeterminate = false;
+  } else {
+    parentChk.checked = false;
+    parentChk.indeterminate = true;
+  }
+  
+  window.updateCustomReportPreview(reportName);
 }
 
 function renderCustomReportGenerator(container, reportName) {
   const sections = [
     { id: 'front-matter', name: 'Front Matter (Title, Preface, Acknowledgement)', type: 'DSR' },
-    { id: 'chapters', name: 'Chapters Outline (Summary of 10 chapters)', type: 'DSR' },
-    { id: 'plates', name: 'Plate Section (List of report plates)', type: 'DSR' },
+    { 
+      id: 'chapters', 
+      name: 'Chapters Outline', 
+      type: 'DSR', 
+      hasSubsections: true,
+      subsections: (S.chapters || []).map(ch => ({ id: `chapter-${ch.id}`, name: ch.name }))
+    },
+    { 
+      id: 'plates', 
+      name: 'Plate Section', 
+      type: 'DSR', 
+      hasSubsections: true,
+      subsections: (S.plates || []).map(pl => ({ id: `plate-${pl.id}`, name: pl.name }))
+    },
     { id: 'graphs', name: 'Cross Section Graphs (Distance/Elevation table)', type: 'DSR' },
     { id: 'anx1', name: 'Annexure I - Sources', type: 'Annexure' },
     { id: 'anx2', name: 'Annexure II - Leases', type: 'Annexure' },
@@ -339,15 +161,44 @@ function renderCustomReportGenerator(container, reportName) {
   let checklistHtml = '';
   sections.forEach(s => {
     const escapedReportName = reportName.replace(/'/g, "\\'");
-    checklistHtml += `
-      <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px; padding:6px; background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0;">
-        <input type="checkbox" id="chk-${s.id}" value="${s.id}" onchange="window.updateCustomReportPreview('${escapedReportName}')" style="width:16px; height:16px; cursor:pointer;">
-        <label for="chk-${s.id}" style="font-size:13px; font-weight:600; cursor:pointer; color:#1e293b; display:flex; align-items:center; gap:6px; margin:0; width:100%;">
-          <span style="font-size:9px; padding:2px 6px; background:#e2e8f0; border-radius:10px; text-transform:uppercase; color:#475569; font-weight:700; white-space:nowrap;">${s.type}</span>
-          <span>${s.name}</span>
-        </label>
-      </div>
-    `;
+    if (s.hasSubsections) {
+      let subHtml = '';
+      s.subsections.forEach(sub => {
+        subHtml += `
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+            <input type="checkbox" id="chk-${sub.id}" value="${sub.id}" data-parent="${s.id}" onchange="window.onSubCheckboxChange('${s.id}', '${escapedReportName}')" style="width:14px; height:14px; cursor:pointer;">
+            <label for="chk-${sub.id}" style="font-size:12px; cursor:pointer; color:#475569; margin:0;">
+              ${sub.name}
+            </label>
+          </div>
+        `;
+      });
+
+      checklistHtml += `
+        <div style="margin-bottom:12px; padding:8px; background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <input type="checkbox" id="chk-${s.id}" value="${s.id}" onchange="window.onParentCheckboxChange('${s.id}', '${escapedReportName}')" style="width:16px; height:16px; cursor:pointer;">
+            <label for="chk-${s.id}" style="font-size:13px; font-weight:700; cursor:pointer; color:#1e293b; display:flex; align-items:center; gap:6px; margin:0; width:100%;">
+              <span style="font-size:9px; padding:2px 6px; background:#cbd5e1; border-radius:10px; text-transform:uppercase; color:#475569; font-weight:700;">${s.type}</span>
+              <span>${s.name}</span>
+            </label>
+          </div>
+          <div id="sub-container-${s.id}" style="padding-left:26px; margin-top:8px; display:flex; flex-direction:column; gap:4px; border-left: 2px dashed #cbd5e1; margin-left: 7px;">
+            ${subHtml}
+          </div>
+        </div>
+      `;
+    } else {
+      checklistHtml += `
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px; padding:8px; background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0;">
+          <input type="checkbox" id="chk-${s.id}" value="${s.id}" onchange="window.updateCustomReportPreview('${escapedReportName}')" style="width:16px; height:16px; cursor:pointer;">
+          <label for="chk-${s.id}" style="font-size:13px; font-weight:700; cursor:pointer; color:#1e293b; display:flex; align-items:center; gap:6px; margin:0; width:100%;">
+            <span style="font-size:9px; padding:2px 6px; background:#e2e8f0; border-radius:10px; text-transform:uppercase; color:#475569; font-weight:700;">${s.type}</span>
+            <span>${s.name}</span>
+          </label>
+        </div>
+      `;
+    }
   });
 
   const escapedReportName = reportName.replace(/'/g, "\\'");
@@ -389,18 +240,26 @@ function renderCustomReportGenerator(container, reportName) {
 
 function updateCustomReportPreview(reportName) {
   const checkboxes = document.querySelectorAll('input[id^="chk-"]:checked');
+  const checkedIds = Array.from(checkboxes).map(c => c.value);
+  
+  const indeterminateParents = Array.from(document.querySelectorAll('input[id^="chk-"]')).filter(c => c.indeterminate).map(c => c.value);
+  const allActiveIds = [...checkedIds, ...indeterminateParents];
+  
   const countEl = document.getElementById('preview-sections-count');
-  if (countEl) countEl.textContent = `${checkboxes.length} selected`;
+  if (countEl) {
+    const parentOrStandaloneSelected = Array.from(document.querySelectorAll('input[id^="chk-"]:not([data-parent])')).filter(c => c.checked || c.indeterminate);
+    countEl.textContent = `${parentOrStandaloneSelected.length} sections selected`;
+  }
   
   const iframe = document.getElementById('custom-report-preview-iframe');
   if (!iframe) return;
   
-  if (checkboxes.length === 0) {
+  if (allActiveIds.length === 0) {
     iframe.srcdoc = `<html><body style='font-family:sans-serif; color:#64748b; padding:40px; text-align:center;'><p>No sections selected yet. Please select sections on the left to see the live preview.</p></body></html>`;
     return;
   }
   
-  const selectedHtml = compileSelectedSectionsHtml(reportName, Array.from(checkboxes).map(c => c.value));
+  const selectedHtml = compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds);
   iframe.srcdoc = selectedHtml;
 }
 
@@ -436,13 +295,13 @@ function cloneSourceWithValues(source) {
   return clone;
 }
 
-function compileSelectedSectionsHtml(reportName, sectionIds) {
+function compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds) {
   const district = (window.S && S.frontMatter && S.frontMatter.district) || 'Jalandhar';
   const year = (window.S && S.frontMatter && S.frontMatter.year) || '2025-26';
   
   let combinedContent = '';
   
-  sectionIds.forEach(id => {
+  allActiveIds.forEach(id => {
     let sectionHtml = '';
     
     if (id === 'front-matter') {
@@ -482,35 +341,41 @@ function compileSelectedSectionsHtml(reportName, sectionIds) {
       `;
     } 
     else if (id === 'chapters') {
-      const chaptersListHtml = (S.chapters || []).map(ch => `
-        <div style="margin-bottom:20px; padding:15px; border:1px solid #e2e8f0; border-radius:8px; background:#f8fafc;">
-          <h4 style="margin:0 0 6px; font-size:13.5px; color:#1e293b; font-weight:700;">${ch.name}</h4>
-          <p style="margin:0; font-size:12px; color:#475569; line-height:1.5;">${ch.summary || 'Summary not defined.'}</p>
-        </div>
-      `).join('');
-      
-      sectionHtml = `
-        <div class="section-block">
-          <h2 class="section-title">Report Chapters Outline</h2>
-          <p style="font-size:12.5px; color:#64748b; margin-bottom:15px;">headings and summaries as per EMGSM 2020 guidelines</p>
-          ${chaptersListHtml}
-        </div>
-      `;
+      const checkedChapters = (S.chapters || []).filter(ch => checkedIds.includes(`chapter-${ch.id}`));
+      if (checkedChapters.length > 0) {
+        const chaptersListHtml = checkedChapters.map(ch => `
+          <div style="margin-bottom:20px; padding:15px; border:1px solid #e2e8f0; border-radius:8px; background:#f8fafc;">
+            <h4 style="margin:0 0 6px; font-size:13.5px; color:#1e293b; font-weight:700;">${ch.name}</h4>
+            <p style="margin:0; font-size:12px; color:#475569; line-height:1.5;">${ch.summary || 'Summary not defined.'}</p>
+          </div>
+        `).join('');
+        
+        sectionHtml = `
+          <div class="section-block">
+            <h2 class="section-title">Report Chapters Outline</h2>
+            <p style="font-size:12.5px; color:#64748b; margin-bottom:15px;">headings and summaries as per EMGSM 2020 guidelines</p>
+            ${chaptersListHtml}
+          </div>
+        `;
+      }
     } 
     else if (id === 'plates') {
-      const platesListHtml = (S.plates || []).map(pl => `
-        <div style="margin-bottom:15px; padding:12px; border:1px solid #e2e8f0; border-radius:6px; background:#f8fafc;">
-          <h4 style="margin:0 0 4px; font-size:13px; color:#1e293b;">${pl.name}</h4>
-          <p style="margin:0; font-size:11.5px; color:#475569;">${pl.summary || 'Summary not defined.'}</p>
-        </div>
-      `).join('');
-      
-      sectionHtml = `
-        <div class="section-block">
-          <h2 class="section-title">Report Plates Section</h2>
-          ${platesListHtml}
-        </div>
-      `;
+      const checkedPlates = (S.plates || []).filter(pl => checkedIds.includes(`plate-${pl.id}`));
+      if (checkedPlates.length > 0) {
+        const platesListHtml = checkedPlates.map(pl => `
+          <div style="margin-bottom:15px; padding:12px; border:1px solid #e2e8f0; border-radius:6px; background:#f8fafc;">
+            <h4 style="margin:0 0 4px; font-size:13px; color:#1e293b;">${pl.name}</h4>
+            <p style="margin:0; font-size:11.5px; color:#475569;">${pl.summary || 'Summary not defined.'}</p>
+          </div>
+        `).join('');
+        
+        sectionHtml = `
+          <div class="section-block">
+            <h2 class="section-title">Report Plates Section</h2>
+            ${platesListHtml}
+          </div>
+        `;
+      }
     } 
     else if (id === 'graphs') {
       const graphsRows = (S.graphs || []).map(g => `
@@ -547,6 +412,9 @@ function compileSelectedSectionsHtml(reportName, sectionIds) {
         </div>
       `;
     } 
+    else if (id.startsWith('chapter-') || id.startsWith('plate-')) {
+      return;
+    }
     else {
       const source = document.getElementById(`view-${id}`);
       if (source) {
