@@ -2110,7 +2110,7 @@ function clearActiveProject() {
   sessionStorage.removeItem('dsr_active_project_id');
   if (typeof S !== 'undefined') {
     S.activeProject = null;
-    ['report-nav', 'annexure-nav', 'tables-nav', 'finalize-nav'].forEach(n => {
+    ['report-nav', 'annexure-nav', 'replenishment-nav', 'tables-nav', 'finalize-nav'].forEach(n => {
       const el = document.getElementById(n);
       if (el) el.style.display = 'none';
     });
@@ -2896,7 +2896,7 @@ async function showAppScreen() {
   });
   const sdlcNav = document.getElementById('sdlc-nav');
   if (sdlcNav) sdlcNav.style.display = isSdlc ? 'block' : 'none';
-  ['report-nav', 'annexure-nav', 'tables-nav', 'finalize-nav'].forEach(navId => {
+  ['report-nav', 'annexure-nav', 'replenishment-nav', 'tables-nav', 'finalize-nav'].forEach(navId => {
     const el = document.getElementById(navId);
     if (el) {
       if (isSdlc) el.style.display = 'none';
@@ -3482,7 +3482,7 @@ async function openProject(id) {
   } catch (err) {
     console.error('Could not load project state:', err);
   }
-  ['report-nav','annexure-nav','tables-nav','finalize-nav'].forEach(n=>{
+  ['report-nav','annexure-nav','replenishment-nav','tables-nav','finalize-nav'].forEach(n=>{
     const el=document.getElementById(n); if(el) el.style.display='block';
   });
   const dist = S.activeProject.district;
