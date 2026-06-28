@@ -6,19 +6,21 @@ let currentReplenishmentStudies = [];
 function initReplenishmentView() {
   const container = document.getElementById('view-replenishment');
   if (!container) return;
+  
+  const selectContainer = document.getElementById('repl-project-select-container');
+  const contentContainer = document.getElementById('repl-content-container');
+  const editorContainer = document.getElementById('repl-editor-container');
+  const headerBtn = container.querySelector('.header-row button');
+  const subTitle = container.querySelector('.page-sub');
+  
+  if (editorContainer) editorContainer.style.display = 'none';
 
-  // currentProject is a global variable from portal.bundle.js
   if (!window.currentProject || !window.currentProject.id) {
-    container.innerHTML = `
-      <div class="empty-state" style="padding: 40px; text-align: center;">
-        <h3 style="margin-bottom: 10px;">Select a DSR Project</h3>
-        <p style="color: var(--text-mid); margin-bottom: 20px;">Please select a DSR project below to view its Replenishment Studies.</p>
-        <select id="repl-project-selector" style="padding: 10px; width: 300px; border-radius: 6px; border: 1px solid var(--border);" onchange="window.selectReplenishmentProject(this.value)">
-          <option value="">Loading projects...</option>
-        </select>
-      </div>`;
-      
-    // Fetch projects and populate the dropdown
+    if (selectContainer) selectContainer.style.display = 'block';
+    if (contentContainer) contentContainer.style.display = 'none';
+    if (headerBtn) headerBtn.style.display = 'none';
+    if (subTitle) subTitle.textContent = 'Please select a project to manage its Replenishment Studies.';
+    
     apiFetch('/api/projects')
       .then(projects => {
         const sel = document.getElementById('repl-project-selector');
@@ -38,30 +40,14 @@ function initReplenishmentView() {
          const sel = document.getElementById('repl-project-selector');
          if (sel) sel.innerHTML = '<option value="">Failed to load projects</option>';
       });
-    return;
-  }
-
-  container.innerHTML = `
-    <div class="header-row">
-      <div>
-        <div class="page-title">Replenishment Studies</div>
-        <div class="page-sub">Manage Replenishment Studies for ${window.currentProject.projectName || 'this project'}. 
-        The DSR acts as the single source of truth.</div>
-      </div>
-      <div>
-        <button class="btn btn-primary" onclick="createReplenishmentStudy()">+ New Replenishment Study</button>
-      </div>
-    </div>
+  } else {
+    if (selectContainer) selectContainer.style.display = 'none';
+    if (contentContainer) contentContainer.style.display = 'block';
+    if (headerBtn) headerBtn.style.display = 'inline-flex';
+    if (subTitle) subTitle.textContent = `Manage Replenishment Studies for ${window.currentProject.projectName || window.currentProject.district || 'this project'}. The DSR acts as the single source of truth.`;
     
-    <div class="panel" style="margin-top: 20px;">
-      <div class="panel-hd">Existing Studies</div>
-      <div class="panel-bd" id="replenishment-list">
-        <div style="padding:20px; text-align:center; color:var(--text-light);">Loading...</div>
-      </div>
-    </div>
-  `;
-
-  fetchReplenishmentStudies();
+    fetchReplenishmentStudies();
+  }
 }
 
 async function fetchReplenishmentStudies() {
@@ -129,7 +115,14 @@ async function createReplenishmentStudy() {
 }
 
 async function openReplenishmentStudy(id) {
-  const container = document.getElementById('view-replenishment');
+  const selectContainer = document.getElementById('repl-project-select-container');
+  const contentContainer = document.getElementById('repl-content-container');
+  const editorContainer = document.getElementById('repl-editor-container');
+  
+  if (selectContainer) selectContainer.style.display = 'none';
+  if (contentContainer) contentContainer.style.display = 'none';
+  if (editorContainer) editorContainer.style.display = 'block';
+
   // Re-fetch studies if not loaded
   if (currentReplenishmentStudies.length === 0 && window.currentProject) {
       currentReplenishmentStudies = await apiFetch(`/api/projects/${window.currentProject.id}/replenishment`);
@@ -142,69 +135,74 @@ async function openReplenishmentStudy(id) {
   const surveyData = study.surveyData || {};
 
   // Form matching Government structure
-  container.innerHTML = `
-    <div class="header-row">
-      <div>
-        <div class="page-title">${study.title}</div>
-        <div class="page-sub">Editor - Single Source of Truth Synchronization Active</div>
-      </div>
-      <div>
-        <button class="btn btn-outline" onclick="initReplenishmentView()">Back</button>
-        <button class="btn btn-primary" onclick="saveReplenishmentStudy('${id}')">Save Changes</button>
-      </div>
-    </div>
-    
-    <div class="layout-grid" style="grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
-      <!-- LEFT: Synced DSR Data (Read-only reference) -->
-      <div class="panel">
-        <div class="panel-hd" style="display:flex; justify-content:space-between;">
-          <span>Synced DSR Data</span>
-          <span class="badge" style="background:#e6f4ea; color:#137333; padding:2px 8px; border-radius:12px; font-size:11px;">In Sync</span>
-        </div>
-        <div class="panel-bd" style="max-height:600px; overflow-y:auto; background:#f9f9fa;">
-          <p class="text-light" style="font-size:12px; margin-bottom:15px;">
-            This data is automatically inherited from the parent DSR. To change this, modify the DSR project directly.
-          </p>
-          <div class="field-row">
-            <div class="field"><label>District</label><input disabled value="${dsrData.district || 'Data to be updated after survey.'}"></div>
-            <div class="field"><label>Year</label><input disabled value="${dsrData.year || 'Data to be updated after survey.'}"></div>
+  editorContainer.innerHTML = `
+    <div class="card">
+      <div class="card-hd">
+        <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+          <div>
+            <div class="card-title">Editor: ${study.title}</div>
+            <div class="card-sub">Single Source of Truth Synchronization Active</div>
           </div>
-          <div class="field"><label>Rivers</label><input disabled value="${dsrData.rivers || 'Pending Field Verification'}"></div>
-          
-          <div style="margin-top:20px; font-weight:600; font-size:13px; margin-bottom:4px;">Geomorphology & Drainage</div>
-          <textarea disabled style="min-height:80px; width:100%; border:1px solid #ddd; background:#eee; padding:8px; border-radius:4px;">${dsrData.drainage?.description || 'Data to be updated after survey.'}</textarea>
-          
-          <div style="margin-top:20px; font-weight:600; font-size:13px; margin-bottom:4px;">Rainfall Climate</div>
-          <textarea disabled style="min-height:80px; width:100%; border:1px solid #ddd; background:#eee; padding:8px; border-radius:4px;">${dsrData.rainfall?.climateDetails || 'Data to be updated after survey.'}</textarea>
+          <div style="display:flex; gap:10px;">
+            <button class="btn btn-outline" onclick="initReplenishmentView()">Back</button>
+            <button class="btn btn-primary" onclick="saveReplenishmentStudy('${id}')">Save Changes</button>
+          </div>
         </div>
       </div>
-      
-      <!-- RIGHT: New Survey Data Input -->
-      <div class="panel">
-        <div class="panel-hd">Survey Data (Unique to Replenishment)</div>
-        <div class="panel-bd" style="max-height:600px; overflow-y:auto;" id="form-repl-survey">
-          <p class="text-light" style="font-size:12px; margin-bottom:15px;">
-            Input fresh survey data here. The AI will merge this with the synced DSR data to generate the final Government report.
-          </p>
-          
-          <div class="field">
-            <label>DGPS Survey File Link (S3 or URL)</label>
-            <input type="text" id="repl-dgps" value="${surveyData.dgpsLink || ''}" placeholder="https://s3...">
+      <div class="card-bd">
+        <div class="layout-grid" style="grid-template-columns: 1fr 1fr; gap: 20px;">
+          <!-- LEFT: Synced DSR Data (Read-only reference) -->
+          <div class="panel">
+            <div class="panel-hd" style="display:flex; justify-content:space-between;">
+              <span>Synced DSR Data</span>
+              <span class="badge" style="background:#e6f4ea; color:#137333; padding:2px 8px; border-radius:12px; font-size:11px;">In Sync</span>
+            </div>
+            <div class="panel-bd" style="max-height:600px; overflow-y:auto; background:#f9f9fa;">
+              <p class="text-light" style="font-size:12px; margin-bottom:15px;">
+                This data is automatically inherited from the parent DSR. To change this, modify the DSR project directly.
+              </p>
+              <div class="field-row">
+                <div class="field"><label>District</label><input disabled value="${dsrData.district || 'Data to be updated after survey.'}"></div>
+                <div class="field"><label>Year</label><input disabled value="${dsrData.year || 'Data to be updated after survey.'}"></div>
+              </div>
+              <div class="field"><label>Rivers</label><input disabled value="${dsrData.rivers || 'Pending Field Verification'}"></div>
+              
+              <div style="margin-top:20px; font-weight:600; font-size:13px; margin-bottom:4px;">Geomorphology & Drainage</div>
+              <textarea disabled style="min-height:80px; width:100%; border:1px solid #ddd; background:#eee; padding:8px; border-radius:4px;">${dsrData.drainage?.description || 'Data to be updated after survey.'}</textarea>
+              
+              <div style="margin-top:20px; font-weight:600; font-size:13px; margin-bottom:4px;">Rainfall Climate</div>
+              <textarea disabled style="min-height:80px; width:100%; border:1px solid #ddd; background:#eee; padding:8px; border-radius:4px;">${dsrData.rainfall?.climateDetails || 'Data to be updated after survey.'}</textarea>
+            </div>
           </div>
           
-          <div class="field">
-            <label>Drone Survey & DEM Highlights</label>
-            <textarea id="repl-drone" style="min-height:100px;">${surveyData.droneSurvey || ''}</textarea>
-          </div>
-          
-          <div class="field">
-            <label>Current Year Rainfall Updates (mm)</label>
-            <input type="number" id="repl-rainfall-update" value="${surveyData.rainfallUpdate || ''}">
-          </div>
-          
-          <div class="field">
-            <label>Survey Observations & Remarks</label>
-            <textarea id="repl-remarks" style="min-height:100px;">${surveyData.remarks || ''}</textarea>
+          <!-- RIGHT: New Survey Data Input -->
+          <div class="panel">
+            <div class="panel-hd">Survey Data (Unique to Replenishment)</div>
+            <div class="panel-bd" style="max-height:600px; overflow-y:auto;" id="form-repl-survey">
+              <p class="text-light" style="font-size:12px; margin-bottom:15px;">
+                Input fresh survey data here. The AI will merge this with the synced DSR data to generate the final Government report.
+              </p>
+              
+              <div class="field">
+                <label>DGPS Survey File Link (S3 or URL)</label>
+                <input type="text" id="repl-dgps" value="${surveyData.dgpsLink || ''}" placeholder="https://s3...">
+              </div>
+              
+              <div class="field">
+                <label>Drone Survey & DEM Highlights</label>
+                <textarea id="repl-drone" style="min-height:100px;">${surveyData.droneSurvey || ''}</textarea>
+              </div>
+              
+              <div class="field">
+                <label>Current Year Rainfall Updates (mm)</label>
+                <input type="number" id="repl-rainfall-update" value="${surveyData.rainfallUpdate || ''}">
+              </div>
+              
+              <div class="field">
+                <label>Survey Observations & Remarks</label>
+                <textarea id="repl-remarks" style="min-height:100px;">${surveyData.remarks || ''}</textarea>
+              </div>
+            </div>
           </div>
         </div>
       </div>
