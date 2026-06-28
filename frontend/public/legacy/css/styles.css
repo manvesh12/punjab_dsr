@@ -195,7 +195,7 @@ html.dark body {
     var(--bg);
 }
 
-h1, h2, h3, h4, h5, h6 { font-family: 'Plus Jakarta Sans', sans-serif; color: var(--text); }
+h1, h2, h3, h4, h5, h6 { font-family: Inter, sans-serif; color: var(--text); }
 
 button, input, textarea, select { font: inherit; outline: none; border: none; }
 button { cursor: pointer; background: none; }
@@ -687,18 +687,18 @@ transparent;
   display: flex; align-items: center; justify-content: center;
   font-size: 22px; font-weight: 900; color: var(--navy); flex-shrink: 0;
   border: 4px solid rgba(255,255,255,.12);
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: Inter, sans-serif;
 }
 /* suppress any emoji that may have been placed inside emblem-mark */
 .emblem-mark > *:not(img):not(svg) { font-size: 0; }
 .emblem-mark img,
 .emblem-mark svg { width: 36px; height: 36px; display: block; }
 
-.emblem-info h1 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px; font-weight: 700; color: #fff; line-height: 1.3; letter-spacing: -0.01em; }
+.emblem-info h1 { font-family: Inter, sans-serif; font-size: 18px; font-weight: 700; color: #fff; line-height: 1.3; letter-spacing: -0.01em; }
 .emblem-info p  { font-size: 10px; font-weight: 600; color: rgba(255,255,255,.6); margin-top: 2px; letter-spacing: .1em; text-transform: uppercase; }
 
 /* Auth title */
-.auth-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 42px; font-weight: 700; color: #197aaa; line-height: 1.2; margin-bottom: 16px; letter-spacing: -0.02em; position: relative; z-index: 2; }
+.auth-title { font-family: Inter, sans-serif; font-size: 42px; font-weight: 700; color: #197aaa; line-height: 1.2; margin-bottom: 16px; letter-spacing: -0.02em; position: relative; z-index: 2; }
 .auth-title em { color: var(--primary); font-style: normal; }
 .auth-title-line { width: 40px; height: 3px; background: var(--primary); margin-bottom: 24px; border-radius: 2px; }
 .auth-desc { font-size: 15px; color: rgba(255,255,255,.65); line-height: 1.6; max-width: 42ch; margin-bottom: 48px; position: relative; z-index: 2; }
@@ -727,7 +727,7 @@ transparent;
 }
 .auth-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
 
-.auth-form-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 26px; font-weight: 700; color: var(--text); margin-bottom: 8px; letter-spacing: -0.01em; }
+.auth-form-title { font-family: Inter, sans-serif; font-size: 26px; font-weight: 700; color: var(--text); margin-bottom: 8px; letter-spacing: -0.01em; }
 .auth-form-sub   { font-size: 14px; color: var(--text-soft); margin-bottom: 32px; }
 .auth-form       { display: none; flex-direction: column; gap: 20px; animation: fadeUp .3s ease; }
 .auth-form.active { display: flex; }
@@ -842,11 +842,11 @@ html.dark .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); 
   background: var(--off); border-radius: var(--r-md);
   display: flex; align-items: center; justify-content: center;
   font-size: 16px; font-weight: 800; color: var(--primary); flex-shrink: 0;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: Inter, sans-serif;
   border: 1px solid var(--border-2);
 }
 .sb-logo-mark img, .sb-logo-mark svg { width: 24px; height: 24px; border-radius: 6px; }
-.sb-logo-text h2 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px; font-weight: 800; color: var(--text); line-height: 1.2; }
+.sb-logo-text h2 { font-family: Inter, sans-serif; font-size: 18px; font-weight: 800; color: var(--text); line-height: 1.2; }
 .sb-logo-text p  { font-size: 11px; font-weight: 600; color: var(--text-soft); text-transform: uppercase; letter-spacing: .08em; margin-top: 2px; }
 
 .sb-user {
@@ -869,7 +869,7 @@ html.dark .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); 
 .sb-nav { padding: 20px 16px; flex: 1; }
 .sb-section { margin-bottom: 24px; }
 .sb-section-lbl {
-  font-family : 'Plus Jakarta Sans', sans-serif;
+  font-family : Inter, sans-serif;
   font-size: 14px; font-weight: 800; letter-spacing: .08em;
   text-transform: uppercase; color: var(--primary);
   padding: 0 12px; margin-bottom: 12px;
@@ -990,7 +990,7 @@ html.dark .topbar { background: var(--card); }
 html.dark .tb-nav-link { background: var(--bg); color: var(--text-mid); border-color: var(--border); }
 html.dark .tb-dropdown-menu { background: var(--card); border-color: var(--border); }
 
-.tb-left h2 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); }
+.tb-left h2 { font-family: Inter, sans-serif; font-size: 18px; font-weight: 700; color: var(--text); }
 .tb-left p  { font-size: 13px; color: var(--text-soft); margin-top: 2px; }
 .tb-right   { display: flex; align-items: center; gap: 12px; }
 
@@ -1280,7 +1280,7 @@ body.preview-open .pdf-preview-mobile-tabs { display: none; }
    COMMON UI COMPONENTS
 ═══════════════════════════════════════════════════════════════ */
 .page-header { margin-bottom: 32px; }
-.page-title  { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 32px; font-weight: 800; color: #111827; letter-spacing: -0.02em; }
+.page-title  { font-family: Inter, sans-serif; font-size: 32px; font-weight: 800; color: #111827; letter-spacing: -0.02em; }
 .page-sub    { font-size: 15px; font-weight: 500; color: #6B7280; margin-top: 8px; max-width: 72ch; line-height: 1.6; }
 .header-row  { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 32px; flex-wrap: wrap; }
 
@@ -1292,7 +1292,7 @@ body.preview-open .pdf-preview-mobile-tabs { display: none; }
   display: flex; align-items: center; justify-content: space-between;
   background: var(--card);
 }
-.card-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 21px; font-weight: 800; color: var(--text); }
+.card-title { font-family: Inter, sans-serif; font-size: 21px; font-weight: 800; color: var(--text); }
 .card-sub   { font-size: 14.5px; color: var(--text-soft); margin-top: 4px; }
 .card-bd    { padding: 24px; }
 
@@ -1312,7 +1312,7 @@ body.preview-open .pdf-preview-mobile-tabs { display: none; }
   color: var(--icon-color, var(--text-mid));
 }
 .stat-lbl  { font-size: 17px; font-weight: 700; color: var(--text-soft); margin-bottom: 8px; }
-.stat-val  { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 46px; font-weight: 800; color: var(--text); line-height: 1; margin-top: 4px; letter-spacing: -0.02em; }
+.stat-val  { font-family: Inter, sans-serif; font-size: 46px; font-weight: 800; color: var(--text); line-height: 1; margin-top: 4px; letter-spacing: -0.02em; }
 .stat-info { font-size: 15px; font-weight: 600; color: var(--text-soft); margin-top: 8px; display: flex; align-items: center; gap: 6px; }
 .stat-trend.up { color: var(--green); background: var(--green-lt); padding: 2px 8px; border-radius: 99px; font-size: 12px; font-weight: 700; }
 
@@ -1473,7 +1473,7 @@ body.preview-open .pdf-preview-mobile-tabs { display: none; }
 .proj-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r-xl); box-shadow: var(--sh-sm); cursor: pointer; transition: box-shadow .2s; overflow: hidden; }
 .proj-card:hover { box-shadow: var(--sh-md); }
 .proj-card-top { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); }
-.proj-card-top h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.3; }
+.proj-card-top h3 { font-family: Inter, sans-serif; font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.3; }
 .proj-card-top p  { font-size: 12px; color: var(--text-soft); margin-top: 4px; }
 .proj-card-bd { padding: 16px 24px; }
 .proj-card-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
@@ -1618,7 +1618,7 @@ body.preview-open .pdf-preview-mobile-tabs { display: none; }
   margin-bottom: 4px;
 }
 .kpi-val {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 22px;
   font-weight: 700;
   color: var(--text);
@@ -1644,7 +1644,7 @@ body.preview-open .pdf-preview-mobile-tabs { display: none; }
   margin-bottom: 4px;
 }
 .result-val {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 24px;
   font-weight: 700;
   color: var(--teal);
@@ -1678,7 +1678,7 @@ body.preview-open .pdf-preview-mobile-tabs { display: none; }
   justify-content: space-between;
 }
 .graph-canvas-title {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 12px;
   font-weight: 700;
   color: var(--text);
@@ -1771,7 +1771,7 @@ body.preview-open .pdf-preview-mobile-tabs { display: none; }
 ═══════════════════════════════════════════════════════════════ */
 .anx-section { margin-bottom: 28px; }
 .anx-section-title {
-  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 700; color: var(--text);
+  font-family: Inter, sans-serif; font-size: 16px; font-weight: 700; color: var(--text);
   margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid var(--border);
 }
 .anx-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
@@ -1872,7 +1872,7 @@ body.preview-open .pdf-preview-mobile-tabs { display: none; }
 }
 
 .pdf-preview-header-title {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 15px;
   font-weight: 600;
   color: #111827;
@@ -2143,7 +2143,7 @@ body.preview-open .pdf-preview-mobile-tabs { display: none; }
 
 /* Legacy preview page styles (generate view, etc.) */
 .preview-hd { padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-.preview-hd h4 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 700; color: var(--text); }
+.preview-hd h4 { font-family: Inter, sans-serif; font-size: 15px; font-weight: 700; color: var(--text); }
 .preview-body { flex: 1; overflow-y: auto; padding: 16px; }
 
 .preview-page      { background: var(--card); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 20px; box-shadow: var(--sh-xs); font-size: 10px; line-height: 1.6; margin-bottom: 12px; }
@@ -2179,7 +2179,7 @@ body.preview-open .pdf-preview-mobile-tabs { display: none; }
 .modal-overlay.open { display: flex; }
 .modal-box  { background: var(--card); border-radius: var(--r-2xl); box-shadow: var(--sh-xl); width: 100%; max-width: 560px; max-height: none; margin: auto; display: flex; flex-direction: column; overflow: hidden; }
 .modal-hd   { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-.modal-hd h3{ font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); }
+.modal-hd h3{ font-family: Inter, sans-serif; font-size: 18px; font-weight: 700; color: var(--text); }
 .modal-close{ width: 32px; height: 32px; border-radius: 50%; background: var(--bg); border: 1px solid var(--border); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-soft); transition: background .15s, color .15s; }
 .modal-close:hover { background: var(--red-lt); color: var(--red); border-color: #fecaca; }
 .modal-bd   { padding: 24px; overflow-y: auto; flex: 1; }
@@ -2192,7 +2192,7 @@ body.preview-open .pdf-preview-mobile-tabs { display: none; }
 ═══════════════════════════════════════════════════════════════ */
 .empty-state { text-align: center; padding: 56px 24px; display: flex; flex-direction: column; align-items: center; gap: 0; }
 .empty-icon  { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; margin: 0 auto 16px; color: var(--text-faint); }
-.empty-state h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.empty-state h3 { font-family: Inter, sans-serif; font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
 .empty-state p  { font-size: 14px; color: var(--text-soft); }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -2221,7 +2221,7 @@ body.preview-open .pdf-preview-mobile-tabs { display: none; }
   display: flex; align-items: center; justify-content: space-between;
   border-bottom: 1px solid rgba(255,255,255,.08);
 }
-.authority-topbar h1 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 17px; font-weight: 700; color: #fff; }
+.authority-topbar h1 { font-family: Inter, sans-serif; font-size: 17px; font-weight: 700; color: #fff; }
 .authority-body { padding: 32px 40px; max-width: 1200px; margin: 0 auto; }
 
 /* Demand Table */

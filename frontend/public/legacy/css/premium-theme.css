@@ -51,7 +51,7 @@ button {
   font: inherit;
 }
 .premium-body {
-  font-family: 'Outfit', sans-serif;
+  font-family: Inter, sans-serif;
   background: var(--p-bg-cream) !important;
   color: var(--p-text);
   margin: 0;
@@ -226,7 +226,7 @@ html.dark .global-watermark {
   will-change: width, height;
 }
 .intro-text {
-  font-family: 'Syne', sans-serif;
+  font-family: Inter, sans-serif;
   font-weight: 800;
   font-size: 5rem;
   letter-spacing: -0.03em;
@@ -542,7 +542,7 @@ html.dark .hero-badge {
   color: var(--p-accent-gold);
 }
 .hero-title {
-  font-family: 'Syne', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: clamp(2.4rem, 4.8vw, 4rem);
   font-weight: 800;
   line-height: 1.1;
@@ -815,7 +815,7 @@ html.dark .premium-body #screen-auth header {
   border-bottom: 1.5px solid var(--p-glass-border-dark) !important;
 }
 .premium-body #screen-auth header .logo {
-  font-family: 'Syne', sans-serif !important;
+  font-family: Inter, sans-serif !important;
   color: var(--p-accent) !important;
   font-size: 2.2rem !important;
   border: none !important;
@@ -831,7 +831,7 @@ html.dark .premium-body #screen-auth header .logo {
   padding: 2px !important; /* Beautiful framed look */
 }
 .premium-body #screen-auth header nav a {
-  font-family: 'Outfit', sans-serif !important;
+  font-family: Inter, sans-serif !important;
   font-weight: 600 !important;
   border-color: var(--p-glass-border) !important;
   background: transparent !important;
@@ -866,7 +866,7 @@ html.dark .premium-body .auth-right {
 }
 .premium-body .auth-right .auth-form-title {
   color: var(--p-text) !important;
-  font-family: 'Syne', sans-serif !important;
+  font-family: Inter, sans-serif !important;
 }
 html.dark .premium-body .auth-right .auth-form-title {
   color: var(--p-accent-gold) !important;
@@ -888,7 +888,7 @@ html.dark .premium-body .auth-right label {
   background: rgba(255, 255, 255, 0.45) !important;
   border: 1.5px solid var(--p-glass-border) !important;
   color: var(--p-text) !important;
-  font-family: 'Outfit', sans-serif !important;
+  font-family: Inter, sans-serif !important;
   border-radius: 8px !important;
   transition: all 0.3s ease !important;
 }
@@ -912,7 +912,7 @@ html.dark .premium-body .auth-right select:focus {
 }
 .premium-body .auth-tab {
   color: var(--p-text-muted) !important;
-  font-family: 'Outfit', sans-serif !important;
+  font-family: Inter, sans-serif !important;
   font-weight: 700 !important;
   transition: all 0.3s ease !important;
 }
@@ -931,7 +931,7 @@ html.dark .premium-body .auth-tab.active {
   background: var(--p-accent) !important;
   color: #fff !important;
   border: 2px solid var(--p-accent-gold) !important;
-  font-family: 'Outfit', sans-serif !important;
+  font-family: Inter, sans-serif !important;
   font-weight: 700 !important;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -1016,7 +1016,7 @@ html.dark .hero-logo-container {
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
 }
 .hero-logo-title {
-  font-family: 'Syne', sans-serif;
+  font-family: Inter, sans-serif;
   font-weight: 800;
   font-size: 2.2rem;
   letter-spacing: 0.12em;
@@ -1074,7 +1074,7 @@ html.dark .hero-logo-title {
   padding: 1px;
 }
 .nav-brand-logo-text {
-  font-family: 'Syne', sans-serif;
+  font-family: Inter, sans-serif;
   font-weight: 800;
   font-size: 1.15rem;
   letter-spacing: 0.02em;
@@ -1125,7 +1125,7 @@ html.dark {
   --text-soft: #859691 !important;
 }
 #screen-app {
-  font-family: 'Outfit', sans-serif !important;
+  font-family: Inter, sans-serif !important;
 }
 #screen-app h1, 
 #screen-app h2, 
@@ -1133,11 +1133,11 @@ html.dark {
 #screen-app h4, 
 #screen-app h5, 
 #screen-app h6 {
-  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-family: Inter, sans-serif !important;
   font-weight: 700;
 }
 .page-title {
-  font-family: 'Syne', sans-serif !important;
+  font-family: Inter, sans-serif !important;
   font-weight: 800 !important;
   color: var(--p-accent) !important;
   letter-spacing: -0.01em !important;
@@ -1309,7 +1309,7 @@ html.dark .topbar {
   border: none !important;
   cursor: pointer !important;
   color: rgba(255, 255, 255, 0.75) !important;
-  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-family: Inter, sans-serif !important;
   font-size: 13px !important;
   font-weight: 700 !important;
   display: flex !important;
@@ -1384,7 +1384,7 @@ html.dark .form-card:hover {
   ) !important;
 }
 .hero-eyebrow {
-  font-family: 'Outfit', sans-serif !important;
+  font-family: Inter, sans-serif !important;
   font-weight: 700 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.12em !important;
@@ -1392,7 +1392,7 @@ html.dark .form-card:hover {
   margin-bottom: 12px !important;
 }
 .hero-title {
-  font-family: 'Syne', sans-serif !important;
+  font-family: Inter, sans-serif !important;
   font-weight: 800 !important;
   color: var(--hero-text-primary) !important;
 }
@@ -1400,7 +1400,7 @@ html.dark .form-card:hover {
   color: var(--hero-accent) !important;
 }
 .hero-sub {
-  font-family: 'Outfit', sans-serif !important;
+  font-family: Inter, sans-serif !important;
   color: var(--hero-text-secondary) !important;
 }
 .step-bar {
@@ -1450,7 +1450,7 @@ html.dark .step.active .step-dot {
   background: var(--p-accent) !important;
   color: #fff !important;
   font-weight: 700 !important;
-  font-family: 'Outfit', sans-serif !important;
+  font-family: Inter, sans-serif !important;
   border-bottom: 2px solid var(--p-accent-gold) !important;
 }
 html.dark .tbl th {
@@ -1548,7 +1548,7 @@ html.dark .stat-card {
   font-size: 32px !important;
   font-weight: 800 !important;
   color: var(--accent, var(--p-accent)) !important;
-  font-family: 'Outfit', sans-serif !important;
+  font-family: Inter, sans-serif !important;
   line-height: 1 !important;
   letter-spacing: -0.02em !important;
   transition: all 0.3s ease !important;
@@ -1561,7 +1561,7 @@ html.dark .stat-card {
   margin-bottom: 6px !important;
   text-transform: none !important;
   letter-spacing: normal !important;
-  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-family: Inter, sans-serif !important;
 }
 html.dark .stat-lbl {
   color: #ffffff !important;
@@ -1723,7 +1723,7 @@ html.dark .sidebar {
 .sb-section-lbl {
   color: var(--p-accent) !important;
   font-weight: 800 !important;
-  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-family: Inter, sans-serif !important;
   font-size: 11px !important;
   letter-spacing: 0.8px !important;
 }
@@ -1734,7 +1734,7 @@ html.dark .sb-section-lbl {
   color: var(--p-text) !important;
   font-size: 13px !important;
   font-weight: 700 !important;
-  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-family: Inter, sans-serif !important;
   border-radius: 8px !important;
   border: 1.5px solid transparent !important;
   margin-bottom: 4px !important;
@@ -1870,7 +1870,7 @@ html.dark .stat-card {
   font-size: 24px !important;
   font-weight: 800 !important;
   color: var(--text) !important;
-  font-family: 'Outfit', sans-serif !important;
+  font-family: Inter, sans-serif !important;
   min-width: 40px !important;
   text-align: right !important;
 }
