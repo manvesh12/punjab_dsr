@@ -5860,7 +5860,15 @@
             </div>
             <div class="field"><label>River(s)</label><input id="proj-rivers" placeholder="Sutlej, Beas"></div>
           </div>
-          <div class="field"><label>Prepared By</label><input id="proj-by" value="Sub-Divisional Committee"></div>
+          <div class="field-row">
+            <div class="field"><label>Prepared By</label><input id="proj-by" value="Sub-Divisional Committee"></div>
+            <div class="field">
+              <label>Start from Model DSR Template (Optional)</label>
+              <select id="proj-model-dsr">
+                <option value="">-- None (Empty Project) --</option>
+              </select>
+            </div>
+          </div>
         </div>
       </div>
       <div class="modal-ft">
@@ -6079,5 +6087,6 @@
 
 
 <script defer src="js/portal.bundle.js?v=site-zoom-20260612i"></script>
+<script defer src="js/model-dsr-module.js"></script>
 </body>
 </html>

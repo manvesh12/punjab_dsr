@@ -5,6 +5,14 @@ import { jsonSafe } from "../lib/json.js";
 
 export const modelDsrRouter = Router();
 
+function checkAdmin(req: any, res: any) {
+  if (req.user?.role !== "ADMIN" && req.user?.role !== "STATE_ADMIN") {
+    res.status(403).json({ error: "Access denied. Only Admins can manage Model DSRs." });
+    return false;
+  }
+  return true;
+}
+
 type NormalizedSection = {
   sectionName: string;
   sequence: number;
@@ -144,6 +152,7 @@ modelDsrRouter.get("/", async (req, res) => {
 
 // Create a new Model DSR template
 modelDsrRouter.post("/", async (req, res) => {
+  if (!checkAdmin(req, res)) return;
   try {
     const body = req.body || {};
     const title = String(body.title || "").trim();
@@ -161,8 +170,14 @@ modelDsrRouter.post("/", async (req, res) => {
 
     const template = await prisma.modelDsr.create({
       data: {
+        modelId: `MODEL-DSR-${Date.now()}`,
         title,
         description: body.description ? String(body.description) : null,
+        category: body.category ? String(body.category) : null,
+        district: body.district ? String(body.district) : null,
+        mineralType: body.mineralType ? String(body.mineralType) : null,
+        remarks: body.remarks ? String(body.remarks) : null,
+        visibility: body.visibility ? String(body.visibility) : "DEPARTMENT_ONLY",
         status: ModelDsrStatus.DRAFT,
         createdBy: req.user?.id,
         sections: {
@@ -170,7 +185,8 @@ modelDsrRouter.post("/", async (req, res) => {
             sectionName: section.sectionName,
             sequence: section.sequence,
             contentType: section.contentType,
-            configuration: section.configuration as Prisma.InputJsonObject
+            configuration: section.configuration as Prisma.InputJsonObject,
+            isIncluded: (section as any).isIncluded !== false
           }))
         }
       },
@@ -282,6 +298,7 @@ modelDsrRouter.get("/:id", async (req, res) => {
 
 // Update Model DSR template sections (only if DRAFT)
 modelDsrRouter.put("/:id", async (req, res) => {
+  if (!checkAdmin(req, res)) return;
   try {
     const { id } = req.params;
     const body = req.body || {};
@@ -302,13 +319,18 @@ modelDsrRouter.put("/:id", async (req, res) => {
         where: { id },
         data: {
           title: body.title ? String(body.title).trim() : existing.title,
-          description: body.description !== undefined ? String(body.description || "") : existing.description
+          description: body.description !== undefined ? String(body.description || "") : existing.description,
+          category: body.category !== undefined ? String(body.category || "") : existing.category,
+          district: body.district !== undefined ? String(body.district || "") : existing.district,
+          mineralType: body.mineralType !== undefined ? String(body.mineralType || "") : existing.mineralType,
+          remarks: body.remarks !== undefined ? String(body.remarks || "") : existing.remarks,
+          visibility: body.visibility !== undefined ? String(body.visibility || "") : existing.visibility,
         }
       });
 
       if (Array.isArray(body.sections)) {
         const sections = normalizeSections(body.sections, {
-          district: body.district || null,
+          district: body.district || existing.district || null,
           sourceFileName: body.sourceFileName || null
         });
 
@@ -320,7 +342,8 @@ modelDsrRouter.put("/:id", async (req, res) => {
               sectionName: section.sectionName,
               sequence: section.sequence,
               contentType: section.contentType,
-              configuration: section.configuration as Prisma.InputJsonObject
+              configuration: section.configuration as Prisma.InputJsonObject,
+              isIncluded: (section as any).isIncluded !== false
             }
           });
         }
@@ -344,6 +367,7 @@ modelDsrRouter.put("/:id", async (req, res) => {
 
 // Publish a Model DSR template
 modelDsrRouter.post("/:id/publish", async (req, res) => {
+  if (!checkAdmin(req, res)) return;
   try {
     const { id } = req.params;
     const template = await prisma.modelDsr.findUnique({
@@ -374,6 +398,7 @@ modelDsrRouter.post("/:id/publish", async (req, res) => {
 
 // Delete/Archive a Model DSR template
 modelDsrRouter.delete("/:id", async (req, res) => {
+  if (!checkAdmin(req, res)) return;
   try {
     const { id } = req.params;
 
@@ -515,6 +540,83 @@ modelDsrRouter.post("/:id/import", async (req, res) => {
         annexuresImported: annexures.length
       })
     );
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Duplicate an existing Model DSR
+modelDsrRouter.post("/:id/duplicate", async (req, res) => {
+  if (!checkAdmin(req, res)) return;
+  try {
+    const { id } = req.params;
+    
+    const original = await prisma.modelDsr.findUnique({
+      where: { id },
+      include: { sections: true }
+    });
+
+    if (!original) {
+      res.status(404).json({ error: "Original template not found" });
+      return;
+    }
+
+    const duplicated = await prisma.modelDsr.create({
+      data: {
+        modelId: `MODEL-DSR-${Date.now()}`,
+        title: `${original.title} (Copy)`,
+        description: original.description,
+        category: original.category,
+        district: original.district,
+        mineralType: original.mineralType,
+        remarks: original.remarks,
+        visibility: original.visibility,
+        status: ModelDsrStatus.DRAFT,
+        createdBy: req.user?.id,
+        sections: {
+          create: original.sections.map(section => ({
+            sectionName: section.sectionName,
+            sequence: section.sequence,
+            contentType: section.contentType,
+            configuration: section.configuration as Prisma.InputJsonObject,
+            isIncluded: section.isIncluded,
+            chapterType: section.chapterType
+          }))
+        }
+      },
+      include: { sections: { orderBy: { sequence: "asc" } } }
+    });
+
+    res.status(201).json(jsonSafe(duplicated));
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get Model DSR preview cache
+modelDsrRouter.get("/:id/preview", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const preview = await prisma.modelPreviewCache.findUnique({
+      where: { modelId: id }
+    });
+    
+    res.json(jsonSafe(preview || {}));
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get Model DSR versions
+modelDsrRouter.get("/:id/versions", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const versions = await prisma.modelDsrVersion.findMany({
+      where: { modelId: id },
+      orderBy: { createdAt: "desc" }
+    });
+    
+    res.json(jsonSafe(versions));
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }

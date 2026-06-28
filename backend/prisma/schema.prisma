@@ -113,6 +113,7 @@ model Project {
   parentPhase       Project?      @relation("ProjectPhaseChain", fields: [parentPhaseId], references: [id])
   childPhases       Project[]     @relation("ProjectPhaseChain")
   generatedDsrs     GeneratedDsr[]
+  modelImportHistory ModelImportHistory[]
 
   @@index([parentPhaseId])
   @@index([district, phaseNo])
@@ -171,8 +172,14 @@ model DsrFile {
 
 model ModelDsr {
   id          String           @id @default(uuid())
+  modelId     String           @unique // e.g. MODEL-DSR-0001
   title       String           @unique
   description String?
+  category    String?
+  district    String?
+  mineralType String?
+  remarks     String?
+  visibility  String           @default("DEPARTMENT_ONLY") // PUBLIC, PRIVATE, DEPARTMENT_ONLY
   status      ModelDsrStatus   @default(DRAFT)
   createdBy   BigInt?
   createdAt   DateTime         @default(now())
@@ -180,6 +187,13 @@ model ModelDsr {
   version     Int              @default(1)
   
   sections    ModelDsrSection[]
+  files       ModelDsrFile[]
+  versions    ModelDsrVersion[]
+  tags        ModelDsrTag[]
+  permissions ModelDsrPermission[]
+  importHistory ModelImportHistory[]
+  previewCache ModelPreviewCache?
+  
   generated   GeneratedDsr[]
 }
 
@@ -190,10 +204,84 @@ model ModelDsrSection {
   sequence      Int
   contentType   SectionContentType @default(TEXT)
   configuration Json               @default("{}")
+  isIncluded    Boolean            @default(true)
+  chapterType   String?            // e.g. "CHAPTER", "ANNEXURE", "FRONT_MATTER"
 
   model         ModelDsr           @relation(fields: [modelId], references: [id], onDelete: Cascade)
 
   @@unique([modelId, sequence])
+}
+
+model ModelDsrFile {
+  id          String   @id @default(uuid())
+  modelId     String
+  fileName    String
+  objectKey   String
+  contentType String   @default("application/pdf") // PDF, Image, Table, Map
+  fileType    String?  // PDF, MAP, IMAGE, TABLE
+  sizeBytes   Int
+  createdAt   DateTime @default(now())
+  
+  model       ModelDsr @relation(fields: [modelId], references: [id], onDelete: Cascade)
+}
+
+model ModelDsrVersion {
+  id            String   @id @default(uuid())
+  modelId       String
+  versionNumber Int
+  snapshotData  Json     // Full JSON snapshot of the model configuration at this version
+  createdAt     DateTime @default(now())
+  createdBy     BigInt?
+  remarks       String?
+
+  model         ModelDsr @relation(fields: [modelId], references: [id], onDelete: Cascade)
+}
+
+model ModelDsrTag {
+  id        String   @id @default(uuid())
+  modelId   String
+  tag       String
+  
+  model     ModelDsr @relation(fields: [modelId], references: [id], onDelete: Cascade)
+
+  @@unique([modelId, tag])
+}
+
+model ModelDsrPermission {
+  id        String   @id @default(uuid())
+  modelId   String
+  userId    BigInt
+  accessLevel String // ADMIN, REVIEWER, OFFICER, VIEWER
+  
+  model     ModelDsr @relation(fields: [modelId], references: [id], onDelete: Cascade)
+
+  @@unique([modelId, userId])
+}
+
+model ModelImportHistory {
+  id          String   @id @default(uuid())
+  modelId     String
+  projectId   BigInt
+  importedBy  BigInt
+  importedAt  DateTime @default(now())
+  importType  String   // REPLACE, MERGE, APPEND
+  dataMapped  Json     // Record of what data was mapped
+  
+  model       ModelDsr @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model ModelPreviewCache {
+  id          String   @id @default(uuid())
+  modelId     String   @unique
+  pageCount   Int      @default(0)
+  imageCount  Int      @default(0)
+  tableCount  Int      @default(0)
+  mapCount    Int      @default(0)
+  previewData Json     // Snippets or thumbnail URLs
+  updatedAt   DateTime @updatedAt
+  
+  model       ModelDsr @relation(fields: [modelId], references: [id], onDelete: Cascade)
 }
 
 model GeneratedDsr {
