@@ -21,7 +21,7 @@ function initReplenishmentView() {
     if (headerBtn) headerBtn.style.display = 'none';
     if (subTitle) subTitle.textContent = 'Please select a project to manage its Replenishment Studies.';
     
-    apiFetch('/api/projects')
+    apiFetch('/projects')
       .then(projects => {
         const sel = document.getElementById('repl-project-selector');
         if (!sel) return;
@@ -55,7 +55,7 @@ async function fetchReplenishmentStudies() {
   if (!list || !S.activeProject) return;
 
   try {
-    const studies = await apiFetch(`/api/projects/${S.activeProject.id}/replenishment`);
+    const studies = await apiFetch(`/projects/${S.activeProject.id}/replenishment`);
     currentReplenishmentStudies = studies;
     
     if (studies.length === 0) {
@@ -101,7 +101,7 @@ async function createReplenishmentStudy() {
     if (!title) return;
     
     // Automatically hits the backend to extract DSR Base data
-    const res = await apiFetch(`/api/projects/${S.activeProject.id}/replenishment`, {
+    const res = await apiFetch(`/projects/${S.activeProject.id}/replenishment`, {
       method: 'POST',
       body: JSON.stringify({ title })
     });
@@ -125,7 +125,7 @@ async function openReplenishmentStudy(id) {
 
   // Re-fetch studies if not loaded
   if (currentReplenishmentStudies.length === 0 && S.activeProject) {
-      currentReplenishmentStudies = await apiFetch(`/api/projects/${S.activeProject.id}/replenishment`);
+      currentReplenishmentStudies = await apiFetch(`/projects/${S.activeProject.id}/replenishment`);
   }
 
   const study = currentReplenishmentStudies.find(s => s.id === id);
@@ -221,7 +221,7 @@ async function saveReplenishmentStudy(id) {
       }
     };
     
-    await apiFetch(`/api/replenishment/${id}`, {
+    await apiFetch(`/replenishment/${id}`, {
       method: 'PUT',
       body: JSON.stringify(payload)
     });
@@ -229,7 +229,7 @@ async function saveReplenishmentStudy(id) {
     toast("Replenishment Study Saved Successfully!", "success");
     
     // Refresh list in background
-    const studies = await apiFetch(`/api/projects/${S.activeProject.id}/replenishment`);
+    const studies = await apiFetch(`/projects/${S.activeProject.id}/replenishment`);
     currentReplenishmentStudies = studies;
   } catch (err) {
     toast("Save failed: " + err.message, "error");
@@ -239,7 +239,7 @@ async function saveReplenishmentStudy(id) {
 async function deleteReplenishmentStudy(id) {
   if (!confirm("Are you sure you want to delete this Replenishment Study?")) return;
   try {
-    await apiFetch(`/api/replenishment/${id}`, { method: 'DELETE' });
+    await apiFetch(`/replenishment/${id}`, { method: 'DELETE' });
     toast("Deleted successfully", "success");
     fetchReplenishmentStudies();
   } catch (err) {
