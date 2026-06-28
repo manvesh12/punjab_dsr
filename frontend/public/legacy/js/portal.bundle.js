@@ -2107,6 +2107,7 @@ function updateSidebarToggleVisibility() {
   toggleBtn.setAttribute('aria-expanded', String(!document.body.classList.contains('sidebar-hidden')));
 }
 function clearActiveProject() {
+  sessionStorage.removeItem('dsr_active_project_id');
   if (typeof S !== 'undefined') {
     S.activeProject = null;
     ['report-nav', 'annexure-nav', 'tables-nav', 'finalize-nav'].forEach(n => {
@@ -2988,6 +2989,16 @@ async function refreshProjectsFromBackend(renderAfter = true) {
     S.projectsLoadedAt = new Date().toLocaleTimeString();
     updateProjectBadgeCount();
     updateTopBarProjectsDropdown();
+
+    const savedProjId = sessionStorage.getItem('dsr_active_project_id');
+    if (savedProjId && !S.activeProject) {
+        await openProject(Number(savedProjId));
+        if (window.location.hash) {
+            const hashView = window.location.hash.substring(1);
+            showView(hashView, null, false);
+        }
+    }
+
     if (renderAfter) {
       renderProjects();
       if (typeof renderDashboard === 'function') renderDashboard();
@@ -3402,6 +3413,7 @@ window.createNextPhase = createNextPhase;
 async function openProject(id) {
   S.activeProject = S.projects.find(p=>p.id===id);
   if (!S.activeProject) return;
+  sessionStorage.setItem('dsr_active_project_id', id);
   if (typeof resetProjectWorkingState === 'function') {
     resetProjectWorkingState(S.activeProject);
   }
