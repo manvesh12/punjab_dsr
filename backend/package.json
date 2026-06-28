@@ -11,7 +11,7 @@
     "start:worker": "node dist/src/worker.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma db push",
-    "seed": "tsx prisma/seed.ts",
+    "seed": "node dist/prisma/seed.js",
     "test:security": "tsx scripts/security-load-test.ts"
   },
   "dependencies": {
