@@ -48,7 +48,8 @@ a { color: inherit; text-decoration: none; }
   background: #fff;
 }
 .header-left { display: flex; align-items: center; gap: 15px; width: 33%; }
-.gov-logo { height: 75px; object-fit: contain; }
+.gov-emblem { height: 85px; object-fit: contain; }
+.gov-logo { height: 75px; object-fit: contain; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 .identity-copy { text-align: center; width: 34%; }
 .identity-copy p { margin: 0; font-size: 11px; font-weight: 700; color: #475569; letter-spacing: 1px; }
 .identity-copy h1 { margin: 2px 0; font-size: 22px; font-weight: 700; color: #0f172a; }
