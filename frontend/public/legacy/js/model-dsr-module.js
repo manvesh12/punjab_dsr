@@ -121,6 +121,7 @@ function displayModelsList(models) {
       </td>
       <td style="padding:12px 16px; font-size:13px; color:#64748b;">${new Date(m.createdAt).toLocaleDateString()}</td>
       <td style="padding:12px 16px; text-align:right;">
+        ${m.status === 'DRAFT' ? `<button class="btn btn-sm" onclick="publishModel('${m.id}')" title="Publish" style="color:#10b981;"><i data-lucide="check-circle" style="width:14px;"></i></button>` : ''}
         <button class="btn btn-sm" onclick="previewModel('${m.id}')" title="Preview"><i data-lucide="eye" style="width:14px;"></i></button>
         <button class="btn btn-sm" onclick="duplicateModel('${m.id}')" title="Duplicate"><i data-lucide="copy" style="width:14px;"></i></button>
         <button class="btn btn-sm" style="color:#ef4444;" onclick="deleteModel('${m.id}')" title="Delete"><i data-lucide="trash-2" style="width:14px;"></i></button>
@@ -312,6 +313,16 @@ async function duplicateModel(id) {
   }
 }
 
+async function publishModel(id) {
+  if (!confirm("Are you sure you want to publish this Model? It will become available for all new projects.")) return;
+  try {
+    await apiFetch(`${MODEL_DSR_API_BASE}/${id}/publish`, { method: 'POST' });
+    renderModelLibrary(document.getElementById('view-model-dsr'));
+  } catch (err) {
+    alert("Publish failed: " + err.message);
+  }
+}
+
 async function deleteModel(id) {
   if (!confirm("Are you sure you want to permanently delete/archive this Model?")) return;
   try {
@@ -322,8 +333,56 @@ async function deleteModel(id) {
   }
 }
 
-function previewModel(id) {
-  alert("Preview mode activated for Model ID: " + id + "\\n(This will open the split-pane viewer component)");
+async function previewModel(id) {
+  try {
+    const model = await apiFetch(`${MODEL_DSR_API_BASE}/${id}`);
+    showModelPreviewModal(model);
+  } catch (err) {
+    alert("Failed to load preview: " + err.message);
+  }
+}
+
+function showModelPreviewModal(model) {
+  let modal = document.getElementById('model-preview-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'model-preview-modal';
+    modal.className = 'modal';
+    document.body.appendChild(modal);
+  }
+  
+  const sectionsHtml = (model.sections || []).map(s => `
+    <div style="padding: 10px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between;">
+      <span style="font-weight: 500;">${s.sectionName}</span>
+      <span style="font-size: 11px; padding: 2px 6px; background: #f1f5f9; border-radius: 4px;">${s.contentType}</span>
+    </div>
+  `).join('');
+
+  modal.innerHTML = `
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Model DSR Preview</h3>
+        <button class="modal-close" onclick="closeModal('model-preview-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <h4 style="margin-top:0; color:#17324D;">${model.title}</h4>
+        <p style="font-size:13px; color:#64748b; margin-bottom: 20px;">
+          District: ${model.district || 'N/A'} | Category: ${model.category || 'N/A'}<br>
+          ${model.description || ''}
+        </p>
+        <h5 style="margin-bottom: 10px; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px;">Included Sections</h5>
+        <div style="max-height: 400px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px;">
+          ${sectionsHtml || '<div style="padding: 10px;">No sections found.</div>'}
+        </div>
+      </div>
+      <div class="modal-footer" style="margin-top: 20px; text-align: right;">
+        <button class="btn btn-outline" onclick="closeModal('model-preview-modal')">Close</button>
+        ${model.status === 'DRAFT' ? `<button class="btn btn-primary" onclick="closeModal('model-preview-modal'); publishModel('${model.id}')">Publish Now</button>` : ''}
+      </div>
+    </div>
+  `;
+  
+  modal.classList.add('open');
 }
 
 // ==========================================
