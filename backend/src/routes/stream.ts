@@ -1,5 +1,5 @@
 import { Router } from "express";
-import Redis from "ioredis";
+import { Redis } from "ioredis";
 
 export const streamRouter = Router();
 
@@ -39,7 +39,7 @@ streamRouter.get("/events", (req, res) => {
   };
 
   // Subscribe to Redis channel
-  redisSubscriber.subscribe(channel, (err) => {
+  redisSubscriber.subscribe(channel, (err: any) => {
     if (err) {
       console.error("Failed to subscribe to Redis channel:", err);
     }
