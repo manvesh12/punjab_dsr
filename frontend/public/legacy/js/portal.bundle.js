@@ -13808,12 +13808,10 @@ async function generateFinalPDF(regenerate = false) {
       return true;
     };
 
-    // PAGE 1: Cover Page
-    const coverPages = S.uploadedPDFs?.cover || [];
+    // 1. Cover Page
+    const coverPages = pdfPreview.getFrontMatterPages().filter(p => /^cover/i.test(p.label));
     if (coverPages.length > 0) {
-      coverPages.forEach((page, index) => {
-        addImagePage(page, 'Cover Page');
-      });
+      coverPages.forEach(p => addImagePage(p.src, 'Cover Page'));
     } else {
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(24);
@@ -13829,56 +13827,60 @@ async function generateFinalPDF(regenerate = false) {
       doc.text(`Version: ${version}`, W / 2, H - 42, { align: 'center' });
     }
 
-    // PAGE 2: Table of Contents placeholder
+    // 2. Table of Contents placeholder
     doc.addPage();
     const tocPage = doc.getCurrentPageInfo().pageNumber;
 
     // 3. Preface
-    const prefPages = S.uploadedPDFs?.pref || [];
-    const prefText = S.frontMatter?.preface || '';
-    if (prefPages.length > 0 || prefText.trim().length > 0) {
+    const prefPages = pdfPreview.getFrontMatterPages().filter(p => /^preface/i.test(p.label));
+    if (prefPages.length > 0) {
       addTitlePage("PREFACE");
-      sectionStarts.push({ title: 'Preface', page: doc.getCurrentPageInfo().pageNumber });
-      if (prefPages.length > 0) {
-        prefPages.forEach(page => addImagePage(page, 'Preface'));
-      } else {
-        doc.addPage();
-        let y = 25;
-        y = writeParagraph("PREFACE", y, { bold: true, size: 14, color: [0, 0, 0] });
-        y = writeParagraph(prefText, y);
-      }
+      sectionStarts.push({ title: 'Preface', page: doc.getCurrentPageInfo().pageNumber + 1 });
+      prefPages.forEach(p => addImagePage(p.src, 'Preface'));
     }
 
     // 4. Acknowledgement
-    const ackText = S.frontMatter?.acknowledgement || '';
-    if (ackText.trim().length > 0) {
+    const ackPages = pdfPreview.getFrontMatterPages().filter(p => /^acknowledgement/i.test(p.label));
+    if (ackPages.length > 0) {
       addTitlePage("ACKNOWLEDGEMENT");
-      sectionStarts.push({ title: 'Acknowledgement', page: doc.getCurrentPageInfo().pageNumber });
-      doc.addPage();
-      let y = 25;
-      y = writeParagraph("ACKNOWLEDGEMENT", y, { bold: true, size: 14, color: [0, 0, 0] });
-      y = writeParagraph(ackText, y);
+      sectionStarts.push({ title: 'Acknowledgement', page: doc.getCurrentPageInfo().pageNumber + 1 });
+      ackPages.forEach(p => addImagePage(p.src, 'Acknowledgement'));
     }
 
     // 5. Certificate of Compliance
-    const certPages = S.uploadedPDFs?.cert || [];
+    const certPages = pdfPreview.getFrontMatterPages().filter(p => /^certificate of compliance/i.test(p.label));
     if (certPages.length > 0) {
       addTitlePage("CERTIFICATE OF COMPLIANCE");
-      sectionStarts.push({ title: 'Certificate of Compliance', page: doc.getCurrentPageInfo().pageNumber });
-      certPages.forEach(page => addImagePage(page, 'Certificate of Compliance'));
+      sectionStarts.push({ title: 'Certificate of Compliance', page: doc.getCurrentPageInfo().pageNumber + 1 });
+      certPages.forEach(p => addImagePage(p.src, 'Certificate of Compliance'));
     }
 
     // 6. Chapters 1 to 10
     for (let i = 1; i <= 10; i += 1) {
-      addChapter(i);
+      const chPages = pdfPreview.getChapterPages().filter(p => new RegExp('^Chapter ' + i + '\\b', 'i').test(p.label));
+      if (chPages.length > 0) {
+        const ch = (S.chapters || []).find(c => Number(c.id) === i) || {};
+        const chSub = ch.name || '';
+        addTitlePage(`CHAPTER ${i}`, chSub);
+        sectionStarts.push({ title: `Chapter ${i} - ${chSub}`, page: doc.getCurrentPageInfo().pageNumber + 1 });
+        chPages.forEach(p => addImagePage(p.src, `Chapter ${i}`));
+      }
     }
 
     // 7. Plates
     setProgress('Merging Sections...', 52);
-    addPlates();
+    (S.plates || []).forEach((plate, idx) => {
+      const pNum = idx + 1;
+      const pName = plate.name || '';
+      const platePages = pdfPreview.getPlatePages().filter(p => new RegExp('^Plate P' + pNum + '\\b|^Plate ' + pNum + '\\b', 'i').test(p.label));
+      if (platePages.length > 0) {
+        addTitlePage(`PLATE ${pNum}`, pName);
+        sectionStarts.push({ title: `Plate ${pNum} - ${pName}`, page: doc.getCurrentPageInfo().pageNumber + 1 });
+        platePages.forEach(p => addImagePage(p.src, `Plate ${pNum}`));
+      }
+    });
 
-    // 8. Cross Section Graphs
-    addGraphSection();
+    // 8. Cross Section Graphs: REMOVED as requested.
 
     // 9. Annexures I to VII & B to K
     const annexurePreviewOrder = [
@@ -13900,6 +13902,7 @@ async function generateFinalPDF(regenerate = false) {
       ['Annexure J', 'annexure-j'],
       ['Annexure K', 'annexure-k']
     ];
+
     for (let annexureIndex = 0; annexureIndex < annexurePreviewOrder.length; annexureIndex += 1) {
       const [title, viewId] = annexurePreviewOrder[annexureIndex];
       if (!hasAnnexureContent(viewId)) continue;
@@ -13907,41 +13910,94 @@ async function generateFinalPDF(regenerate = false) {
       const mainTitle = title.split(' - ')[0].toUpperCase();
       const subTitle = title.split(' - ')[1] || '';
       addTitlePage(mainTitle, subTitle);
-      sectionStarts.push({ title, page: doc.getCurrentPageInfo().pageNumber });
+      sectionStarts.push({ title, page: doc.getCurrentPageInfo().pageNumber + 1 });
       await addAnnexureFromPreview(title, viewId);
     }
 
     setProgress('Finalizing Document...', 78);
+    
+    // RENDER TABLE OF CONTENTS
     doc.setPage(tocPage);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`District Survey Report\n${district} District\nPunjab`, pad, 25);
+    
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(16);
-    doc.setTextColor(0, 0, 0);
-    doc.text('Table of Contents', pad, 25);
-    doc.setDrawColor(0, 0, 0);
-    doc.setLineWidth(0.3);
-    doc.line(pad, 29, W - pad, 29);
-    
-    let tocY = 37;
+    doc.text('Content', W / 2, 45, { align: 'center' });
+
+    // Format sectionStarts into standard rows: Chapter No | Subject | Page No.
+    const tocRows = [];
     sectionStarts.forEach(item => {
-      if (tocY > 268) {
-        doc.addPage();
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(12);
-        doc.setTextColor(0, 0, 0);
-        doc.text('Table of Contents (Continued)', pad, 25);
-        doc.line(pad, 29, W - pad, 29);
-        tocY = 37;
+      const title = String(item.title).trim();
+      if (/^preface$/i.test(title)) {
+        tocRows.push(['-', 'Preface', String(item.page)]);
+      } else if (/^acknowledgement$/i.test(title)) {
+        tocRows.push(['-', 'Acknowledgement', String(item.page)]);
+      } else if (/^certificate of compliance$/i.test(title)) {
+        tocRows.push(['-', 'Certificate of Compliance', String(item.page)]);
+      } else if (/^chapter\s+(\d+)\s*-\s*(.*)$/i.test(title)) {
+        const match = title.match(/^chapter\s+(\d+)\s*-\s*(.*)$/i);
+        tocRows.push([match[1], match[2], String(item.page)]);
+      } else if (/^plate\s+([\w\d]+)\s*-\s*(.*)$/i.test(title)) {
+        const match = title.match(/^plate\s+([\w\d]+)\s*-\s*(.*)$/i);
+        tocRows.push([`Plate ${match[1]}`, match[2], String(item.page)]);
+      } else if (/^annexure\s+([\w\d\-]+)\s*-\s*(.*)$/i.test(title)) {
+        const match = title.match(/^annexure\s+([\w\d\-]+)\s*-\s*(.*)$/i);
+        tocRows.push([`Annexure ${match[1]}`, match[2], String(item.page)]);
+      } else if (/^annexure\s+(\w)$/i.test(title)) {
+        const match = title.match(/^annexure\s+(\w)$/i);
+        tocRows.push([`Annexure ${match[1]}`, '-', String(item.page)]);
+      } else {
+        // Skip Cross Section Graphs!
+        if (/cross section/i.test(title)) return;
+        tocRows.push(['-', title, String(item.page)]);
       }
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9.5);
-      doc.setTextColor(0, 0, 0);
-      const cleanTitle = String(item.title).replace(/\s+/g, ' ').trim();
-      doc.text(cleanTitle, pad, tocY, { maxWidth: W - 40 });
-      doc.text(String(item.page), W - pad, tocY, { align: 'right' });
-      doc.setDrawColor(200, 200, 200);
-      doc.setLineWidth(0.1);
-      doc.line(pad, tocY + 2, W - pad, tocY + 2);
-      tocY += 8;
+    });
+
+    const finalRows = [];
+    let addedPlatesHeader = false;
+    let addedAnnexuresHeader = false;
+
+    tocRows.forEach(row => {
+      const chNo = row[0];
+      if (chNo.startsWith('Plate') && !addedPlatesHeader) {
+        finalRows.push(['', 'PLATES', '']);
+        addedPlatesHeader = true;
+      }
+      if (chNo.startsWith('Annexure') && !addedAnnexuresHeader) {
+        finalRows.push(['', 'ANNEXURES', '']);
+        addedAnnexuresHeader = true;
+      }
+      finalRows.push(row);
+    });
+
+    doc.autoTable({
+      startY: 52,
+      margin: { left: pad, right: pad },
+      head: [['Chapter No', 'Subject', 'Page No.']],
+      body: finalRows,
+      theme: 'grid',
+      styles: { fontSize: 9, cellPadding: 3, lineColor: [0, 0, 0], lineWidth: 0.2, textColor: [0, 0, 0] },
+      headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold', lineColor: [0, 0, 0], lineWidth: 0.2 },
+      columnStyles: {
+        0: { width: 30 },
+        1: { width: 120 },
+        2: { width: 30, align: 'right' }
+      },
+      didParseCell: (cellData) => {
+        if (cellData.section === 'body') {
+          const val = cellData.row.cells[1].text[0];
+          if (val === 'PLATES' || val === 'ANNEXURES') {
+            cellData.cell.styles.fontStyle = 'bold';
+            cellData.cell.styles.fillColor = [240, 240, 240];
+            if (cellData.column.index === 0 || cellData.column.index === 2) {
+              cellData.cell.text = ''; // Clear other cells in separator row
+            }
+          }
+        }
+      }
     });
 
     const totalPages = doc.getNumberOfPages();
@@ -13950,20 +14006,25 @@ async function generateFinalPDF(regenerate = false) {
       if (p === 1) continue;
       
       const isTitlePage = titlePages.includes(p);
-      doc.setDrawColor(0, 0, 0);
-      doc.setLineWidth(0.3);
-      doc.rect(10, 10, W - 20, H - 20, 'S'); // thin black border on ALL pages except Cover
+      const isUploaded = uploadedPages.includes(p);
       
-      if (!isTitlePage) {
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(7.5);
-        doc.setTextColor(0, 0, 0);
-        const districtNameUpper = String(district || 'PUNJAB').toUpperCase();
-        const footerLeft = `PREPARED BY: SUB-DIVISIONAL COMMITTEE OF ${districtNameUpper} DISTRICT`;
-        const footerLeft2 = `ASSISTED BY: RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD`;
-        doc.text(footerLeft, 14, H - 15);
-        doc.text(footerLeft2, 14, H - 11);
-        doc.text(`Page ${p}`, W - 14, H - 13, { align: 'right' });
+      // Do not add extra generated footer/border around an uploaded PDF page if it already has official border/footer
+      if (!isUploaded) {
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.3);
+        doc.rect(10, 10, W - 20, H - 20, 'S'); // thin black border on ALL generated pages except Cover
+        
+        if (!isTitlePage) {
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(7.5);
+          doc.setTextColor(0, 0, 0);
+          const districtNameUpper = String(district || 'PUNJAB').toUpperCase();
+          const footerLeft = `PREPARED BY: SUB-DIVISIONAL COMMITTEE OF ${districtNameUpper} DISTRICT`;
+          const footerLeft2 = `ASSISTED BY: RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD`;
+          doc.text(footerLeft, 14, H - 15);
+          doc.text(footerLeft2, 14, H - 11);
+          doc.text(`Page ${p}`, W - 14, H - 13, { align: 'right' });
+        }
       }
     }
 
