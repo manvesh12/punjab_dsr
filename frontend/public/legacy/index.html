@@ -292,6 +292,17 @@
 <section class="relative bg-surface-container-lowest overflow-hidden border-b border-surface-container-highest">
 <!-- Background decorative pattern -->
 <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: radial-gradient(#1E293B 1px, transparent 1px); background-size: 24px 24px;"></div>
+<!-- Sand Mining Scenery Background covering edge to edge and fading out left -->
+<div class="absolute right-0 top-0 bottom-0 w-full lg:w-[65%] pointer-events-none z-0" style="
+  background-image: url('assets/sand_mining_scenery.png');
+  background-size: cover;
+  background-position: center;
+  mix-blend-mode: multiply;
+  opacity: 0.48;
+  filter: contrast(1.1) brightness(0.92) saturate(1.1);
+  mask-image: linear-gradient(to left, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+  -webkit-mask-image: linear-gradient(to left, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+"></div>
 <div class="max-w-container-max mx-auto px-sm md:px-gutter relative z-10 pt-xs pb-sm">
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-lg items-center">
 <div class="lg:col-span-7 flex flex-col gap-2">
@@ -319,17 +330,6 @@
 </div>
 <!-- Right Side Register Form -->
 <div class="lg:col-span-5 relative">
-<!-- Satellite Map Background extending behind logo and towards left text -->
-<div class="absolute -left-[40%] lg:-left-[95%] right-0 top-1/2 -translate-y-1/2 h-[125%] pointer-events-none z-0" style="
-  background-image: url('assets/sand_mining_scenery.png');
-  background-size: cover;
-  background-position: center;
-  mix-blend-mode: multiply;
-  opacity: 0.35;
-  filter: contrast(1.1) brightness(1.05) saturate(1.2);
-  mask-image: radial-gradient(circle at 80% 50%, rgba(0,0,0,1) 15%, rgba(0,0,0,0) 75%);
-  -webkit-mask-image: radial-gradient(circle at 80% 50%, rgba(0,0,0,1) 15%, rgba(0,0,0,0) 75%);
-"></div>
 <div class="relative flex items-center justify-center h-full">
 <style>
     @keyframes float {
