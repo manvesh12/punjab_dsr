@@ -13352,6 +13352,7 @@ async function generateFinalPDF(regenerate = false) {
     const version = document.getElementById('pdf-version')?.value || S.frontMatter?.version || 'Final Approved Draft';
     const generatedAt = new Date();
     const sectionStarts = [];
+    const titlePages = [];
     const safe = (value, fallback = '-') => String(value ?? fallback).trim() || fallback;
     const hasText = (value) => String(value ?? '').trim().length > 0;
     const hexToRgb = (hex, fallback = [245, 158, 11]) => {
@@ -13359,65 +13360,82 @@ async function generateFinalPDF(regenerate = false) {
       if (!/^[0-9a-f]{6}$/i.test(value)) return fallback;
       return [0, 2, 4].map(index => parseInt(value.slice(index, index + 2), 16));
     };
-    const addHeader = (sectionTitle) => {
-      doc.setFillColor(...navy);
-      doc.rect(0, 0, W, 14, 'F');
+
+    const addTitlePage = (titleText, subtitleText = '') => {
+      doc.addPage();
+      const pNum = doc.getCurrentPageInfo().pageNumber;
+      titlePages.push(pNum);
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(8);
-      doc.setTextColor(255, 255, 255);
-      doc.text('DISTRICT SURVEY REPORT - GOVERNMENT OF PUNJAB - EMGSM 2020', W / 2, 8, { align: 'center' });
-      doc.text(sectionTitle.slice(0, 42), W - pad, 8, { align: 'right' });
-      doc.setDrawColor(...saffron);
-      doc.setLineWidth(0.7);
-      doc.line(pad, 15, W - pad, 15);
+      doc.setFontSize(22);
+      doc.setTextColor(0, 0, 0);
+      doc.text(titleText, W / 2, H / 2 - 10, { align: 'center', maxWidth: W - 40 });
+      if (subtitleText) {
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(12);
+        doc.setTextColor(100, 100, 100);
+        doc.text(subtitleText, W / 2, H / 2 + 5, { align: 'center', maxWidth: W - 40 });
+      }
     };
+
+    const addHeader = (sectionTitle) => {
+      // Stub to satisfy table of contents calls or fallbacks
+    };
+
     const beginSection = (title) => {
       doc.addPage();
-      sectionStarts.push({ title, page: doc.getCurrentPageInfo().pageNumber });
-      addHeader(title);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(15);
-      doc.setTextColor(...navy);
-      doc.text(title, pad, 28, { maxWidth: W - (pad * 2) });
-      doc.setDrawColor(220, 225, 232);
-      doc.line(pad, 34, W - pad, 34);
-      return 44;
+      return 25;
     };
+
     const writeParagraph = (text, y, options = {}) => {
       if (!hasText(text)) return y;
       doc.setFont('helvetica', options.bold ? 'bold' : 'normal');
       doc.setFontSize(options.size || 10);
-      doc.setTextColor(...(options.color || muted));
+      doc.setTextColor(...(options.color || [0, 0, 0]));
       const lines = doc.splitTextToSize(String(text), options.width || W - (pad * 2));
       doc.text(lines, options.x || pad, y);
       return y + (lines.length * (options.lineHeight || 5.5)) + (options.after || 6);
     };
+
     const addImagePage = (src, title) => {
       if (!src) return;
       doc.addPage();
-      addHeader(title);
       try {
         const format = String(src).startsWith('data:image/jpeg') ? 'JPEG' : 'PNG';
-        doc.addImage(src, format, pad, 22, W - (pad * 2), H - 38, undefined, 'FAST');
+        doc.addImage(src, format, 12, 12, W - 24, H - 24, undefined, 'FAST');
       } catch (err) {
         try {
-          doc.addImage(src, 'JPEG', pad, 22, W - (pad * 2), H - 38, undefined, 'FAST');
+          doc.addImage(src, 'JPEG', 12, 12, W - 24, H - 24, undefined, 'FAST');
         } catch (innerErr) {
           console.warn('Could not embed uploaded page:', innerErr);
         }
       }
     };
+
     const addUploadedPages = (pages, title) => {
       if (!Array.isArray(pages) || !pages.length) return false;
-      pages.forEach((page, index) => addImagePage(page, `${title} - Attachment ${index + 1}`));
+      pages.forEach((page, index) => addImagePage(page, `${title} - Page ${index + 1}`));
       return true;
     };
+
     const tableRowsFromElement = (table) => {
       if (!table) return null;
       const getCells = (row) => getPrintableTableCells(row)
         .map(cell => {
           const select = cell.querySelector('select');
-          return (select ? select.value : cell.innerText || '').replace(/\s+/g, ' ').trim();
+          const input = cell.querySelector('input');
+          const textarea = cell.querySelector('textarea');
+          let val = '';
+          if (select) {
+            val = select.value;
+          } else if (input) {
+            val = input.value;
+          } else if (textarea) {
+            val = textarea.value;
+          } else {
+            val = cell.innerText || '';
+          }
+          val = val.replace(/\s+/g, ' ').trim();
+          return val || 'NA';
         });
       const head = Array.from(table.querySelectorAll('thead tr')).map(getCells).filter(row => row.some(Boolean));
       const bodyRows = Array.from(table.querySelectorAll('tbody tr'))
@@ -13428,33 +13446,49 @@ async function generateFinalPDF(regenerate = false) {
       if (!body.some(row => row.some(cell => cell && !/^na$/i.test(cell)))) return null;
       return { head: head.length ? head : [body.shift() || ['Details']], body, rowMeta: bodyRows.map(row => row.meta) };
     };
+
     const addTable = (table, title) => {
-      const data = tableRowsFromElement(table);
-      if (!data) return false;
-      let y = beginSection(title);
+      if (!table) return false;
+      const clone = table.cloneNode(true);
+      clone.querySelectorAll('select').forEach(select => {
+        const val = select.value || '';
+        const textNode = document.createTextNode(val || 'NA');
+        select.parentNode.replaceChild(textNode, select);
+      });
+      clone.querySelectorAll('input, textarea').forEach(input => {
+        const val = input.value || '';
+        const textNode = document.createTextNode(val || 'NA');
+        input.parentNode.replaceChild(textNode, input);
+      });
+      clone.querySelectorAll('td, th').forEach(cell => {
+        cell.querySelectorAll('button, a, .btn, .actions, .edit-btn, .delete-btn').forEach(el => el.remove());
+        const txt = (cell.textContent || '').trim();
+        if (!txt) {
+          cell.textContent = 'NA';
+        }
+      });
+      doc.addPage();
+      let y = 25;
+      y = writeParagraph(title, y, { bold: true, size: 11, color: [0, 0, 0], after: 6 });
       doc.autoTable({
+        html: clone,
         startY: y,
         margin: { left: pad, right: pad },
-        head: data.head,
-        body: data.body,
         theme: 'grid',
-        styles: { fontSize: 7.2, cellPadding: 2, overflow: 'linebreak' },
-        headStyles: { fillColor: navy, textColor: [255, 255, 255], fontStyle: 'bold' },
-        alternateRowStyles: { fillColor: [247, 249, 252] },
-        didParseCell: (cellData) => {
-          if (cellData.section !== 'body') return;
-          const rowMeta = data.rowMeta?.[cellData.row.index];
-          if (!rowMeta?.color) return;
-          cellData.cell.styles.fillColor = hexToRgb(rowMeta.color, [230, 247, 238]);
-        }
+        styles: { fontSize: 7.5, cellPadding: 2, lineColor: [0, 0, 0], lineWidth: 0.2, textColor: [0, 0, 0], overflow: 'linebreak' },
+        headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold', lineColor: [0, 0, 0], lineWidth: 0.2 },
+        alternateRowStyles: { fillColor: [255, 255, 255] }
       });
       return true;
     };
+
     const addPhaseChangeSummary = () => {
       if (typeof getPhaseChangeSummaryRows !== 'function') return false;
       const rows = getPhaseChangeSummaryRows();
       if (!rows.length) return false;
-      let y = beginSection('Phase Change Summary');
+      doc.addPage();
+      let y = 25;
+      y = writeParagraph('Phase Change Summary', y, { bold: true, size: 12, color: [0, 0, 0], after: 6 });
       y = writeParagraph(`This report is generated for ${getProjectPhaseLabel(S.activeProject)}. Imported Phase 1 data remains locked; new and updated Phase 2 records are tracked with color metadata.`, y, { size: 9.5, after: 6 });
       doc.autoTable({
         startY: y,
@@ -13462,16 +13496,12 @@ async function generateFinalPDF(regenerate = false) {
         head: [['Type', 'Record / Section', 'Color']],
         body: rows.map(row => [row[0], row[1], row[2]]),
         theme: 'grid',
-        styles: { fontSize: 8, cellPadding: 2.4 },
-        headStyles: { fillColor: navy, textColor: [255, 255, 255] },
-        didParseCell: (cellData) => {
-          if (cellData.section !== 'body' || cellData.column.index !== 2) return;
-          cellData.cell.styles.fillColor = hexToRgb(rows[cellData.row.index]?.[2], [226, 232, 240]);
-          cellData.cell.styles.textColor = [20, 24, 32];
-        }
+        styles: { fontSize: 8, cellPadding: 2.4, lineColor: [0, 0, 0], lineWidth: 0.2, textColor: [0, 0, 0] },
+        headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold', lineColor: [0, 0, 0], lineWidth: 0.2 }
       });
       return true;
     };
+
     const addTables = (configs) => {
       let added = false;
       configs.forEach(cfg => {
@@ -13483,35 +13513,41 @@ async function generateFinalPDF(regenerate = false) {
       });
       return added;
     };
+
     const addEntryList = (title, entries) => {
       const rows = (entries || []).filter(item => hasText(item.name) || hasText(item.summary) || (item.pages && item.pages.length));
       if (!rows.length) return false;
-      let y = beginSection(title);
+      doc.addPage();
+      let y = 25;
+      y = writeParagraph(title, y, { bold: true, size: 12, color: [0, 0, 0], after: 8 });
       rows.forEach((item, index) => {
-        if (y > 260) y = beginSection(`${title} Continued`);
+        if (y > 260) {
+          doc.addPage();
+          y = 25;
+          y = writeParagraph(`${title} Continued`, y, { bold: true, size: 12, color: [0, 0, 0], after: 8 });
+        }
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(10);
-        doc.setTextColor(...blue);
+        doc.setTextColor(0, 0, 0);
         doc.text(`${index + 1}. ${safe(item.name, 'Entry')}`, pad, y);
         y += 6;
         y = writeParagraph(item.summary || '', y, { size: 9, after: 4 });
         if (item.fileName) {
-          y = writeParagraph(`Attachment: ${item.fileName}`, y, { size: 8.5, color: saffron, after: 6 });
+          y = writeParagraph(`Attachment: ${item.fileName}`, y, { size: 8.5, color: [100, 100, 100], after: 6 });
         }
         addUploadedPages(item.pages, `${title} - ${safe(item.name, `Entry ${index + 1}`)}`);
       });
       return true;
     };
+
     const addGraphSection = () => {
       if (!Array.isArray(S.graphs) || !S.graphs.length) return false;
-      let y = beginSection('Cross Section Graphs');
+      addTitlePage('CROSS SECTION GRAPHS');
+      sectionStarts.push({ title: 'Cross Section Graphs', page: doc.getCurrentPageInfo().pageNumber });
       S.graphs.forEach((g, index) => {
-        if (y > 225) y = beginSection('Cross Section Graphs Continued');
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(11);
-        doc.setTextColor(...blue);
-        doc.text(`${index + 1}. ${safe(g.name || g.subName, 'Cross Section')}`, pad, y);
-        y += 7;
+        doc.addPage();
+        let y = 25;
+        y = writeParagraph(`${index + 1}. ${safe(g.name || g.subName, 'Cross Section')}`, y, { bold: true, size: 12, color: [0, 0, 0] });
         const calc = typeof calcGraph === 'function' ? calcGraph(g) : null;
         doc.autoTable({
           startY: y,
@@ -13527,15 +13563,15 @@ async function generateFinalPDF(regenerate = false) {
             ['Mining Percentage', safe(g.pct) + '%'],
             ['Estimated Volume', calc ? fmtN(calc.volume, 0) : '-']
           ],
-          styles: { fontSize: 8, cellPadding: 2 },
-          headStyles: { fillColor: navy }
+          styles: { fontSize: 8, cellPadding: 2, lineColor: [0, 0, 0], lineWidth: 0.2, textColor: [0, 0, 0] },
+          headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold', lineColor: [0, 0, 0], lineWidth: 0.2 },
+          theme: 'grid'
         });
         y = doc.lastAutoTable.finalY + 8;
         const canvas = document.getElementById(`canvas-${g.id}-post`) || document.getElementById(`canvas-${g.id}`);
         if (canvas) {
           try {
             doc.addImage(canvas.toDataURL('image/png', 1), 'PNG', pad, y, W - (pad * 2), 65);
-            y += 72;
           } catch (err) {
             console.warn('Cross-section canvas capture failed:', err);
           }
@@ -13543,65 +13579,61 @@ async function generateFinalPDF(regenerate = false) {
       });
       return true;
     };
+
     const addFrontMatter = () => {
-      let y = beginSection('Front Matter');
-      y = writeParagraph(safe(S.frontMatter?.title, S.activeProject?.title || 'District Survey Report'), y, { bold: true, size: 14, color: navy, after: 8 });
-      const metaRows = [
-        ['Project Name', safe(S.activeProject?.title || S.frontMatter?.title)],
-        ['District', safe(district)],
-        ['Year', safe(year)],
-        ['Version', safe(version)],
-        ['Generated By', safe(S.user?.name || S.user?.email || 'Portal User')],
-        ['Generated On', generatedAt.toLocaleString()]
-      ];
-      doc.autoTable({
-        startY: y,
-        margin: { left: pad, right: pad },
-        body: metaRows,
-        theme: 'grid',
-        styles: { fontSize: 9, cellPadding: 2.5 },
-        columnStyles: { 0: { fontStyle: 'bold', fillColor: [247, 249, 252] } }
-      });
-      y = doc.lastAutoTable.finalY + 10;
-      y = writeParagraph(S.frontMatter?.preface, y, { after: 8 });
-      y = writeParagraph(S.frontMatter?.acknowledgement, y, { after: 8 });
-      ['cover', 'cert', 'toc', 'pref'].forEach(key => addUploadedPages(S.uploadedPDFs?.[key], `Front Matter - ${key.toUpperCase()}`));
+      // Handled inline in main execution flow to enforce Cover -> TOC -> Preface/Chapters order
       return true;
     };
+
     const addChapter = (chapterNo) => {
       const ch = (S.chapters || []).find(item => Number(item.id) === chapterNo) || (S.chapters || [])[chapterNo - 1];
       if (!ch || (!hasText(ch.name) && !hasText(ch.summary) && !S.chapterPDFs?.[ch.id]?.length)) return false;
-      let y = beginSection(`Chapter ${chapterNo}`);
-      y = writeParagraph(ch.name || `Chapter ${chapterNo}`, y, { bold: true, size: 13, color: navy, after: 8 });
+      const chapterTitle = `CHAPTER ${chapterNo}`;
+      const chapterSub = ch.name || '';
+      addTitlePage(chapterTitle, chapterSub);
+      sectionStarts.push({ title: `Chapter ${chapterNo} - ${chapterSub}`, page: doc.getCurrentPageInfo().pageNumber });
+      doc.addPage();
+      let y = 25;
+      y = writeParagraph(ch.name || `Chapter ${chapterNo}`, y, { bold: true, size: 14, color: [0, 0, 0], after: 8 });
       y = writeParagraph(ch.summary || 'Chapter content will be appended from uploaded project records.', y);
-      if (ch.fileName) y = writeParagraph(`Uploaded source: ${ch.fileName}`, y, { size: 8.5, color: saffron });
+      if (ch.fileName) {
+        y = writeParagraph(`Uploaded source: ${ch.fileName}`, y, { size: 8.5, color: [100, 100, 100] });
+      }
       addUploadedPages(S.chapterPDFs?.[ch.id], `Chapter ${chapterNo}`);
       return true;
     };
+
     const addPlates = () => {
       if (!Array.isArray(S.plates) || !S.plates.length) return false;
       S.plates.forEach((plate, index) => {
-        let y = beginSection(`Plate P${index + 1}`);
-        y = writeParagraph(`P${index + 1} · ${safe(plate.name, 'Plate')}`, y, { bold: true, size: 13, color: blue, after: 5 });
+        const plateTitle = `PLATE ${plate.id || (index + 1)}`;
+        const plateSub = plate.name || '';
+        addTitlePage(plateTitle, plateSub);
+        sectionStarts.push({ title: `${plateTitle} - ${plateSub}`, page: doc.getCurrentPageInfo().pageNumber });
+        doc.addPage();
+        let y = 25;
+        y = writeParagraph(`${plateTitle} · ${safe(plate.name, 'Plate')}`, y, { bold: true, size: 13, color: [0, 0, 0], after: 5 });
         y = writeParagraph(plate.summary || 'No plate description has been entered.', y, { size: 9.5, after: 6 });
-        if (plate.fileName) y = writeParagraph(`Attachment: ${plate.fileName}`, y, { size: 8.5, color: saffron, after: 5 });
+        if (plate.fileName) {
+          y = writeParagraph(`Attachment: ${plate.fileName}`, y, { size: 8.5, color: [100, 100, 100], after: 5 });
+        }
         const source = Array.isArray(plate.pages)
           ? plate.pages.find(page => /^data:image\//i.test(String(page || '')))
           : '';
         if (source) {
           try {
             const format = /^data:image\/jpeg/i.test(source) ? 'JPEG' : 'PNG';
-            doc.addImage(source, format, pad, y, W - (pad * 2), H - y - 18, undefined, 'FAST');
+            doc.addImage(source, format, 15, y, W - 30, H - y - 20, undefined, 'FAST');
           } catch (err) {
             console.warn('Could not embed plate attachment:', err);
           }
         } else {
-          y = writeParagraph('No PDF or image has been uploaded for this plate.', y + 18, { size: 9, color: muted });
+          writeParagraph('No PDF or image has been uploaded for this plate.', y + 10, { size: 9, color: muted });
         }
       });
-      addUploadedPages(S.uploadedPDFs?.plates, 'Plate Section');
       return true;
     };
+
     const waitFor = (ms) => new Promise(resolve => setTimeout(resolve, ms));
     const withTimeout = (promise, ms, label) => Promise.race([
       promise,
@@ -13704,6 +13736,15 @@ async function generateFinalPDF(regenerate = false) {
       const blob = await waitForPreviewBlob(viewId);
       return blob ? pdfBlobToImages(blob) : [];
     };
+
+    const hasAnnexureContent = (viewId) => {
+      const hasUpload = Array.isArray(S.uploadedPDFs?.[viewId]) && S.uploadedPDFs[viewId].length > 0;
+      const hasDomTable = !!document.querySelector(`table[id*="${viewId}"], table[id*="${viewId.replace('annexure-', 'anx')}"]`);
+      const iframe = getPreviewIframe(viewId);
+      const hasIframe = !!(iframe && (iframe.getAttribute('src') || iframe.srcdoc));
+      return hasUpload || hasDomTable || hasIframe;
+    };
+
     const addAnnexureFromPreview = async (title, viewId) => {
       let pages = [];
       try {
@@ -13763,31 +13804,83 @@ async function generateFinalPDF(regenerate = false) {
         warnings.push(`${title} has no PDF Preview pages to include.`);
         return false;
       }
-      sectionStarts.push({ title, page: doc.getNumberOfPages() + 1 });
       pages.forEach((page, index) => addImagePage(page, `${title} - Page ${index + 1}`));
       return true;
     };
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(22);
-    doc.setTextColor(...navy);
-    doc.text('District Survey Report', W / 2, 70, { align: 'center' });
-    doc.setFontSize(16);
-    doc.setTextColor(...saffron);
-    doc.text(`${district} District`, W / 2, 84, { align: 'center' });
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(11);
-    doc.setTextColor(...muted);
-    doc.text(`Final DSR PDF - ${year}`, W / 2, 96, { align: 'center' });
-    doc.text(`Generated: ${generatedAt.toLocaleString()}`, W / 2, 106, { align: 'center' });
-    doc.text(`Version: ${version}`, W / 2, 116, { align: 'center' });
+
+    // PAGE 1: Cover Page
+    const coverPages = S.uploadedPDFs?.cover || [];
+    if (coverPages.length > 0) {
+      coverPages.forEach((page, index) => {
+        addImagePage(page, 'Cover Page');
+      });
+    } else {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(24);
+      doc.setTextColor(0, 0, 0);
+      doc.text('DISTRICT SURVEY REPORT', W / 2, 70, { align: 'center' });
+      doc.text(`FOR SAND MINING IN ${district.toUpperCase()} DISTRICT`, W / 2, 84, { align: 'center', maxWidth: W - 30 });
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(12);
+      doc.text(`Government of Punjab\nDepartment of Mining and Geology`, W / 2, H / 2 - 10, { align: 'center' });
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.text(`Year: ${year}`, W / 2, H - 50, { align: 'center' });
+      doc.text(`Version: ${version}`, W / 2, H - 42, { align: 'center' });
+    }
+
+    // PAGE 2: Table of Contents placeholder
     doc.addPage();
     const tocPage = doc.getCurrentPageInfo().pageNumber;
-    addPhaseChangeSummary();
-    addFrontMatter();
-    for (let i = 1; i <= 10; i += 1) addChapter(i);
+
+    // 3. Preface
+    const prefPages = S.uploadedPDFs?.pref || [];
+    const prefText = S.frontMatter?.preface || '';
+    if (prefPages.length > 0 || prefText.trim().length > 0) {
+      addTitlePage("PREFACE");
+      sectionStarts.push({ title: 'Preface', page: doc.getCurrentPageInfo().pageNumber });
+      if (prefPages.length > 0) {
+        prefPages.forEach(page => addImagePage(page, 'Preface'));
+      } else {
+        doc.addPage();
+        let y = 25;
+        y = writeParagraph("PREFACE", y, { bold: true, size: 14, color: [0, 0, 0] });
+        y = writeParagraph(prefText, y);
+      }
+    }
+
+    // 4. Acknowledgement
+    const ackText = S.frontMatter?.acknowledgement || '';
+    if (ackText.trim().length > 0) {
+      addTitlePage("ACKNOWLEDGEMENT");
+      sectionStarts.push({ title: 'Acknowledgement', page: doc.getCurrentPageInfo().pageNumber });
+      doc.addPage();
+      let y = 25;
+      y = writeParagraph("ACKNOWLEDGEMENT", y, { bold: true, size: 14, color: [0, 0, 0] });
+      y = writeParagraph(ackText, y);
+    }
+
+    // 5. Certificate of Compliance
+    const certPages = S.uploadedPDFs?.cert || [];
+    if (certPages.length > 0) {
+      addTitlePage("CERTIFICATE OF COMPLIANCE");
+      sectionStarts.push({ title: 'Certificate of Compliance', page: doc.getCurrentPageInfo().pageNumber });
+      certPages.forEach(page => addImagePage(page, 'Certificate of Compliance'));
+    }
+
+    // 6. Chapters 1 to 10
+    for (let i = 1; i <= 10; i += 1) {
+      addChapter(i);
+    }
+
+    // 7. Plates
     setProgress('Merging Sections...', 52);
     addPlates();
+
+    // 8. Cross Section Graphs
     addGraphSection();
+
+    // 9. Annexures I to VII & B to K
     const annexurePreviewOrder = [
       ['Annexure I - Sources', 'anx1'],
       ['Annexure II - Leases', 'anx2'],
@@ -13809,44 +13902,71 @@ async function generateFinalPDF(regenerate = false) {
     ];
     for (let annexureIndex = 0; annexureIndex < annexurePreviewOrder.length; annexureIndex += 1) {
       const [title, viewId] = annexurePreviewOrder[annexureIndex];
+      if (!hasAnnexureContent(viewId)) continue;
       setProgress(`Merging Sections... ${title}`, 52 + Math.min(24, Math.round(annexureIndex * 1.4)));
+      const mainTitle = title.split(' - ')[0].toUpperCase();
+      const subTitle = title.split(' - ')[1] || '';
+      addTitlePage(mainTitle, subTitle);
+      sectionStarts.push({ title, page: doc.getCurrentPageInfo().pageNumber });
       await addAnnexureFromPreview(title, viewId);
     }
 
     setProgress('Finalizing Document...', 78);
     doc.setPage(tocPage);
-    addHeader('Table of Contents');
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(15);
-    doc.setTextColor(...navy);
-    doc.text('Table of Contents', pad, 28);
-    let tocY = 42;
+    doc.setFontSize(16);
+    doc.setTextColor(0, 0, 0);
+    doc.text('Table of Contents', pad, 25);
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.3);
+    doc.line(pad, 29, W - pad, 29);
+    
+    let tocY = 37;
     sectionStarts.forEach(item => {
-      if (tocY > 278) {
+      if (tocY > 268) {
         doc.addPage();
-        addHeader('Table of Contents');
-        tocY = 28;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.setTextColor(0, 0, 0);
+        doc.text('Table of Contents (Continued)', pad, 25);
+        doc.line(pad, 29, W - pad, 29);
+        tocY = 37;
       }
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      doc.setTextColor(...muted);
-      doc.text(item.title, pad, tocY, { maxWidth: W - 60 });
+      doc.setFontSize(9.5);
+      doc.setTextColor(0, 0, 0);
+      const cleanTitle = String(item.title).replace(/\s+/g, ' ').trim();
+      doc.text(cleanTitle, pad, tocY, { maxWidth: W - 40 });
       doc.text(String(item.page), W - pad, tocY, { align: 'right' });
-      doc.setDrawColor(225, 229, 235);
-      doc.line(pad, tocY + 1.5, W - pad, tocY + 1.5);
-      tocY += 7;
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.1);
+      doc.line(pad, tocY + 2, W - pad, tocY + 2);
+      tocY += 8;
     });
+
     const totalPages = doc.getNumberOfPages();
     for (let p = 1; p <= totalPages; p += 1) {
       doc.setPage(p);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7);
-      doc.setTextColor(120, 126, 140);
-      doc.setDrawColor(210, 216, 224);
-      doc.line(pad, 286, W - pad, 286);
-      doc.text(`Project: ${safe(S.activeProject?.title || S.frontMatter?.title)} | District: ${district} | Version: ${version}`, pad, 291);
-      doc.text(`Page ${p} of ${totalPages}`, W - pad, 291, { align: 'right' });
+      if (p === 1) continue;
+      
+      const isTitlePage = titlePages.includes(p);
+      doc.setDrawColor(0, 0, 0);
+      doc.setLineWidth(0.3);
+      doc.rect(10, 10, W - 20, H - 20, 'S'); // thin black border on ALL pages except Cover
+      
+      if (!isTitlePage) {
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7.5);
+        doc.setTextColor(0, 0, 0);
+        const districtNameUpper = String(district || 'PUNJAB').toUpperCase();
+        const footerLeft = `PREPARED BY: SUB-DIVISIONAL COMMITTEE OF ${districtNameUpper} DISTRICT`;
+        const footerLeft2 = `ASSISTED BY: RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD`;
+        doc.text(footerLeft, 14, H - 15);
+        doc.text(footerLeft2, 14, H - 11);
+        doc.text(`Page ${p}`, W - 14, H - 13, { align: 'right' });
+      }
     }
+
     setProgress('Finalizing Document...', 90);
     const safeDistrict = district.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || 'Punjab';
     const safeYear = year.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || '2025-26';
