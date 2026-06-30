@@ -2503,7 +2503,7 @@ html.dark .dash-notice-marquee-text, html.dark .dash-notice-marquee-text span {
 
 
 body:not(.view-dashboard-active):not(.view-projects-active) {
-  --topbar-h: 272px !important;
+  --topbar-h: 304px !important;
 }
 body:not(.view-dashboard-active):not(.view-projects-active) .topbar.dash-global-topbar {
   top: 0 !important;
