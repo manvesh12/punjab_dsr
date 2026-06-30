@@ -18,6 +18,8 @@ import { usersRouter } from "./routes/users.js";
 import { modelDsrRouter } from "./routes/model-dsr.js";
 import { replenishmentRouter } from "./routes/replenishment.js";
 import { settingsRouter } from "./routes/settings.js";
+import { searchRouter } from "./routes/search.js";
+import { streamRouter } from "./routes/stream.js";
 
 const app = express();
 app.set("trust proxy", 1);
@@ -70,6 +72,8 @@ app.use("/api/reports", requireAuth, auditMutations, reportsRouter);
 app.use("/api/users", requireAuth, auditMutations, usersRouter);
 app.use("/api/model-dsrs", requireAuth, auditMutations, modelDsrRouter);
 app.use("/api/settings", settingsRouter);
+app.use("/api/search", requireAuth, auditMutations, searchRouter);
+app.use("/api/stream", requireAuth, streamRouter);
 app.use("/api", requireAuth, auditMutations, replenishmentRouter);
 app.use("/api", requireAuth, uploadLimiter, auditMutations, pdfRouter);
 
