@@ -545,4 +545,92 @@
     });
   });
 </script>
+
+<!-- Demo Modal for Public Links -->
+<div id="demo-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-[#0F2E47]/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+  <div class="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden transform scale-95 transition-transform duration-300 p-6 relative">
+    <button onclick="closeDemoModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-error transition-colors">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+    <div class="flex items-center gap-4 mb-4">
+      <div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
+        <span id="demo-modal-icon" class="material-symbols-outlined text-[24px]">info</span>
+      </div>
+      <h3 id="demo-modal-title" class="text-headline-sm font-bold text-primary-container">Feature in Progress</h3>
+    </div>
+    <div id="demo-modal-content" class="text-body-md text-on-surface-variant mb-6 leading-relaxed">
+      This feature is currently under development.
+    </div>
+    <div class="flex justify-end gap-3 border-t border-surface-container-highest pt-4">
+      <button onclick="closeDemoModal()" class="px-5 py-2 bg-primary text-white text-label-md font-bold rounded-lg hover:bg-on-tertiary-fixed-variant transition-colors shadow-sm">Got it, Thanks!</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openDemoModal(title, text, icon = 'info') {
+    document.getElementById('demo-modal-title').innerText = title;
+    document.getElementById('demo-modal-content').innerText = text;
+    document.getElementById('demo-modal-icon').innerText = icon;
+    
+    const modal = document.getElementById('demo-modal');
+    modal.classList.remove('hidden');
+    // Trigger reflow for transition
+    void modal.offsetWidth;
+    modal.classList.remove('opacity-0');
+    modal.querySelector('div').classList.remove('scale-95');
+    modal.classList.add('flex');
+  }
+
+  function closeDemoModal() {
+    const modal = document.getElementById('demo-modal');
+    modal.classList.add('opacity-0');
+    modal.querySelector('div').classList.add('scale-95');
+    setTimeout(() => {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }, 300);
+  }
+
+  // Intercept all links to login.html that shouldn't go to login
+  document.addEventListener('DOMContentLoaded', () => {
+    const links = document.querySelectorAll('a[href="login.html"]');
+    links.forEach(link => {
+      // Get readable text, removing icons
+      const text = link.innerText.replace(/arrow_forward|arrow_right_alt|open_in_new|search|language/g, '').trim();
+      
+      // Keep actual login links working
+      const isLoginLink = text.includes('Login') || text.includes('Access DSR Portal') || link.innerText.includes('Official Login');
+      
+      if (!isLoginLink) {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          let modalText = "This page is part of the public portal and will be connected to the live backend soon.";
+          let modalIcon = "engineering";
+          let modalTitle = text || "Information";
+          
+          if(text.includes('Reports') || text.includes('DSR')) {
+            modalText = "Here citizens will be able to search and view published District Survey Reports. Demo data is currently being prepared for this section.";
+            modalIcon = "description";
+          } else if(text.includes('Notices') || text.includes('Archive') || text.includes('JUN')) {
+            modalText = "This is a demo notice. In the final version, clicking this will open a PDF viewer with the official government circular.";
+            modalIcon = "campaign";
+            modalTitle = "Notice Details";
+          } else if(text.includes('Helpdesk') || text.includes('Support') || text.includes('Contact')) {
+            modalText = "Helpdesk integration is in progress. You will soon be able to raise technical support tickets directly from here.";
+            modalIcon = "support_agent";
+          } else if(text.includes('Guidelines') || text.includes('Policy') || text.includes('Terms')) {
+            modalText = "Policy documents and official guidelines are being drafted and will be published here as downloadable PDFs shortly.";
+            modalIcon = "gavel";
+          } else if(text.includes('Status') || text.includes('Track')) {
+            modalText = "A tracking system will allow you to enter your Application ID and check the exact current status of the DSR review workflow.";
+            modalIcon = "location_searching";
+          }
+          
+          openDemoModal(modalTitle, modalText, modalIcon);
+        });
+      }
+    });
+  });
+</script>
 </body></html>
