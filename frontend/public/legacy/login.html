@@ -5538,6 +5538,22 @@
 </div>
 
 <script>
+  async function loadGeneralSettings() {
+    try {
+      const res = await fetch('/api/settings/noticeText');
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.value) {
+          const textEl = document.getElementById('settings-notice-text');
+          if (textEl) textEl.value = data.value;
+        }
+      }
+    } catch (e) {
+      console.error('Error loading notice text in settings:', e);
+    }
+  }
+  window.loadGeneralSettings = loadGeneralSettings;
+
   function switchSettingsTab(tabName) {
     document.querySelectorAll('.settings-tab-content').forEach(el => el.style.display = 'none');
     document.querySelectorAll('.settings-tab').forEach(el => {
@@ -5554,8 +5570,10 @@
       activeTabBtn.style.color = 'var(--text)';
     }
 
-    if (tabName === 'users' && typeof loadUsers === 'function') {
-      loadUsers();
+    if (tabName === 'users' && typeof renderUsers === 'function') {
+      renderUsers();
+    } else if (tabName === 'general') {
+      loadGeneralSettings();
     }
   }
 
@@ -5565,26 +5583,49 @@
     btn.disabled = true;
     btn.innerText = 'Saving...';
     try {
-      const res = await fetch('/api/settings/noticeText', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ value: text })
-      });
-      if (res.ok) {
-        alert('Notice updated successfully!');
+      if (typeof apiFetch === 'function') {
+        await apiFetch('/settings/noticeText', {
+          method: 'PUT',
+          body: JSON.stringify({ value: text })
+        });
+        toast('Notice updated successfully!', 'success');
         if (typeof updateNoticeUI === 'function') {
           updateNoticeUI(text);
         }
       } else {
-        alert('Failed to update notice.');
+        const res = await fetch('/api/settings/noticeText', {
+          method: 'PUT',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('dsr_token')}`
+          },
+          body: JSON.stringify({ value: text })
+        });
+        if (res.ok) {
+          alert('Notice updated successfully!');
+          if (typeof updateNoticeUI === 'function') {
+            updateNoticeUI(text);
+          }
+        } else {
+          alert('Failed to update notice.');
+        }
       }
     } catch (e) {
-      alert('Error updating notice.');
+      if (typeof toast === 'function') {
+        toast('Error updating notice: ' + (e.message || e), 'error');
+      } else {
+        alert('Error updating notice.');
+      }
       console.error(e);
     }
     btn.disabled = false;
     btn.innerText = 'Save Changes';
   }
+
+  // Load notice settings immediately on template parse
+  document.addEventListener('DOMContentLoaded', () => {
+    loadGeneralSettings();
+  });
 </script>
 
       <div id="view-users" class="view">

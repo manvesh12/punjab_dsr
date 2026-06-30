@@ -1988,6 +1988,10 @@ function showView(id, btn, push = true) {
     refreshProjectsFromBackend(true).catch(err => console.error('Project refresh failed', err));
   }
   if (id === 'users' && typeof renderUsers === 'function') renderUsers();
+  if (id === 'settings') {
+    if (typeof window.loadGeneralSettings === 'function') window.loadGeneralSettings();
+    if (typeof renderUsers === 'function') renderUsers();
+  }
   if (id === 'audit-logs' && typeof window.loadAuditLogs === 'function') {
     window.loadAuditLogs();
   }
