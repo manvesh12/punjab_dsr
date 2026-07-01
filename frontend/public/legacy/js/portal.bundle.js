@@ -13440,6 +13440,16 @@ async function generateFinalPDF(regenerate = false) {
     const sectionStarts = [];
     const titlePages = [];
     const uploadedPages = [];
+    const borderPages = [];
+    let borderActive = false;
+    const originalAddPage = doc.addPage.bind(doc);
+    doc.addPage = function(...args) {
+      originalAddPage(...args);
+      const pNum = doc.getCurrentPageInfo().pageNumber;
+      if (borderActive) {
+        borderPages.push(pNum);
+      }
+    };
     let isFirstPage = true;
     const safe = (value, fallback = '-') => String(value ?? fallback).trim() || fallback;
     const hasText = (value) => String(value ?? '').trim().length > 0;
@@ -14185,24 +14195,39 @@ async function generateFinalPDF(regenerate = false) {
       if (renderedTables) hasTables = true;
       
       let hasAttachments = false;
+      const prevBorderActive = borderActive;
       if (viewId === 'annexure-f') {
         const fAttachment = typeof getAnnexureFAttachment === 'function' ? getAnnexureFAttachment() : null;
         if (fAttachment && fAttachment.pages && fAttachment.pages.length) {
+          borderActive = false;
           fAttachment.pages.forEach((page, index) => addImagePage(page, `${title} - Supporting - Page ${index + 1}`));
+          borderActive = prevBorderActive;
           hasAttachments = true;
         }
       } else if (viewId === 'annexure-j') {
         const jAttachments = typeof getAnnexureJAttachments === 'function' ? getAnnexureJAttachments() : [];
+        let anyJ = false;
         jAttachments.forEach(att => {
           if (att.pages && att.pages.length) {
-            att.pages.forEach((page, index) => addImagePage(page, `${title} - Supporting - Page ${index + 1}`));
-            hasAttachments = true;
+            anyJ = true;
           }
         });
+        if (anyJ) {
+          borderActive = false;
+          jAttachments.forEach(att => {
+            if (att.pages && att.pages.length) {
+              att.pages.forEach((page, index) => addImagePage(page, `${title} - Supporting - Page ${index + 1}`));
+            }
+          });
+          borderActive = prevBorderActive;
+          hasAttachments = true;
+        }
       } else if (viewId === 'annexure-k') {
         const kAttachment = typeof getAnnexureKAttachment === 'function' ? getAnnexureKAttachment() : null;
         if (kAttachment && kAttachment.pages && kAttachment.pages.length) {
+          borderActive = false;
           kAttachment.pages.forEach((page, index) => addImagePage(page, `${title} - Supporting - Page ${index + 1}`));
+          borderActive = prevBorderActive;
           hasAttachments = true;
         }
       }
@@ -14320,9 +14345,15 @@ async function generateFinalPDF(regenerate = false) {
       setProgress(`Merging Sections... ${title}`, 52 + Math.min(24, Math.round(annexureIndex * 1.4)));
       const mainTitle = title.split(' - ')[0].toUpperCase();
       const subTitle = title.split(' - ')[1] || '';
+      
+      const isAllowed = ['anx1', 'anx2', 'anx3', 'anx4', 'anx5', 'anx6', 'anx7', 'annexure-f', 'annexure-j', 'annexure-k'].includes(viewId);
+      borderActive = isAllowed;
+      
       addTitlePage(mainTitle, subTitle);
       sectionStarts.push({ title, page: doc.getCurrentPageInfo().pageNumber + 1 });
       await addAnnexureFromPreview(title, viewId);
+      
+      borderActive = false;
     }
 
     setProgress('Finalizing Document...', 78);
@@ -14334,9 +14365,11 @@ async function generateFinalPDF(regenerate = false) {
       
       const isTitlePage = titlePages.includes(p);
       
-      doc.setDrawColor(0, 0, 0);
-      doc.setLineWidth(0.3);
-      doc.rect(pageFrameMargin, pageFrameMargin, W - (pageFrameMargin * 2), H - pageFrameMargin - 18, 'S');
+      if (borderPages.includes(p)) {
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.3);
+        doc.rect(pageFrameMargin, pageFrameMargin, W - (pageFrameMargin * 2), H - pageFrameMargin - 18, 'S');
+      }
       
       if (!isTitlePage) {
         doc.setFont('helvetica', 'normal');
