@@ -13422,6 +13422,26 @@ async function generateFinalPDF(regenerate = false) {
         }
       }
     };
+    const addPreviewImagePage = (src, title) => {
+      if (!src) return;
+      if (isFirstPage) {
+        isFirstPage = false;
+      } else {
+        doc.addPage();
+      }
+      const pNum = doc.getCurrentPageInfo().pageNumber;
+      uploadedPages.push(pNum);
+      try {
+        const format = String(src).startsWith('data:image/png') ? 'PNG' : 'JPEG';
+        doc.addImage(src, format, 0, 0, W, H, undefined, 'FAST');
+      } catch (err) {
+        try {
+          doc.addImage(src, 'JPEG', 0, 0, W, H, undefined, 'FAST');
+        } catch (innerErr) {
+          console.warn('Could not embed live preview page:', innerErr);
+        }
+      }
+    };
 
     const addUploadedPages = (pages, title) => {
       if (!Array.isArray(pages) || !pages.length) return false;
@@ -13710,6 +13730,40 @@ async function generateFinalPDF(regenerate = false) {
       }
       return null;
     };
+    const addPagesFromPreviewBlob = async (viewId, title) => {
+      const blob = await waitForPreviewBlob(viewId);
+      if (!blob) return false;
+      const pages = await pdfBlobToImages(blob);
+      if (!pages.length) return false;
+      pages.forEach((page, index) => addPreviewImagePage(page, `${title} - Page ${index + 1}`));
+      return true;
+    };
+    const addLivePreviewPdfPages = async (title, viewId) => {
+      const exportFnMap = {
+        'annexure-f': 'exportAnnexureFPDF',
+        'annexure-j': 'exportAnnexureJPDF',
+        'annexure-k': 'exportAnnexureKPDF'
+      };
+      const exportFnName = exportFnMap[viewId];
+      if (!exportFnName || typeof window[exportFnName] !== 'function') return false;
+      const iframe = getPreviewIframe(viewId);
+      if (!iframe) return false;
+      iframe.removeAttribute('srcdoc');
+      iframe.src = 'about:blank';
+      const previousPreviewView = window.pdfPreview ? window.pdfPreview.currentView : null;
+      const shouldRestorePreviewView = window.pdfPreview && window.pdfPreview.currentView === viewId;
+      if (shouldRestorePreviewView) window.pdfPreview.currentView = null;
+      try {
+        await ensurePortalVendors(['jspdf', 'autotable', 'pdfjs']);
+        await window[exportFnName](null, true);
+        return await addPagesFromPreviewBlob(viewId, title);
+      } catch (err) {
+        console.warn(`Could not merge ${viewId} from live preview:`, err);
+        return false;
+      } finally {
+        if (shouldRestorePreviewView && window.pdfPreview) window.pdfPreview.currentView = previousPreviewView;
+      }
+    };
     const fallbackTables = {
       anx1: [
         { title: 'a) Rivers:', selector: 'table[id^="anx1-rivers"]', all: true },
@@ -13899,6 +13953,11 @@ async function generateFinalPDF(regenerate = false) {
         uploaded.forEach((page, index) => addImagePage(page, `${title} - Page ${index + 1}`));
         return true;
       }
+
+      if (['annexure-f', 'annexure-j', 'annexure-k'].includes(viewId)) {
+        const addedLivePreview = await addLivePreviewPdfPages(title, viewId);
+        if (addedLivePreview) return true;
+      }
       
       if (viewId.startsWith('annexure-')) {
         const letter = viewId.replace('annexure-', '').toUpperCase();
@@ -13907,7 +13966,7 @@ async function generateFinalPDF(regenerate = false) {
           const fnName = `getAnnexure${letter}Pages`;
           if (typeof pdfPreview[fnName] === 'function') {
             const pages = pdfPreview[fnName]();
-            pages.forEach((p, idx) => addImagePage(p.src, `${title} - Page ${idx + 1}`));
+            pages.forEach((p, idx) => addPreviewImagePage(p.src, `${title} - Page ${idx + 1}`));
             return true;
           }
         }
@@ -13945,7 +14004,7 @@ async function generateFinalPDF(regenerate = false) {
         const fnName = `getAnnexure${letter}Pages`;
         if (typeof pdfPreview[fnName] === 'function') {
           const pages = pdfPreview[fnName]();
-          pages.forEach((p, idx) => addImagePage(p.src, `${title} - Page ${idx + 1}`));
+          pages.forEach((p, idx) => addPreviewImagePage(p.src, `${title} - Page ${idx + 1}`));
         }
       }
 
