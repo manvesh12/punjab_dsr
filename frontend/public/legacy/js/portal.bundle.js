@@ -14017,8 +14017,14 @@ async function generateFinalPDF(regenerate = false) {
       }
 
       if (['annexure-f', 'annexure-j', 'annexure-k'].includes(viewId)) {
-        const addedLivePreview = await addLivePreviewHtmlPages(title, viewId);
-        if (addedLivePreview) return true;
+        const blob = await waitForPreviewBlob(viewId);
+        if (blob) {
+          const pages = await pdfBlobToImages(blob);
+          if (pages && pages.length > 0) {
+            pages.forEach((page, index) => addImagePage(page, `${title} - Page ${index + 1}`));
+            return true;
+          }
+        }
         return false;
       }
 
