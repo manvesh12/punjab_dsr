@@ -11466,16 +11466,14 @@ async function exportAnnexureFPDF(btn, isLivePreview = false, returnBlob = false
       doc.setDrawColor(0, 0, 0);
       doc.setLineWidth(0.6);
       doc.rect(border.x, border.y, border.w, border.h);
-    }
-    doc.setFont('times', 'italic');
-    doc.setFontSize(10);
-    doc.setTextColor(0, 0, 0);
-    doc.text('District Survey Report', headerLeft, 27);
-    doc.text(`${district} District`, headerLeft, 39);
-    doc.text(state, headerLeft, 51);
-    doc.setLineWidth(0.4);
-    doc.line(tableLeft, 62, pageWidth - 22, 62);
-    if (!returnBlob) {
+      doc.setFont('times', 'italic');
+      doc.setFontSize(10);
+      doc.setTextColor(0, 0, 0);
+      doc.text('District Survey Report', headerLeft, 27);
+      doc.text(`${district} District`, headerLeft, 39);
+      doc.text(state, headerLeft, 51);
+      doc.setLineWidth(0.4);
+      doc.line(tableLeft, 62, pageWidth - 22, 62);
       doc.setFont('times', 'normal');
       doc.setFontSize(8);
       const footerText1 = `PREPARED BY: SUB-DIVISIONAL COMMITTEE OF ${district.toUpperCase()} DISTRICT`;
@@ -12033,10 +12031,8 @@ async function exportAnnexureJPDF(btn, isLivePreview = false, previewRequestId =
   const drawFrame = data => {
     if (!returnBlob) {
       doc.setDrawColor(0, 0, 0); doc.setLineWidth(0.6); doc.rect(border.x, border.y, border.w, border.h);
-    }
-    doc.setFont('times', 'italic'); doc.setFontSize(10); doc.setTextColor(0, 0, 0); doc.text('District Survey Report', headerLeft, 27); doc.text(`${district} District`, headerLeft, 39); doc.text(state, headerLeft, 51);
-    doc.setLineWidth(0.4); doc.line(headerLeft, 62, pageWidth - 22, 62); doc.setFont('times', 'normal'); doc.setFontSize(8);
-    if (!returnBlob) {
+      doc.setFont('times', 'italic'); doc.setFontSize(10); doc.setTextColor(0, 0, 0); doc.text('District Survey Report', headerLeft, 27); doc.text(`${district} District`, headerLeft, 39); doc.text(state, headerLeft, 51);
+      doc.setLineWidth(0.4); doc.line(headerLeft, 62, pageWidth - 22, 62); doc.setFont('times', 'normal'); doc.setFontSize(8);
       const footerText1 = `PREPARED BY: SUB-DIVISIONAL COMMITTEE OF ${district.toUpperCase()} DISTRICT`;
       const footerText2 = `ASSISTED BY: RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD`;
       doc.text(footerText1, pageWidth / 2, footerY - 2, { align: 'center' });
@@ -12464,16 +12460,14 @@ async function exportAnnexureKPDF(btn, isLivePreview = false, returnBlob = false
       doc.setDrawColor(0, 0, 0);
       doc.setLineWidth(0.6);
       doc.rect(border.x, border.y, border.w, border.h);
-    }
-    doc.setFont('times', 'italic');
-    doc.setFontSize(10);
-    doc.setTextColor(0, 0, 0);
-    doc.text('District Survey Report', headerLeft, 27);
-    doc.text(`${district} District`, headerLeft, 39);
-    doc.text(state, headerLeft, 51);
-    doc.setLineWidth(0.4);
-    doc.line(headerLeft, 62, pageWidth - 22, 62);
-    if (!returnBlob) {
+      doc.setFont('times', 'italic');
+      doc.setFontSize(10);
+      doc.setTextColor(0, 0, 0);
+      doc.text('District Survey Report', headerLeft, 27);
+      doc.text(`${district} District`, headerLeft, 39);
+      doc.text(state, headerLeft, 51);
+      doc.setLineWidth(0.4);
+      doc.line(headerLeft, 62, pageWidth - 22, 62);
       doc.setFont('times', 'normal');
       doc.setFontSize(8);
       const footerText1 = `PREPARED BY: SUB-DIVISIONAL COMMITTEE OF ${district.toUpperCase()} DISTRICT`;
