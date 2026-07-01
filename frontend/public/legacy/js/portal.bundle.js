@@ -14326,25 +14326,21 @@ async function generateFinalPDF(regenerate = false) {
       if (p === 1) continue;
       
       const isTitlePage = titlePages.includes(p);
-      const isUploaded = uploadedPages.includes(p);
       
-      // Do not add extra generated footer/border around an uploaded PDF page if it already has official border/footer
-      if (!isUploaded) {
-        doc.setDrawColor(0, 0, 0);
-        doc.setLineWidth(0.3);
-        doc.rect(pageFrameMargin, pageFrameMargin, W - (pageFrameMargin * 2), H - (pageFrameMargin * 2), 'S');
-        
-        if (!isTitlePage) {
-          doc.setFont('helvetica', 'normal');
-          doc.setFontSize(7.5);
-          doc.setTextColor(0, 0, 0);
-          const districtNameUpper = String(district || 'PUNJAB').toUpperCase();
-          const footerLeft = `PREPARED BY: SUB-DIVISIONAL COMMITTEE OF ${districtNameUpper} DISTRICT`;
-          const footerLeft2 = `ASSISTED BY: RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD`;
-          doc.text(footerLeft, W / 2, H - 13, { align: 'center' });
-          doc.text(footerLeft2, W / 2, H - 9, { align: 'center' });
-          doc.text(`Page ${p}`, W - pad, H - 11, { align: 'right' });
-        }
+      doc.setDrawColor(0, 0, 0);
+      doc.setLineWidth(0.3);
+      doc.rect(pageFrameMargin, pageFrameMargin, W - (pageFrameMargin * 2), H - (pageFrameMargin * 2), 'S');
+      
+      if (!isTitlePage) {
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7.5);
+        doc.setTextColor(0, 0, 0);
+        const districtNameUpper = String(district || 'PUNJAB').toUpperCase();
+        const footerLeft = `PREPARED BY: SUB-DIVISIONAL COMMITTEE OF ${districtNameUpper} DISTRICT`;
+        const footerLeft2 = `ASSISTED BY: RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD`;
+        doc.text(footerLeft, W / 2, H - 13, { align: 'center' });
+        doc.text(footerLeft2, W / 2, H - 9, { align: 'center' });
+        doc.text(`Page ${p}`, W - pad, H - 11, { align: 'right' });
       }
     }
 
