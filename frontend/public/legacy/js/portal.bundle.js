@@ -958,6 +958,20 @@ function enforceActiveViewHierarchy(force = false) {
     lockFormElement(el, !canEdit, label);
   });
   activeView.querySelectorAll('[contenteditable], [contenteditable="true"]').forEach(el => {
+    if (el.classList?.contains('editable-title')) {
+      const canEditTitle = hasAdminAccess();
+      el.setAttribute('contenteditable', canEditTitle ? 'true' : 'false');
+      el.classList.remove('rbac-locked');
+      el.removeAttribute('aria-disabled');
+      if (canEditTitle) {
+        el.removeAttribute('title');
+        delete el.dataset.rbacBadge;
+      } else {
+        el.title = 'Only admins can edit annexure titles';
+        delete el.dataset.rbacBadge;
+      }
+      return;
+    }
     lockFormElement(el, !canEdit, label);
   });
   activeView.querySelectorAll('button, label.btn, .upload-zone').forEach(el => {
@@ -1619,6 +1633,8 @@ function addGenericAnnexureColumn(table, viewId) {
     row.insertBefore(td, actionCell || null);
   });
   recalcKnownAnnexureTable(table);
+  if (typeof makeAllSectionTitlesEditable === 'function') makeAllSectionTitlesEditable(viewId);
+  if (typeof enforceActiveViewHierarchy === 'function') enforceActiveViewHierarchy(true);
   if (window.debouncedSaveState) window.debouncedSaveState();
   refreshCoreAnnexurePreview(viewId);
 }
@@ -6291,6 +6307,9 @@ function getAnx1TableRows(tableId) {
 }
 function buildAnx1PreviewMarkup() {
   const sections = [];
+  const pageTitle = typeof getEditableAnnexureTitle === 'function'
+    ? getEditableAnnexureTitle('anx1', 'Annexure-I')
+    : 'Annexure-I';
   document.querySelectorAll('#view-anx1 .anx-section').forEach(sec => {
     const table = sec.querySelector('table');
     if (!table) return;
@@ -6348,7 +6367,7 @@ function buildAnx1PreviewMarkup() {
   </head>
   <body>
     <main class="page">
-      <h1>Annexure-I</h1>
+      <h1>${escapeAnx1Html(pageTitle)}</h1>
       <p class="sub">Details of Sand/M-Sand Sources</p>
       ${sectionHtml}
     </main>
@@ -10372,6 +10391,8 @@ function addRouteTableBlockAnx7(prefill = false, rows = null, title = '') {
   updateDeleteButtonsVisibilityAnx7('individual');
   if (window.initLucide) window.initLucide();
   if (typeof addCoreAnnexureTableControls === 'function') addCoreAnnexureTableControls('anx7');
+  if (typeof makeAllSectionTitlesEditable === 'function') makeAllSectionTitlesEditable('anx7');
+  if (typeof enforceActiveViewHierarchy === 'function') enforceActiveViewHierarchy(true);
   if (typeof refreshCoreAnnexurePreview === 'function') refreshCoreAnnexurePreview('anx7');
   return card;
 }
@@ -10438,6 +10459,8 @@ function addClusterTableBlockAnx7(prefill = false, rows = null, title = '') {
   updateDeleteButtonsVisibilityAnx7('cluster');
   if (window.initLucide) window.initLucide();
   if (typeof addCoreAnnexureTableControls === 'function') addCoreAnnexureTableControls('anx7');
+  if (typeof makeAllSectionTitlesEditable === 'function') makeAllSectionTitlesEditable('anx7');
+  if (typeof enforceActiveViewHierarchy === 'function') enforceActiveViewHierarchy(true);
   if (typeof refreshCoreAnnexurePreview === 'function') refreshCoreAnnexurePreview('anx7');
   return card;
 }
@@ -10477,6 +10500,8 @@ function deleteTableBlockAnx7(btn) {
     card.remove();
     renumberTableBlocksAnx7(type);
     updateDeleteButtonsVisibilityAnx7(type);
+    if (typeof makeAllSectionTitlesEditable === 'function') makeAllSectionTitlesEditable('anx7');
+    if (typeof enforceActiveViewHierarchy === 'function') enforceActiveViewHierarchy(true);
     toast('Table block deleted.', 'success');
     if (typeof refreshCoreAnnexurePreview === 'function') refreshCoreAnnexurePreview('anx7');
   }
@@ -14348,16 +14373,19 @@ async function generateFinalPDF(regenerate = false) {
     for (let annexureIndex = 0; annexureIndex < annexurePreviewOrder.length; annexureIndex += 1) {
       const [title, viewId] = annexurePreviewOrder[annexureIndex];
       if (!hasAnnexureContent(viewId)) continue;
-      setProgress(`Merging Sections... ${title}`, 52 + Math.min(24, Math.round(annexureIndex * 1.4)));
-      const mainTitle = title.split(' - ')[0].toUpperCase();
-      const subTitle = title.split(' - ')[1] || '';
+      const editableTitle = typeof getEditableAnnexureTitle === 'function'
+        ? getEditableAnnexureTitle(viewId, title)
+        : title;
+      setProgress(`Merging Sections... ${editableTitle}`, 52 + Math.min(24, Math.round(annexureIndex * 1.4)));
+      const mainTitle = editableTitle.split(' - ')[0].toUpperCase();
+      const subTitle = editableTitle.split(' - ')[1] || '';
       
       const isAllowed = ['anx1', 'anx2', 'anx3', 'anx4', 'anx5', 'anx6', 'anx7', 'annexure-f', 'annexure-j', 'annexure-k'].includes(viewId);
       borderActive = isAllowed;
       
       addTitlePage(mainTitle, subTitle);
-      sectionStarts.push({ title, page: doc.getCurrentPageInfo().pageNumber + 1 });
-      await addAnnexureFromPreview(title, viewId);
+      sectionStarts.push({ title: editableTitle, page: doc.getCurrentPageInfo().pageNumber + 1 });
+      await addAnnexureFromPreview(editableTitle, viewId);
       
       borderActive = false;
     }
@@ -14800,7 +14828,11 @@ const pdfPreview = {
     }
     const mobileTabs = document.getElementById('pdf-preview-mobile-tabs');
     if (mobileTabs) mobileTabs.setAttribute('aria-hidden', 'false');
-    if (this.titleEl) this.titleEl.textContent = this.SECTION_TITLES[viewId] || 'PDF Preview';
+    if (this.titleEl) {
+      this.titleEl.textContent = typeof getEditableAnnexureTitle === 'function'
+        ? getEditableAnnexureTitle(viewId, this.SECTION_TITLES[viewId] || 'PDF Preview')
+        : (this.SECTION_TITLES[viewId] || 'PDF Preview');
+    }
     const isAnnexure = this.isAnnexureView(viewId);
     const scrollContainer = this.scrollEl;
     const iframe = document.getElementById('pdf-preview-iframe') || document.querySelector('.pdf-preview-viewer iframe');
@@ -15155,7 +15187,9 @@ const pdfPreview = {
     const source = this.getAnnexureSourceView(viewId);
     if (!source) return '';
     const clone = this.cleanupAnnexurePreviewClone(source.cloneNode(true), viewId);
-    const title = this.SECTION_TITLES[viewId] || 'Annexure Preview';
+    const title = typeof getEditableAnnexureTitle === 'function'
+      ? getEditableAnnexureTitle(viewId, this.SECTION_TITLES[viewId] || 'Annexure Preview')
+      : (this.SECTION_TITLES[viewId] || 'Annexure Preview');
     const district = (window.S && S.frontMatter && S.frontMatter.district) || 'Jalandhar';
     const year = (window.S && S.frontMatter && S.frontMatter.year) || '2025-26';
     
@@ -15229,7 +15263,9 @@ const pdfPreview = {
     if (!iframe) return;
     iframe.style.display = 'block';
     iframe.removeAttribute('src');
-    const title = this.SECTION_TITLES[viewId] || 'Annexure Preview';
+    const title = typeof getEditableAnnexureTitle === 'function'
+      ? getEditableAnnexureTitle(viewId, this.SECTION_TITLES[viewId] || 'Annexure Preview')
+      : (this.SECTION_TITLES[viewId] || 'Annexure Preview');
     iframe.srcdoc = `<!doctype html>
       <html><head><meta charset="utf-8">
       <style>
@@ -16097,11 +16133,44 @@ function refreshCurrentLivePreview(delay = 80) {
   }, delay);
 }
 
+function isEditableAnnexureTitleViewId(viewId) {
+  return /^(anx[1-7]|annexure-[b-k])$/i.test(String(viewId || ''));
+}
+function getStoredEditableTitle(key) {
+  if (!key) return '';
+  try {
+    return (localStorage.getItem('global_title_' + key) || '').trim();
+  } catch (err) {
+    return '';
+  }
+}
+function getEditableAnnexureTitle(viewId, fallback = '') {
+  const safeViewId = String(viewId || '');
+  if (!isEditableAnnexureTitleViewId(safeViewId)) {
+    return fallback || (window.pdfPreview?.SECTION_TITLES?.[safeViewId]) || 'PDF Preview';
+  }
+  const saved = getStoredEditableTitle(`${safeViewId}-page-title`);
+  if (saved) return saved;
+  const domTitle = document.querySelector(`#view-${safeViewId} .page-title .editable-title, #view-${safeViewId} .page-title`);
+  const domText = (domTitle?.innerText || domTitle?.textContent || '').trim();
+  return domText || fallback || (window.pdfPreview?.SECTION_TITLES?.[safeViewId]) || 'PDF Preview';
+}
+function syncEditableAnnexureTitleUI(viewId) {
+  if (!isEditableAnnexureTitleViewId(viewId)) return;
+  const title = getEditableAnnexureTitle(viewId);
+  const topbarTitle = document.getElementById('topbar-title');
+  if (topbarTitle && typeof currentViewId !== 'undefined' && currentViewId === viewId && title) topbarTitle.textContent = title;
+  if (window.pdfPreview?.currentView === viewId && window.pdfPreview.titleEl && title) {
+    window.pdfPreview.titleEl.textContent = title;
+  }
+}
+
 function setupEditableTitleEvents(span, viewId) {
   const key = span.getAttribute('data-key');
   if (!key) return;
   
   span.dataset.listenerAdded = 'true';
+  span.__editableTitleListenerAdded = true;
   
   // Restore saved value
   let saved = localStorage.getItem('global_title_' + key);
@@ -16117,12 +16186,16 @@ function setupEditableTitleEvents(span, viewId) {
   }
   
   const saveVal = () => {
+    if (typeof hasAdminAccess === 'function' && !hasAdminAccess()) return;
     const val = span.innerText.trim();
     localStorage.setItem('global_title_' + key, val);
     if (key.startsWith('anx5-')) {
       localStorage.setItem('anx5_heading_' + key, val);
     } else if (key.startsWith('anx6-')) {
       localStorage.setItem('anx6_heading_' + key, val);
+    }
+    if (key === `${viewId}-page-title`) {
+      syncEditableAnnexureTitleUI(viewId);
     }
   };
   
@@ -16149,46 +16222,65 @@ function setupEditableTitleEvents(span, viewId) {
 function makeAllSectionTitlesEditable(viewId) {
   const view = document.getElementById('view-' + viewId);
   if (!view) return;
+  const isAnnexure = isEditableAnnexureTitleViewId(viewId);
+  if (!isAnnexure) return;
   
-  const isAdmin = !!(
-    window.S && (
-      S.role === 'admin' || 
-      (S.user && (
-        S.user.role === 'admin' || 
-        String(S.user.email || '').toLowerCase().includes('admin')
-      ))
-    )
-  );
+  const isAdmin = typeof hasAdminAccess === 'function'
+    ? hasAdminAccess()
+    : !!(window.S && (S.role === 'admin' || S.user?.role === 'admin'));
 
-  // 1. Process all section titles / card titles
-  let headingsSelector = '.anx-section-title, .annexure-f-block-title, .annexure-k-block-title';
-  if (viewId === 'anx5') {
-    headingsSelector += ', .card-title';
-  }
-  const headings = view.querySelectorAll(headingsSelector);
-  headings.forEach((heading, idx) => {
-    if (!heading.querySelector('.editable-title') && !heading.classList.contains('editable-title')) {
+  const ensureEditableHeading = (heading, key, iconSize = '14px', forceKey = false) => {
+    if (!heading) return null;
+    if (heading.closest('.annexure-line-instructions, .annexure-instructions-card')) return null;
+    let span = heading.classList.contains('editable-title') ? heading : heading.querySelector(':scope > .editable-title');
+    if (!span && heading.matches('span.card-title[contenteditable], .card-title[contenteditable]')) {
+      span = heading;
+      span.classList.add('editable-title');
+    }
+    if (!span) {
       const originalText = heading.innerText.trim();
       heading.innerHTML = '';
-      
-      const span = document.createElement('span');
+      span = document.createElement('span');
       span.className = 'editable-title';
-      span.setAttribute('data-key', `${viewId}-title-auto-${idx}`);
       span.innerText = originalText;
       heading.appendChild(span);
-      
+    }
+    if (forceKey || !span.getAttribute('data-key')) span.setAttribute('data-key', key);
+
+    const iconHost = span === heading ? heading.parentElement : heading;
+    if (iconHost && !iconHost.querySelector(':scope > i[data-lucide="pencil-line"], :scope > svg.lucide-pencil-line')) {
       const icon = document.createElement('i');
       icon.setAttribute('data-lucide', 'pencil-line');
-      icon.style.width = '14px';
-      icon.style.height = '14px';
+      icon.style.width = iconSize;
+      icon.style.height = iconSize;
       icon.style.color = 'var(--primary)';
       icon.style.flexShrink = '0';
-      heading.appendChild(icon);
+      if (iconSize === '11px') icon.style.marginLeft = '4px';
+      iconHost.appendChild(icon);
     }
+    if (heading !== span && !heading.style.display) {
+      heading.style.display = 'flex';
+      heading.style.alignItems = 'center';
+      heading.style.gap = '6px';
+    }
+    return span;
+  };
+
+  // 0. Process the main page title for Annexures I-VII and B-K
+  const pageTitle = view.querySelector(':scope > .header-row .page-title, .header-row .page-title');
+  ensureEditableHeading(pageTitle, `${viewId}-page-title`, '16px', true);
+
+  // 1. Process all section titles / card titles
+  const headingsSelector = '.anx-section-title, .annexure-f-block-title, .annexure-j-block-title, .annexure-k-block-title, .card-title';
+  const headings = Array.from(view.querySelectorAll(headingsSelector)).filter(heading => {
+    const text = (heading.innerText || '').trim();
+    return text && !heading.closest('.header-row, .annexure-line-instructions, .annexure-instructions-card');
+  });
+  headings.forEach((heading, idx) => {
+    ensureEditableHeading(heading, `${viewId}-title-auto-${idx}`, '14px');
   });
 
   // 2. Process all table headers in Annexures 1-7 and B-K
-  const isAnnexure = /^(anx[1-7]|annexure-[b-k])$/i.test(viewId);
   if (isAnnexure) {
     const tables = view.querySelectorAll('table.anx-tbl, table');
     tables.forEach((table, tIdx) => {
@@ -16200,6 +16292,7 @@ function makeAllSectionTitlesEditable(viewId) {
         
         let span = th.querySelector('.editable-title');
         const expectedKey = `${viewId}-${tableId}-th-${thIdx}`;
+        th.removeAttribute('contenteditable');
         if (!span) {
           const originalText = th.innerText.trim();
           th.innerHTML = '';
@@ -16228,7 +16321,7 @@ function makeAllSectionTitlesEditable(viewId) {
   // 3. Apply Admin vs Non-Admin attributes, borders, cursor, events & icons visibility
   view.querySelectorAll('.editable-title').forEach(span => {
     span.style.fontWeight = '600';
-    if (!span.dataset.listenerAdded) {
+    if (!span.__editableTitleListenerAdded) {
       setupEditableTitleEvents(span, viewId);
     }
     
@@ -16252,10 +16345,13 @@ function makeAllSectionTitlesEditable(viewId) {
     el.style.display = isAdmin ? '' : 'none';
   });
   
+  syncEditableAnnexureTitleUI(viewId);
   if (window.initLucide) window.initLucide();
 }
 
 window.refreshCurrentLivePreview = refreshCurrentLivePreview;
+window.getEditableAnnexureTitle = getEditableAnnexureTitle;
+window.syncEditableAnnexureTitleUI = syncEditableAnnexureTitleUI;
 window.setupEditableTitleEvents = setupEditableTitleEvents;
 window.makeAllSectionTitlesEditable = makeAllSectionTitlesEditable;
 
