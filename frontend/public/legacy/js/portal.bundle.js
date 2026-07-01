@@ -13766,12 +13766,14 @@ async function generateFinalPDF(regenerate = false) {
             .sheet{width:${previewWidth}px!important;max-width:${previewWidth}px!important;box-shadow:none!important;margin:0!important;}
           </style>`);
       iframe.style.position = 'fixed';
-      iframe.style.left = '-10000px';
+      iframe.style.left = '0';
       iframe.style.top = '0';
       iframe.style.width = `${previewWidth}px`;
       iframe.style.height = '1200px';
       iframe.style.border = '0';
+      iframe.style.background = '#fff';
       iframe.style.pointerEvents = 'none';
+      iframe.style.zIndex = '1';
       iframe.setAttribute('aria-hidden', 'true');
       document.body.appendChild(iframe);
       try {
