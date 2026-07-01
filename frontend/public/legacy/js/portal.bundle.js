@@ -13883,7 +13883,7 @@ async function generateFinalPDF(regenerate = false) {
         const stateKey = `annexure${letter}`;
         const entries = S[stateKey];
         if (Array.isArray(entries)) {
-          hasLetterUpload = entries.some(entry => Array.isArray(entry.pages) && entry.pages.length > 0);
+          hasLetterUpload = entries.length > 0;
         }
       }
 
@@ -13902,23 +13902,39 @@ async function generateFinalPDF(regenerate = false) {
       
       if (viewId.startsWith('annexure-')) {
         const letter = viewId.replace('annexure-', '').toUpperCase();
-        const stateKey = `annexure${letter}`;
-        const entries = S[stateKey];
-        if (Array.isArray(entries)) {
-          const pages = [];
-          entries.forEach(entry => {
-            if (Array.isArray(entry.pages)) {
-              pages.push(...entry.pages);
-            }
-          });
-          if (pages.length > 0) {
-            pages.forEach((page, index) => addImagePage(page, `${title} - Page ${index + 1}`));
+        const simpleLetters = ['B', 'C', 'D', 'E', 'G', 'H', 'I'];
+        if (simpleLetters.includes(letter)) {
+          const fnName = `getAnnexure${letter}Pages`;
+          if (typeof pdfPreview[fnName] === 'function') {
+            const pages = pdfPreview[fnName]();
+            pages.forEach((p, idx) => addImagePage(p.src, `${title} - Page ${idx + 1}`));
             return true;
           }
         }
       }
 
-      return renderAnnexureTables(viewId, title);
+      const renderedTables = renderAnnexureTables(viewId, title);
+      
+      if (viewId === 'annexure-f') {
+        const fAttachment = typeof getAnnexureFAttachment === 'function' ? getAnnexureFAttachment() : null;
+        if (fAttachment && fAttachment.pages && fAttachment.pages.length) {
+          fAttachment.pages.forEach((page, index) => addImagePage(page, `${title} - Supporting - Page ${index + 1}`));
+        }
+      } else if (viewId === 'annexure-j') {
+        const jAttachments = typeof getAnnexureJAttachments === 'function' ? getAnnexureJAttachments() : [];
+        jAttachments.forEach(att => {
+          if (att.pages && att.pages.length) {
+            att.pages.forEach((page, index) => addImagePage(page, `${title} - Supporting - Page ${index + 1}`));
+          }
+        });
+      } else if (viewId === 'annexure-k') {
+        const kAttachment = typeof getAnnexureKAttachment === 'function' ? getAnnexureKAttachment() : null;
+        if (kAttachment && kAttachment.pages && kAttachment.pages.length) {
+          kAttachment.pages.forEach((page, index) => addImagePage(page, `${title} - Supporting - Page ${index + 1}`));
+        }
+      }
+
+      return renderedTables;
     };
 
     // 1. Cover Page
