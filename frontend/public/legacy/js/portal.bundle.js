@@ -13876,10 +13876,21 @@ async function generateFinalPDF(regenerate = false) {
 
     const hasAnnexureContent = (viewId) => {
       const hasUpload = Array.isArray(S.uploadedPDFs?.[viewId]) && S.uploadedPDFs[viewId].length > 0;
+      
+      let hasLetterUpload = false;
+      if (viewId.startsWith('annexure-')) {
+        const letter = viewId.replace('annexure-', '').toUpperCase();
+        const stateKey = `annexure${letter}`;
+        const entries = S[stateKey];
+        if (Array.isArray(entries)) {
+          hasLetterUpload = entries.some(entry => Array.isArray(entry.pages) && entry.pages.length > 0);
+        }
+      }
+
       const hasDomTable = !!document.querySelector(`table[id*="${viewId}"], table[id*="${viewId.replace('annexure-', 'anx')}"]`);
       const iframe = getPreviewIframe(viewId);
       const hasIframe = !!(iframe && (iframe.getAttribute('src') || iframe.srcdoc));
-      return hasUpload || hasDomTable || hasIframe;
+      return hasUpload || hasLetterUpload || hasDomTable || hasIframe;
     };
 
     const addAnnexureFromPreview = async (title, viewId) => {
@@ -13888,6 +13899,25 @@ async function generateFinalPDF(regenerate = false) {
         uploaded.forEach((page, index) => addImagePage(page, `${title} - Page ${index + 1}`));
         return true;
       }
+      
+      if (viewId.startsWith('annexure-')) {
+        const letter = viewId.replace('annexure-', '').toUpperCase();
+        const stateKey = `annexure${letter}`;
+        const entries = S[stateKey];
+        if (Array.isArray(entries)) {
+          const pages = [];
+          entries.forEach(entry => {
+            if (Array.isArray(entry.pages)) {
+              pages.push(...entry.pages);
+            }
+          });
+          if (pages.length > 0) {
+            pages.forEach((page, index) => addImagePage(page, `${title} - Page ${index + 1}`));
+            return true;
+          }
+        }
+      }
+
       return renderAnnexureTables(viewId, title);
     };
 
