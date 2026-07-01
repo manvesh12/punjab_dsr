@@ -11992,11 +11992,16 @@ async function exportAnnexureJPDF(btn, isLivePreview = false, previewRequestId =
     doc.setFont('times', 'normal'); doc.text('ASSISTED BY:', pageWidth / 2 - 130, footerY + 10, { align: 'left' }); doc.setFont('times', 'bold'); doc.text(' RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD', pageWidth / 2 - 78, footerY + 10, { align: 'left' });
     doc.setFontSize(10); doc.text(String(490 + data.pageNumber), pageWidth - 26, pageHeight - 18, { align: 'right' });
   };
+  doc.setFont('times', 'bold');
+  doc.setFontSize(11);
+  doc.setTextColor(0, 0, 0);
+  doc.text('Supporting PDF / Image Upload:', tableLeft, startY);
+  startY += 14;
   const tables = Array.from(document.querySelectorAll('#annexure-j-demand-container table.annexure-j-demand-table'));
   tables.forEach((table, index) => {
     const titleHeight = 14;
     if (index && startY + titleHeight + 46 > pageHeight - 40) { doc.addPage(); drawFrame({ pageNumber: doc.getCurrentPageInfo().pageNumber }); startY = contentTop; }
-    doc.setFont('times', 'bold'); doc.setFontSize(11); doc.setTextColor(0, 0, 0); doc.text(index ? `Annexure J - Projected Demand of Gravel - Table ${index + 1}` : 'Annexure J - Projected Demand of Gravel', pageWidth / 2, startY, { align: 'center' });
+    doc.setFont('times', 'bold'); doc.setFontSize(11); doc.setTextColor(0, 0, 0); doc.text(index ? `Projected Demand of Gravel - Table ${index + 1}` : 'Projected Demand of Gravel:', tableLeft, startY);
     startY += titleHeight;
     const data = extractAnnexureJTable(table);
     doc.autoTable({ startY, head: [data.headers], body: data.rows, theme: 'grid', styles: { font: 'times', fontSize: 8.5, textColor: 0, lineColor: 0, lineWidth: 0.4, cellPadding: 2.5, valign: 'middle', halign: 'left', overflow: 'linebreak', minCellHeight: 0 }, headStyles: { fillColor: false, fontStyle: 'bold', halign: 'center', valign: 'middle', textColor: 0, lineColor: 0, lineWidth: 0.4, cellPadding: 2.5 }, margin: { top: startY, bottom: 40, left: tableLeft, right: tableLeft }, tableWidth, didDrawPage: drawFrame });
@@ -12414,6 +12419,11 @@ async function exportAnnexureKPDF(btn, isLivePreview = false, returnBlob = false
     doc.setFontSize(10);
     doc.text(String(pageNumberOffset + data.pageNumber), pageWidth - 26, pageHeight - 18, { align: 'right' });
   };
+  doc.setFont('times', 'bold');
+  doc.setFontSize(11);
+  doc.setTextColor(0, 0, 0);
+  doc.text('Supporting PDF / Image Upload:', tableLeft, startY);
+  startY += 14;
   const sections = ['PROFORMA', 'ANNEXURE_A'].flatMap(sectionType => {
     const cfg = ANNEXURE_K_TABLES[sectionType];
     return getAnnexureKTables(sectionType).map((table, tableIndex) => ({
@@ -13766,14 +13776,12 @@ async function generateFinalPDF(regenerate = false) {
             .sheet{width:${previewWidth}px!important;max-width:${previewWidth}px!important;box-shadow:none!important;margin:0!important;}
           </style>`);
       iframe.style.position = 'fixed';
-      iframe.style.left = '0';
+      iframe.style.left = '-10000px';
       iframe.style.top = '0';
       iframe.style.width = `${previewWidth}px`;
       iframe.style.height = '1200px';
       iframe.style.border = '0';
-      iframe.style.background = '#fff';
       iframe.style.pointerEvents = 'none';
-      iframe.style.zIndex = '1';
       iframe.setAttribute('aria-hidden', 'true');
       document.body.appendChild(iframe);
       try {
@@ -14066,10 +14074,10 @@ async function generateFinalPDF(regenerate = false) {
       }
 
       if (['annexure-f', 'annexure-j', 'annexure-k'].includes(viewId)) {
-        const addedLivePreview = await addLivePreviewHtmlPages(title, viewId);
-        if (addedLivePreview) return true;
         const addedGeneratedPdf = await addAnnexureExportBlobPages(title, viewId);
         if (addedGeneratedPdf) return true;
+        const addedLivePreview = await addLivePreviewHtmlPages(title, viewId);
+        if (addedLivePreview) return true;
       }
 
       if (simpleAnnexurePreviewIds.includes(viewId)) {
