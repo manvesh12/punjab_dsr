@@ -11440,6 +11440,18 @@ async function exportAnnexureFPDF(btn, isLivePreview = false, returnBlob = false
   const normalizeSectionTitle = (title) => String(title || '')
     .replace(/^>\s*/, '')
     .replace(/:$/, '');
+  const drawSectionHeading = (text) => {
+    if (startY + 18 > pageHeight - 40) {
+      doc.addPage();
+      drawReportFrame({ pageNumber: doc.getCurrentPageInfo().pageNumber });
+      startY = CONTENT_TOP;
+    }
+    doc.setFont('times', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(0, 0, 0);
+    doc.text(text, tableLeft, startY);
+    startY += 18;
+  };
   const drawReportFrame = (data) => {
     doc.setDrawColor(0, 0, 0);
     doc.setLineWidth(0.6);
@@ -11531,6 +11543,7 @@ async function exportAnnexureFPDF(btn, isLivePreview = false, returnBlob = false
     });
     startY = doc.lastAutoTable.finalY + 18;
   });
+  drawSectionHeading('d) Supporting PDF / Image Upload:');
   await appendAnnexureFAttachmentPages(doc);
   if (returnBlob) return doc.output('blob');
   if (isLivePreview) {
@@ -14012,6 +14025,14 @@ async function generateFinalPDF(regenerate = false) {
     };
 
     const hasAnnexureContent = (viewId) => {
+      if (['annexure-f', 'annexure-j', 'annexure-k'].includes(viewId)) {
+        if (window.pdfPreview && typeof pdfPreview.prepareAnnexureLivePreviewSource === 'function') {
+          pdfPreview.prepareAnnexureLivePreviewSource(viewId);
+        }
+        if (viewId === 'annexure-j' && typeof getAnnexureJDemandTables === 'function' && getAnnexureJDemandTables().length) {
+          return true;
+        }
+      }
       const hasUpload = Array.isArray(S.uploadedPDFs?.[viewId]) && S.uploadedPDFs[viewId].length > 0;
       if (simpleAnnexurePreviewIds.includes(viewId)) {
         ensureSimpleAnnexurePreviewState(viewId);
@@ -14790,6 +14811,12 @@ const pdfPreview = {
   getAnnexureSourceView(viewId) {
     return document.getElementById(`view-${viewId}`);
   },
+  prepareAnnexureLivePreviewSource(viewId) {
+    if (viewId === 'annexure-f' && typeof renderAnnexureF === 'function') renderAnnexureF();
+    if (viewId === 'annexure-j' && typeof syncAnnexureJDemandTables === 'function') syncAnnexureJDemandTables();
+    if (viewId === 'annexure-j' && typeof renderAnnexureJ === 'function') renderAnnexureJ();
+    if (viewId === 'annexure-k' && typeof renderAnnexureK === 'function') renderAnnexureK();
+  },
   escapeHtml(value) {
     return String(value ?? '')
       .replace(/&/g, '&amp;')
@@ -14995,6 +15022,7 @@ const pdfPreview = {
     return clone;
   },
   buildAnnexureHtmlDocument(viewId) {
+    this.prepareAnnexureLivePreviewSource(viewId);
     const source = this.getAnnexureSourceView(viewId);
     if (!source) return '';
     const clone = this.cleanupAnnexurePreviewClone(source.cloneNode(true), viewId);
