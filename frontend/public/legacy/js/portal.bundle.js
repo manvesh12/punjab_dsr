@@ -11412,12 +11412,12 @@ function extractAnnexureFTable(tableId) {
   });
   return { headers, rows };
 }
-async function exportAnnexureFPDF(btn, isLivePreview = false) {
+async function exportAnnexureFPDF(btn, isLivePreview = false, returnBlob = false) {
   if (typeof btn === 'boolean') {
     isLivePreview = btn;
     btn = null;
   }
-  if (isLivePreview) {
+  if (isLivePreview && !returnBlob) {
     if (window.pdfPreview && window.pdfPreview.currentView === 'annexure-f') {
       window.pdfPreview.generateAnnexureLivePreview('annexure-f', 0);
       return;
@@ -11532,6 +11532,7 @@ async function exportAnnexureFPDF(btn, isLivePreview = false) {
     startY = doc.lastAutoTable.finalY + 18;
   });
   await appendAnnexureFAttachmentPages(doc);
+  if (returnBlob) return doc.output('blob');
   if (isLivePreview) {
     const blob = doc.output('blob');
     const blobUrl = URL.createObjectURL(blob);
@@ -11952,9 +11953,9 @@ async function appendAnnexureJAttachmentPages(doc) {
     }
   }
 }
-async function exportAnnexureJPDF(btn, isLivePreview = false, previewRequestId = null) {
+async function exportAnnexureJPDF(btn, isLivePreview = false, previewRequestId = null, returnBlob = false) {
   if (typeof btn === 'boolean') { isLivePreview = btn; btn = null; }
-  if (isLivePreview) {
+  if (isLivePreview && !returnBlob) {
     if (window.pdfPreview && window.pdfPreview.currentView === 'annexure-j') {
       window.pdfPreview.generateAnnexureLivePreview('annexure-j', 0);
       return;
@@ -11989,6 +11990,7 @@ async function exportAnnexureJPDF(btn, isLivePreview = false, previewRequestId =
     startY = doc.lastAutoTable.finalY + 18;
   });
   await appendAnnexureJAttachmentPages(doc);
+  if (returnBlob) return doc.output('blob');
   if (isLivePreview) {
     if (requestId !== window.annexureJPreviewRequest) return;
     const blob = doc.output('blob');
@@ -12349,12 +12351,12 @@ function extractAnnexureKTable(tableId) {
   });
   return { headers, rows };
 }
-async function exportAnnexureKPDF(btn, isLivePreview = false) {
+async function exportAnnexureKPDF(btn, isLivePreview = false, returnBlob = false) {
   if (typeof btn === 'boolean') {
     isLivePreview = btn;
     btn = null;
   }
-  if (isLivePreview) {
+  if (isLivePreview && !returnBlob) {
     if (window.pdfPreview && window.pdfPreview.currentView === 'annexure-k') {
       window.pdfPreview.generateAnnexureLivePreview('annexure-k', 0);
       return;
@@ -12472,6 +12474,7 @@ async function exportAnnexureKPDF(btn, isLivePreview = false) {
     startY = doc.lastAutoTable.finalY + 18;
   });
   await appendAnnexureKAttachmentPages(doc);
+  if (returnBlob) return doc.output('blob');
   if (isLivePreview) {
     const blob = doc.output('blob');
     const blobUrl = URL.createObjectURL(blob);
@@ -13746,23 +13749,29 @@ async function generateFinalPDF(regenerate = false) {
       };
       const exportFnName = exportFnMap[viewId];
       if (!exportFnName || typeof window[exportFnName] !== 'function') return false;
-      const iframe = getPreviewIframe(viewId);
-      if (!iframe) return false;
-      iframe.removeAttribute('srcdoc');
-      iframe.src = 'about:blank';
-      const previousPreviewView = window.pdfPreview ? window.pdfPreview.currentView : null;
-      const shouldRestorePreviewView = window.pdfPreview && window.pdfPreview.currentView === viewId;
-      if (shouldRestorePreviewView) window.pdfPreview.currentView = null;
       try {
         await ensurePortalVendors(['jspdf', 'autotable', 'pdfjs']);
-        await window[exportFnName](null, true);
-        return await addPagesFromPreviewBlob(viewId, title);
+        const blob = viewId === 'annexure-j'
+          ? await window[exportFnName](null, true, null, true)
+          : await window[exportFnName](null, true, true);
+        if (!blob) return false;
+        const pages = await pdfBlobToImages(blob);
+        if (!pages.length) return false;
+        pages.forEach((page, index) => addPreviewImagePage(page, `${title} - Page ${index + 1}`));
+        return true;
       } catch (err) {
         console.warn(`Could not merge ${viewId} from live preview:`, err);
         return false;
-      } finally {
-        if (shouldRestorePreviewView && window.pdfPreview) window.pdfPreview.currentView = previousPreviewView;
       }
+    };
+    const addSimpleAnnexurePreviewPages = (title, viewId) => {
+      const letter = viewId.replace('annexure-', '').toUpperCase();
+      const fnName = `getAnnexure${letter}Pages`;
+      if (!window.pdfPreview || typeof pdfPreview[fnName] !== 'function') return false;
+      const pages = pdfPreview[fnName]();
+      if (!pages.length) return false;
+      pages.forEach((p, idx) => addPreviewImagePage(p.src, `${title} - Page ${idx + 1}`));
+      return true;
     };
     const fallbackTables = {
       anx1: [
@@ -13957,6 +13966,11 @@ async function generateFinalPDF(regenerate = false) {
       if (['annexure-f', 'annexure-j', 'annexure-k'].includes(viewId)) {
         const addedLivePreview = await addLivePreviewPdfPages(title, viewId);
         if (addedLivePreview) return true;
+        return false;
+      }
+
+      if (['annexure-e', 'annexure-g', 'annexure-h', 'annexure-i'].includes(viewId)) {
+        return addSimpleAnnexurePreviewPages(title, viewId);
       }
       
       if (viewId.startsWith('annexure-')) {
