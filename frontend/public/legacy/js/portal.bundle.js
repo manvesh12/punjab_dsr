@@ -13698,77 +13698,168 @@ async function generateFinalPDF(regenerate = false) {
       }
       return null;
     };
-    const addNativeTablesAsPreviewFallback = (title, tableConfigs) => {
-      const before = doc.getNumberOfPages();
-      tableConfigs.forEach(cfg => {
-        const tables = cfg.all ? Array.from(document.querySelectorAll(cfg.selector)) : [document.querySelector(cfg.selector)].filter(Boolean);
-        tables.forEach((table, index) => addTable(table, `${cfg.title}${tables.length > 1 ? ` (${index + 1})` : ''}`));
-      });
-      const added = doc.getNumberOfPages() > before;
-      if (!added) warnings.push(`${title} has no filled preview tables available.`);
-      return added;
-    };
-    const htmlElementToPdfBlob = async (element, filename) => {
-      await ensurePortalVendors(['html2pdf']);
-      const opt = {
-        margin: 12,
-        filename,
-        image: { type: 'jpeg', quality: 0.95 },
-        html2canvas: { scale: 1.8, useCORS: true, logging: false },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', 'h1', 'h2', 'h3', 'h4'] }
-      };
-      return withTimeout(
-        html2pdf().set(opt).from(element).toPdf().get('pdf').then(pdf => pdf.output('blob')),
-        12000,
-        filename
-      );
+    const fallbackTables = {
+      anx1: [
+        { title: 'a) Rivers:', selector: 'table[id^="anx1-rivers"]', all: true },
+        { title: 'b) De-Siltation Location (Lakes/Ponds/Dams etc.):', selector: 'table[id^="anx1-desilt"]', all: true },
+        { title: 'c) Patta lands/Khatedari land:', selector: 'table[id^="anx1-patta"]', all: true },
+        { title: 'd) M-Sand Plants:', selector: 'table[id^="anx1-msand"]', all: true }
+      ],
+      anx2: [
+        { title: 'Annexure II(a) - Mining Leases', selector: 'table[id^="anx2-leases"]', all: true },
+        { title: 'Annexure II(b) - Patta Lands', selector: 'table[id^="anx2-patta"]', all: true },
+        { title: 'Annexure II(c) - De-siltation', selector: 'table[id^="anx2-desilt"]', all: true },
+        { title: 'Annexure II(d) - M-Sand Plants', selector: 'table[id^="anx2-msand"]', all: true }
+      ],
+      anx3: [
+        { title: 'Annexure III(a) - Clusters', selector: 'table[id^="anx3-clusters"]', all: true },
+        { title: 'Annexure III(b) - Contiguous Clusters', selector: 'table[id^="anx3-contiguous"]', all: true }
+      ],
+      anx4: [
+        { title: 'Annexure IV(a) - Lease Routes', selector: 'table[id^="anx4-routes"]', all: true },
+        { title: 'Annexure IV(b) - Cluster Routes', selector: 'table[id^="anx4-cluster-routes"]', all: true }
+      ],
+      anx5: [
+        { title: 'Annexure V - Bench Mark & CORS', selector: 'table[id^="anx5-benchmarks"]', all: true },
+        { title: 'Annexure V - Mining Leases', selector: 'table[id^="anx5-mining"]', all: true },
+        { title: 'Annexure V - Patta Lands', selector: 'table[id^="anx5-patta"]', all: true },
+        { title: 'Annexure V - De-siltation', selector: 'table[id^="anx5-desilt"]', all: true },
+        { title: 'Annexure V - M-Sand Plants', selector: 'table[id^="anx5-msand"]', all: true }
+      ],
+      anx6: [
+        { title: 'Annexure VI - Final Cluster Details', selector: 'table[id^="anx6-final-clusters"]', all: true },
+        { title: 'Annexure VI - Contiguous Cluster Details', selector: 'table[id^="anx6-contiguous-clusters"]', all: true }
+      ],
+      anx7: [
+        { title: 'Annexure VII - Individual Routes', selector: 'table[id^="anx7-routes"]', all: true },
+        { title: 'Annexure VII - Cluster Routes', selector: 'table[id^="anx7-cluster-routes"]', all: true },
+        { title: 'Annexure VII - Transportation Routes', selector: 'table[id^="anx7-patta-final"]', all: true }
+      ],
+      'annexure-b': [
+        { title: 'Annexure B - Mining Leases', selector: 'table[id^="annexure-b-leases"]', all: true }
+      ],
+      'annexure-c': [
+        { title: 'Annexure C - Cluster details', selector: 'table[id^="annexure-c-details"]', all: true }
+      ],
+      'annexure-d': [
+        { title: 'Annexure D - Details', selector: 'table[id^="annexure-d-details"]', all: true }
+      ],
+      'annexure-e': [
+        { title: 'Annexure E - Details', selector: 'table[id^="annexure-e-details"]', all: true }
+      ],
+      'annexure-f': [
+        { title: 'Annexure F - Sand Ghats', selector: 'table[id^="annexure-f-sand"]', all: true },
+        { title: 'Annexure F - Bench Marks', selector: 'table[id^="annexure-f-benchmark"]', all: true },
+        { title: 'Annexure F - CORS Stations', selector: 'table[id^="annexure-f-cors"]', all: true }
+      ],
+      'annexure-g': [
+        { title: 'Annexure G - Details', selector: 'table[id^="annexure-g-details"]', all: true }
+      ],
+      'annexure-h': [
+        { title: 'Annexure H - Details', selector: 'table[id^="annexure-h-details"]', all: true }
+      ],
+      'annexure-i': [
+        { title: 'Annexure I - Details', selector: 'table[id^="annexure-i-details"]', all: true }
+      ],
+      'annexure-j': [
+        { title: 'Annexure J - Details', selector: 'table[id^="annexure-j-details"]', all: true }
+      ],
+      'annexure-k': [
+        { title: 'Annexure K - Proforma Auctioned Sites', selector: 'table[id^="annexure-k-proforma"]', all: true },
+        { title: 'Annexure K - Annexure A', selector: 'table[id^="annexure-k-annexure-a"]', all: true }
+      ]
     };
 
-    const getAnnexurePreviewPages = async (viewId) => {
-      const uploaded = S.uploadedPDFs?.[viewId];
-      if (Array.isArray(uploaded) && uploaded.length > 0) {
-        return uploaded;
-      }
+    const renderAnnexureTables = (viewId, title) => {
+      const configs = fallbackTables[viewId];
+      if (!configs) return false;
       
-      const htmlString = pdfPreview.buildAnnexureHtmlDocument(viewId);
-      if (htmlString) {
-        try {
-          const parser = new DOMParser();
-          const docEl = parser.parseFromString(htmlString, 'text/html');
+      let addedAny = false;
+      let startY = 25;
+      
+      configs.forEach((cfg) => {
+        const tables = cfg.all ? Array.from(document.querySelectorAll(cfg.selector)) : [document.querySelector(cfg.selector)].filter(Boolean);
+        tables.forEach((table) => {
+          const clone = table.cloneNode(true);
           
-          docEl.querySelectorAll('table').forEach(table => {
-            const rows = Array.from(table.querySelectorAll('tr'));
-            let actionColIndexes = [];
-            rows.forEach(row => {
-              const cells = Array.from(row.children);
-              cells.forEach((cell, idx) => {
-                const txt = (cell.textContent || '').trim().toLowerCase();
-                if (txt === 'action' || txt === 'actions' || cell.classList.contains('actions') || cell.classList.contains('action')) {
-                  if (!actionColIndexes.includes(idx)) {
-                    actionColIndexes.push(idx);
-                  }
-                }
-              });
-            });
-            actionColIndexes.sort((a, b) => b - a);
-            rows.forEach(row => {
-              const cells = Array.from(row.children);
-              actionColIndexes.forEach(idx => {
-                if (cells[idx]) cells[idx].remove();
-              });
-            });
+          clone.querySelectorAll('select').forEach(select => {
+            const val = select.value || '';
+            const textNode = document.createTextNode(val || 'NA');
+            select.parentNode.replaceChild(textNode, select);
           });
           
-          const blob = await htmlElementToPdfBlob(docEl.body, `${viewId}.pdf`);
-          if (blob) {
-            return await pdfBlobToImages(blob);
+          clone.querySelectorAll('input, textarea').forEach(input => {
+            const val = input.value || '';
+            const textNode = document.createTextNode(val || 'NA');
+            input.parentNode.replaceChild(textNode, input);
+          });
+
+          const headers = Array.from(clone.querySelectorAll('thead tr th, thead tr td, tbody tr th, tbody tr td'));
+          let actionColIndexes = [];
+          
+          clone.querySelectorAll('tr').forEach(row => {
+            const cells = Array.from(row.children);
+            cells.forEach((cell, idx) => {
+              const txt = (cell.textContent || '').trim().toLowerCase();
+              if (txt === 'action' || txt === 'actions' || cell.classList.contains('actions') || cell.classList.contains('action')) {
+                if (!actionColIndexes.includes(idx)) {
+                  actionColIndexes.push(idx);
+                }
+              }
+            });
+          });
+
+          actionColIndexes.sort((a, b) => b - a);
+
+          clone.querySelectorAll('tr').forEach(row => {
+            const cells = Array.from(row.children);
+            actionColIndexes.forEach(idx => {
+              if (cells[idx]) cells[idx].remove();
+            });
+          });
+
+          clone.querySelectorAll('td, th').forEach(cell => {
+            cell.querySelectorAll('button, a, .btn, .actions, .edit-btn, .delete-btn, i, svg').forEach(el => el.remove());
+            const txt = (cell.textContent || '').trim();
+            if (!txt) {
+              cell.textContent = 'NA';
+            }
+          });
+
+          if (!addedAny) {
+            doc.addPage();
+            startY = 25;
+            addedAny = true;
+          } else {
+            if (startY > 250) {
+              doc.addPage();
+              startY = 25;
+            }
           }
-        } catch (err) {
-          console.warn(`HTML-to-PDF conversion failed for ${viewId}:`, err);
-        }
-      }
-      return [];
+
+          startY = writeParagraph(cfg.title, startY, { bold: true, size: 11, color: [0, 0, 0], after: 4 });
+
+          const firstRow = clone.querySelector('tr');
+          const colCount = firstRow ? firstRow.children.length : 0;
+          const isWide = colCount > 8;
+          const fontSize = isWide ? 5.8 : 7.5;
+          const cellPadding = isWide ? 1.2 : 2;
+
+          doc.autoTable({
+            html: clone,
+            startY: startY,
+            margin: { left: pad, right: pad },
+            theme: 'grid',
+            styles: { fontSize: fontSize, cellPadding: cellPadding, lineColor: [0, 0, 0], lineWidth: 0.2, textColor: [0, 0, 0], overflow: 'linebreak' },
+            headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold', lineColor: [0, 0, 0], lineWidth: 0.2 },
+            alternateRowStyles: { fillColor: [255, 255, 255] }
+          });
+
+          startY = doc.lastAutoTable.finalY + 10;
+        });
+      });
+
+      return addedAny;
     };
 
     const hasAnnexureContent = (viewId) => {
@@ -13780,66 +13871,12 @@ async function generateFinalPDF(regenerate = false) {
     };
 
     const addAnnexureFromPreview = async (title, viewId) => {
-      let pages = [];
-      try {
-        pages = await withTimeout(getAnnexurePreviewPages(viewId), 14000, title);
-      } catch (err) {
-        console.warn(`${title} preview capture failed:`, err);
+      const uploaded = S.uploadedPDFs?.[viewId];
+      if (Array.isArray(uploaded) && uploaded.length > 0) {
+        uploaded.forEach((page, index) => addImagePage(page, `${title} - Page ${index + 1}`));
+        return true;
       }
-      if (!pages.length) {
-        const fallbackTables = {
-          anx1: [
-            { title: 'Annexure I(a) - Rivers', selector: 'table[id^="anx1-rivers"]', all: true },
-            { title: 'Annexure I(b) - De-siltation', selector: 'table[id^="anx1-desilt"]', all: true },
-            { title: 'Annexure I(c) - Patta Lands', selector: 'table[id^="anx1-patta"]', all: true },
-            { title: 'Annexure I(d) - M-Sand Plants', selector: 'table[id^="anx1-msand"]', all: true }
-          ],
-          anx2: [
-            { title: 'Annexure II(a) - Mining Leases', selector: 'table[id^="anx2-leases"]', all: true },
-            { title: 'Annexure II(b) - Patta Lands', selector: 'table[id^="anx2-patta"]', all: true },
-            { title: 'Annexure II(c) - De-siltation', selector: 'table[id^="anx2-desilt"]', all: true },
-            { title: 'Annexure II(d) - M-Sand Plants', selector: 'table[id^="anx2-msand"]', all: true }
-          ],
-          anx3: [
-            { title: 'Annexure III(a) - Clusters', selector: 'table[id^="anx3-clusters"]', all: true },
-            { title: 'Annexure III(b) - Contiguous Clusters', selector: 'table[id^="anx3-contiguous"]', all: true }
-          ],
-          anx4: [
-            { title: 'Annexure IV(a) - Lease Routes', selector: 'table[id^="anx4-routes"]', all: true },
-            { title: 'Annexure IV(b) - Cluster Routes', selector: 'table[id^="anx4-cluster-routes"]', all: true }
-          ],
-          anx5: [
-            { title: 'Annexure V - Bench Mark & CORS', selector: 'table[id^="anx5-benchmarks"]', all: true },
-            { title: 'Annexure V - Mining Leases', selector: 'table[id^="anx5-mining"]', all: true },
-            { title: 'Annexure V - Patta Lands', selector: 'table[id^="anx5-patta"]', all: true },
-            { title: 'Annexure V - De-siltation', selector: 'table[id^="anx5-desilt"]', all: true },
-            { title: 'Annexure V - M-Sand Plants', selector: 'table[id^="anx5-msand"]', all: true }
-          ],
-          anx6: [
-            { title: 'Annexure VI - Final Cluster Details', selector: 'table[id^="anx6-final-clusters"]', all: true },
-            { title: 'Annexure VI - Contiguous Cluster Details', selector: 'table[id^="anx6-contiguous-clusters"]', all: true }
-          ],
-          anx7: [
-            { title: 'Annexure VII - Individual Routes', selector: 'table[id^="anx7-routes"]', all: true },
-            { title: 'Annexure VII - Cluster Routes', selector: 'table[id^="anx7-cluster-routes"]', all: true },
-            { title: 'Annexure VII - Transportation Routes', selector: 'table[id^="anx7-patta-final"]', all: true }
-          ],
-          'annexure-f': [
-            { title: 'Annexure F - Sand Ghats', selector: 'table[id^="annexure-f-sand"]', all: true },
-            { title: 'Annexure F - Bench Marks', selector: 'table[id^="annexure-f-benchmark"]', all: true },
-            { title: 'Annexure F - CORS Stations', selector: 'table[id^="annexure-f-cors"]', all: true }
-          ],
-          'annexure-k': [
-            { title: 'Annexure K - Proforma Auctioned Sites', selector: 'table[id^="annexure-k-proforma"]', all: true },
-            { title: 'Annexure K - Annexure A', selector: 'table[id^="annexure-k-annexure-a"]', all: true }
-          ]
-        };
-        if (fallbackTables[viewId]) return addNativeTablesAsPreviewFallback(title, fallbackTables[viewId]);
-        warnings.push(`${title} has no PDF Preview pages to include.`);
-        return false;
-      }
-      pages.forEach((page, index) => addImagePage(page, `${title} - Page ${index + 1}`));
-      return true;
+      return renderAnnexureTables(viewId, title);
     };
 
     // 1. Cover Page
