@@ -11412,6 +11412,15 @@ function extractAnnexureFTable(tableId) {
   });
   return { headers, rows };
 }
+function scaledPdfColumnStyles(widths, targetWidth) {
+  const total = widths.reduce((sum, width) => sum + Number(width || 0), 0);
+  if (!total || !targetWidth) return {};
+  const scale = targetWidth / total;
+  return widths.reduce((styles, width, index) => {
+    styles[index] = { cellWidth: width * scale };
+    return styles;
+  }, {});
+}
 async function exportAnnexureFPDF(btn, isLivePreview = false, returnBlob = false) {
   if (typeof btn === 'boolean') {
     isLivePreview = btn;
@@ -11427,9 +11436,9 @@ async function exportAnnexureFPDF(btn, isLivePreview = false, returnBlob = false
   const doc = new jsPDF('p', 'pt', 'a4');
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
-  const border = { x: 30, y: 14, w: pageWidth - 60, h: pageHeight - 42 };
-  const tableLeft = 52;
-  const tableWidth = pageWidth - tableLeft - 36;
+  const border = { x: 18, y: 10, w: pageWidth - 36, h: pageHeight - 20 };
+  const tableLeft = 36;
+  const tableWidth = pageWidth - (tableLeft * 2);
   const headerLeft = tableLeft + 4;
   const footerY = pageHeight - 38;
   const pageNumberOffset = 490;
@@ -11463,7 +11472,7 @@ async function exportAnnexureFPDF(btn, isLivePreview = false, returnBlob = false
     doc.text(`${district} District`, headerLeft, 39);
     doc.text(state, headerLeft, 51);
     doc.setLineWidth(0.4);
-    doc.line(tableLeft, 62, pageWidth - 32, 62);
+    doc.line(tableLeft, 62, pageWidth - 22, 62);
     doc.setFont('times', 'normal');
     doc.setFontSize(8);
     doc.text('PREPARED BY:', pageWidth / 2 - 130, footerY - 2, { align: 'left' });
@@ -11501,15 +11510,9 @@ async function exportAnnexureFPDF(btn, isLivePreview = false, returnBlob = false
     doc.text(normalizeSectionTitle(section.title), pageWidth / 2, startY, { align: 'center' });
     startY += titleHeight;
     const tableData = extractAnnexureFTable(section.table);
-    const columnStyles = section.tableId && section.tableId.startsWith('annexure-f-sand') ? {
-      0: { cellWidth: 40 },
-      1: { cellWidth: 40 },
-      2: { cellWidth: 108 },
-      3: { cellWidth: 52 },
-      4: { cellWidth: 34 },
-      5: { cellWidth: 88 },
-      6: { cellWidth: 88 }
-    } : {};
+    const columnStyles = section.tableId && section.tableId.startsWith('annexure-f-sand')
+      ? scaledPdfColumnStyles([40, 40, 108, 52, 34, 88, 88], tableWidth)
+      : {};
     doc.autoTable({
       startY,
       head: [tableData.headers],
@@ -11551,7 +11554,7 @@ async function exportAnnexureFPDF(btn, isLivePreview = false, returnBlob = false
     top: CONTENT_TOP,
     bottom: 46,
     maxWidth: tableWidth,
-    maxHeight: 250,
+    maxHeight: 390,
     onNewPage: () => {
       doc.addPage();
       drawReportFrame({ pageNumber: doc.getCurrentPageInfo().pageNumber });
@@ -11699,7 +11702,7 @@ async function drawAnnexureInlineAttachmentPages(doc, pages, startY, options = {
   const top = options.top || 72;
   const bottom = options.bottom || 46;
   const maxWidth = options.maxWidth || (pageWidth - left - right);
-  const maxHeight = options.maxHeight || 250;
+  const maxHeight = options.maxHeight || 390;
   const gap = options.gap || 12;
   let y = startY;
   for (const src of pages) {
@@ -12024,15 +12027,15 @@ async function exportAnnexureJPDF(btn, isLivePreview = false, previewRequestId =
   const doc = new jsPDF('p', 'pt', 'a4');
   const pageWidth = doc.internal.pageSize.getWidth(); const pageHeight = doc.internal.pageSize.getHeight();
   const district = (S.activeProject && S.activeProject.district) || 'Jalandhar'; const state = (S.activeProject && S.activeProject.state) || 'Punjab';
-  const border = { x: 30, y: 14, w: pageWidth - 60, h: pageHeight - 42 };
+  const border = { x: 18, y: 10, w: pageWidth - 36, h: pageHeight - 20 };
   const tableLeft = 36; const tableWidth = pageWidth - tableLeft * 2; const headerLeft = tableLeft + 4; const footerY = pageHeight - 38; const contentTop = 72; let startY = contentTop;
   const drawFrame = data => {
     doc.setDrawColor(0, 0, 0); doc.setLineWidth(0.6); doc.rect(border.x, border.y, border.w, border.h);
     doc.setFont('times', 'italic'); doc.setFontSize(10); doc.setTextColor(0, 0, 0); doc.text('District Survey Report', headerLeft, 27); doc.text(`${district} District`, headerLeft, 39); doc.text(state, headerLeft, 51);
-    doc.setLineWidth(0.4); doc.line(headerLeft, 62, pageWidth - 32, 62); doc.setFont('times', 'normal'); doc.setFontSize(8);
+    doc.setLineWidth(0.4); doc.line(headerLeft, 62, pageWidth - 22, 62); doc.setFont('times', 'normal'); doc.setFontSize(8);
     doc.text('PREPARED BY:', pageWidth / 2 - 130, footerY - 2, { align: 'left' }); doc.setFont('times', 'bold'); doc.text(` SUB-DIVISIONAL COMMITTEE OF ${district.toUpperCase()} DISTRICT`, pageWidth / 2 - 76, footerY - 2, { align: 'left' });
     doc.setFont('times', 'normal'); doc.text('ASSISTED BY:', pageWidth / 2 - 130, footerY + 10, { align: 'left' }); doc.setFont('times', 'bold'); doc.text(' RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD', pageWidth / 2 - 78, footerY + 10, { align: 'left' });
-    doc.setFontSize(10); doc.text(String(490 + data.pageNumber), pageWidth - 26, pageHeight - 18, { align: 'right' });
+    doc.setFontSize(10); doc.text(String(490 + data.pageNumber), pageWidth - 18, pageHeight - 12, { align: 'right' });
   };
   doc.setFont('times', 'bold');
   doc.setFontSize(11);
@@ -12046,7 +12049,7 @@ async function exportAnnexureJPDF(btn, isLivePreview = false, previewRequestId =
     top: contentTop,
     bottom: 46,
     maxWidth: tableWidth,
-    maxHeight: 250,
+    maxHeight: 390,
     onNewPage: () => {
       doc.addPage();
       drawFrame({ pageNumber: doc.getCurrentPageInfo().pageNumber });
@@ -12056,7 +12059,7 @@ async function exportAnnexureJPDF(btn, isLivePreview = false, previewRequestId =
   const tables = Array.from(document.querySelectorAll('#annexure-j-demand-container table.annexure-j-demand-table'));
   tables.forEach((table, index) => {
     const titleHeight = 14;
-    if (index && startY + titleHeight + 46 > pageHeight - 40) { doc.addPage(); drawFrame({ pageNumber: doc.getCurrentPageInfo().pageNumber }); startY = contentTop; }
+    if (startY + titleHeight + 46 > pageHeight - 40) { doc.addPage(); drawFrame({ pageNumber: doc.getCurrentPageInfo().pageNumber }); startY = contentTop; }
     doc.setFont('times', 'bold'); doc.setFontSize(11); doc.setTextColor(0, 0, 0); doc.text(index ? `Projected Demand of Gravel - Table ${index + 1}` : 'Projected Demand of Gravel:', tableLeft, startY);
     startY += titleHeight;
     const data = extractAnnexureJTable(table);
@@ -12439,7 +12442,7 @@ async function exportAnnexureKPDF(btn, isLivePreview = false, returnBlob = false
   const doc = new jsPDF('p', 'pt', 'a4');
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
-  const border = { x: 30, y: 14, w: pageWidth - 60, h: pageHeight - 42 };
+  const border = { x: 18, y: 10, w: pageWidth - 36, h: pageHeight - 20 };
   const tableLeft = 36;
   const tableWidth = pageWidth - (tableLeft * 2);
   const headerLeft = tableLeft + 4;
@@ -12460,7 +12463,7 @@ async function exportAnnexureKPDF(btn, isLivePreview = false, returnBlob = false
     doc.text(`${district} District`, headerLeft, 39);
     doc.text(state, headerLeft, 51);
     doc.setLineWidth(0.4);
-    doc.line(headerLeft, 62, pageWidth - 32, 62);
+    doc.line(headerLeft, 62, pageWidth - 22, 62);
     doc.setFont('times', 'normal');
     doc.setFontSize(8);
     doc.text('PREPARED BY:', pageWidth / 2 - 130, footerY - 2, { align: 'left' });
@@ -12472,7 +12475,7 @@ async function exportAnnexureKPDF(btn, isLivePreview = false, returnBlob = false
     doc.text(' RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD', pageWidth / 2 - 78, footerY + 10, { align: 'left' });
     doc.setFont('times', 'bold');
     doc.setFontSize(10);
-    doc.text(String(pageNumberOffset + data.pageNumber), pageWidth - 26, pageHeight - 18, { align: 'right' });
+    doc.text(String(pageNumberOffset + data.pageNumber), pageWidth - 18, pageHeight - 12, { align: 'right' });
   };
   doc.setFont('times', 'bold');
   doc.setFontSize(11);
@@ -12486,7 +12489,7 @@ async function exportAnnexureKPDF(btn, isLivePreview = false, returnBlob = false
     top: CONTENT_TOP,
     bottom: 46,
     maxWidth: tableWidth,
-    maxHeight: 250,
+    maxHeight: 390,
     onNewPage: () => {
       doc.addPage();
       drawReportFrame({ pageNumber: doc.getCurrentPageInfo().pageNumber });
@@ -12507,7 +12510,7 @@ async function exportAnnexureKPDF(btn, isLivePreview = false, returnBlob = false
     const titleHeight = 14;
     const tableStartEstimate = startY + titleHeight + 6;
     const isProforma = section.sectionType === 'PROFORMA';
-    if (index > 0 && tableStartEstimate + 40 > pageHeight - 40) {
+    if (tableStartEstimate + 40 > pageHeight - 40) {
       doc.addPage();
       drawReportFrame({ pageNumber: doc.getCurrentPageInfo().pageNumber });
       startY = CONTENT_TOP;
@@ -12545,20 +12548,7 @@ async function exportAnnexureKPDF(btn, isLivePreview = false, returnBlob = false
         lineWidth: 0.4,
         cellPadding: isProforma ? 0.9 : 2.5
       },
-      columnStyles: isProforma ? {
-        0: { cellWidth: 22 },
-        1: { cellWidth: 42 },
-        2: { cellWidth: 34 },
-        3: { cellWidth: 42 },
-        4: { cellWidth: 44 },
-        5: { cellWidth: 46 },
-        6: { cellWidth: 42 },
-        7: { cellWidth: 42 },
-        8: { cellWidth: 34 },
-        9: { cellWidth: 50 },
-        10: { cellWidth: 50 },
-        11: { cellWidth: 35 }
-      } : {},
+      columnStyles: isProforma ? scaledPdfColumnStyles([22, 42, 34, 42, 44, 46, 42, 42, 34, 50, 50, 35], tableWidth) : {},
       margin: { top: startY, bottom: 40, left: tableLeft, right: tableLeft },
       tableWidth,
       didDrawPage: drawReportFrame
@@ -13436,7 +13426,10 @@ async function generateFinalPDF(regenerate = false) {
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const W = 210;
     const H = 297;
-    const pad = 15;
+    const pad = 12;
+    const tableWidth = W - (pad * 2);
+    const pageFrameMargin = 5;
+    const imagePageMargin = 4;
     const navy = [11, 29, 58];
     const blue = [26, 51, 102];
     const saffron = [196, 154, 88];
@@ -13496,6 +13489,20 @@ async function generateFinalPDF(regenerate = false) {
       return y + (lines.length * (options.lineHeight || 5.5)) + (options.after || 6);
     };
 
+    const getImageFormat = (src) => /^data:image\/jpe?g/i.test(String(src || '')) ? 'JPEG' : 'PNG';
+    const drawFittedImagePage = (src, margin = imagePageMargin) => {
+      const format = getImageFormat(src);
+      const props = doc.getImageProperties(src);
+      const maxW = W - (margin * 2);
+      const maxH = H - (margin * 2);
+      const ratio = Math.min(maxW / props.width, maxH / props.height);
+      const drawW = props.width * ratio;
+      const drawH = props.height * ratio;
+      const x = (W - drawW) / 2;
+      const y = (H - drawH) / 2;
+      doc.addImage(src, format, x, y, drawW, drawH, undefined, 'FAST');
+    };
+
     const addImagePage = (src, title) => {
       if (!src) return;
       if (isFirstPage) {
@@ -13506,11 +13513,10 @@ async function generateFinalPDF(regenerate = false) {
       const pNum = doc.getCurrentPageInfo().pageNumber;
       uploadedPages.push(pNum);
       try {
-        const format = String(src).startsWith('data:image/jpeg') ? 'JPEG' : 'PNG';
-        doc.addImage(src, format, 10, 10, W - 20, H - 20, undefined, 'FAST');
+        drawFittedImagePage(src, imagePageMargin);
       } catch (err) {
         try {
-          doc.addImage(src, 'JPEG', 10, 10, W - 20, H - 20, undefined, 'FAST');
+          doc.addImage(src, 'JPEG', imagePageMargin, imagePageMargin, W - (imagePageMargin * 2), H - (imagePageMargin * 2), undefined, 'FAST');
         } catch (innerErr) {
           console.warn('Could not embed uploaded page:', innerErr);
         }
@@ -13526,11 +13532,10 @@ async function generateFinalPDF(regenerate = false) {
       const pNum = doc.getCurrentPageInfo().pageNumber;
       uploadedPages.push(pNum);
       try {
-        const format = String(src).startsWith('data:image/png') ? 'PNG' : 'JPEG';
-        doc.addImage(src, format, 0, 0, W, H, undefined, 'FAST');
+        drawFittedImagePage(src, imagePageMargin);
       } catch (err) {
         try {
-          doc.addImage(src, 'JPEG', 0, 0, W, H, undefined, 'FAST');
+          doc.addImage(src, 'JPEG', imagePageMargin, imagePageMargin, W - (imagePageMargin * 2), H - (imagePageMargin * 2), undefined, 'FAST');
         } catch (innerErr) {
           console.warn('Could not embed live preview page:', innerErr);
         }
@@ -13600,6 +13605,7 @@ async function generateFinalPDF(regenerate = false) {
         html: clone,
         startY: y,
         margin: { left: pad, right: pad },
+        tableWidth,
         theme: 'grid',
         styles: { fontSize: 7.5, cellPadding: 2, lineColor: [0, 0, 0], lineWidth: 0.2, textColor: [0, 0, 0], overflow: 'linebreak' },
         headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold', lineColor: [0, 0, 0], lineWidth: 0.2 },
@@ -13619,6 +13625,7 @@ async function generateFinalPDF(regenerate = false) {
       doc.autoTable({
         startY: y,
         margin: { left: pad, right: pad },
+        tableWidth,
         head: [['Type', 'Record / Section', 'Color']],
         body: rows.map(row => [row[0], row[1], row[2]]),
         theme: 'grid',
@@ -13678,6 +13685,7 @@ async function generateFinalPDF(regenerate = false) {
         doc.autoTable({
           startY: y,
           margin: { left: pad, right: pad },
+          tableWidth,
           head: [['Metric', 'Value']],
           body: [
             ['Distance Points', safe(g.dist)],
@@ -13697,7 +13705,7 @@ async function generateFinalPDF(regenerate = false) {
         const canvas = document.getElementById(`canvas-${g.id}-post`) || document.getElementById(`canvas-${g.id}`);
         if (canvas) {
           try {
-            doc.addImage(canvas.toDataURL('image/png', 1), 'PNG', pad, y, W - (pad * 2), 65);
+            doc.addImage(canvas.toDataURL('image/png', 1), 'PNG', pad, y, tableWidth, 65);
           } catch (err) {
             console.warn('Cross-section canvas capture failed:', err);
           }
@@ -13749,7 +13757,7 @@ async function generateFinalPDF(regenerate = false) {
         if (source) {
           try {
             const format = /^data:image\/jpeg/i.test(source) ? 'JPEG' : 'PNG';
-            doc.addImage(source, format, 15, y, W - 30, H - y - 20, undefined, 'FAST');
+            doc.addImage(source, format, pad, y, tableWidth, H - y - 16, undefined, 'FAST');
           } catch (err) {
             console.warn('Could not embed plate attachment:', err);
           }
@@ -14090,6 +14098,7 @@ async function generateFinalPDF(regenerate = false) {
             html: clone,
             startY: startY,
             margin: { left: pad, right: pad },
+            tableWidth,
             theme: 'grid',
             styles: { fontSize: fontSize, cellPadding: cellPadding, lineColor: [0, 0, 0], lineWidth: 0.2, textColor: [0, 0, 0], overflow: 'linebreak' },
             headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold', lineColor: [0, 0, 0], lineWidth: 0.2 },
@@ -14324,7 +14333,7 @@ async function generateFinalPDF(regenerate = false) {
       if (!isUploaded) {
         doc.setDrawColor(0, 0, 0);
         doc.setLineWidth(0.3);
-        doc.rect(10, 10, W - 20, H - 20, 'S'); // thin black border on ALL generated pages except Cover
+        doc.rect(pageFrameMargin, pageFrameMargin, W - (pageFrameMargin * 2), H - (pageFrameMargin * 2), 'S');
         
         if (!isTitlePage) {
           doc.setFont('helvetica', 'normal');
@@ -14333,9 +14342,9 @@ async function generateFinalPDF(regenerate = false) {
           const districtNameUpper = String(district || 'PUNJAB').toUpperCase();
           const footerLeft = `PREPARED BY: SUB-DIVISIONAL COMMITTEE OF ${districtNameUpper} DISTRICT`;
           const footerLeft2 = `ASSISTED BY: RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD`;
-          doc.text(footerLeft, 14, H - 15);
-          doc.text(footerLeft2, 14, H - 11);
-          doc.text(`Page ${p}`, W - 14, H - 13, { align: 'right' });
+          doc.text(footerLeft, pad, H - 13);
+          doc.text(footerLeft2, pad, H - 9);
+          doc.text(`Page ${p}`, W - pad, H - 11, { align: 'right' });
         }
       }
     }
