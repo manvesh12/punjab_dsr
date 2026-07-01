@@ -1,11 +1,11 @@
-const CACHE_NAME = 'smart-dsr-cache-v1';
+const CACHE_NAME = 'smart-dsr-cache-v2-annex-fjk';
 const urlsToCache = [
   './login.html',
   './css/styles.css',
   './css/premium-theme.css',
   './css/mobile-overrides.css',
   './js/portal.bundle.js',
-  './js/auth.js',
+  './js/replenishment-module.js',
   './js/theme.js',
   './assets/dsr-logo.png'
 ];

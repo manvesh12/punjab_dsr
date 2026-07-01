@@ -48,7 +48,7 @@ const JS_FILES = [
   'js/main.js'
 ];
 
-const ASSET_VERSION = 'site-zoom-20260612i';
+const ASSET_VERSION = 'site-zoom-20260702-annex-fjk';
 const applyAssetVersion = (html) => html.replace(/\{\{ASSET_VERSION\}\}/g, ASSET_VERSION);
 
 function buildJsBundle() {
@@ -104,7 +104,7 @@ function compile() {
     // 6. Append bundled and extra JS modules + Leaflet map script + styles
     html += `\n<script defer src="${JS_BUNDLE_FILE}?v=${ASSET_VERSION}-v3"></script>`;
     html += `\n<script defer src="js/model-dsr-module.js?v=2"></script>`;
-    html += `\n<script defer src="js/replenishment-module.js?v=4"></script>`;
+    html += `\n<script defer src="js/replenishment-module.js?v=5"></script>`;
     
     html += `\n<script>
 document.addEventListener("DOMContentLoaded", function() {

@@ -13781,13 +13781,34 @@ async function generateFinalPDF(regenerate = false) {
         if (!blob) return false;
         const pages = await pdfBlobToImages(blob);
         if (!pages.length) return false;
-        pages.forEach((page, index) => addImagePage(page, `${title} - Page ${index + 1}`));
+        pages.forEach((page, index) => addPreviewImagePage(page, `${title} - Page ${index + 1}`));
         return true;
       } catch (err) {
         console.warn(`Could not merge ${viewId} from HTML live preview:`, err);
         return false;
       } finally {
         iframe.remove();
+      }
+    };
+    const addAnnexureExportBlobPages = async (title, viewId) => {
+      try {
+        await ensurePortalVendors(['jspdf', 'autotable', 'pdfjs']);
+        let blob = null;
+        if (viewId === 'annexure-f' && typeof exportAnnexureFPDF === 'function') {
+          blob = await exportAnnexureFPDF(null, false, true);
+        } else if (viewId === 'annexure-j' && typeof exportAnnexureJPDF === 'function') {
+          blob = await exportAnnexureJPDF(null, false, null, true);
+        } else if (viewId === 'annexure-k' && typeof exportAnnexureKPDF === 'function') {
+          blob = await exportAnnexureKPDF(null, false, true);
+        }
+        if (!blob) return false;
+        const pages = await pdfBlobToImages(blob);
+        if (!pages.length) return false;
+        pages.forEach((page, index) => addPreviewImagePage(page, `${title} - Page ${index + 1}`));
+        return true;
+      } catch (err) {
+        console.warn(`Could not merge ${viewId} from generated annexure PDF:`, err);
+        return false;
       }
     };
     const simpleAnnexurePreviewIds = ['annexure-e', 'annexure-g', 'annexure-h', 'annexure-i'];
@@ -14023,7 +14044,8 @@ async function generateFinalPDF(regenerate = false) {
       if (['annexure-f', 'annexure-j', 'annexure-k'].includes(viewId)) {
         const addedLivePreview = await addLivePreviewHtmlPages(title, viewId);
         if (addedLivePreview) return true;
-        return false;
+        const addedGeneratedPdf = await addAnnexureExportBlobPages(title, viewId);
+        if (addedGeneratedPdf) return true;
       }
 
       if (simpleAnnexurePreviewIds.includes(viewId)) {

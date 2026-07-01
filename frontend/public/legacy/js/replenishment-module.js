@@ -576,6 +576,35 @@ function cloneSourceWithValues(source) {
   return clone;
 }
 
+const LIVE_PREVIEW_ANNEXURE_IDS = ['annexure-f', 'annexure-j', 'annexure-k'];
+
+function isLivePreviewAnnexureId(id) {
+  return LIVE_PREVIEW_ANNEXURE_IDS.includes(id);
+}
+
+function getLivePreviewAnnexureSectionHtml(viewId) {
+  if (!isLivePreviewAnnexureId(viewId)) return '';
+  if (!window.pdfPreview || typeof window.pdfPreview.buildAnnexureHtmlDocument !== 'function') return '';
+
+  const letter = viewId.replace('annexure-', '').toUpperCase();
+  const renderFn = window[`renderAnnexure${letter}`];
+  if (typeof renderFn === 'function') renderFn();
+
+  const html = window.pdfPreview.buildAnnexureHtmlDocument(viewId);
+  if (!html) return '';
+
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const sheet = doc.querySelector('.sheet') || doc.body;
+  const bodyHtml = sheet ? sheet.innerHTML.trim() : '';
+  if (!bodyHtml) return '';
+
+  return `
+    <div class="section-block annexure-live-preview-section" data-annexure-id="${escapeHtml(viewId)}">
+      ${bodyHtml}
+    </div>
+  `;
+}
+
 function compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds) {
   const district = (window.S && S.frontMatter && S.frontMatter.district) || 'Jalandhar';
   const year = (window.S && S.frontMatter && S.frontMatter.year) || '2025-26';
@@ -902,6 +931,14 @@ function compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds) {
       combinedContent += sectionHtml;
     }
     else {
+      if (isLivePreviewAnnexureId(item.id)) {
+        const livePreviewHtml = getLivePreviewAnnexureSectionHtml(item.id);
+        if (livePreviewHtml) {
+          combinedContent += livePreviewHtml;
+          return;
+        }
+      }
+
       const source = document.getElementById(`view-${item.id}`);
       if (source) {
         const cleanedClone = cloneSourceWithValues(source);
@@ -985,6 +1022,37 @@ function compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds) {
           img{max-width:100%;height:auto;display:block;margin:0 auto 10px;}
           .annexure-uploaded-pages-simple { display: flex; flex-direction: column; gap: 20px; margin-top: 20px; }
           .annexure-uploaded-pages-simple img { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+          .annexure-live-preview-section .doc-head {
+            border-bottom: 2px solid #17324d;
+            padding-bottom: 14px;
+            margin-bottom: 20px;
+            text-align: center;
+          }
+          .annexure-live-preview-section .doc-head h1 {
+            margin: 0 0 8px;
+            color: #17324d;
+            font-size: 24px;
+            line-height: 1.2;
+          }
+          .annexure-live-preview-section .doc-head p {
+            margin: 0;
+            color: #526172;
+            font-size: 13px;
+          }
+          .annexure-live-preview-section .card,
+          .annexure-live-preview-section .card-bd,
+          .annexure-live-preview-section .annexure-line-main {
+            border: 0 !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            margin: 0 0 18px !important;
+          }
+          .annexure-live-preview-section .g2,
+          .annexure-live-preview-section .grid,
+          .annexure-live-preview-section .annexure-line-layout {
+            display: block !important;
+          }
           
           /* Flatten form elements for flat text printing */
           input, textarea, select {
@@ -1120,8 +1188,9 @@ async function generateReplenishmentPDF(reportName, checkedIds) {
     itemsToRender.push({ type: 'html', html: fullHtml });
   } else {
     sectionBlocks.forEach(block => {
-      const titleEl = block.querySelector('.section-title');
-      const titleText = titleEl ? titleEl.textContent : 'Section';
+      const titleEl = block.querySelector(':scope > .section-title');
+      const hasSectionTitle = !!titleEl;
+      const titleText = titleEl ? titleEl.textContent : '';
       if (titleEl) titleEl.remove();
       
       let currentHtmlGroup = [];
@@ -1131,7 +1200,7 @@ async function generateReplenishmentPDF(reportName, checkedIds) {
           const htmlBlock = `
             <div class="sheet">
               <div class="section-block">
-                <h2 class="section-title">${titleText}</h2>
+                ${hasSectionTitle ? `<h2 class="section-title">${titleText}</h2>` : ''}
                 ${currentHtmlGroup.join('\n')}
               </div>
             </div>
@@ -1209,6 +1278,23 @@ async function generateReplenishmentPDF(reportName, checkedIds) {
       th, td { border: 1px solid #111827; padding: 6px 7px; vertical-align: top; word-break: break-word; }
       th { background: #f3f4f6; font-weight: 700; text-align: left; }
       p { font-size: 13px; line-height: 1.55; color: #374151; margin-top: 0; margin-bottom: 12px; }
+      .doc-head {
+        border-bottom: 2px solid #17324d;
+        padding-bottom: 14px;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+      .doc-head h1 {
+        margin: 0 0 8px;
+        color: #17324d;
+        font-size: 24px;
+        line-height: 1.2;
+      }
+      .doc-head p {
+        margin: 0;
+        color: #526172;
+        font-size: 13px;
+      }
       .cover-page {
         text-align: center;
         padding: 40px 0;
@@ -1221,6 +1307,14 @@ async function generateReplenishmentPDF(reportName, checkedIds) {
         box-sizing: border-box;
       }
       .field-value { display: inline-block; min-width: 80px; padding: 4px 6px; border-bottom: 1px solid #cbd5e1; }
+      .card, .card-bd, .annexure-line-main {
+        border: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 0 18px !important;
+      }
+      .g2, .grid, .annexure-line-layout { display: block !important; }
       input, textarea, select { border: none !important; background: transparent !important; color: #111827 !important; padding: 0 !important; font-size: 13px !important; }
       .btn, button, .upload-zone, .card-hd, .modal, .file-item, .alert-box, .hint { display: none !important; }
     </style>
@@ -1432,4 +1526,3 @@ function showCustomPromptModal(title, defaultValue, onConfirm, buttonText = "Con
 }
 
 window.showCustomPromptModal = showCustomPromptModal;
-
