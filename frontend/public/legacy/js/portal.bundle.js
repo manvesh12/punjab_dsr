@@ -13708,33 +13708,67 @@ async function generateFinalPDF(regenerate = false) {
       if (!added) warnings.push(`${title} has no filled preview tables available.`);
       return added;
     };
-    const getAnnexurePreviewPages = async (viewId) => {
-      const directPreviewGetters = {
-        'annexure-b': 'getAnnexureBPages',
-        'annexure-c': 'getAnnexureCPages',
-        'annexure-d': 'getAnnexureDPages',
-        'annexure-e': 'getAnnexureEPages',
-        'annexure-g': 'getAnnexureGPages',
-        'annexure-h': 'getAnnexureHPages',
-        'annexure-i': 'getAnnexureIPages'
+    const htmlElementToPdfBlob = async (element, filename) => {
+      await ensurePortalVendors(['html2pdf']);
+      const opt = {
+        margin: 12,
+        filename,
+        image: { type: 'jpeg', quality: 0.95 },
+        html2canvas: { scale: 1.8, useCORS: true, logging: false },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', 'h1', 'h2', 'h3', 'h4'] }
       };
-      const getter = directPreviewGetters[viewId];
-      if (getter && typeof window.pdfPreview?.[getter] === 'function') {
-        return window.pdfPreview[getter]().map(page => typeof page === 'string' ? page : page.src).filter(Boolean);
+      return withTimeout(
+        html2pdf().set(opt).from(element).toPdf().get('pdf').then(pdf => pdf.output('blob')),
+        12000,
+        filename
+      );
+    };
+
+    const getAnnexurePreviewPages = async (viewId) => {
+      const uploaded = S.uploadedPDFs?.[viewId];
+      if (Array.isArray(uploaded) && uploaded.length > 0) {
+        return uploaded;
       }
-      const exportFnName = window.pdfPreview?.getAnnexureExportFnName
-        ? window.pdfPreview.getAnnexureExportFnName(viewId)
-        : `export${viewId.charAt(0).toUpperCase()}${viewId.slice(1)}PDF`;
-      if (typeof window[exportFnName] !== 'function') return [];
-      const iframe = getPreviewIframe(viewId);
-      if (iframe) {
-        iframe.removeAttribute('src');
-        iframe.removeAttribute('srcdoc');
+      
+      const htmlString = pdfPreview.buildAnnexureHtmlDocument(viewId);
+      if (htmlString) {
+        try {
+          const parser = new DOMParser();
+          const docEl = parser.parseFromString(htmlString, 'text/html');
+          
+          docEl.querySelectorAll('table').forEach(table => {
+            const rows = Array.from(table.querySelectorAll('tr'));
+            let actionColIndexes = [];
+            rows.forEach(row => {
+              const cells = Array.from(row.children);
+              cells.forEach((cell, idx) => {
+                const txt = (cell.textContent || '').trim().toLowerCase();
+                if (txt === 'action' || txt === 'actions' || cell.classList.contains('actions') || cell.classList.contains('action')) {
+                  if (!actionColIndexes.includes(idx)) {
+                    actionColIndexes.push(idx);
+                  }
+                }
+              });
+            });
+            actionColIndexes.sort((a, b) => b - a);
+            rows.forEach(row => {
+              const cells = Array.from(row.children);
+              actionColIndexes.forEach(idx => {
+                if (cells[idx]) cells[idx].remove();
+              });
+            });
+          });
+          
+          const blob = await htmlElementToPdfBlob(docEl.body, `${viewId}.pdf`);
+          if (blob) {
+            return await pdfBlobToImages(blob);
+          }
+        } catch (err) {
+          console.warn(`HTML-to-PDF conversion failed for ${viewId}:`, err);
+        }
       }
-      const result = window[exportFnName](null, true);
-      if (result && typeof result.then === 'function') await result;
-      const blob = await waitForPreviewBlob(viewId);
-      return blob ? pdfBlobToImages(blob) : [];
+      return [];
     };
 
     const hasAnnexureContent = (viewId) => {
