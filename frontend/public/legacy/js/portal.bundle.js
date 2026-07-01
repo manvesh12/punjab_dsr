@@ -15175,11 +15175,7 @@ const pdfPreview = {
       return { src: this.renderCoverPageCanvas(), label: sectionLabel, generated: true };
     }
     if (type === 'toc') {
-      return {
-        src: this.renderTextPageCanvas('CONTENTS', '1. Cover Page\n2. Preface\n3. Acknowledgement\n4. Certificate of Compliance\n5. Report Chapters', 'District Survey Report'),
-        label: sectionLabel,
-        generated: true
-      };
+      return null;
     }
     if (type === 'pref' && S.frontMatter && S.frontMatter.preface) {
       return {
