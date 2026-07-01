@@ -13910,13 +13910,12 @@ async function generateFinalPDF(regenerate = false) {
       doc.text(`Version: ${version}`, W / 2, H - 42, { align: 'center' });
     }
 
-    // 2. Table of Contents placeholder
-    if (isFirstPage) {
-      isFirstPage = false;
-    } else {
-      doc.addPage();
+    // 2. Table of Contents (TOC) from Front Matter
+    const tocPages = pdfPreview.getFrontMatterPages().filter(p => /^content/i.test(p.label));
+    if (tocPages.length > 0) {
+      sectionStarts.push({ title: 'Table of Contents', page: doc.getCurrentPageInfo().pageNumber + 1 });
+      tocPages.forEach(p => addImagePage(p.src, 'Table of Contents'));
     }
-    const tocPage = doc.getCurrentPageInfo().pageNumber;
 
     // 3. Preface
     const prefPages = pdfPreview.getFrontMatterPages().filter(p => /^preface/i.test(p.label));
@@ -13999,95 +13998,6 @@ async function generateFinalPDF(regenerate = false) {
     }
 
     setProgress('Finalizing Document...', 78);
-    
-    // RENDER TABLE OF CONTENTS
-    doc.setPage(tocPage);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    doc.setTextColor(0, 0, 0);
-    doc.text(`District Survey Report\n${district} District\nPunjab`, pad, 25);
-    
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(16);
-    doc.text('Content', W / 2, 45, { align: 'center' });
-
-    // Format sectionStarts into standard rows: Chapter No | Subject | Page No.
-    const tocRows = [];
-    sectionStarts.forEach(item => {
-      const title = String(item.title).trim();
-      if (/^preface$/i.test(title)) {
-        tocRows.push(['-', 'Preface', String(item.page)]);
-      } else if (/^acknowledgement$/i.test(title)) {
-        tocRows.push(['-', 'Acknowledgement', String(item.page)]);
-      } else if (/^certificate of compliance$/i.test(title)) {
-        tocRows.push(['-', 'Certificate of Compliance', String(item.page)]);
-      } else if (/^chapter\s+(\d+)\s*-\s*(.*)$/i.test(title)) {
-        const match = title.match(/^chapter\s+(\d+)\s*-\s*(.*)$/i);
-        tocRows.push([match[1], match[2], String(item.page)]);
-      } else if (/^plate\s+([\w\d]+)\s*-\s*(.*)$/i.test(title)) {
-        const match = title.match(/^plate\s+([\w\d]+)\s*-\s*(.*)$/i);
-        tocRows.push([`Plate ${match[1]}`, match[2], String(item.page)]);
-      } else if (/^annexure\s+([\w\d\-]+)\s*-\s*(.*)$/i.test(title)) {
-        const match = title.match(/^annexure\s+([\w\d\-]+)\s*-\s*(.*)$/i);
-        tocRows.push([`Annexure ${match[1]}`, match[2], String(item.page)]);
-      } else if (/^annexure\s+(\w)$/i.test(title)) {
-        const match = title.match(/^annexure\s+(\w)$/i);
-        tocRows.push([`Annexure ${match[1]}`, '-', String(item.page)]);
-      } else {
-        // Skip Cross Section Graphs!
-        if (/cross section/i.test(title)) return;
-        tocRows.push(['-', title, String(item.page)]);
-      }
-    });
-
-    const finalRows = [];
-    let addedPlatesHeader = false;
-    let addedAnnexuresHeader = false;
-
-    tocRows.forEach(row => {
-      const chNo = String(row[0] || '');
-      if (chNo.startsWith('Plate') && !addedPlatesHeader) {
-        finalRows.push(['', 'PLATES', '']);
-        addedPlatesHeader = true;
-      }
-      if (chNo.startsWith('Annexure') && !addedAnnexuresHeader) {
-        finalRows.push(['', 'ANNEXURES', '']);
-        addedAnnexuresHeader = true;
-      }
-      finalRows.push(row);
-    });
-
-    doc.autoTable({
-      startY: 52,
-      margin: { left: pad, right: pad },
-      head: [['Chapter No', 'Subject', 'Page No.']],
-      body: finalRows,
-      theme: 'grid',
-      styles: { fontSize: 7.5, cellPadding: 1.4, lineColor: [0, 0, 0], lineWidth: 0.2, textColor: [0, 0, 0] },
-      headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold', lineColor: [0, 0, 0], lineWidth: 0.2 },
-      columnStyles: {
-        0: { width: 30 },
-        1: { width: 120 },
-        2: { width: 30, align: 'right' }
-      },
-      didParseCell: (cellData) => {
-        if (cellData.section === 'body') {
-          if (cellData.column.index === 1) {
-            const val = String(cellData.cell.raw || '').trim();
-            if (val === 'PLATES' || val === 'ANNEXURES') {
-              cellData.cell.styles.fontStyle = 'bold';
-              cellData.cell.styles.fillColor = [240, 240, 240];
-            }
-          }
-          const rowSubject = String(cellData.row.cells[1]?.raw || '').trim();
-          if (rowSubject === 'PLATES' || rowSubject === 'ANNEXURES') {
-            if (cellData.column.index === 0 || cellData.column.index === 2) {
-              cellData.cell.text = '';
-            }
-          }
-        }
-      }
-    });
 
     const totalPages = doc.getNumberOfPages();
     for (let p = 1; p <= totalPages; p += 1) {
