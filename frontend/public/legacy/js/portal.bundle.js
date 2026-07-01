@@ -13353,6 +13353,7 @@ async function generateFinalPDF(regenerate = false) {
     const generatedAt = new Date();
     const sectionStarts = [];
     const titlePages = [];
+    const uploadedPages = [];
     const safe = (value, fallback = '-') => String(value ?? fallback).trim() || fallback;
     const hasText = (value) => String(value ?? '').trim().length > 0;
     const hexToRgb = (hex, fallback = [245, 158, 11]) => {
@@ -13399,12 +13400,14 @@ async function generateFinalPDF(regenerate = false) {
     const addImagePage = (src, title) => {
       if (!src) return;
       doc.addPage();
+      const pNum = doc.getCurrentPageInfo().pageNumber;
+      uploadedPages.push(pNum);
       try {
         const format = String(src).startsWith('data:image/jpeg') ? 'JPEG' : 'PNG';
-        doc.addImage(src, format, 12, 12, W - 24, H - 24, undefined, 'FAST');
+        doc.addImage(src, format, 10, 10, W - 20, H - 20, undefined, 'FAST');
       } catch (err) {
         try {
-          doc.addImage(src, 'JPEG', 12, 12, W - 24, H - 24, undefined, 'FAST');
+          doc.addImage(src, 'JPEG', 10, 10, W - 20, H - 20, undefined, 'FAST');
         } catch (innerErr) {
           console.warn('Could not embed uploaded page:', innerErr);
         }
@@ -14032,7 +14035,7 @@ async function generateFinalPDF(regenerate = false) {
     let addedAnnexuresHeader = false;
 
     tocRows.forEach(row => {
-      const chNo = row[0];
+      const chNo = String(row[0] || '');
       if (chNo.startsWith('Plate') && !addedPlatesHeader) {
         finalRows.push(['', 'PLATES', '']);
         addedPlatesHeader = true;
@@ -14059,12 +14062,17 @@ async function generateFinalPDF(regenerate = false) {
       },
       didParseCell: (cellData) => {
         if (cellData.section === 'body') {
-          const val = cellData.row.cells[1].text[0];
-          if (val === 'PLATES' || val === 'ANNEXURES') {
-            cellData.cell.styles.fontStyle = 'bold';
-            cellData.cell.styles.fillColor = [240, 240, 240];
+          if (cellData.column.index === 1) {
+            const val = String(cellData.cell.raw || '').trim();
+            if (val === 'PLATES' || val === 'ANNEXURES') {
+              cellData.cell.styles.fontStyle = 'bold';
+              cellData.cell.styles.fillColor = [240, 240, 240];
+            }
+          }
+          const rowSubject = String(cellData.row.cells[1]?.raw || '').trim();
+          if (rowSubject === 'PLATES' || rowSubject === 'ANNEXURES') {
             if (cellData.column.index === 0 || cellData.column.index === 2) {
-              cellData.cell.text = ''; // Clear other cells in separator row
+              cellData.cell.text = '';
             }
           }
         }
