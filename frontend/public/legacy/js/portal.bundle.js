@@ -14326,11 +14326,11 @@ async function generateFinalPDF(regenerate = false) {
     for (let i = 1; i <= 10; i += 1) {
       const chPages = pdfPreview.getChapterPages().filter(p => new RegExp('^Chapter ' + i + '\\b', 'i').test(p.label));
       if (chPages.length > 0) {
-        const ch = (S.chapters || []).find(c => Number(c.id) === i) || {};
-        const chSub = ch.name || '';
-        addTitlePage(`CHAPTER ${i}`, chSub);
-        sectionStarts.push({ title: `Chapter ${i} - ${chSub}`, page: doc.getCurrentPageInfo().pageNumber + 1 });
-        chPages.forEach(p => addImagePage(p.src, `Chapter ${i}`));
+        const ch = (S.chapters || [])[i - 1] || (S.chapters || []).find(c => Number(c.id) === i) || {};
+        const chapterTitle = safe(ch.name, `Chapter ${i}`);
+        addTitlePage(chapterTitle, `Chapter ${i}`);
+        sectionStarts.push({ title: chapterTitle, page: doc.getCurrentPageInfo().pageNumber + 1 });
+        chPages.forEach(p => addImagePage(p.src, chapterTitle));
       }
     }
 
@@ -14341,9 +14341,10 @@ async function generateFinalPDF(regenerate = false) {
       const pName = plate.name || '';
       const platePages = pdfPreview.getPlatePages().filter(p => new RegExp('^Plate P' + pNum + '\\b|^Plate ' + pNum + '\\b', 'i').test(p.label));
       if (platePages.length > 0) {
-        addTitlePage(`PLATE ${pNum}`, pName);
-        sectionStarts.push({ title: `Plate ${pNum} - ${pName}`, page: doc.getCurrentPageInfo().pageNumber + 1 });
-        platePages.forEach(p => addImagePage(p.src, `Plate ${pNum}`));
+        const plateTitle = safe(pName, `Plate ${pNum}`);
+        addTitlePage(plateTitle, `Plate ${pNum}`);
+        sectionStarts.push({ title: plateTitle, page: doc.getCurrentPageInfo().pageNumber + 1 });
+        platePages.forEach(p => addImagePage(p.src, plateTitle));
       }
     });
 
@@ -14377,13 +14378,11 @@ async function generateFinalPDF(regenerate = false) {
         ? getEditableAnnexureTitle(viewId, title)
         : title;
       setProgress(`Merging Sections... ${editableTitle}`, 52 + Math.min(24, Math.round(annexureIndex * 1.4)));
-      const mainTitle = editableTitle.split(' - ')[0].toUpperCase();
-      const subTitle = editableTitle.split(' - ')[1] || '';
       
       const isAllowed = ['anx1', 'anx2', 'anx3', 'anx4', 'anx5', 'anx6', 'anx7', 'annexure-f', 'annexure-j', 'annexure-k'].includes(viewId);
       borderActive = isAllowed;
       
-      addTitlePage(mainTitle, subTitle);
+      addTitlePage(editableTitle);
       sectionStarts.push({ title: editableTitle, page: doc.getCurrentPageInfo().pageNumber + 1 });
       await addAnnexureFromPreview(editableTitle, viewId);
       
