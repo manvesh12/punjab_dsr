@@ -14106,7 +14106,7 @@ async function generateFinalPDF(regenerate = false) {
     const dataUri = doc.output('datauristring');
     const base64 = dataUri.split(',')[1];
     if (S.activeProject?.id) {
-      await apiFetch('/upload-pdf', {
+      apiFetch('/upload-pdf', {
         method: 'POST',
         body: JSON.stringify({
           projectId: S.activeProject.id,
@@ -14114,7 +14114,7 @@ async function generateFinalPDF(regenerate = false) {
           pdf: base64,
           annexureId: 'final'
         })
-      });
+      }).catch(err => console.warn('Background PDF upload failed:', err));
       S.activeProject.finalPdfName = fileName;
       S.activeProject.finalPdfGeneratedAt = generatedAt.toISOString();
       S.activeProject.finalPdfPages = totalPages;
