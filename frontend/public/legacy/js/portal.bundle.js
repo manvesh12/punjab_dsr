@@ -11544,7 +11544,20 @@ async function exportAnnexureFPDF(btn, isLivePreview = false, returnBlob = false
     startY = doc.lastAutoTable.finalY + 18;
   });
   drawSectionHeading('d) Supporting PDF / Image Upload:');
-  await appendAnnexureFAttachmentPages(doc);
+  const fAttachment = getAnnexureFAttachment();
+  startY = await drawAnnexureInlineAttachmentPages(doc, fAttachment?.pages || [], startY, {
+    left: tableLeft,
+    right: 36,
+    top: CONTENT_TOP,
+    bottom: 46,
+    maxWidth: tableWidth,
+    maxHeight: 250,
+    onNewPage: () => {
+      doc.addPage();
+      drawReportFrame({ pageNumber: doc.getCurrentPageInfo().pageNumber });
+      return CONTENT_TOP;
+    }
+  });
   if (returnBlob) return doc.output('blob');
   if (isLivePreview) {
     const blob = doc.output('blob');
@@ -11676,6 +11689,35 @@ function loadAnnexureFImage(src) {
     img.onerror = reject;
     img.src = src;
   });
+}
+async function drawAnnexureInlineAttachmentPages(doc, pages, startY, options = {}) {
+  if (!Array.isArray(pages) || !pages.length) return startY;
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const left = options.left || 36;
+  const right = options.right || left;
+  const top = options.top || 72;
+  const bottom = options.bottom || 46;
+  const maxWidth = options.maxWidth || (pageWidth - left - right);
+  const maxHeight = options.maxHeight || 250;
+  const gap = options.gap || 12;
+  let y = startY;
+  for (const src of pages) {
+    const img = await loadAnnexureFImage(src);
+    if (y + 120 > pageHeight - bottom && typeof options.onNewPage === 'function') {
+      y = options.onNewPage() || top;
+    }
+    const availableHeight = Math.max(120, pageHeight - bottom - y);
+    const drawMaxHeight = Math.min(maxHeight, availableHeight);
+    const ratio = Math.min(maxWidth / img.width, drawMaxHeight / img.height);
+    const drawW = img.width * ratio;
+    const drawH = img.height * ratio;
+    const x = left + ((maxWidth - drawW) / 2);
+    const format = String(src).startsWith('data:image/png') ? 'PNG' : 'JPEG';
+    doc.addImage(src, format, x, y, drawW, drawH);
+    y += drawH + gap;
+  }
+  return y;
 }
 async function appendAnnexureFAttachmentPages(doc) {
   const attachment = getAnnexureFAttachment();
@@ -11997,6 +12039,20 @@ async function exportAnnexureJPDF(btn, isLivePreview = false, previewRequestId =
   doc.setTextColor(0, 0, 0);
   doc.text('Supporting PDF / Image Upload:', tableLeft, startY);
   startY += 14;
+  const jAttachmentPages = getAnnexureJAttachments().flatMap(attachment => attachment.pages || []);
+  startY = await drawAnnexureInlineAttachmentPages(doc, jAttachmentPages, startY, {
+    left: tableLeft,
+    right: tableLeft,
+    top: contentTop,
+    bottom: 46,
+    maxWidth: tableWidth,
+    maxHeight: 250,
+    onNewPage: () => {
+      doc.addPage();
+      drawFrame({ pageNumber: doc.getCurrentPageInfo().pageNumber });
+      return contentTop;
+    }
+  });
   const tables = Array.from(document.querySelectorAll('#annexure-j-demand-container table.annexure-j-demand-table'));
   tables.forEach((table, index) => {
     const titleHeight = 14;
@@ -12007,7 +12063,6 @@ async function exportAnnexureJPDF(btn, isLivePreview = false, previewRequestId =
     doc.autoTable({ startY, head: [data.headers], body: data.rows, theme: 'grid', styles: { font: 'times', fontSize: 8.5, textColor: 0, lineColor: 0, lineWidth: 0.4, cellPadding: 2.5, valign: 'middle', halign: 'left', overflow: 'linebreak', minCellHeight: 0 }, headStyles: { fillColor: false, fontStyle: 'bold', halign: 'center', valign: 'middle', textColor: 0, lineColor: 0, lineWidth: 0.4, cellPadding: 2.5 }, margin: { top: startY, bottom: 40, left: tableLeft, right: tableLeft }, tableWidth, didDrawPage: drawFrame });
     startY = doc.lastAutoTable.finalY + 18;
   });
-  await appendAnnexureJAttachmentPages(doc);
   if (returnBlob) return doc.output('blob');
   if (isLivePreview) {
     if (requestId !== window.annexureJPreviewRequest) return;
@@ -12424,6 +12479,20 @@ async function exportAnnexureKPDF(btn, isLivePreview = false, returnBlob = false
   doc.setTextColor(0, 0, 0);
   doc.text('Supporting PDF / Image Upload:', tableLeft, startY);
   startY += 14;
+  const kAttachment = getAnnexureKAttachment();
+  startY = await drawAnnexureInlineAttachmentPages(doc, kAttachment?.pages || [], startY, {
+    left: tableLeft,
+    right: tableLeft,
+    top: CONTENT_TOP,
+    bottom: 46,
+    maxWidth: tableWidth,
+    maxHeight: 250,
+    onNewPage: () => {
+      doc.addPage();
+      drawReportFrame({ pageNumber: doc.getCurrentPageInfo().pageNumber });
+      return CONTENT_TOP;
+    }
+  });
   const sections = ['PROFORMA', 'ANNEXURE_A'].flatMap(sectionType => {
     const cfg = ANNEXURE_K_TABLES[sectionType];
     return getAnnexureKTables(sectionType).map((table, tableIndex) => ({
@@ -12496,7 +12565,6 @@ async function exportAnnexureKPDF(btn, isLivePreview = false, returnBlob = false
     });
     startY = doc.lastAutoTable.finalY + 18;
   });
-  await appendAnnexureKAttachmentPages(doc);
   if (returnBlob) return doc.output('blob');
   if (isLivePreview) {
     const blob = doc.output('blob');
