@@ -13714,7 +13714,7 @@ async function generateFinalPDF(regenerate = false) {
       const target = elementToRender || body;
       if (!target) return null;
       const opt = {
-        margin: 10,
+        margin: 0,
         filename,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true, windowWidth: target.scrollWidth || document.body.scrollWidth },
@@ -13771,7 +13771,8 @@ async function generateFinalPDF(regenerate = false) {
       iframe.style.width = `${previewWidth}px`;
       iframe.style.height = '1200px';
       iframe.style.border = '0';
-      iframe.style.visibility = 'hidden';
+      iframe.style.pointerEvents = 'none';
+      iframe.setAttribute('aria-hidden', 'true');
       document.body.appendChild(iframe);
       try {
         await ensurePortalVendors(['html2pdf', 'pdfjs']);
