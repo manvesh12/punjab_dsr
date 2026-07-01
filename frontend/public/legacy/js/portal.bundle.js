@@ -13741,27 +13741,49 @@ async function generateFinalPDF(regenerate = false) {
       pages.forEach((page, index) => addPreviewImagePage(page, `${title} - Page ${index + 1}`));
       return true;
     };
-    const addLivePreviewPdfPages = async (title, viewId) => {
-      const exportFnMap = {
-        'annexure-f': 'exportAnnexureFPDF',
-        'annexure-j': 'exportAnnexureJPDF',
-        'annexure-k': 'exportAnnexureKPDF'
-      };
-      const exportFnName = exportFnMap[viewId];
-      if (!exportFnName || typeof window[exportFnName] !== 'function') return false;
+    const addLivePreviewHtmlPages = async (title, viewId) => {
+      if (!window.pdfPreview || typeof pdfPreview.buildAnnexureHtmlDocument !== 'function') return false;
+      let html = pdfPreview.buildAnnexureHtmlDocument(viewId);
+      if (!html) return false;
+      const iframe = document.createElement('iframe');
+      const visiblePreviewIframe = getPreviewIframe(viewId);
+      const previewWidth = Math.max(620, visiblePreviewIframe?.clientWidth || 620);
+      html = html.replace('</style>', `
+            body{width:${previewWidth}px!important;max-width:${previewWidth}px!important;overflow:hidden!important;}
+            .sheet{width:${previewWidth}px!important;max-width:${previewWidth}px!important;overflow:hidden!important;}
+          </style>`);
+      iframe.style.position = 'fixed';
+      iframe.style.left = '-10000px';
+      iframe.style.top = '0';
+      iframe.style.width = `${previewWidth}px`;
+      iframe.style.height = '1200px';
+      iframe.style.border = '0';
+      iframe.style.visibility = 'hidden';
+      document.body.appendChild(iframe);
       try {
-        await ensurePortalVendors(['jspdf', 'autotable', 'pdfjs']);
-        const blob = viewId === 'annexure-j'
-          ? await window[exportFnName](null, true, null, true)
-          : await window[exportFnName](null, true, true);
+        await ensurePortalVendors(['html2pdf', 'pdfjs']);
+        iframe.srcdoc = html;
+        await withTimeout(new Promise(resolve => {
+          iframe.onload = () => resolve();
+          setTimeout(resolve, 250);
+        }), 3000, `${viewId} HTML preview render`);
+        const body = iframe.contentDocument?.body;
+        if (body) {
+          body.style.width = `${previewWidth}px`;
+          body.style.maxWidth = `${previewWidth}px`;
+          body.style.overflow = 'hidden';
+        }
+        const blob = await htmlPreviewToPdfBlob(iframe, `${viewId}.pdf`);
         if (!blob) return false;
         const pages = await pdfBlobToImages(blob);
         if (!pages.length) return false;
         pages.forEach((page, index) => addPreviewImagePage(page, `${title} - Page ${index + 1}`));
         return true;
       } catch (err) {
-        console.warn(`Could not merge ${viewId} from live preview:`, err);
+        console.warn(`Could not merge ${viewId} from HTML live preview:`, err);
         return false;
+      } finally {
+        iframe.remove();
       }
     };
     const simpleAnnexurePreviewIds = ['annexure-e', 'annexure-g', 'annexure-h', 'annexure-i'];
@@ -13995,7 +14017,7 @@ async function generateFinalPDF(regenerate = false) {
       }
 
       if (['annexure-f', 'annexure-j', 'annexure-k'].includes(viewId)) {
-        const addedLivePreview = await addLivePreviewPdfPages(title, viewId);
+        const addedLivePreview = await addLivePreviewHtmlPages(title, viewId);
         if (addedLivePreview) return true;
         return false;
       }
