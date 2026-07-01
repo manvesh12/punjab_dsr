@@ -14022,23 +14022,59 @@ async function generateFinalPDF(regenerate = false) {
         if (renderedTables) hasTables = true;
         
         let hasAttachments = false;
+        let startY = 25;
+        if (renderedTables) {
+          startY = doc.lastAutoTable.finalY + 18;
+        }
+
         if (viewId === 'annexure-f') {
           const fAttachment = typeof getAnnexureFAttachment === 'function' ? getAnnexureFAttachment() : null;
           if (fAttachment && fAttachment.pages && fAttachment.pages.length) {
+            if (renderedTables) {
+              if (startY > 250) {
+                doc.addPage();
+                startY = 25;
+              }
+            } else {
+              doc.addPage();
+              startY = 25;
+            }
+            startY = writeParagraph('d) Supporting PDF / Image Upload:', startY, { bold: true, size: 11, color: [0, 0, 0], after: 8 });
             fAttachment.pages.forEach((page, index) => addImagePage(page, `${title} - Supporting - Page ${index + 1}`));
             hasAttachments = true;
           }
         } else if (viewId === 'annexure-j') {
           const jAttachments = typeof getAnnexureJAttachments === 'function' ? getAnnexureJAttachments() : [];
-          jAttachments.forEach(att => {
-            if (att.pages && att.pages.length) {
-              att.pages.forEach((page, index) => addImagePage(page, `${title} - Supporting - Page ${index + 1}`));
-              hasAttachments = true;
+          const actualAttachments = jAttachments.filter(att => att.pages && att.pages.length);
+          if (actualAttachments.length > 0) {
+            if (renderedTables) {
+              if (startY > 250) {
+                doc.addPage();
+                startY = 25;
+              }
+            } else {
+              doc.addPage();
+              startY = 25;
             }
-          });
+            startY = writeParagraph('Supporting PDF / Image Upload:', startY, { bold: true, size: 11, color: [0, 0, 0], after: 8 });
+            actualAttachments.forEach(att => {
+              att.pages.forEach((page, index) => addImagePage(page, `${title} - Supporting - Page ${index + 1}`));
+            });
+            hasAttachments = true;
+          }
         } else if (viewId === 'annexure-k') {
           const kAttachment = typeof getAnnexureKAttachment === 'function' ? getAnnexureKAttachment() : null;
           if (kAttachment && kAttachment.pages && kAttachment.pages.length) {
+            if (renderedTables) {
+              if (startY > 250) {
+                doc.addPage();
+                startY = 25;
+              }
+            } else {
+              doc.addPage();
+              startY = 25;
+            }
+            startY = writeParagraph('Supporting PDF / Image Upload:', startY, { bold: true, size: 11, color: [0, 0, 0], after: 8 });
             kAttachment.pages.forEach((page, index) => addImagePage(page, `${title} - Supporting - Page ${index + 1}`));
             hasAttachments = true;
           }
