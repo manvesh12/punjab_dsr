@@ -13764,11 +13764,38 @@ async function generateFinalPDF(regenerate = false) {
         return false;
       }
     };
+    const simpleAnnexurePreviewIds = ['annexure-e', 'annexure-g', 'annexure-h', 'annexure-i'];
+    const ensureSimpleAnnexurePreviewState = (viewId) => {
+      const letter = viewId.replace('annexure-', '').toUpperCase();
+      const stateKey = `annexure${letter}`;
+      if (!Array.isArray(S[stateKey])) S[stateKey] = [];
+      if (!S[stateKey].length) {
+        S[stateKey].push({
+          id: Date.now(),
+          name: `Annexure ${letter} - Entry 1`,
+          summary: `Upload your Annexure ${letter} PDF or image here.`,
+          fileName: null,
+          fileSize: null,
+          pages: null
+        });
+      }
+      const renderName = `renderAnnexure${letter}`;
+      if (typeof window[renderName] === 'function') window[renderName]();
+      return S[stateKey];
+    };
     const addSimpleAnnexurePreviewPages = (title, viewId) => {
       const letter = viewId.replace('annexure-', '').toUpperCase();
       const fnName = `getAnnexure${letter}Pages`;
       if (!window.pdfPreview || typeof pdfPreview[fnName] !== 'function') return false;
-      const pages = pdfPreview[fnName]();
+      ensureSimpleAnnexurePreviewState(viewId);
+      let pages = pdfPreview[fnName]();
+      if (!pages.length && typeof pdfPreview.renderTextPageCanvas === 'function') {
+        pages = [{
+          src: pdfPreview.renderTextPageCanvas(`Annexure ${letter} - Entry 1`, `Upload your Annexure ${letter} PDF or image here.`, `Annexure ${letter}`),
+          label: `${title} - Page 1`,
+          generated: true
+        }];
+      }
       if (!pages.length) return false;
       pages.forEach((p, idx) => addPreviewImagePage(p.src, `${title} - Page ${idx + 1}`));
       return true;
@@ -13939,6 +13966,10 @@ async function generateFinalPDF(regenerate = false) {
 
     const hasAnnexureContent = (viewId) => {
       const hasUpload = Array.isArray(S.uploadedPDFs?.[viewId]) && S.uploadedPDFs[viewId].length > 0;
+      if (simpleAnnexurePreviewIds.includes(viewId)) {
+        ensureSimpleAnnexurePreviewState(viewId);
+        return true;
+      }
       
       let hasLetterUpload = false;
       if (viewId.startsWith('annexure-')) {
@@ -13969,7 +14000,7 @@ async function generateFinalPDF(regenerate = false) {
         return false;
       }
 
-      if (['annexure-e', 'annexure-g', 'annexure-h', 'annexure-i'].includes(viewId)) {
+      if (simpleAnnexurePreviewIds.includes(viewId)) {
         return addSimpleAnnexurePreviewPages(title, viewId);
       }
       
