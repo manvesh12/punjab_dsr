@@ -11462,9 +11462,11 @@ async function exportAnnexureFPDF(btn, isLivePreview = false, returnBlob = false
     startY += 18;
   };
   const drawReportFrame = (data) => {
-    doc.setDrawColor(0, 0, 0);
-    doc.setLineWidth(0.6);
-    doc.rect(border.x, border.y, border.w, border.h);
+    if (!returnBlob) {
+      doc.setDrawColor(0, 0, 0);
+      doc.setLineWidth(0.6);
+      doc.rect(border.x, border.y, border.w, border.h);
+    }
     doc.setFont('times', 'italic');
     doc.setFontSize(10);
     doc.setTextColor(0, 0, 0);
@@ -11473,15 +11475,17 @@ async function exportAnnexureFPDF(btn, isLivePreview = false, returnBlob = false
     doc.text(state, headerLeft, 51);
     doc.setLineWidth(0.4);
     doc.line(tableLeft, 62, pageWidth - 22, 62);
-    doc.setFont('times', 'normal');
-    doc.setFontSize(8);
-    const footerText1 = `PREPARED BY: SUB-DIVISIONAL COMMITTEE OF ${district.toUpperCase()} DISTRICT`;
-    const footerText2 = `ASSISTED BY: RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD`;
-    doc.text(footerText1, pageWidth / 2, footerY - 2, { align: 'center' });
-    doc.text(footerText2, pageWidth / 2, footerY + 10, { align: 'center' });
-    doc.setFont('times', 'bold');
-    doc.setFontSize(10);
-    doc.text(String(pageNumberOffset + data.pageNumber), pageWidth - 26, pageHeight - 18, { align: 'right' });
+    if (!returnBlob) {
+      doc.setFont('times', 'normal');
+      doc.setFontSize(8);
+      const footerText1 = `PREPARED BY: SUB-DIVISIONAL COMMITTEE OF ${district.toUpperCase()} DISTRICT`;
+      const footerText2 = `ASSISTED BY: RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD`;
+      doc.text(footerText1, pageWidth / 2, footerY - 2, { align: 'center' });
+      doc.text(footerText2, pageWidth / 2, footerY + 10, { align: 'center' });
+      doc.setFont('times', 'bold');
+      doc.setFontSize(10);
+      doc.text(String(pageNumberOffset + data.pageNumber), pageWidth - 26, pageHeight - 18, { align: 'right' });
+    }
   };
   const sections = ['SAND', 'BENCHMARK', 'CORS'].flatMap(sectionType => {
     const cfg = ANNEXURE_F_TABLES[sectionType];
@@ -12027,14 +12031,18 @@ async function exportAnnexureJPDF(btn, isLivePreview = false, previewRequestId =
   const border = { x: 18, y: 10, w: pageWidth - 36, h: pageHeight - 20 };
   const tableLeft = 36; const tableWidth = pageWidth - tableLeft * 2; const headerLeft = tableLeft + 4; const footerY = pageHeight - 38; const contentTop = 72; let startY = contentTop;
   const drawFrame = data => {
-    doc.setDrawColor(0, 0, 0); doc.setLineWidth(0.6); doc.rect(border.x, border.y, border.w, border.h);
+    if (!returnBlob) {
+      doc.setDrawColor(0, 0, 0); doc.setLineWidth(0.6); doc.rect(border.x, border.y, border.w, border.h);
+    }
     doc.setFont('times', 'italic'); doc.setFontSize(10); doc.setTextColor(0, 0, 0); doc.text('District Survey Report', headerLeft, 27); doc.text(`${district} District`, headerLeft, 39); doc.text(state, headerLeft, 51);
     doc.setLineWidth(0.4); doc.line(headerLeft, 62, pageWidth - 22, 62); doc.setFont('times', 'normal'); doc.setFontSize(8);
-    const footerText1 = `PREPARED BY: SUB-DIVISIONAL COMMITTEE OF ${district.toUpperCase()} DISTRICT`;
-    const footerText2 = `ASSISTED BY: RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD`;
-    doc.text(footerText1, pageWidth / 2, footerY - 2, { align: 'center' });
-    doc.text(footerText2, pageWidth / 2, footerY + 10, { align: 'center' });
-    doc.setFontSize(10); doc.text(String(490 + data.pageNumber), pageWidth - 18, pageHeight - 12, { align: 'right' });
+    if (!returnBlob) {
+      const footerText1 = `PREPARED BY: SUB-DIVISIONAL COMMITTEE OF ${district.toUpperCase()} DISTRICT`;
+      const footerText2 = `ASSISTED BY: RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD`;
+      doc.text(footerText1, pageWidth / 2, footerY - 2, { align: 'center' });
+      doc.text(footerText2, pageWidth / 2, footerY + 10, { align: 'center' });
+      doc.setFontSize(10); doc.text(String(490 + data.pageNumber), pageWidth - 18, pageHeight - 12, { align: 'right' });
+    }
   };
   doc.setFont('times', 'bold');
   doc.setFontSize(11);
@@ -12452,9 +12460,11 @@ async function exportAnnexureKPDF(btn, isLivePreview = false, returnBlob = false
   const CONTENT_TOP = 72;
   let startY = CONTENT_TOP;
   const drawReportFrame = (data) => {
-    doc.setDrawColor(0, 0, 0);
-    doc.setLineWidth(0.6);
-    doc.rect(border.x, border.y, border.w, border.h);
+    if (!returnBlob) {
+      doc.setDrawColor(0, 0, 0);
+      doc.setLineWidth(0.6);
+      doc.rect(border.x, border.y, border.w, border.h);
+    }
     doc.setFont('times', 'italic');
     doc.setFontSize(10);
     doc.setTextColor(0, 0, 0);
@@ -12463,15 +12473,17 @@ async function exportAnnexureKPDF(btn, isLivePreview = false, returnBlob = false
     doc.text(state, headerLeft, 51);
     doc.setLineWidth(0.4);
     doc.line(headerLeft, 62, pageWidth - 22, 62);
-    doc.setFont('times', 'normal');
-    doc.setFontSize(8);
-    const footerText1 = `PREPARED BY: SUB-DIVISIONAL COMMITTEE OF ${district.toUpperCase()} DISTRICT`;
-    const footerText2 = `ASSISTED BY: RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD`;
-    doc.text(footerText1, pageWidth / 2, footerY - 2, { align: 'center' });
-    doc.text(footerText2, pageWidth / 2, footerY + 10, { align: 'center' });
-    doc.setFont('times', 'bold');
-    doc.setFontSize(10);
-    doc.text(String(pageNumberOffset + data.pageNumber), pageWidth - 18, pageHeight - 12, { align: 'right' });
+    if (!returnBlob) {
+      doc.setFont('times', 'normal');
+      doc.setFontSize(8);
+      const footerText1 = `PREPARED BY: SUB-DIVISIONAL COMMITTEE OF ${district.toUpperCase()} DISTRICT`;
+      const footerText2 = `ASSISTED BY: RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD`;
+      doc.text(footerText1, pageWidth / 2, footerY - 2, { align: 'center' });
+      doc.text(footerText2, pageWidth / 2, footerY + 10, { align: 'center' });
+      doc.setFont('times', 'bold');
+      doc.setFontSize(10);
+      doc.text(String(pageNumberOffset + data.pageNumber), pageWidth - 18, pageHeight - 12, { align: 'right' });
+    }
   };
   doc.setFont('times', 'bold');
   doc.setFontSize(11);
