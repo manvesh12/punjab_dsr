@@ -13777,7 +13777,7 @@ async function generateFinalPDF(regenerate = false) {
         if (!blob) return false;
         const pages = await pdfBlobToImages(blob);
         if (!pages.length) return false;
-        pages.forEach((page, index) => addPreviewImagePage(page, `${title} - Page ${index + 1}`));
+        pages.forEach((page, index) => addImagePage(page, `${title} - Page ${index + 1}`));
         return true;
       } catch (err) {
         console.warn(`Could not merge ${viewId} from HTML live preview:`, err);
@@ -14017,79 +14017,9 @@ async function generateFinalPDF(regenerate = false) {
       }
 
       if (['annexure-f', 'annexure-j', 'annexure-k'].includes(viewId)) {
-        let hasTables = false;
-        const renderedTables = renderAnnexureTables(viewId, title);
-        if (renderedTables) hasTables = true;
-        
-        let hasAttachments = false;
-        let startY = 25;
-        if (renderedTables) {
-          startY = doc.lastAutoTable.finalY + 18;
-        }
-
-        if (viewId === 'annexure-f') {
-          const fAttachment = typeof getAnnexureFAttachment === 'function' ? getAnnexureFAttachment() : null;
-          if (fAttachment && fAttachment.pages && fAttachment.pages.length) {
-            if (renderedTables) {
-              if (startY > 250) {
-                doc.addPage();
-                startY = 25;
-              }
-            } else {
-              doc.addPage();
-              startY = 25;
-            }
-            startY = writeParagraph('d) Supporting PDF / Image Upload:', startY, { bold: true, size: 11, color: [0, 0, 0], after: 8 });
-            fAttachment.pages.forEach((page, index) => addImagePage(page, `${title} - Supporting - Page ${index + 1}`));
-            hasAttachments = true;
-          }
-        } else if (viewId === 'annexure-j') {
-          const jAttachments = typeof getAnnexureJAttachments === 'function' ? getAnnexureJAttachments() : [];
-          const actualAttachments = jAttachments.filter(att => att.pages && att.pages.length);
-          if (actualAttachments.length > 0) {
-            if (renderedTables) {
-              if (startY > 250) {
-                doc.addPage();
-                startY = 25;
-              }
-            } else {
-              doc.addPage();
-              startY = 25;
-            }
-            startY = writeParagraph('Supporting PDF / Image Upload:', startY, { bold: true, size: 11, color: [0, 0, 0], after: 8 });
-            actualAttachments.forEach(att => {
-              att.pages.forEach((page, index) => addImagePage(page, `${title} - Supporting - Page ${index + 1}`));
-            });
-            hasAttachments = true;
-          }
-        } else if (viewId === 'annexure-k') {
-          const kAttachment = typeof getAnnexureKAttachment === 'function' ? getAnnexureKAttachment() : null;
-          if (kAttachment && kAttachment.pages && kAttachment.pages.length) {
-            if (renderedTables) {
-              if (startY > 250) {
-                doc.addPage();
-                startY = 25;
-              }
-            } else {
-              doc.addPage();
-              startY = 25;
-            }
-            startY = writeParagraph('Supporting PDF / Image Upload:', startY, { bold: true, size: 11, color: [0, 0, 0], after: 8 });
-            kAttachment.pages.forEach((page, index) => addImagePage(page, `${title} - Supporting - Page ${index + 1}`));
-            hasAttachments = true;
-          }
-        }
-
-        if (!hasTables && !hasAttachments) {
-          const letter = viewId.replace('annexure-', '').toUpperCase();
-          const fnName = `getAnnexure${letter}Pages`;
-          if (typeof pdfPreview[fnName] === 'function') {
-            const pages = pdfPreview[fnName]();
-            pages.forEach((p, idx) => addImagePage(p.src, `${title} - Page ${idx + 1}`));
-          }
-        }
-
-        return renderedTables;
+        const addedLivePreview = await addLivePreviewHtmlPages(title, viewId);
+        if (addedLivePreview) return true;
+        return false;
       }
 
       if (simpleAnnexurePreviewIds.includes(viewId)) {
@@ -14103,7 +14033,7 @@ async function generateFinalPDF(regenerate = false) {
           const fnName = `getAnnexure${letter}Pages`;
           if (typeof pdfPreview[fnName] === 'function') {
             const pages = pdfPreview[fnName]();
-            pages.forEach((p, idx) => addPreviewImagePage(p.src, `${title} - Page ${idx + 1}`));
+            pages.forEach((p, idx) => addImagePage(p.src, `${title} - Page ${idx + 1}`));
             return true;
           }
         }
