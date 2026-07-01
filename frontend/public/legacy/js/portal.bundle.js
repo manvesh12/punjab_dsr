@@ -13921,7 +13921,6 @@ async function generateFinalPDF(regenerate = false) {
     // 3. Preface
     const prefPages = pdfPreview.getFrontMatterPages().filter(p => /^preface/i.test(p.label));
     if (prefPages.length > 0) {
-      addTitlePage("PREFACE");
       sectionStarts.push({ title: 'Preface', page: doc.getCurrentPageInfo().pageNumber + 1 });
       prefPages.forEach(p => addImagePage(p.src, 'Preface'));
     }
@@ -13929,7 +13928,6 @@ async function generateFinalPDF(regenerate = false) {
     // 4. Acknowledgement
     const ackPages = pdfPreview.getFrontMatterPages().filter(p => /^acknowledgement/i.test(p.label));
     if (ackPages.length > 0) {
-      addTitlePage("ACKNOWLEDGEMENT");
       sectionStarts.push({ title: 'Acknowledgement', page: doc.getCurrentPageInfo().pageNumber + 1 });
       ackPages.forEach(p => addImagePage(p.src, 'Acknowledgement'));
     }
@@ -13937,7 +13935,6 @@ async function generateFinalPDF(regenerate = false) {
     // 5. Certificate of Compliance
     const certPages = pdfPreview.getFrontMatterPages().filter(p => /^certificate of compliance/i.test(p.label));
     if (certPages.length > 0) {
-      addTitlePage("CERTIFICATE OF COMPLIANCE");
       sectionStarts.push({ title: 'Certificate of Compliance', page: doc.getCurrentPageInfo().pageNumber + 1 });
       certPages.forEach(p => addImagePage(p.src, 'Certificate of Compliance'));
     }
