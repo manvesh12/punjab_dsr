@@ -13354,6 +13354,7 @@ async function generateFinalPDF(regenerate = false) {
     const sectionStarts = [];
     const titlePages = [];
     const uploadedPages = [];
+    let isFirstPage = true;
     const safe = (value, fallback = '-') => String(value ?? fallback).trim() || fallback;
     const hasText = (value) => String(value ?? '').trim().length > 0;
     const hexToRgb = (hex, fallback = [245, 158, 11]) => {
@@ -13363,7 +13364,11 @@ async function generateFinalPDF(regenerate = false) {
     };
 
     const addTitlePage = (titleText, subtitleText = '') => {
-      doc.addPage();
+      if (isFirstPage) {
+        isFirstPage = false;
+      } else {
+        doc.addPage();
+      }
       const pNum = doc.getCurrentPageInfo().pageNumber;
       titlePages.push(pNum);
       doc.setFont('helvetica', 'bold');
@@ -13399,7 +13404,11 @@ async function generateFinalPDF(regenerate = false) {
 
     const addImagePage = (src, title) => {
       if (!src) return;
-      doc.addPage();
+      if (isFirstPage) {
+        isFirstPage = false;
+      } else {
+        doc.addPage();
+      }
       const pNum = doc.getCurrentPageInfo().pageNumber;
       uploadedPages.push(pNum);
       try {
@@ -13902,7 +13911,11 @@ async function generateFinalPDF(regenerate = false) {
     }
 
     // 2. Table of Contents placeholder
-    doc.addPage();
+    if (isFirstPage) {
+      isFirstPage = false;
+    } else {
+      doc.addPage();
+    }
     const tocPage = doc.getCurrentPageInfo().pageNumber;
 
     // 3. Preface
@@ -14053,7 +14066,7 @@ async function generateFinalPDF(regenerate = false) {
       head: [['Chapter No', 'Subject', 'Page No.']],
       body: finalRows,
       theme: 'grid',
-      styles: { fontSize: 9, cellPadding: 3, lineColor: [0, 0, 0], lineWidth: 0.2, textColor: [0, 0, 0] },
+      styles: { fontSize: 7.5, cellPadding: 1.4, lineColor: [0, 0, 0], lineWidth: 0.2, textColor: [0, 0, 0] },
       headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold', lineColor: [0, 0, 0], lineWidth: 0.2 },
       columnStyles: {
         0: { width: 30 },
