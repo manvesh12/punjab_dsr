@@ -14017,9 +14017,43 @@ async function generateFinalPDF(regenerate = false) {
       }
 
       if (['annexure-f', 'annexure-j', 'annexure-k'].includes(viewId)) {
-        const addedLivePreview = await addLivePreviewHtmlPages(title, viewId);
-        if (addedLivePreview) return true;
-        return false;
+        let hasTables = false;
+        const renderedTables = renderAnnexureTables(viewId, title);
+        if (renderedTables) hasTables = true;
+        
+        let hasAttachments = false;
+        if (viewId === 'annexure-f') {
+          const fAttachment = typeof getAnnexureFAttachment === 'function' ? getAnnexureFAttachment() : null;
+          if (fAttachment && fAttachment.pages && fAttachment.pages.length) {
+            fAttachment.pages.forEach((page, index) => addImagePage(page, `${title} - Supporting - Page ${index + 1}`));
+            hasAttachments = true;
+          }
+        } else if (viewId === 'annexure-j') {
+          const jAttachments = typeof getAnnexureJAttachments === 'function' ? getAnnexureJAttachments() : [];
+          jAttachments.forEach(att => {
+            if (att.pages && att.pages.length) {
+              att.pages.forEach((page, index) => addImagePage(page, `${title} - Supporting - Page ${index + 1}`));
+              hasAttachments = true;
+            }
+          });
+        } else if (viewId === 'annexure-k') {
+          const kAttachment = typeof getAnnexureKAttachment === 'function' ? getAnnexureKAttachment() : null;
+          if (kAttachment && kAttachment.pages && kAttachment.pages.length) {
+            kAttachment.pages.forEach((page, index) => addImagePage(page, `${title} - Supporting - Page ${index + 1}`));
+            hasAttachments = true;
+          }
+        }
+
+        if (!hasTables && !hasAttachments) {
+          const letter = viewId.replace('annexure-', '').toUpperCase();
+          const fnName = `getAnnexure${letter}Pages`;
+          if (typeof pdfPreview[fnName] === 'function') {
+            const pages = pdfPreview[fnName]();
+            pages.forEach((p, idx) => addImagePage(p.src, `${title} - Page ${idx + 1}`));
+          }
+        }
+
+        return renderedTables;
       }
 
       if (simpleAnnexurePreviewIds.includes(viewId)) {
