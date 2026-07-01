@@ -13489,16 +13489,23 @@ async function generateFinalPDF(regenerate = false) {
     };
 
     const getImageFormat = (src) => /^data:image\/jpe?g/i.test(String(src || '')) ? 'JPEG' : 'PNG';
-    const drawFittedImagePage = (src, margin = imagePageMargin) => {
+    const drawFittedImagePage = (src) => {
       const format = getImageFormat(src);
       const props = doc.getImageProperties(src);
-      const maxW = W - (margin * 2);
-      const maxH = H - (margin * 2);
+      
+      const topMargin = 7;
+      const leftMargin = 7;
+      const bottomMargin = 20; // leaves space at the bottom (ends at y=277)
+      
+      const maxW = W - (leftMargin * 2);
+      const maxH = H - topMargin - bottomMargin;
+      
       const ratio = Math.min(maxW / props.width, maxH / props.height);
       const drawW = props.width * ratio;
       const drawH = props.height * ratio;
       const x = (W - drawW) / 2;
-      const y = (H - drawH) / 2;
+      const y = topMargin + (maxH - drawH) / 2;
+      
       doc.addImage(src, format, x, y, drawW, drawH, undefined, 'FAST');
     };
 
@@ -13512,10 +13519,10 @@ async function generateFinalPDF(regenerate = false) {
       const pNum = doc.getCurrentPageInfo().pageNumber;
       uploadedPages.push(pNum);
       try {
-        drawFittedImagePage(src, imagePageMargin);
+        drawFittedImagePage(src);
       } catch (err) {
         try {
-          doc.addImage(src, 'JPEG', imagePageMargin, imagePageMargin, W - (imagePageMargin * 2), H - (imagePageMargin * 2), undefined, 'FAST');
+          doc.addImage(src, 'JPEG', 7, 7, W - 14, H - 27, undefined, 'FAST');
         } catch (innerErr) {
           console.warn('Could not embed uploaded page:', innerErr);
         }
@@ -13531,10 +13538,10 @@ async function generateFinalPDF(regenerate = false) {
       const pNum = doc.getCurrentPageInfo().pageNumber;
       uploadedPages.push(pNum);
       try {
-        drawFittedImagePage(src, imagePageMargin);
+        drawFittedImagePage(src);
       } catch (err) {
         try {
-          doc.addImage(src, 'JPEG', imagePageMargin, imagePageMargin, W - (imagePageMargin * 2), H - (imagePageMargin * 2), undefined, 'FAST');
+          doc.addImage(src, 'JPEG', 7, 7, W - 14, H - 27, undefined, 'FAST');
         } catch (innerErr) {
           console.warn('Could not embed live preview page:', innerErr);
         }
@@ -14329,7 +14336,7 @@ async function generateFinalPDF(regenerate = false) {
       
       doc.setDrawColor(0, 0, 0);
       doc.setLineWidth(0.3);
-      doc.rect(pageFrameMargin, pageFrameMargin, W - (pageFrameMargin * 2), H - (pageFrameMargin * 2), 'S');
+      doc.rect(pageFrameMargin, pageFrameMargin, W - (pageFrameMargin * 2), H - pageFrameMargin - 18, 'S');
       
       if (!isTitlePage) {
         doc.setFont('helvetica', 'normal');
@@ -14338,9 +14345,9 @@ async function generateFinalPDF(regenerate = false) {
         const districtNameUpper = String(district || 'PUNJAB').toUpperCase();
         const footerLeft = `PREPARED BY: SUB-DIVISIONAL COMMITTEE OF ${districtNameUpper} DISTRICT`;
         const footerLeft2 = `ASSISTED BY: RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD`;
-        doc.text(footerLeft, W / 2, H - 13, { align: 'center' });
-        doc.text(footerLeft2, W / 2, H - 9, { align: 'center' });
-        doc.text(`Page ${p}`, W - pad, H - 11, { align: 'right' });
+        doc.text(footerLeft, W / 2, 286, { align: 'center' });
+        doc.text(footerLeft2, W / 2, 290, { align: 'center' });
+        doc.text(`Page ${p}`, W - 8, 288, { align: 'right' });
       }
     }
 
