@@ -11475,13 +11475,10 @@ async function exportAnnexureFPDF(btn, isLivePreview = false, returnBlob = false
     doc.line(tableLeft, 62, pageWidth - 22, 62);
     doc.setFont('times', 'normal');
     doc.setFontSize(8);
-    doc.text('PREPARED BY:', pageWidth / 2 - 130, footerY - 2, { align: 'left' });
-    doc.setFont('times', 'bold');
-    doc.text(` SUB-DIVISIONAL COMMITTEE OF ${district.toUpperCase()} DISTRICT`, pageWidth / 2 - 76, footerY - 2, { align: 'left' });
-    doc.setFont('times', 'normal');
-    doc.text('ASSISTED BY:', pageWidth / 2 - 130, footerY + 10, { align: 'left' });
-    doc.setFont('times', 'bold');
-    doc.text(' RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD', pageWidth / 2 - 78, footerY + 10, { align: 'left' });
+    const footerText1 = `PREPARED BY: SUB-DIVISIONAL COMMITTEE OF ${district.toUpperCase()} DISTRICT`;
+    const footerText2 = `ASSISTED BY: RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD`;
+    doc.text(footerText1, pageWidth / 2, footerY - 2, { align: 'center' });
+    doc.text(footerText2, pageWidth / 2, footerY + 10, { align: 'center' });
     doc.setFont('times', 'bold');
     doc.setFontSize(10);
     doc.text(String(pageNumberOffset + data.pageNumber), pageWidth - 26, pageHeight - 18, { align: 'right' });
@@ -12033,8 +12030,10 @@ async function exportAnnexureJPDF(btn, isLivePreview = false, previewRequestId =
     doc.setDrawColor(0, 0, 0); doc.setLineWidth(0.6); doc.rect(border.x, border.y, border.w, border.h);
     doc.setFont('times', 'italic'); doc.setFontSize(10); doc.setTextColor(0, 0, 0); doc.text('District Survey Report', headerLeft, 27); doc.text(`${district} District`, headerLeft, 39); doc.text(state, headerLeft, 51);
     doc.setLineWidth(0.4); doc.line(headerLeft, 62, pageWidth - 22, 62); doc.setFont('times', 'normal'); doc.setFontSize(8);
-    doc.text('PREPARED BY:', pageWidth / 2 - 130, footerY - 2, { align: 'left' }); doc.setFont('times', 'bold'); doc.text(` SUB-DIVISIONAL COMMITTEE OF ${district.toUpperCase()} DISTRICT`, pageWidth / 2 - 76, footerY - 2, { align: 'left' });
-    doc.setFont('times', 'normal'); doc.text('ASSISTED BY:', pageWidth / 2 - 130, footerY + 10, { align: 'left' }); doc.setFont('times', 'bold'); doc.text(' RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD', pageWidth / 2 - 78, footerY + 10, { align: 'left' });
+    const footerText1 = `PREPARED BY: SUB-DIVISIONAL COMMITTEE OF ${district.toUpperCase()} DISTRICT`;
+    const footerText2 = `ASSISTED BY: RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD`;
+    doc.text(footerText1, pageWidth / 2, footerY - 2, { align: 'center' });
+    doc.text(footerText2, pageWidth / 2, footerY + 10, { align: 'center' });
     doc.setFontSize(10); doc.text(String(490 + data.pageNumber), pageWidth - 18, pageHeight - 12, { align: 'right' });
   };
   doc.setFont('times', 'bold');
@@ -12466,13 +12465,10 @@ async function exportAnnexureKPDF(btn, isLivePreview = false, returnBlob = false
     doc.line(headerLeft, 62, pageWidth - 22, 62);
     doc.setFont('times', 'normal');
     doc.setFontSize(8);
-    doc.text('PREPARED BY:', pageWidth / 2 - 130, footerY - 2, { align: 'left' });
-    doc.setFont('times', 'bold');
-    doc.text(` SUB-DIVISIONAL COMMITTEE OF ${district.toUpperCase()} DISTRICT`, pageWidth / 2 - 76, footerY - 2, { align: 'left' });
-    doc.setFont('times', 'normal');
-    doc.text('ASSISTED BY:', pageWidth / 2 - 130, footerY + 10, { align: 'left' });
-    doc.setFont('times', 'bold');
-    doc.text(' RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD', pageWidth / 2 - 78, footerY + 10, { align: 'left' });
+    const footerText1 = `PREPARED BY: SUB-DIVISIONAL COMMITTEE OF ${district.toUpperCase()} DISTRICT`;
+    const footerText2 = `ASSISTED BY: RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD`;
+    doc.text(footerText1, pageWidth / 2, footerY - 2, { align: 'center' });
+    doc.text(footerText2, pageWidth / 2, footerY + 10, { align: 'center' });
     doc.setFont('times', 'bold');
     doc.setFontSize(10);
     doc.text(String(pageNumberOffset + data.pageNumber), pageWidth - 18, pageHeight - 12, { align: 'right' });
@@ -13373,8 +13369,11 @@ function generateFinalPDF() {
     doc.setPage(p);
     doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(120,120,140);
     doc.setDrawColor(200,200,200); doc.line(pad,287,W-pad,287);
-    doc.text(`PREPARED BY: SUB-DIVISIONAL COMMITTEE, ${dist.toUpperCase()} | ASSISTED BY: RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD`, pad, 291);
-    doc.text(`Page ${p} of ${total}`, W-pad, 291, {align:'right'});
+    const line1 = `PREPARED BY: SUB-DIVISIONAL COMMITTEE OF ${dist.toUpperCase()} DISTRICT`;
+    const line2 = `ASSISTED BY: RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD`;
+    doc.text(line1, W / 2, 291, { align: 'center' });
+    doc.text(line2, W / 2, 294, { align: 'center' });
+    doc.text(`Page ${p} of ${total}`, W-pad, 292, {align:'right'});
   }
   const fname=`DSR-${dist}-${yr.replace('/','-')}-${new Date().toISOString().split('T')[0]}.pdf`;
   doc.save(fname);
@@ -14342,8 +14341,8 @@ async function generateFinalPDF(regenerate = false) {
           const districtNameUpper = String(district || 'PUNJAB').toUpperCase();
           const footerLeft = `PREPARED BY: SUB-DIVISIONAL COMMITTEE OF ${districtNameUpper} DISTRICT`;
           const footerLeft2 = `ASSISTED BY: RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD`;
-          doc.text(footerLeft, pad, H - 13);
-          doc.text(footerLeft2, pad, H - 9);
+          doc.text(footerLeft, W / 2, H - 13, { align: 'center' });
+          doc.text(footerLeft2, W / 2, H - 9, { align: 'center' });
           doc.text(`Page ${p}`, W - pad, H - 11, { align: 'right' });
         }
       }

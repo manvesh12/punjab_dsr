@@ -25,7 +25,7 @@ We have optimized the DSR PDF generation engine in [portal.bundle.js](file:///c:
 
 ### 5. Dito Sync for Annexure B to K layouts
 - **Simple Annexures B, C, D, E, G, H, I:** Mapped their rendering logic directly to `pdfPreview.getAnnexure[B-I]Pages()` so they output exactly what is shown in the live preview (scanned PDF uploads if files are present, or fallback text pages showing description/names if empty).
-- **Table Annexures F, J, K:** Rendered dynamically using an optimized HTML-in-memory snapshotting process. This compiles the visual HTML structure at a high resolution (1040px width) directly from the editor DOM, capturing headers, inline style rules, and attachments precisely while avoiding browser cross-origin frame access security issues.
+- **Table Annexures F, J, K:** Refactored their compiler to render the DOM tables first, and then append their supporting documents/attachments at the end of the sections, mirroring the live preview PDF generation flow.
 
 ### 6. Stability Fixes (Error Handling)
 - Fixed a `ReferenceError` caused by using an undeclared `uploadedPages` array in the final page-numbering loops.
