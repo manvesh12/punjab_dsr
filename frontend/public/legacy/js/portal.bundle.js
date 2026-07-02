@@ -14372,7 +14372,7 @@ async function generateFinalPDF(regenerate = false) {
       if (chPages.length > 0) {
         const ch = (S.chapters || [])[i - 1] || (S.chapters || []).find(c => Number(c.id) === i) || {};
         const chapterTitle = safe(ch.name, `Chapter ${i}`);
-        addTitlePage(chapterTitle, `Chapter ${i}`);
+        addTitlePage(chapterTitle);
         sectionStarts.push({ title: chapterTitle, page: doc.getCurrentPageInfo().pageNumber + 1 });
         chPages.forEach(p => addImagePage(p.src, chapterTitle));
       }
@@ -14386,7 +14386,7 @@ async function generateFinalPDF(regenerate = false) {
       const platePages = pdfPreview.getPlatePages().filter(p => new RegExp('^Plate P' + pNum + '\\b|^Plate ' + pNum + '\\b', 'i').test(p.label));
       if (platePages.length > 0) {
         const plateTitle = safe(pName, `Plate ${pNum}`);
-        addTitlePage(plateTitle, `Plate ${pNum}`);
+        addTitlePage(plateTitle);
         sectionStarts.push({ title: plateTitle, page: doc.getCurrentPageInfo().pageNumber + 1 });
         platePages.forEach(p => addImagePage(p.src, plateTitle));
       }
@@ -15607,7 +15607,7 @@ const pdfPreview = {
       }
       if (String(ch.name || ch.summary || '').trim()) {
         pages.push({
-          src: this.renderTextPageCanvas(ch.name || `CHAPTER ${i + 1}`, ch.summary || 'Upload a chapter PDF to preview the original chapter document here.', `Chapter ${i + 1}`),
+          src: this.renderTextPageCanvas(ch.name || `CHAPTER ${i + 1}`, ch.summary || 'Upload a chapter PDF to preview the original chapter document here.'),
           label: `Chapter ${i + 1}`,
           generated: true
         });
@@ -15636,7 +15636,7 @@ const pdfPreview = {
       }
       // Match the Chapter preview's generated-page structure exactly.
       pages.push({
-        src: this.renderTextPageCanvas(title, description, `Plate P${i + 1}`),
+        src: this.renderTextPageCanvas(title, description),
         label: `Plate P${i + 1}`,
         generated: true
       });
