@@ -13997,7 +13997,7 @@ async function generateFinalPDF(regenerate = false) {
         return false;
       }
     };
-    const simpleAnnexurePreviewIds = ['annexure-e', 'annexure-g', 'annexure-h', 'annexure-i'];
+    const simpleAnnexurePreviewIds = ['annexure-b', 'annexure-c', 'annexure-d', 'annexure-e', 'annexure-g', 'annexure-h', 'annexure-i'];
     const ensureSimpleAnnexurePreviewState = (viewId) => {
       const letter = viewId.replace('annexure-', '').toUpperCase();
       const stateKey = `annexure${letter}`;

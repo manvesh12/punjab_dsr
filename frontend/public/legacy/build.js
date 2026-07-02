@@ -48,7 +48,7 @@ const JS_FILES = [
   'js/main.js'
 ];
 
-const ASSET_VERSION = 'site-zoom-20260702-annex-fjk-v5';
+const ASSET_VERSION = 'site-zoom-20260702-annex-fjk-v6';
 const applyAssetVersion = (html) => html.replace(/\{\{ASSET_VERSION\}\}/g, ASSET_VERSION);
 
 function buildJsBundle() {
