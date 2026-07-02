@@ -5410,6 +5410,7 @@ async function renderUsers() {
   tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Loading users...</td></tr>';
   try {
     const users = await apiFetch('/users');
+    window.cachedUsers = users;
     tbody.innerHTML = users.map(user => {
       const perms = user.permissions || [];
       const activeLabel = user.active ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-gray">Inactive</span>';
@@ -5428,6 +5429,7 @@ async function renderUsers() {
           <td style="display:flex;gap:6px;align-items:center;">
             <button class="btn btn-xs btn-outline" onclick="editUserScope(${user.id})">Scope</button>
             <button class="btn btn-xs ${user.active ? 'btn-danger' : 'btn-saffron'}" onclick="toggleUserActive(${user.id}, ${!user.active})">${user.active ? 'Disable' : 'Enable'}</button>
+            ${!user.active ? `<button class="btn btn-xs btn-danger" onclick="deleteUserPermanently(${user.id}, '${user.email || user.username}')">Delete</button>` : ''}
           </td>
         </tr>`;
     }).join('');
@@ -5464,24 +5466,51 @@ async function toggleUserActive(userId, active) {
     toast(e.message || 'Failed to update user', 'error');
   }
 }
-async function editUserScope(userId) {
-  const district = prompt('Assigned district (blank = all):', 'Jalandhar');
-  if (district === null) return;
-  const block = prompt('Assigned block (optional):', '');
-  if (block === null) return;
-  const section = prompt('Assigned section (optional):', '');
-  if (section === null) return;
+async function deleteUserPermanently(userId, email) {
+  if (!confirm(`Are you sure you want to permanently delete user "${email}" from the project? This action cannot be undone.`)) {
+    return;
+  }
+  try {
+    await apiFetch(`/users/${userId}`, {
+      method: 'DELETE'
+    });
+    toast('User permanently deleted', 'success');
+    renderUsers();
+  } catch (e) {
+    toast(e.message || 'Failed to delete user', 'error');
+  }
+}
+window.deleteUserPermanently = deleteUserPermanently;
+
+function editUserScope(userId) {
+  const user = (window.cachedUsers || []).find(u => u.id === userId);
+  if (!user) return;
+  document.getElementById('edit-scope-user-id').value = userId;
+  document.getElementById('edit-scope-district').value = user.district || '';
+  document.getElementById('edit-scope-block').value = user.block || '';
+  document.getElementById('edit-scope-section').value = user.section || '';
+  openModal('modal-edit-scope');
+}
+
+async function submitUserScope() {
+  const userId = document.getElementById('edit-scope-user-id').value;
+  const district = document.getElementById('edit-scope-district').value.trim();
+  const block = document.getElementById('edit-scope-block').value.trim();
+  const section = document.getElementById('edit-scope-section').value.trim();
   try {
     await apiFetch(`/users/${userId}`, {
       method: 'PUT',
       body: JSON.stringify({ district, block, section })
     });
     toast('Scope updated', 'success');
+    closeModal('modal-edit-scope');
     renderUsers();
   } catch (e) {
     toast(e.message || 'Failed to update scope', 'error');
   }
 }
+window.submitUserScope = submitUserScope;
+
 function openAddUserPrompt() {
   openModal('modal-invite-user');
 }
