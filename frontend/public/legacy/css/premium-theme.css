@@ -3932,29 +3932,54 @@ html.dark body.view-projects-active .dash-brand-subtitle {
   white-space: nowrap;
   box-shadow: 0 7px 16px rgba(15, 23, 42, 0.18);
 }
-.map-district-chip.c1, .district-color-grid span:nth-child(1) { background: #2563eb; }
-.map-district-chip.c2, .district-color-grid span:nth-child(2) { background: #16a34a; }
-.map-district-chip.c3, .district-color-grid span:nth-child(3) { background: #dc2626; }
-.map-district-chip.c4, .district-color-grid span:nth-child(4) { background: #9333ea; }
-.map-district-chip.c5, .district-color-grid span:nth-child(5) { background: #d97706; }
-.map-district-chip.c6, .district-color-grid span:nth-child(6) { background: #0891b2; }
-.map-district-chip.c7, .district-color-grid span:nth-child(7) { background: #be123c; }
-.map-district-chip.c8, .district-color-grid span:nth-child(8) { background: #4f46e5; }
-.map-district-chip.c9, .district-color-grid span:nth-child(9) { background: #15803d; }
-.map-district-chip.c10, .district-color-grid span:nth-child(10) { background: #ea580c; }
-.map-district-chip.c11, .district-color-grid span:nth-child(11) { background: #0f766e; }
-.map-district-chip.c12, .district-color-grid span:nth-child(12) { background: #7c3aed; }
-.map-district-chip.c13, .district-color-grid span:nth-child(13) { background: #b45309; }
-.map-district-chip.c14, .district-color-grid span:nth-child(14) { background: #0369a1; }
-.map-district-chip.c15, .district-color-grid span:nth-child(15) { background: #65a30d; }
-.map-district-chip.c16, .district-color-grid span:nth-child(16) { background: #c026d3; }
-.map-district-chip.c17, .district-color-grid span:nth-child(17) { background: #475569; }
-.map-district-chip.c18, .district-color-grid span:nth-child(18) { background: #0284c7; }
-.map-district-chip.c19, .district-color-grid span:nth-child(19) { background: #ca8a04; }
-.map-district-chip.c20, .district-color-grid span:nth-child(20) { background: #e11d48; }
-.map-district-chip.c21, .district-color-grid span:nth-child(21) { background: #059669; }
-.map-district-chip.c22, .district-color-grid span:nth-child(22) { background: #1d4ed8; }
-.map-district-chip.c23, .district-color-grid span:nth-child(23) { background: #a21caf; }
+.map-district-chip.c1 { background: #2563eb; }
+.map-district-chip.c2 { background: #16a34a; }
+.map-district-chip.c3 { background: #dc2626; }
+.map-district-chip.c4 { background: #9333ea; }
+.map-district-chip.c5 { background: #d97706; }
+.map-district-chip.c6 { background: #0891b2; }
+.map-district-chip.c7 { background: #be123c; }
+.map-district-chip.c8 { background: #4f46e5; }
+.map-district-chip.c9 { background: #15803d; }
+.map-district-chip.c10 { background: #ea580c; }
+.map-district-chip.c11 { background: #0f766e; }
+.map-district-chip.c12 { background: #7c3aed; }
+.map-district-chip.c13 { background: #b45309; }
+.map-district-chip.c14 { background: #0369a1; }
+.map-district-chip.c15 { background: #65a30d; }
+.map-district-chip.c16 { background: #c026d3; }
+.map-district-chip.c17 { background: #475569; }
+.map-district-chip.c18 { background: #0284c7; }
+.map-district-chip.c19 { background: #ca8a04; }
+.map-district-chip.c20 { background: #e11d48; }
+.map-district-chip.c21 { background: #059669; }
+.map-district-chip.c22 { background: #1d4ed8; }
+.map-district-chip.c23 { background: #a21caf; }
+
+.district-color-grid span:nth-child(1) { background: rgba(37, 99, 235, 0.08) !important; border-left: 4px solid #2563eb !important; border-color: rgba(37, 99, 235, 0.25) !important; }
+.district-color-grid span:nth-child(2) { background: rgba(22, 163, 74, 0.08) !important; border-left: 4px solid #16a34a !important; border-color: rgba(22, 163, 74, 0.25) !important; }
+.district-color-grid span:nth-child(3) { background: rgba(220, 38, 38, 0.08) !important; border-left: 4px solid #dc2626 !important; border-color: rgba(220, 38, 38, 0.25) !important; }
+.district-color-grid span:nth-child(4) { background: rgba(147, 51, 234, 0.08) !important; border-left: 4px solid #9333ea !important; border-color: rgba(147, 51, 234, 0.25) !important; }
+.district-color-grid span:nth-child(5) { background: rgba(217, 119, 6, 0.08) !important; border-left: 4px solid #d97706 !important; border-color: rgba(217, 119, 6, 0.25) !important; }
+.district-color-grid span:nth-child(6) { background: rgba(8, 145, 178, 0.08) !important; border-left: 4px solid #0891b2 !important; border-color: rgba(8, 145, 178, 0.25) !important; }
+.district-color-grid span:nth-child(7) { background: rgba(190, 18, 60, 0.08) !important; border-left: 4px solid #be123c !important; border-color: rgba(190, 18, 60, 0.25) !important; }
+.district-color-grid span:nth-child(8) { background: rgba(79, 70, 229, 0.08) !important; border-left: 4px solid #4f46e5 !important; border-color: rgba(79, 70, 229, 0.25) !important; }
+.district-color-grid span:nth-child(9) { background: rgba(21, 128, 61, 0.08) !important; border-left: 4px solid #15803d !important; border-color: rgba(21, 128, 61, 0.25) !important; }
+.district-color-grid span:nth-child(10) { background: rgba(234, 88, 12, 0.08) !important; border-left: 4px solid #ea580c !important; border-color: rgba(234, 88, 12, 0.25) !important; }
+.district-color-grid span:nth-child(11) { background: rgba(15, 118, 110, 0.08) !important; border-left: 4px solid #0f766e !important; border-color: rgba(15, 118, 110, 0.25) !important; }
+.district-color-grid span:nth-child(12) { background: rgba(124, 58, 237, 0.08) !important; border-left: 4px solid #7c3aed !important; border-color: rgba(124, 58, 237, 0.25) !important; }
+.district-color-grid span:nth-child(13) { background: rgba(180, 83, 9, 0.08) !important; border-left: 4px solid #b45309 !important; border-color: rgba(180, 83, 9, 0.25) !important; }
+.district-color-grid span:nth-child(14) { background: rgba(3, 105, 161, 0.08) !important; border-left: 4px solid #0369a1 !important; border-color: rgba(3, 105, 161, 0.25) !important; }
+.district-color-grid span:nth-child(15) { background: rgba(101, 163, 13, 0.08) !important; border-left: 4px solid #65a30d !important; border-color: rgba(101, 163, 13, 0.25) !important; }
+.district-color-grid span:nth-child(16) { background: rgba(192, 38, 211, 0.08) !important; border-left: 4px solid #c026d3 !important; border-color: rgba(192, 38, 211, 0.25) !important; }
+.district-color-grid span:nth-child(17) { background: rgba(71, 85, 105, 0.08) !important; border-left: 4px solid #475569 !important; border-color: rgba(71, 85, 105, 0.25) !important; }
+.district-color-grid span:nth-child(18) { background: rgba(2, 132, 199, 0.08) !important; border-left: 4px solid #0284c7 !important; border-color: rgba(2, 132, 199, 0.25) !important; }
+.district-color-grid span:nth-child(19) { background: rgba(202, 138, 4, 0.08) !important; border-left: 4px solid #ca8a04 !important; border-color: rgba(202, 138, 4, 0.25) !important; }
+.district-color-grid span:nth-child(20) { background: rgba(225, 29, 72, 0.08) !important; border-left: 4px solid #e11d48 !important; border-color: rgba(225, 29, 72, 0.25) !important; }
+.district-color-grid span:nth-child(21) { background: rgba(5, 150, 105, 0.08) !important; border-left: 4px solid #059669 !important; border-color: rgba(5, 150, 105, 0.25) !important; }
+.district-color-grid span:nth-child(22) { background: rgba(29, 78, 216, 0.08) !important; border-left: 4px solid #1d4ed8 !important; border-color: rgba(29, 78, 216, 0.25) !important; }
+.district-color-grid span:nth-child(23) { background: rgba(162, 28, 175, 0.08) !important; border-left: 4px solid #a21caf !important; border-color: rgba(162, 28, 175, 0.25) !important; }
+
 .dash-district-legend {
   padding: 18px;
   border: 1px solid rgba(23, 50, 77, 0.12);
@@ -3973,12 +3998,22 @@ html.dark body.view-projects-active .dash-brand-subtitle {
 }
 .district-color-grid span {
   display: block;
-  padding: 8px 10px;
-  border-radius: 7px;
-  color: #ffffff;
-  font-size: 12px;
-  font-weight: 850;
-  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.10);
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  color: #1e293b !important; /* Dark text in light mode */
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s ease;
+}
+.district-color-grid span:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+html.dark .district-color-grid span {
+  color: #f1f5f9 !important; /* Light text in dark mode */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 html.dark .dash-district-map-section,
 html.dark .dash-district-legend,
