@@ -67,6 +67,13 @@
 
 <script>
   async function loadGeneralSettings() {
+    const localNotice = localStorage.getItem('portalNoticeText');
+    if (localNotice) {
+      const textEl = document.getElementById('settings-notice-text');
+      if (textEl) textEl.value = localNotice;
+      updateNoticeUI(localNotice);
+    }
+
     try {
       const res = await fetch('/api/settings/noticeText');
       if (res.ok) {
@@ -74,6 +81,7 @@
         if (data && data.value) {
           const textEl = document.getElementById('settings-notice-text');
           if (textEl) textEl.value = data.value;
+          updateNoticeUI(data.value);
         }
       }
     } catch (e) {
@@ -81,6 +89,27 @@
     }
   }
   window.loadGeneralSettings = loadGeneralSettings;
+
+  function updateNoticeUI(text) {
+    const nextText = String(text || '').trim();
+    if (!nextText) return;
+    window.portalNoticeText = nextText;
+    document.querySelectorAll('[data-i18n="noticeText"]').forEach((el) => {
+      el.textContent = nextText;
+    });
+  }
+  window.updateNoticeUI = updateNoticeUI;
+
+  function installNoticeLanguagePatch() {
+    const originalApplyPortalLanguage = window.applyPortalLanguage;
+    if (typeof originalApplyPortalLanguage !== 'function' || originalApplyPortalLanguage.__noticeAware) return;
+    window.applyPortalLanguage = function(...args) {
+      const result = originalApplyPortalLanguage.apply(this, args);
+      if (window.portalNoticeText) updateNoticeUI(window.portalNoticeText);
+      return result;
+    };
+    window.applyPortalLanguage.__noticeAware = true;
+  }
 
   function switchSettingsTab(tabName) {
     document.querySelectorAll('.settings-tab-content').forEach(el => el.style.display = 'none');
@@ -120,6 +149,7 @@
         if (typeof updateNoticeUI === 'function') {
           updateNoticeUI(text);
         }
+        localStorage.setItem('portalNoticeText', text);
       } else {
         const res = await fetch('/api/settings/noticeText', {
           method: 'PUT',
@@ -134,15 +164,20 @@
           if (typeof updateNoticeUI === 'function') {
             updateNoticeUI(text);
           }
+          localStorage.setItem('portalNoticeText', text);
         } else {
           alert('Failed to update notice.');
         }
       }
     } catch (e) {
+      localStorage.setItem('portalNoticeText', text);
+      if (typeof updateNoticeUI === 'function') {
+        updateNoticeUI(text);
+      }
       if (typeof toast === 'function') {
-        toast('Error updating notice: ' + (e.message || e), 'error');
+        toast('Notice updated locally. Server save is unavailable: ' + (e.message || e), 'info');
       } else {
-        alert('Error updating notice.');
+        alert('Notice updated locally. Server save is unavailable.');
       }
       console.error(e);
     }
@@ -153,5 +188,6 @@
   // Load notice settings immediately on template parse
   document.addEventListener('DOMContentLoaded', () => {
     loadGeneralSettings();
+    setTimeout(installNoticeLanguagePatch, 0);
   });
 </script>

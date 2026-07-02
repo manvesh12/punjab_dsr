@@ -648,6 +648,7 @@ function hasPermission(permission) {
 }
 function hasModuleAccess(viewId) {
   if (!viewId) return true;
+  if (viewId === 'settings' || viewId === 'users') return hasAdminAccess();
   if (viewId === 'audit-logs') return true;
   if (viewId === 'model-dsr') return true;
   const rule = getRoleRule();
@@ -711,7 +712,8 @@ function hasReviewAccess() {
 }
 function hasAdminAccess() {
   if (typeof S === 'undefined' || !S || !S.user) return false;
-  return hasPermission('ADMIN') || getBackendRole() === 'ADMIN';
+  const role = getBackendRole();
+  return hasPermission('ADMIN') || role === 'ADMIN' || role === 'STATE_ADMIN';
 }
 function setLockedElement(el, locked, label) {
   if (!el) return;
@@ -932,6 +934,12 @@ function updateRolePermissionUI() {
   if (projectsMenuAuditLogs) projectsMenuAuditLogs.style.display = 'block';
   const navUsers = document.getElementById('nav-users');
   if (navUsers) navUsers.style.display = adminAccess ? 'block' : 'none';
+  const tbNavUsers = document.getElementById('tb-nav-users');
+  if (tbNavUsers) tbNavUsers.style.display = adminAccess ? 'block' : 'none';
+  ['dash-menu-users', 'projects-menu-users'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = adminAccess ? 'block' : 'none';
+  });
   const roleText = document.querySelector('.sb-role-text');
   if (roleText && S?.user) roleText.textContent = getRoleRule().label;
 }
@@ -1968,6 +1976,8 @@ function showView(id, btn, push = true) {
     if (id === 'dashboard') return onclickAttr.includes("'dashboard'");
     if (id === 'projects') return onclickAttr.includes("'projects'");
     if (id === 'workflow') return onclickAttr.includes("'workflow'");
+    if (id === 'settings') return onclickAttr.includes("'settings'");
+    if (id === 'audit-logs') return onclickAttr.includes("'audit-logs'");
     return false;
   });
   if (topbarBtn) topbarBtn.classList.add('active');
@@ -1983,7 +1993,7 @@ function showView(id, btn, push = true) {
     'annexure-h': 'Annexure H', 'annexure-i': 'Annexure I', 'annexure-j': 'Annexure J',
     'annexure-k': 'Annexure K', 'demand-table': 'Projected Demand Table',
     'auction-table': 'Auctioned Sites', 'summary-table': 'Source Summary Table', 'benchmark-table': 'Bench Mark & CORS',
-    'esign': 'E-Signature Panel', 'generate': 'Generate Final PDF', 'history': 'Report History', 'users': 'User Management',
+    'esign': 'E-Signature Panel', 'generate': 'Generate Final PDF', 'history': 'Report History', 'users': 'User Management', 'settings': 'Settings',
     'audit-logs': 'System Audit Logs'
   };
   const titleEl = document.getElementById('topbar-title');
