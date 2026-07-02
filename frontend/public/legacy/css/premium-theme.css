@@ -3995,6 +3995,32 @@ html.dark body.view-projects-active .dash-brand-subtitle {
   display: grid;
   grid-template-columns: 1fr;
   gap: 8px;
+  max-height: 250px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+.district-color-grid::-webkit-scrollbar {
+  width: 5px;
+}
+.district-color-grid::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 4px;
+}
+.district-color-grid::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+}
+.district-color-grid::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.22);
+}
+html.dark .district-color-grid::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+html.dark .district-color-grid::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+}
+html.dark .district-color-grid::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
 }
 .district-color-grid span {
   display: block;
