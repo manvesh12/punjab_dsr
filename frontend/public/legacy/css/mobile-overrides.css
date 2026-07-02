@@ -9,9 +9,13 @@
     box-sizing: border-box !important; padding-left: 0 !important; padding-right: 0 !important;
     margin-left: 0 !important; margin-right: 0 !important;
   }
-  .main-content, .view, .dash-portal-wrapper {
+  .view, .dash-portal-wrapper {
     width: 100% !important; max-width: 100% !important; box-sizing: border-box !important;
     padding: 12px !important; margin: 0 !important; overflow-x: hidden !important;
+  }
+  .main-content {
+    width: 100% !important; max-width: 100% !important; box-sizing: border-box !important;
+    padding: 12px !important; margin: 0 !important; overflow: visible !important;
   }
   
   /* SIDEBAR: Hide and off-canvas */

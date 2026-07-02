@@ -1204,7 +1204,7 @@ body.preview-open .app-workspace {
   grid-row: 1;
   width: 100%;
   min-width: 0;
-  overflow-x: hidden;
+  overflow-x: visible;
   overflow-y: visible;
   min-height: calc(100vh - var(--topbar-h));
 }
