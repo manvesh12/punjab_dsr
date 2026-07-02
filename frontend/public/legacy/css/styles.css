@@ -183,7 +183,7 @@ body {
   background-attachment: fixed;
   color: var(--text);
   min-height: 100vh;
-  overflow-x: hidden;
+  overflow: visible;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
