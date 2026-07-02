@@ -13541,7 +13541,12 @@ async function generateFinalPDF(regenerate = false) {
       doc.setFontSize(22);
       doc.setTextColor(0, 0, 0);
       doc.text(titleText, W / 2, H / 2 - 10, { align: 'center', maxWidth: W - 40 });
-      if (subtitleText) {
+      const isRedundant = subtitleText && (
+        titleText.toLowerCase().includes(subtitleText.toLowerCase()) || 
+        subtitleText.toLowerCase().includes(titleText.toLowerCase()) ||
+        titleText.toLowerCase().replace(/[^a-z0-9]/g, '') === subtitleText.toLowerCase().replace(/[^a-z0-9]/g, '')
+      );
+      if (subtitleText && !isRedundant) {
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(12);
         doc.setTextColor(100, 100, 100);
@@ -15348,8 +15353,9 @@ const pdfPreview = {
   /** Build a simple A4-style page image from title + body text */
   renderTextPageCanvas(title, bodyText, subtitle) {
     const canvas = document.createElement('canvas');
-    const W = 620;
-    const H = 880;
+    const scale = 3;
+    const W = 620 * scale;
+    const H = 880 * scale;
     canvas.width = W;
     canvas.height = H;
     const ctx = canvas.getContext('2d');
@@ -15357,17 +15363,22 @@ const pdfPreview = {
     ctx.fillRect(0, 0, W, H);
     ctx.fillStyle = '#0a2540';
     ctx.textAlign = 'center';
-    ctx.font = 'bold 22px Georgia, serif';
-    ctx.fillText(title, W / 2, 120);
-    if (subtitle) {
-      ctx.font = '12px Georgia, serif';
+    ctx.font = `bold ${22 * scale}px Georgia, serif`;
+    ctx.fillText(title, W / 2, 120 * scale);
+    const isRedundant = subtitle && (
+      title.toLowerCase().includes(subtitle.toLowerCase()) || 
+      subtitle.toLowerCase().includes(title.toLowerCase()) ||
+      title.toLowerCase().replace(/[^a-z0-9]/g, '') === subtitle.toLowerCase().replace(/[^a-z0-9]/g, '')
+    );
+    if (subtitle && !isRedundant) {
+      ctx.font = `${12 * scale}px Georgia, serif`;
       ctx.fillStyle = '#64748b';
-      ctx.fillText(subtitle, W / 2, 150);
+      ctx.fillText(subtitle, W / 2, 150 * scale);
     }
     ctx.textAlign = 'left';
     ctx.fillStyle = '#334155';
-    ctx.font = '14px Georgia, serif';
-    const margin = 56;
+    ctx.font = `${14 * scale}px Georgia, serif`;
+    const margin = 56 * scale;
     const maxWidth = W - margin * 2;
     const words = (bodyText || '').split(/\s+/);
     const lines = [];
@@ -15382,20 +15393,21 @@ const pdfPreview = {
       }
     });
     if (line) lines.push(line);
-    let y = 200;
-    const lineHeight = 22;
+    let y = 200 * scale;
+    const lineHeight = 22 * scale;
     lines.forEach(l => {
-      if (y > H - 80) return;
+      if (y > H - 80 * scale) return;
       ctx.fillText(l, margin, y);
       y += lineHeight;
     });
-    return canvas.toDataURL('image/jpeg', 0.92);
+    return canvas.toDataURL('image/jpeg', 0.95);
   },
   renderCoverPageCanvas() {
     const fm = S.frontMatter || {};
     const canvas = document.createElement('canvas');
-    const W = 620;
-    const H = 880;
+    const scale = 3;
+    const W = 620 * scale;
+    const H = 880 * scale;
     canvas.width = W;
     canvas.height = H;
     const ctx = canvas.getContext('2d');
@@ -15404,33 +15416,33 @@ const pdfPreview = {
     const navy = '#0a2540';
     const accent = '#e07b00';
     ctx.strokeStyle = navy;
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 2 * scale;
     ctx.beginPath();
-    ctx.arc(W / 2, 100, 36, 0, Math.PI * 2);
+    ctx.arc(W / 2, 100 * scale, 36 * scale, 0, Math.PI * 2);
     ctx.stroke();
     ctx.fillStyle = navy;
     ctx.textAlign = 'center';
-    ctx.font = '11px Georgia, serif';
-    ctx.fillText('GOVERNMENT OF PUNJAB', W / 2, 160);
-    ctx.font = 'bold 20px Georgia, serif';
+    ctx.font = `${11 * scale}px Georgia, serif`;
+    ctx.fillText('GOVERNMENT OF PUNJAB', W / 2, 160 * scale);
+    ctx.font = `bold ${20 * scale}px Georgia, serif`;
     const title = (fm.title || 'District Survey Report').toUpperCase();
-    this._wrapCenteredText(ctx, title, W / 2, 220, W - 80, 26);
-    ctx.font = '16px Georgia, serif';
+    this._wrapCenteredText(ctx, title, W / 2, 220 * scale, W - 80 * scale, 26 * scale);
+    ctx.font = `${16 * scale}px Georgia, serif`;
     ctx.fillStyle = accent;
-    ctx.fillText(`${(fm.district || 'District').toUpperCase()} DISTRICT`, W / 2, 310);
+    ctx.fillText(`${(fm.district || 'District').toUpperCase()} DISTRICT`, W / 2, 310 * scale);
     ctx.fillStyle = navy;
-    ctx.font = '13px Georgia, serif';
-    ctx.fillText(`${fm.state || 'Punjab'} · ${fm.year || ''}`, W / 2, 340);
-    ctx.font = '11px Georgia, serif';
+    ctx.font = `${13 * scale}px Georgia, serif`;
+    ctx.fillText(`${fm.state || 'Punjab'} · ${fm.year || ''}`, W / 2, 340 * scale);
+    ctx.font = `${11 * scale}px Georgia, serif`;
     ctx.fillStyle = '#475569';
     const prep = `Prepared by: ${fm.preparedBy || ''}`;
-    this._wrapCenteredText(ctx, prep, W / 2, 420, W - 80, 18);
+    this._wrapCenteredText(ctx, prep, W / 2, 420 * scale, W - 80 * scale, 18 * scale);
     const assist = `Assisted by: ${fm.assistedBy || ''}`;
-    this._wrapCenteredText(ctx, assist, W / 2, 460, W - 80, 18);
-    ctx.font = '12px Georgia, serif';
+    this._wrapCenteredText(ctx, assist, W / 2, 460 * scale, W - 80 * scale, 18 * scale);
+    ctx.font = `${12 * scale}px Georgia, serif`;
     ctx.fillStyle = navy;
-    ctx.fillText(fm.version || '', W / 2, H - 60);
-    return canvas.toDataURL('image/jpeg', 0.92);
+    ctx.fillText(fm.version || '', W / 2, H - 60 * scale);
+    return canvas.toDataURL('image/jpeg', 0.95);
   },
   _wrapCenteredText(ctx, text, cx, startY, maxWidth, lineHeight) {
     const words = (text || '').split(/\s+/);
