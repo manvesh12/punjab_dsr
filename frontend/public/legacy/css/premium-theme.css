@@ -4373,7 +4373,14 @@ body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar 
   #view-annexure-h > .header-row,
   #view-annexure-i > .header-row,
   #view-annexure-j > .header-row,
-  #view-annexure-k > .header-row {
+  #view-annexure-k > .header-row,
+  #view-generate > .header-row,
+  #view-history > .header-row,
+  #view-workflow > .header-row,
+  #view-settings > .header-row,
+  #view-users > .header-row,
+  #view-audit-logs > .header-row,
+  #view-sdlc-portal > .header-row {
     margin-top: var(--editor-notice-clearance) !important;
   }
 }
