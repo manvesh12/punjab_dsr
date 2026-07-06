@@ -1703,6 +1703,58 @@ function hidePdfProgressToast() {
 }
 
 async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
+  const localRenderTextPageCanvas = (title, bodyText, subtitle) => {
+    const canvas = document.createElement('canvas');
+    const scale = 3;
+    const W_canvas = 620 * scale;
+    const H_canvas = 880 * scale;
+    canvas.width = W_canvas;
+    canvas.height = H_canvas;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, W_canvas, H_canvas);
+    ctx.fillStyle = '#0a2540';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold ' + (22 * scale) + 'px Georgia, serif';
+    ctx.fillText(title, W_canvas / 2, 120 * scale);
+    const isRedundant = subtitle && (
+      title.toLowerCase().includes(subtitle.toLowerCase()) || 
+      subtitle.toLowerCase().includes(title.toLowerCase()) ||
+      title.toLowerCase().replace(/[^a-z0-9]/g, '') === subtitle.toLowerCase().replace(/[^a-z0-9]/g, '')
+    );
+    if (subtitle && !isRedundant) {
+      ctx.font = (12 * scale) + 'px Georgia, serif';
+      ctx.fillStyle = '#64748b';
+      ctx.fillText(subtitle, W_canvas / 2, 150 * scale);
+    }
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#334155';
+    ctx.font = (14 * scale) + 'px Georgia, serif';
+    const margin = 56 * scale;
+    const maxWidth = W_canvas - margin * 2;
+    const words = (bodyText || '').split(/\s+/);
+    const lines = [];
+    let line = '';
+    words.forEach(word => {
+      const test = line ? (line + ' ' + word) : word;
+      if (ctx.measureText(test).width > maxWidth && line) {
+        lines.push(line);
+        line = word;
+      } else {
+        line = test;
+      }
+    });
+    if (line) lines.push(line);
+    let y = 200 * scale;
+    const lineHeight = 22 * scale;
+    lines.forEach(l => {
+      if (y > H_canvas - 80 * scale) return;
+      ctx.fillText(l, margin, y);
+      y += lineHeight;
+    });
+    return canvas.toDataURL('image/jpeg', 0.95);
+  };
+
   const hasAnnexureContent = (viewId) => {
     if (['annexure-f', 'annexure-j', 'annexure-k'].includes(viewId)) {
       if (window.pdfPreview && typeof pdfPreview.prepareAnnexureLivePreviewSource === 'function') {
@@ -1728,7 +1780,7 @@ async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
     }
 
     const hasDomTable = !!document.querySelector("table[id*=\"" + viewId + "\"], table[id*=\"" + viewId.replace('annexure-', 'anx') + "\"]");
-    const iframe = document.getElementById("iframe-" + viewId);
+    const iframe = getPreviewIframe(viewId);
     const hasIframe = !!(iframe && (iframe.getAttribute('src') || iframe.srcdoc));
     return hasUpload || hasLetterUpload || hasDomTable || hasIframe;
   };
@@ -2237,12 +2289,23 @@ async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
       const letter = viewId.replace('annexure-', '').toUpperCase();
       const simpleLetters = ['B', 'C', 'D', 'E', 'G', 'H', 'I'];
       if (simpleLetters.includes(letter)) {
-        const fnName = `getAnnexure${letter}Pages`;
-        if (typeof pdfPreview[fnName] === 'function') {
-          const pages = pdfPreview[fnName]();
-          pages.forEach((p, idx) => addImagePage(p.src, `${title} - Page ${idx + 1}`));
-          return true;
+        const stateKey = 'annexure' + letter;
+        const entries = S[stateKey] || [];
+        let addedAny = false;
+        entries.forEach(entry => {
+          if (Array.isArray(entry.pages) && entry.pages.length > 0) {
+            entry.pages.forEach((page, idx) => {
+              addImagePage(page, `${title} - Page ${idx + 1}`);
+              addedAny = true;
+            });
+          }
+        });
+        if (!addedAny) {
+          const placeholderSrc = localRenderTextPageCanvas(`Annexure ${letter} - Entry 1`, `Upload your Annexure ${letter} PDF or image here.`, `Annexure ${letter}`);
+          addImagePage(placeholderSrc, `${title} - Page 1`);
+          addedAny = true;
         }
+        if (addedAny) return true;
       }
     }
 
@@ -2290,10 +2353,20 @@ async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
 
     if (!hasTables && !hasAttachments) {
       const letter = viewId.replace('annexure-', '').toUpperCase();
-      const fnName = `getAnnexure${letter}Pages`;
-      if (typeof pdfPreview[fnName] === 'function') {
-        const pages = pdfPreview[fnName]();
-        pages.forEach((p, idx) => addPreviewImagePage(p.src, `${title} - Page ${idx + 1}`));
+      const stateKey = 'annexure' + letter;
+      const entries = S[stateKey] || [];
+      let addedAny = false;
+      entries.forEach(entry => {
+        if (Array.isArray(entry.pages) && entry.pages.length > 0) {
+          entry.pages.forEach((page, idx) => {
+            addPreviewImagePage(page, `${title} - Page ${idx + 1}`);
+            addedAny = true;
+          });
+        }
+      });
+      if (!addedAny) {
+        const placeholderSrc = localRenderTextPageCanvas(`Annexure ${letter} - Entry 1`, `Upload your Annexure ${letter} PDF or image here.`, `Annexure ${letter}`);
+        addPreviewImagePage(placeholderSrc, `${title} - Page 1`);
       }
     }
 
@@ -2410,9 +2483,9 @@ async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
             const tocPages = window.pdfPreview ? window.pdfPreview.getFrontMatterPages().filter(p => /^content/i.test(p.label)) : [];
             if (tocPages.length > 0) {
               tocPages.forEach(p => addImagePage(p.src, 'Table of Contents'));
-            } else if (window.pdfPreview && typeof window.pdfPreview.renderTextPageCanvas === 'function') {
-              const tocText = `1. Front Matter....................................................................................i\n2. Chapters Outline...............................................................................1\n3. Plate Section...................................................................................46\n4. Cross Section Graphs...........................................................................56\n5. Annexures Reference Data.....................................................................63`;
-              addImagePage(window.pdfPreview.renderTextPageCanvas('TABLE OF CONTENTS', tocText, 'District Survey Report'), 'Table of Contents');
+            } else {
+              const tocText = '1. Front Matter....................................................................................i\n2. Chapters Outline...............................................................................1\n3. Plate Section...................................................................................46\n4. Cross Section Graphs...........................................................................56\n5. Annexures Reference Data.....................................................................63';
+              addImagePage(localRenderTextPageCanvas('TABLE OF CONTENTS', tocText, 'District Survey Report'), 'Table of Contents');
             }
           } else if (subId === 'fm-pref') {
             const prefPages = window.pdfPreview ? window.pdfPreview.getFrontMatterPages().filter(p => /^preface/i.test(p.label)) : [];
@@ -2438,10 +2511,10 @@ async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
           const chNum = chIdx !== -1 ? chIdx + 1 : 1;
           const ch = (S.chapters || [])[chNum - 1] || {};
           const chapterTitle = safe(ch.name, `Chapter ${chNum}`);
-          const chPages = window.pdfPreview ? window.pdfPreview.getChapterPages().filter(p => new RegExp('^Chapter ' + chNum + '\\b', 'i').test(p.label)) : [];
+          const chPages = ch.pages || [];
           if (chPages.length > 0) {
             addTitlePage(chapterTitle);
-            chPages.forEach(p => addImagePage(p.src, chapterTitle));
+            chPages.forEach(p => addImagePage(p, chapterTitle));
           }
         }
       } 
@@ -2451,10 +2524,10 @@ async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
           const plateNo = plIdx !== -1 ? plIdx + 1 : 1;
           const pl = (S.plates || [])[plateNo - 1] || {};
           const plateTitle = safe(pl.name, `Plate ${plateNo}`);
-          const platePages = window.pdfPreview ? window.pdfPreview.getPlatePages().filter(p => new RegExp('^Plate P' + plateNo + '\\b|^Plate ' + plateNo + '\\b', 'i').test(p.label)) : [];
+          const platePages = pl.pages || [];
           if (platePages.length > 0) {
             addTitlePage(plateTitle);
-            platePages.forEach(p => addImagePage(p.src, plateTitle));
+            platePages.forEach(p => addImagePage(p, plateTitle));
           }
         }
       } 

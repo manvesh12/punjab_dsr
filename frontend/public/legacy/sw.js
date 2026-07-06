@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smart-dsr-cache-v14-replenishment-format-exact-aligned';
+const CACHE_NAME = 'smart-dsr-cache-v15-replenishment-isolated-state-lookups';
 const urlsToCache = [
   './login.html',
   './css/styles.css',
