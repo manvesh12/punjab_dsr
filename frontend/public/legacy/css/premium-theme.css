@@ -5852,6 +5852,38 @@ body.view-projects-active .topbar.dash-global-topbar {
   }
 }
 
+/* Portal header variant requested for the live app: no Home/Login switcher row. */
+@media (min-width: 1024px) {
+  body.view-dashboard-active,
+  body.view-projects-active {
+    --project-topbar-h: 216px !important;
+  }
+
+  body.view-dashboard-active .topbar.dash-global-topbar,
+  body.view-projects-active .topbar.dash-global-topbar {
+    grid-template-rows: 32px 92px 42px 50px !important;
+    height: var(--project-topbar-h) !important;
+    min-height: var(--project-topbar-h) !important;
+    max-height: var(--project-topbar-h) !important;
+  }
+
+  .dash-global-topbar .dash-switcher-bar {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1280px) {
+  body.view-dashboard-active,
+  body.view-projects-active {
+    --project-topbar-h: 224px !important;
+  }
+
+  body.view-dashboard-active .topbar.dash-global-topbar,
+  body.view-projects-active .topbar.dash-global-topbar {
+    grid-template-rows: 32px 100px 42px 50px !important;
+  }
+}
+
 /* Settings page: remove extra vertical gap below the fixed topbar. */
 body:has(#view-settings.active) .page-body {
   padding-top: 0 !important;
