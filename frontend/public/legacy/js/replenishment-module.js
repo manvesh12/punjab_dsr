@@ -358,13 +358,19 @@ function renameCustomReport(reportId) {
 }
 
 function deleteCustomReport(reportId) {
-  if (!confirm("Are you sure you want to delete this report?")) return;
-  
-  let reports = loadLocalReports();
-  reports = reports.filter(r => r.id !== reportId);
-  saveLocalReports(reports);
-  toast("Report deleted successfully!", "success");
-  showExistingReportsList();
+  showCustomConfirmModal({
+    title: "Delete report?",
+    message: "This saved replenishment report will be removed from the list.",
+    confirmText: "Delete",
+    tone: "danger",
+    onConfirm: () => {
+      let reports = loadLocalReports();
+      reports = reports.filter(r => r.id !== reportId);
+      saveLocalReports(reports);
+      toast("Report deleted successfully!", "success");
+      showExistingReportsList();
+    }
+  });
 }
 
 function downloadCustomReportPDFDirect(reportId) {
@@ -535,27 +541,33 @@ function saveNewSectionOrder(reportId, reportName) {
 }
 
 function resetSectionOrder(reportId, reportName) {
-  if (!confirm("Are you sure you want to reset the section order to default?")) return;
-  
-  const reports = loadLocalReports();
-  const report = reports.find(r => r.id === reportId);
-  if (report) {
-    const defaultOrder = [
-      'front-matter',
-      'chapters',
-      'plates',
-      'anx1', 'anx2', 'anx3', 'anx4', 'anx5', 'anx6', 'anx7',
-      'annexure-b', 'annexure-c', 'annexure-d', 'annexure-e', 'annexure-f', 'annexure-g', 'annexure-h', 'annexure-i', 'annexure-j', 'annexure-k'
-    ];
-    report.sectionOrder = defaultOrder;
-    saveLocalReports(reports);
-    
-    const editorContainer = document.getElementById('repl-editor-container');
-    if (editorContainer) {
-      renderCustomReportGenerator(editorContainer, report);
+  showCustomConfirmModal({
+    title: "Reset section order?",
+    message: "Your selected sections will remain selected, but the order will return to the default DSR sequence.",
+    confirmText: "Reset Order",
+    tone: "warning",
+    onConfirm: () => {
+      const reports = loadLocalReports();
+      const report = reports.find(r => r.id === reportId);
+      if (report) {
+        const defaultOrder = [
+          'front-matter',
+          'chapters',
+          'plates',
+          'anx1', 'anx2', 'anx3', 'anx4', 'anx5', 'anx6', 'anx7',
+          'annexure-b', 'annexure-c', 'annexure-d', 'annexure-e', 'annexure-f', 'annexure-g', 'annexure-h', 'annexure-i', 'annexure-j', 'annexure-k'
+        ];
+        report.sectionOrder = defaultOrder;
+        saveLocalReports(reports);
+
+        const editorContainer = document.getElementById('repl-editor-container');
+        if (editorContainer) {
+          renderCustomReportGenerator(editorContainer, report);
+        }
+        toast("Section order reset to default successfully!", "success");
+      }
     }
-    toast("Section order reset to default successfully!", "success");
-  }
+  });
 }
 
 function addCustomSection(reportId, reportName) {
@@ -685,23 +697,30 @@ function handleFrontMatterPdfUpload(input, reportId, sectionId, reportName) {
 }
 
 function removeFrontMatterPdfUpload(reportId, sectionId, reportName) {
-  if (!confirm("Are you sure you want to remove the uploaded front matter PDF?")) return;
-  const uploadKey = frontMatterUploadKey(sectionId);
-  const reports = loadLocalReports();
-  const report = reports.find(r => r.id === reportId);
-  if (report) {
-    if (report.frontMatterPdfs) {
-      delete report.frontMatterPdfs[uploadKey];
-    }
-    if (S.uploadedPDFs) {
-      delete S.uploadedPDFs[uploadKey];
-    }
-    saveLocalReports(reports);
+  showCustomConfirmModal({
+    title: "Remove front matter PDF?",
+    message: "The uploaded PDF for this front matter part will be removed from this replenishment report.",
+    confirmText: "Remove",
+    tone: "danger",
+    onConfirm: () => {
+      const uploadKey = frontMatterUploadKey(sectionId);
+      const reports = loadLocalReports();
+      const report = reports.find(r => r.id === reportId);
+      if (report) {
+        if (report.frontMatterPdfs) {
+          delete report.frontMatterPdfs[uploadKey];
+        }
+        if (S.uploadedPDFs) {
+          delete S.uploadedPDFs[uploadKey];
+        }
+        saveLocalReports(reports);
 
-    const editorContainer = document.getElementById('repl-editor-container');
-    if (editorContainer) renderCustomReportGenerator(editorContainer, report);
-    toast("Front matter PDF removed successfully!", "success");
-  }
+        const editorContainer = document.getElementById('repl-editor-container');
+        if (editorContainer) renderCustomReportGenerator(editorContainer, report);
+        toast("Front matter PDF removed successfully!", "success");
+      }
+    }
+  });
 }
 
 function handleCustomSectionPdfUpload(input, reportId, sectionId, reportName) {
@@ -763,51 +782,65 @@ function handleCustomSectionPdfUpload(input, reportId, sectionId, reportName) {
 }
 
 function removeCustomSectionPdf(reportId, sectionId, reportName) {
-  if (!confirm("Are you sure you want to remove the uploaded PDF?")) return;
-  const reports = loadLocalReports();
-  const report = reports.find(r => r.id === reportId);
-  if (report) {
-    if (report.customPdfs) {
-      delete report.customPdfs[sectionId];
+  showCustomConfirmModal({
+    title: "Remove uploaded PDF?",
+    message: "The PDF attached to this custom section will be removed.",
+    confirmText: "Remove",
+    tone: "danger",
+    onConfirm: () => {
+      const reports = loadLocalReports();
+      const report = reports.find(r => r.id === reportId);
+      if (report) {
+        if (report.customPdfs) {
+          delete report.customPdfs[sectionId];
+        }
+        if (S.uploadedPDFs) {
+          delete S.uploadedPDFs[sectionId];
+        }
+        saveLocalReports(reports);
+
+        const editorContainer = document.getElementById('repl-editor-container');
+        if (editorContainer) {
+          renderCustomReportGenerator(editorContainer, report);
+        }
+        toast("PDF removed successfully!", "success");
+      }
     }
-    if (S.uploadedPDFs) {
-      delete S.uploadedPDFs[sectionId];
-    }
-    saveLocalReports(reports);
-    
-    const editorContainer = document.getElementById('repl-editor-container');
-    if (editorContainer) {
-      renderCustomReportGenerator(editorContainer, report);
-    }
-    toast("PDF removed successfully!", "success");
-  }
+  });
 }
 
 function deleteCustomSection(reportId, sectionId, reportName) {
-  if (!confirm("Are you sure you want to delete this custom section?")) return;
-  const reports = loadLocalReports();
-  const report = reports.find(r => r.id === reportId);
-  if (report) {
-    if (report.customSections) {
-      report.customSections = report.customSections.filter(cs => cs.id !== sectionId);
+  showCustomConfirmModal({
+    title: "Delete custom section?",
+    message: "This custom PDF section and its uploaded file will be deleted from the report.",
+    confirmText: "Delete",
+    tone: "danger",
+    onConfirm: () => {
+      const reports = loadLocalReports();
+      const report = reports.find(r => r.id === reportId);
+      if (report) {
+        if (report.customSections) {
+          report.customSections = report.customSections.filter(cs => cs.id !== sectionId);
+        }
+        if (report.sectionOrder) {
+          report.sectionOrder = report.sectionOrder.filter(id => id !== sectionId);
+        }
+        if (report.customPdfs) {
+          delete report.customPdfs[sectionId];
+        }
+        if (S.uploadedPDFs) {
+          delete S.uploadedPDFs[sectionId];
+        }
+        saveLocalReports(reports);
+
+        const editorContainer = document.getElementById('repl-editor-container');
+        if (editorContainer) {
+          renderCustomReportGenerator(editorContainer, report);
+        }
+        toast("Custom section deleted successfully!", "success");
+      }
     }
-    if (report.sectionOrder) {
-      report.sectionOrder = report.sectionOrder.filter(id => id !== sectionId);
-    }
-    if (report.customPdfs) {
-      delete report.customPdfs[sectionId];
-    }
-    if (S.uploadedPDFs) {
-      delete S.uploadedPDFs[sectionId];
-    }
-    saveLocalReports(reports);
-    
-    const editorContainer = document.getElementById('repl-editor-container');
-    if (editorContainer) {
-      renderCustomReportGenerator(editorContainer, report);
-    }
-    toast("Custom section deleted successfully!", "success");
-  }
+  });
 }
 
 function hydrateCheckboxStates(checkedIds) {
@@ -2906,6 +2939,102 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
+function showCustomConfirmModal({
+  title = "Are you sure?",
+  message = "",
+  confirmText = "OK",
+  cancelText = "Cancel",
+  tone = "warning",
+  onConfirm = null
+} = {}) {
+  const existing = document.getElementById('custom-confirm-modal-overlay');
+  if (existing) existing.remove();
+
+  const palette = tone === "danger"
+    ? {
+        accent: "#dc2626",
+        accentDark: "#b91c1c",
+        accentSoft: "#fee2e2",
+        accentText: "#991b1b",
+        ring: "rgba(220, 38, 38, 0.18)",
+        icon: "!"
+      }
+    : {
+        accent: "#b7791f",
+        accentDark: "#92400e",
+        accentSoft: "#fef3c7",
+        accentText: "#92400e",
+        ring: "rgba(183, 121, 31, 0.18)",
+        icon: "?"
+      };
+
+  const overlay = document.createElement('div');
+  overlay.id = 'custom-confirm-modal-overlay';
+  overlay.style.position = 'fixed';
+  overlay.style.left = '0';
+  overlay.style.top = '0';
+  overlay.style.width = '100%';
+  overlay.style.height = '100%';
+  overlay.style.backgroundColor = 'rgba(15, 23, 42, 0.40)';
+  overlay.style.backdropFilter = 'blur(5px)';
+  overlay.style.zIndex = '1000000';
+  overlay.style.display = 'flex';
+  overlay.style.justifyContent = 'center';
+  overlay.style.alignItems = 'flex-start';
+  overlay.style.padding = 'clamp(130px, 18vh, 220px) 18px 32px';
+  overlay.style.boxSizing = 'border-box';
+
+  overlay.innerHTML = `
+    <div role="dialog" aria-modal="true" aria-labelledby="custom-confirm-title" aria-describedby="custom-confirm-message" style="background: #ffffff; color: #0f172a; width: min(440px, 100%); border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 24px 70px rgba(15, 23, 42, 0.24); overflow: hidden; animation: confirmModalIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);">
+      <div style="display: flex; gap: 14px; padding: 22px 22px 18px 22px;">
+        <div aria-hidden="true" style="width: 40px; height: 40px; flex: 0 0 40px; border-radius: 999px; background: ${palette.accentSoft}; color: ${palette.accentText}; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 19px; box-shadow: 0 0 0 6px ${palette.ring};">${palette.icon}</div>
+        <div style="min-width: 0;">
+          <h3 id="custom-confirm-title" style="font-family: 'Plus Jakarta Sans', system-ui, sans-serif; margin: 0 0 7px 0; color: #0f172a; font-size: 18px; line-height: 1.25; font-weight: 800; letter-spacing: 0;">${escapeHtml(title)}</h3>
+          <p id="custom-confirm-message" style="margin: 0; color: #475569; font-size: 14px; line-height: 1.55;">${escapeHtml(message)}</p>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px; padding: 14px 22px 20px 22px; background: #f8fafc; border-top: 1px solid #eef2f7;">
+        <button type="button" id="custom-confirm-cancel" style="min-width: 92px; padding: 10px 16px; border-radius: 10px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);">${escapeHtml(cancelText)}</button>
+        <button type="button" id="custom-confirm-ok" style="min-width: 108px; padding: 10px 17px; border-radius: 10px; border: 1px solid ${palette.accentDark}; background: ${palette.accent}; color: #ffffff; font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 10px 22px ${palette.ring};">${escapeHtml(confirmText)}</button>
+      </div>
+    </div>
+    <style>
+      @keyframes confirmModalIn {
+        from { transform: translateY(-14px) scale(0.98); opacity: 0; }
+        to { transform: translateY(0) scale(1); opacity: 1; }
+      }
+    </style>
+  `;
+
+  const close = () => {
+    document.removeEventListener('keydown', handleKeyDown);
+    overlay.remove();
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.key === 'Escape') close();
+  };
+
+  overlay.addEventListener('click', (event) => {
+    if (event.target === overlay) close();
+  });
+
+  const cancelBtn = overlay.querySelector('#custom-confirm-cancel');
+  const okBtn = overlay.querySelector('#custom-confirm-ok');
+
+  if (cancelBtn) cancelBtn.addEventListener('click', close);
+  if (okBtn) {
+    okBtn.addEventListener('click', () => {
+      close();
+      if (typeof onConfirm === 'function') onConfirm();
+    });
+  }
+
+  document.body.appendChild(overlay);
+  document.addEventListener('keydown', handleKeyDown);
+  if (cancelBtn) cancelBtn.focus();
+}
+
 function showCustomPromptModal(title, defaultValue, onConfirm, buttonText = "Confirm") {
   const existing = document.getElementById('custom-prompt-modal-overlay');
   if (existing) existing.remove();
@@ -2987,4 +3116,5 @@ function showCustomPromptModal(title, defaultValue, onConfirm, buttonText = "Con
   }
 }
 
+window.showCustomConfirmModal = showCustomConfirmModal;
 window.showCustomPromptModal = showCustomPromptModal;

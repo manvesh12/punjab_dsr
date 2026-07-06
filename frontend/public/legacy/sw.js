@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smart-dsr-cache-v18-front-matter-upload-pdfs';
+const CACHE_NAME = 'smart-dsr-cache-v19-white-confirm-modals';
 const urlsToCache = [
   './login.html',
   './css/styles.css',
