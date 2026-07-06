@@ -2052,14 +2052,14 @@ body.preview-open .pdf-preview-mobile-tabs { display: none; }
 
 .pdf-preview-page-wrap {
   width: 100%;
-  max-width: 620px;
+  max-width: 960px;
   display: flex;
   justify-content: center;
   flex-shrink: 0;
 }
 .pdf-preview-page {
   width: 100%;
-  max-width: 620px;
+  max-width: 960px;
   height: auto;
   display: block;
   background: #fff;

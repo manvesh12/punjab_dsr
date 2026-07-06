@@ -15952,7 +15952,7 @@ const pdfPreview = {
     const pct = `${Math.round(this.scale * 100)}%`;
     this.body.querySelectorAll('.pdf-preview-page').forEach(el => {
       el.style.width = `${this.scale * 100}%`;
-      el.style.maxWidth = `${620 * this.scale}px`;
+      el.style.maxWidth = `${960 * this.scale}px`;
     });
     this.body.querySelectorAll('.pdf-preview-html-page').forEach(el => {
       el.style.transform = `scale(${this.scale})`;
