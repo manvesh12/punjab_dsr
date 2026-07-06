@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smart-dsr-cache-v26-updated-topbar';
+const CACHE_NAME = 'smart-dsr-cache-v27-zoom-cleanup';
 const urlsToCache = [
   './login.html',
   './css/styles.css',

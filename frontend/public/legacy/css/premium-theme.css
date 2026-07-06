@@ -2854,7 +2854,7 @@ html.dark body.premium-body .premium-hero .hero-title .gradient-text {
 }
 @media (min-width: 1024px) {
   html {
-    zoom: 0.5;
+    zoom: 1;
   }
 }
 @media (min-width: 1024px) {
@@ -3129,7 +3129,7 @@ html.dark body.premium-body .premium-hero .hero-title .gradient-text {
 }
 @media (min-width: 1024px) {
   html {
-    zoom: 0.5 !important;
+    zoom: 1 !important;
   }
   body:not(.view-dashboard-active):not(.view-projects-active) {
     --sidebar-w: 292px !important;
@@ -3298,7 +3298,7 @@ html.dark body.premium-body .premium-hero .hero-title .gradient-text {
 @media (min-width: 1024px) {
   html[style],
   html {
-    zoom: 0.5 !important;
+    zoom: 1 !important;
   }
   body:not(.view-dashboard-active):not(.view-projects-active) #screen-app {
     min-height: 200vh !important;
@@ -4119,7 +4119,7 @@ html.dark .dash-punjab-map-stage img {
 @media (min-width: 1024px) {
   html,
   html[style] {
-    zoom: 0.65 !important;
+    zoom: 1 !important;
   }
   body:not(.view-dashboard-active):not(.view-projects-active) #screen-app {
     min-height: 154vh !important;
@@ -4678,7 +4678,7 @@ body.home-page.page-scrolled .nav-links-hub {
 @media (min-width: 1024px) {
   html,
   html[style] {
-    zoom: 0.83 !important;
+    zoom: 1 !important;
   }
 }
 
@@ -4691,11 +4691,11 @@ body.home-page.page-scrolled .nav-links-hub {
 
 @media (min-width: 1024px) {
   body.auth-page {
-    zoom: 0.83 !important;
+    zoom: 1 !important;
   }
 
   html:has(#screen-app.active) {
-    zoom: 0.83 !important;
+    zoom: 1 !important;
   }
 }
 
