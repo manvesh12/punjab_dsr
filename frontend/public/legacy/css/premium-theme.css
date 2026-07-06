@@ -5911,8 +5911,8 @@ html, body, #screen-app {
     overflow: visible !important;
     left: 0 !important;
     right: auto !important;
-    width: 125vw !important;
-    min-width: 125vw !important;
+    width: 205vw !important;
+    min-width: 205vw !important;
     max-width: none !important;
   }
 
@@ -5931,7 +5931,7 @@ html, body, #screen-app {
     padding-left: 24px !important;
     padding-right: 24px !important;
     background: #082b4d !important;
-    box-shadow: 100vw 0 0 #082b4d !important;
+    box-shadow: 200vw 0 0 #082b4d !important;
   }
 
   .dash-global-topbar .dash-gov-brand-row {
@@ -5939,7 +5939,7 @@ html, body, #screen-app {
     min-height: 92px !important;
     padding: 12px 32px !important;
     background: #ffffff !important;
-    box-shadow: 100vw 0 0 #ffffff !important;
+    box-shadow: 200vw 0 0 #ffffff !important;
   }
 
   .dash-global-topbar .dash-gov-menu-bar {
@@ -5947,7 +5947,7 @@ html, body, #screen-app {
     min-height: 45px !important;
     border-bottom: 3px solid #f2a123 !important;
     background: #082b4d !important;
-    box-shadow: 100vw 0 0 #082b4d, 100vw 3px 0 #f2a123 !important;
+    box-shadow: 200vw 0 0 #082b4d, 200vw 3px 0 #f2a123 !important;
   }
 
   .dash-global-topbar .dash-gov-notice-ticker {
@@ -5955,7 +5955,7 @@ html, body, #screen-app {
     min-height: 52px !important;
     padding: 10px 32px !important;
     background: #fff8ec !important;
-    box-shadow: 100vw 0 0 #fff8ec !important;
+    box-shadow: 200vw 0 0 #fff8ec !important;
   }
 
   .dash-global-topbar .dash-brand-left img {
