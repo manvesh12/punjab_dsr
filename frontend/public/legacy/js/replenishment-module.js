@@ -1,3 +1,4 @@
+(function() {
 // Replenishment Study Module
 // Handles the UI, compilation, and custom PDF generation for Replenishment Studies
 
@@ -50,7 +51,7 @@ function injectDraggableStyles() {
   document.head.appendChild(style);
 }
 
-function initReplenishmentView() {
+async function initReplenishmentView() {
   injectDraggableStyles();
   const container = document.getElementById('view-replenishment');
   if (!container) return;
@@ -75,6 +76,30 @@ function initReplenishmentView() {
     `;
     if (window.lucide) lucide.createIcons();
     return;
+  }
+  
+  editorContainer.innerHTML = `
+    <div style="max-width: 800px; margin: 40px auto; padding: 0 20px; text-align: center;">
+      <div style="border: 4px solid #f1f5f9; border-top: 4px solid #f59e0b; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto;"></div>
+      <p style="font-family: 'Plus Jakarta Sans', sans-serif; font-size:14px; color:#64748b; font-weight:700; margin-top:12px;">Loading saved reports from server...</p>
+    </div>
+  `;
+  
+  try {
+    const studies = await apiFetch(`/api/projects/${S.activeProject.id}/replenishment`);
+    window.replenishmentReports = (studies || []).filter(s => s.reportState?.type === 'replenishment').map(s => ({
+      id: s.id,
+      name: s.title,
+      createdAt: s.createdAt,
+      sections: s.reportState?.sections || [],
+      frontMatterPdfs: s.reportState?.frontMatterPdfs || {},
+      customPdfs: s.reportState?.customPdfs || {},
+      customSections: s.reportState?.customSections || [],
+      sectionOrder: s.reportState?.sectionOrder || []
+    }));
+  } catch (err) {
+    console.error("Failed to load reports from database:", err);
+    window.replenishmentReports = [];
   }
   
   // Show the main option cards
@@ -131,22 +156,51 @@ function getReplenishmentSectionTitle(viewId) {
     : fallback;
 }
 
-// Helper: load reports from localStorage
-function loadLocalReports() {
+// Helper: load reports from server database
+async function loadLocalReports() {
   if (!S.activeProject) return [];
-  const key = `repl_reports_${S.activeProject.id}`;
   try {
-    return JSON.parse(localStorage.getItem(key) || '[]');
-  } catch (e) {
+    const studies = await apiFetch(`/api/projects/${S.activeProject.id}/replenishment`);
+    return (studies || []).filter(s => s.reportState?.type === 'replenishment').map(s => ({
+      id: s.id,
+      name: s.title,
+      createdAt: s.createdAt,
+      sections: s.reportState?.sections || [],
+      frontMatterPdfs: s.reportState?.frontMatterPdfs || {},
+      customPdfs: s.reportState?.customPdfs || {},
+      customSections: s.reportState?.customSections || [],
+      sectionOrder: s.reportState?.sectionOrder || []
+    }));
+  } catch (err) {
+    console.error("Failed to load reports from database:", err);
     return [];
   }
 }
 
-// Helper: save reports to localStorage
-function saveLocalReports(reports) {
-  if (!S.activeProject) return;
-  const key = `repl_reports_${S.activeProject.id}`;
-  localStorage.setItem(key, JSON.stringify(reports));
+// Helper: save report to server database
+async function saveReportToServer(report) {
+  if (!report || !report.id) return;
+  try {
+    const payload = {
+      title: report.name,
+      status: 'DRAFT',
+      reportState: {
+        type: 'replenishment',
+        sections: report.sections || [],
+        frontMatterPdfs: report.frontMatterPdfs || {},
+        customPdfs: report.customPdfs || {},
+        customSections: report.customSections || [],
+        sectionOrder: report.sectionOrder || []
+      }
+    };
+    await apiFetch(`/api/replenishment/${report.id}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload)
+    });
+  } catch (err) {
+    console.error("Failed to save report to server:", err);
+    toast("Failed to auto-save change to server: " + err.message, "error");
+  }
 }
 
 // Expose functions to window
@@ -243,7 +297,7 @@ function showCreateReportForm() {
   }, 100);
 }
 
-function submitCustomReportName() {
+async function submitCustomReportName() {
   const input = document.getElementById('new-report-name-input');
   if (!input) return;
   const reportName = input.value.trim();
@@ -252,27 +306,49 @@ function submitCustomReportName() {
     return;
   }
   
-  const reports = loadLocalReports();
-  const newReport = {
-    id: 'rep_' + Date.now(),
-    name: reportName,
-    createdAt: new Date().toISOString(),
-    sections: []
-  };
-  reports.unshift(newReport);
-  saveLocalReports(reports);
-  
-  const editorContainer = document.getElementById('repl-editor-container');
-  if (editorContainer) {
-    renderCustomReportGenerator(editorContainer, newReport);
+  try {
+    const res = await apiFetch(`/api/projects/${S.activeProject.id}/replenishment`, {
+      method: 'POST',
+      body: JSON.stringify({
+        title: reportName,
+        reportState: {
+          type: 'replenishment',
+          sections: [],
+          frontMatterPdfs: {},
+          customPdfs: {},
+          customSections: [],
+          sectionOrder: []
+        }
+      })
+    });
+    
+    const newReport = {
+      id: res.id,
+      name: res.title,
+      createdAt: res.createdAt,
+      sections: [],
+      frontMatterPdfs: {},
+      customPdfs: {},
+      customSections: [],
+      sectionOrder: []
+    };
+    
+    window.activeReport = newReport;
+    const editorContainer = document.getElementById('repl-editor-container');
+    if (editorContainer) {
+      renderCustomReportGenerator(editorContainer, newReport);
+    }
+  } catch (err) {
+    toast("Failed to create report: " + err.message, "error");
   }
 }
 
-function showExistingReportsList() {
+async function showExistingReportsList() {
   const editorContainer = document.getElementById('repl-editor-container');
   if (!editorContainer) return;
   
-  const reports = loadLocalReports();
+  editorContainer.innerHTML = `<div style="padding:40px; text-align:center; font-weight:700; color:#1e293b;">Loading saved reports...</div>`;
+  const reports = await loadLocalReports();
   
   let rowsHtml = '';
   if (reports.length === 0) {
@@ -333,28 +409,49 @@ function showExistingReportsList() {
   `;
 }
 
-function openCustomReport(reportId) {
-  const reports = loadLocalReports();
-  const report = reports.find(r => r.id === reportId);
-  if (!report) return;
-  
-  const editorContainer = document.getElementById('repl-editor-container');
-  if (editorContainer) {
-    renderCustomReportGenerator(editorContainer, report);
+async function openCustomReport(reportId) {
+  try {
+    const s = await apiFetch(`/api/replenishment/${reportId}`);
+    const report = {
+      id: s.id,
+      name: s.title,
+      createdAt: s.createdAt,
+      sections: s.reportState?.sections || [],
+      frontMatterPdfs: s.reportState?.frontMatterPdfs || {},
+      customPdfs: s.reportState?.customPdfs || {},
+      customSections: s.reportState?.customSections || [],
+      sectionOrder: s.reportState?.sectionOrder || []
+    };
+    window.activeReport = report;
+    const editorContainer = document.getElementById('repl-editor-container');
+    if (editorContainer) {
+      renderCustomReportGenerator(editorContainer, report);
+    }
+  } catch (err) {
+    toast("Failed to open report: " + err.message, "error");
   }
 }
 
-function renameCustomReport(reportId) {
-  const reports = loadLocalReports();
-  const report = reports.find(r => r.id === reportId);
-  if (!report) return;
-  
-  showCustomPromptModal("Rename Report", report.name, (newName) => {
-    report.name = newName;
-    saveLocalReports(reports);
-    toast("Report renamed successfully!", "success");
-    showExistingReportsList();
-  }, "Rename");
+async function renameCustomReport(reportId) {
+  try {
+    const s = await apiFetch(`/api/replenishment/${reportId}`);
+    showCustomPromptModal("Rename Report", s.title, async (newName) => {
+      try {
+        await apiFetch(`/api/replenishment/${reportId}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            title: newName
+          })
+        });
+        toast("Report renamed successfully!", "success");
+        showExistingReportsList();
+      } catch (e) {
+        toast("Rename failed: " + e.message, "error");
+      }
+    }, "Rename");
+  } catch (err) {
+    toast("Failed to load report: " + err.message, "error");
+  }
 }
 
 function deleteCustomReport(reportId) {
@@ -363,29 +460,45 @@ function deleteCustomReport(reportId) {
     message: "This saved replenishment report will be removed from the list.",
     confirmText: "Delete",
     tone: "danger",
-    onConfirm: () => {
-      let reports = loadLocalReports();
-      reports = reports.filter(r => r.id !== reportId);
-      saveLocalReports(reports);
-      toast("Report deleted successfully!", "success");
-      showExistingReportsList();
+    onConfirm: async () => {
+      try {
+        await apiFetch(`/api/replenishment/${reportId}`, {
+          method: 'DELETE'
+        });
+        toast("Report deleted successfully!", "success");
+        showExistingReportsList();
+      } catch (err) {
+        toast("Failed to delete report: " + err.message, "error");
+      }
     }
   });
 }
 
-function downloadCustomReportPDFDirect(reportId) {
-  const reports = loadLocalReports();
-  const report = reports.find(r => r.id === reportId);
-  if (!report) return;
-  restoreReportFrontMatterPdfs(report);
-  
-  const checkedIds = report.sections || [];
-  if (checkedIds.length === 0) {
-    toast("No sections selected in this report to download.", "error");
-    return;
+async function downloadCustomReportPDFDirect(reportId) {
+  try {
+    const s = await apiFetch(`/api/replenishment/${reportId}`);
+    const report = {
+      id: s.id,
+      name: s.title,
+      createdAt: s.createdAt,
+      sections: s.reportState?.sections || [],
+      frontMatterPdfs: s.reportState?.frontMatterPdfs || {},
+      customPdfs: s.reportState?.customPdfs || {},
+      customSections: s.reportState?.customSections || [],
+      sectionOrder: s.reportState?.sectionOrder || []
+    };
+    restoreReportFrontMatterPdfs(report);
+    
+    const checkedIds = report.sections || [];
+    if (checkedIds.length === 0) {
+      toast("No sections selected in this report to download.", "error");
+      return;
+    }
+    
+    generateReplenishmentPDF(report.name, checkedIds, reportId);
+  } catch (err) {
+    toast("Failed to download PDF: " + err.message, "error");
   }
-  
-  generateReplenishmentPDF(report.name, checkedIds, reportId);
 }
 
 function getCurrentSelectedReportSectionIds() {
@@ -394,14 +507,11 @@ function getCurrentSelectedReportSectionIds() {
   return Array.from(new Set(Array.from(checkboxes).map(c => c.value).filter(Boolean)));
 }
 
-function saveReportSelection(reportId) {
-  const reports = loadLocalReports();
-  const report = reports.find(r => r.id === reportId);
-  if (!report) return;
-  
-  report.sections = getCurrentSelectedReportSectionIds();
-  
-  saveLocalReports(reports);
+async function saveReportSelection(reportId) {
+  if (window.activeReport && window.activeReport.id === reportId) {
+    window.activeReport.sections = getCurrentSelectedReportSectionIds();
+    await saveReportToServer(window.activeReport);
+  }
 }
 
 function initDragAndDrop(reportId, reportName) {
@@ -540,16 +650,14 @@ function saveNewSectionOrder(reportId, reportName) {
   window.updateCustomReportPreview(reportName, reportId);
 }
 
-function resetSectionOrder(reportId, reportName) {
+async function resetSectionOrder(reportId, reportName) {
   showCustomConfirmModal({
     title: "Reset section order?",
     message: "Your selected sections will remain selected, but the order will return to the default DSR sequence.",
     confirmText: "Reset Order",
     tone: "warning",
-    onConfirm: () => {
-      const reports = loadLocalReports();
-      const report = reports.find(r => r.id === reportId);
-      if (report) {
+    onConfirm: async () => {
+      if (window.activeReport && window.activeReport.id === reportId) {
         const defaultOrder = [
           'front-matter',
           'chapters',
@@ -557,12 +665,12 @@ function resetSectionOrder(reportId, reportName) {
           'anx1', 'anx2', 'anx3', 'anx4', 'anx5', 'anx6', 'anx7',
           'annexure-b', 'annexure-c', 'annexure-d', 'annexure-e', 'annexure-f', 'annexure-g', 'annexure-h', 'annexure-i', 'annexure-j', 'annexure-k'
         ];
-        report.sectionOrder = defaultOrder;
-        saveLocalReports(reports);
+        window.activeReport.sectionOrder = defaultOrder;
+        await saveReportToServer(window.activeReport);
 
         const editorContainer = document.getElementById('repl-editor-container');
         if (editorContainer) {
-          renderCustomReportGenerator(editorContainer, report);
+          renderCustomReportGenerator(editorContainer, window.activeReport);
         }
         toast("Section order reset to default successfully!", "success");
       }
@@ -596,7 +704,7 @@ function closeCustomPdfModal() {
   }
 }
 
-function confirmAddCustomSection(reportId, reportName) {
+async function confirmAddCustomSection(reportId, reportName) {
   const input = document.getElementById('custom-pdf-title-input');
   if (!input) return;
   const name = input.value.trim();
@@ -607,22 +715,20 @@ function confirmAddCustomSection(reportId, reportName) {
   
   closeCustomPdfModal();
   
-  const reports = loadLocalReports();
-  const report = reports.find(r => r.id === reportId);
-  if (report) {
-    if (!report.customSections) report.customSections = [];
+  if (window.activeReport && window.activeReport.id === reportId) {
+    if (!window.activeReport.customSections) window.activeReport.customSections = [];
     const newSecId = 'custom-pdf-' + Date.now();
     const newSec = { id: newSecId, name: name, type: 'Custom PDF', isCustom: true };
     
-    report.customSections.push(newSec);
-    if (!report.sectionOrder) report.sectionOrder = [];
-    report.sectionOrder.push(newSecId);
+    window.activeReport.customSections.push(newSec);
+    if (!window.activeReport.sectionOrder) window.activeReport.sectionOrder = [];
+    window.activeReport.sectionOrder.push(newSecId);
     
-    saveLocalReports(reports);
+    await saveReportToServer(window.activeReport);
     
     const editorContainer = document.getElementById('repl-editor-container');
     if (editorContainer) {
-      renderCustomReportGenerator(editorContainer, report);
+      renderCustomReportGenerator(editorContainer, window.activeReport);
     }
     toast("Custom PDF section added successfully!", "success");
   }
@@ -787,21 +893,19 @@ function removeCustomSectionPdf(reportId, sectionId, reportName) {
     message: "The PDF attached to this custom section will be removed.",
     confirmText: "Remove",
     tone: "danger",
-    onConfirm: () => {
-      const reports = loadLocalReports();
-      const report = reports.find(r => r.id === reportId);
-      if (report) {
-        if (report.customPdfs) {
-          delete report.customPdfs[sectionId];
+    onConfirm: async () => {
+      if (window.activeReport && window.activeReport.id === reportId) {
+        if (window.activeReport.customPdfs) {
+          delete window.activeReport.customPdfs[sectionId];
         }
         if (S.uploadedPDFs) {
           delete S.uploadedPDFs[sectionId];
         }
-        saveLocalReports(reports);
+        await saveReportToServer(window.activeReport);
 
         const editorContainer = document.getElementById('repl-editor-container');
         if (editorContainer) {
-          renderCustomReportGenerator(editorContainer, report);
+          renderCustomReportGenerator(editorContainer, window.activeReport);
         }
         toast("PDF removed successfully!", "success");
       }
@@ -815,27 +919,25 @@ function deleteCustomSection(reportId, sectionId, reportName) {
     message: "This custom PDF section and its uploaded file will be deleted from the report.",
     confirmText: "Delete",
     tone: "danger",
-    onConfirm: () => {
-      const reports = loadLocalReports();
-      const report = reports.find(r => r.id === reportId);
-      if (report) {
-        if (report.customSections) {
-          report.customSections = report.customSections.filter(cs => cs.id !== sectionId);
+    onConfirm: async () => {
+      if (window.activeReport && window.activeReport.id === reportId) {
+        if (window.activeReport.customSections) {
+          window.activeReport.customSections = window.activeReport.customSections.filter(cs => cs.id !== sectionId);
         }
-        if (report.sectionOrder) {
-          report.sectionOrder = report.sectionOrder.filter(id => id !== sectionId);
+        if (window.activeReport.sectionOrder) {
+          window.activeReport.sectionOrder = window.activeReport.sectionOrder.filter(id => id !== sectionId);
         }
-        if (report.customPdfs) {
-          delete report.customPdfs[sectionId];
+        if (window.activeReport.customPdfs) {
+          delete window.activeReport.customPdfs[sectionId];
         }
         if (S.uploadedPDFs) {
           delete S.uploadedPDFs[sectionId];
         }
-        saveLocalReports(reports);
+        await saveReportToServer(window.activeReport);
 
         const editorContainer = document.getElementById('repl-editor-container');
         if (editorContainer) {
-          renderCustomReportGenerator(editorContainer, report);
+          renderCustomReportGenerator(editorContainer, window.activeReport);
         }
         toast("Custom section deleted successfully!", "success");
       }
@@ -3118,3 +3220,5 @@ function showCustomPromptModal(title, defaultValue, onConfirm, buttonText = "Con
 
 window.showCustomConfirmModal = showCustomConfirmModal;
 window.showCustomPromptModal = showCustomPromptModal;
+
+})();

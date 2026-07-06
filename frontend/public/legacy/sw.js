@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smart-dsr-cache-v19-white-confirm-modals';
+const CACHE_NAME = 'smart-dsr-cache-v22-decoupled-backend-custom-builders';
 const urlsToCache = [
   './login.html',
   './css/styles.css',

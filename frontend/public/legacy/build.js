@@ -102,8 +102,8 @@ function compile() {
 
     // 6. Append bundled and extra JS modules + Leaflet map script + styles
     html += `\n<script defer src="${JS_BUNDLE_FILE}?v=${ASSET_VERSION}-v3"></script>`;
-    html += `\n<script defer src="js/model-dsr-module.js?v=2"></script>`;
-    html += `\n<script defer src="js/replenishment-module.js?v=21"></script>`;
+    html += `\n<script defer src="js/model-dsr-module.js?v=10"></script>`;
+    html += `\n<script defer src="js/replenishment-module.js?v=22"></script>`;
     
     html += `\n<script>
 document.addEventListener("DOMContentLoaded", function() {
