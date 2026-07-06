@@ -43,12 +43,11 @@ const JS_FILES = [
   'js/pdf.js',
   'js/pdf-preview.js',
   'js/audit-logs.js',
-  'js/sdlc.js',
   'js/model-dsr.js',
   'js/main.js'
 ];
 
-const ASSET_VERSION = 'site-zoom-20260706-sidebar-scroll-v1';
+const ASSET_VERSION = 'site-zoom-20260706-role-cleanup-v1';
 const applyAssetVersion = (html) => html.replace(/\{\{ASSET_VERSION\}\}/g, ASSET_VERSION);
 
 function buildJsBundle() {

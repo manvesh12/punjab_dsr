@@ -225,7 +225,7 @@
                   <i data-lucide="leaf" style="width:13px; height:13px;"></i> EMGSM 2020
                 </button>
                 <button class="dash-action-icon-btn" onclick="dashFocusSearch()" title="Search portal"><i data-lucide="search" style="width:16px; height:16px;"></i></button>
-                <button class="dash-action-icon-btn" onclick="showView('sdlc-portal', null)"><i data-lucide="help-circle" style="width:16px; height:16px;"></i></button>
+                <button class="dash-action-icon-btn" onclick="clearActiveProject(); showView('dashboard', null); setTimeout(()=>document.getElementById('dash-contact-section')?.scrollIntoView({behavior:'smooth', block:'start'}), 80);"><i data-lucide="help-circle" style="width:16px; height:16px;"></i></button>
                 <button class="dash-action-icon-btn" onclick="dashSharePortal()" title="Copy portal link"><i data-lucide="share-2" style="width:16px; height:16px;"></i></button>
                 <button class="dash-action-icon-btn dash-theme-toggle" onclick="toggleDarkMode()" title="Toggle dark mode" aria-label="Toggle dark mode" data-theme-toggle><i data-lucide="moon" style="width:16px; height:16px;"></i></button>
                 <button onclick="doLogout()" class="dash-btn-logout">

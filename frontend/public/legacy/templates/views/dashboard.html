@@ -1153,7 +1153,7 @@
           <i data-lucide="leaf" style="width:13px; height:13px;"></i> EMGSM 2020
         </button>
         <button class="dash-action-icon-btn" onclick="dashFocusSearch()" title="Search portal"><i data-lucide="search" style="width:16px; height:16px;"></i></button>
-        <button class="dash-action-icon-btn" onclick="showView('sdlc-portal', null)"><i data-lucide="help-circle" style="width:16px; height:16px;"></i></button>
+        <button class="dash-action-icon-btn" onclick="document.getElementById('dash-contact-section')?.scrollIntoView({behavior:'smooth', block:'start'})"><i data-lucide="help-circle" style="width:16px; height:16px;"></i></button>
         <button class="dash-action-icon-btn" onclick="dashSharePortal()" title="Copy portal link"><i data-lucide="share-2" style="width:16px; height:16px;"></i></button>
         <button class="dash-action-icon-btn dash-theme-toggle" onclick="toggleDarkMode()" title="Toggle dark mode" aria-label="Toggle dark mode" data-theme-toggle><i data-lucide="moon" style="width:16px; height:16px;"></i></button>
         <button onclick="doLogout()" class="dash-btn-logout">
@@ -1252,7 +1252,7 @@
             <button onclick="showView('generate', null)" class="dash-btn-hero-outline">
               <i data-lucide="file-text" style="width: 15px; height: 15px;"></i> View Guidelines
             </button>
-            <button onclick="showView('sdlc-portal', null)" class="dash-btn-hero-outline">
+            <button onclick="document.getElementById('dash-contact-section')?.scrollIntoView({behavior:'smooth', block:'start'})" class="dash-btn-hero-outline">
               <i data-lucide="help-circle" style="width: 15px; height: 15px;"></i> Help & Support
             </button>
           </div>
@@ -1438,7 +1438,7 @@
               <span class="dash-quick-subtitle">All 23 districts</span>
             </div>
           </div>
-          <div onclick="showView('sdlc-portal', null)" class="dash-quick-access-btn">
+          <div onclick="document.getElementById('dash-contact-section')?.scrollIntoView({behavior:'smooth', block:'start'})" class="dash-quick-access-btn">
             <div class="dash-quick-icon-box" style="color: #10B981;"><i data-lucide="help-circle" style="width: 20px; height: 20px;"></i></div>
             <div class="dash-quick-text-box">
               <span class="dash-quick-title">Help & FAQ</span>
@@ -1454,7 +1454,7 @@
           <span class="dash-panel-title">
             <i data-lucide="phone" style="width: 20px; height: 20px; color: #C49A58;"></i> Contact & Demo Support
           </span>
-          <span class="dash-panel-link-all" onclick="showView('sdlc-portal', null)">Open Help Desk</span>
+          <span class="dash-panel-link-all" onclick="document.getElementById('dash-contact-section')?.scrollIntoView({behavior:'smooth', block:'start'})">Open Help Desk</span>
         </div>
         <div class="dash-quick-access-grid" style="grid-template-columns: repeat(4, minmax(0, 1fr));">
           <div class="dash-quick-access-btn">
@@ -1505,7 +1505,7 @@
         <div>
           <h3 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 700; color: var(--text); text-transform: uppercase; letter-spacing: 0.6px; margin: 0 0 10px 0;">Support</h3>
           <div style="display: flex; flex-direction: column; gap: 6px;">
-            <a onclick="showView('sdlc-portal', null)" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; color: var(--text-soft); text-decoration: none; cursor: pointer;">Helpdesk</a>
+            <a onclick="document.getElementById('dash-contact-section')?.scrollIntoView({behavior:'smooth', block:'start'})" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; color: var(--text-soft); text-decoration: none; cursor: pointer;">Helpdesk</a>
             <a href="#" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; color: var(--text-soft); text-decoration: none;">Accessibility Statement</a>
             <a href="#" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; color: var(--text-soft); text-decoration: none;">Feedback</a>
           </div>

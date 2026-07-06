@@ -2095,7 +2095,6 @@ html.dark .sidebar #report-nav,
 html.dark .sidebar #annexure-nav,
 html.dark .sidebar #tables-nav,
 html.dark .sidebar #finalize-nav,
-html.dark .sidebar #sdlc-nav,
 html.dark .sidebar #inline-more-annexures,
 html.dark .sidebar #inline-more-annexures[style] {
   background: #071a33 !important;
@@ -4455,8 +4454,7 @@ body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar 
   #view-workflow > .header-row,
   #view-settings > .header-row,
   #view-users > .header-row,
-  #view-audit-logs > .header-row,
-  #view-sdlc-portal > .header-row {
+  #view-audit-logs > .header-row {
     margin-top: var(--editor-notice-clearance) !important;
   }
 }

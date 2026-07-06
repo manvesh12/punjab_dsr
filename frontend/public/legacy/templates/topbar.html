@@ -66,7 +66,7 @@
       <button class="dash-action-icon-btn" onclick="dashFocusSearch()" title="Search portal" aria-label="Search portal">
         <i data-lucide="search" style="width:16px; height:16px;"></i>
       </button>
-      <button class="dash-action-icon-btn" onclick="showView('sdlc-portal', null)" title="Help" aria-label="Help">
+      <button class="dash-action-icon-btn" onclick="clearActiveProject(); showView('dashboard', null); setTimeout(()=>document.getElementById('dash-contact-section')?.scrollIntoView({behavior:'smooth', block:'start'}), 80);" title="Help" aria-label="Help">
         <i data-lucide="help-circle" style="width:16px; height:16px;"></i>
       </button>
       <button class="dash-action-icon-btn" onclick="dashSharePortal()" title="Copy portal link" aria-label="Copy portal link">

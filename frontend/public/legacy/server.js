@@ -102,7 +102,7 @@ function normalizeRole(role) {
 function permissionsForRole(role) {
   const value = normalizeRole(role);
   if (value === 'ADMIN') return ['UPLOAD', 'REVIEW', 'ADMIN'];
-  if (['IIT_ROPAR', 'GIS', 'REVIEWER', 'REVIEWER_1', 'REVIEWER_2', 'SDLC'].includes(value)) return ['REVIEW'];
+  if (['IIT_ROPAR', 'GIS', 'REVIEWER', 'REVIEWER_1', 'REVIEWER_2'].includes(value)) return ['REVIEW'];
   if (['SDO', 'JE', 'AXEN', 'OFFICER'].includes(value)) return ['UPLOAD'];
   return [];
 }
@@ -132,9 +132,8 @@ function defaultUsers() {
   return [
     { id: 1, username: 'admin@demo.com', email: 'admin@demo.com', fullName: 'Demo Admin', role: 'ADMIN', active: true },
     { id: 2, username: 'iit@demo.com', email: 'iit@demo.com', fullName: 'IIT Ropar Reviewer', role: 'IIT_ROPAR', active: true },
-    { id: 3, username: 'sdlc@demo.com', email: 'sdlc@demo.com', fullName: 'SDLC Committee', role: 'SDLC', district: 'Jalandhar', active: true },
-    { id: 4, username: 'sdo@demo.com', email: 'sdo@demo.com', fullName: 'SDO Demo User', role: 'SDO', district: 'Jalandhar', active: true },
-    { id: 5, username: 'gis@demo.com', email: 'gis@demo.com', fullName: 'GIS Demo User', role: 'GIS', active: true }
+    { id: 3, username: 'sdo@demo.com', email: 'sdo@demo.com', fullName: 'SDO Demo User', role: 'SDO', district: 'Jalandhar', active: true },
+    { id: 4, username: 'gis@demo.com', email: 'gis@demo.com', fullName: 'GIS Demo User', role: 'GIS', active: true }
   ].map(normalizeUser);
 }
 
@@ -357,7 +356,6 @@ const server = http.createServer((req, res) => {
             if (email.includes('admin')) role = 'ROLE_ADMIN';
             else if (email.includes('iit')) role = 'ROLE_IIT_ROPAR';
             else if (email.includes('sdo')) role = 'ROLE_SDO';
-            else if (email.includes('sdlc')) role = 'ROLE_SDLC';
             else if (email.includes('gis')) role = 'ROLE_GIS';
             else if (email.includes('je')) role = 'ROLE_JE';
             else if (email.includes('axen')) role = 'ROLE_AXEN';

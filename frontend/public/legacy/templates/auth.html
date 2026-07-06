@@ -75,9 +75,6 @@
           <div id="tab-btn-authority" class="auth-tab" onclick="switchAuthMode('authority')">
             Govt. Authority
           </div>
-          <div id="tab-btn-sdlc" class="auth-tab" onclick="switchAuthMode('sdlc')">
-            SDLC Portal
-          </div>
         </div>
 
         <!-- Staff Login -->
@@ -154,32 +151,6 @@
 
           <button class="btn-primary" onclick="doAuthorityVerify()" style="margin-top: 10px;">
             Verify & Login ->
-          </button>
-        </div>
-
-        <!-- SDLC Login -->
-        <div id="auth-form-sdlc" class="auth-form">
-          <div class="auth-form-title">SDLC Portal</div>
-          <div class="auth-form-sub">Sign in to Sub-Divisional Committee account</div>
-
-          <div class="f-field">
-            <label>SDLC ID / Email</label>
-            <div class="input-wrap">
-              <input type="text" id="sdlc-email" value="" placeholder="Enter SDLC ID or Email">
-            </div>
-          </div>
-
-          <div class="f-field">
-            <label>Password</label>
-            <div class="input-wrap">
-              <input type="password" id="sdlc-pass" value="" placeholder="********">
-            </div>
-          </div>
-
-          <div class="form-err" id="sdlc-error" style="display:none; color:red; font-size:12px; margin-bottom:10px;"></div>
-
-          <button class="btn-primary" onclick="doSdlcLogin()">
-            Verify & Access Portal ->
           </button>
         </div>
 

@@ -294,7 +294,6 @@ function resetProjectWorkingState(activeProject) {
     S[key] = defaults[key] !== undefined ? defaults[key] : {};
   });
   S.chapterPDFs = {};
-  S.sdlcData = null;
   S.activeProject = activeProject || null;
   window.reviewerNotes = {};
 }
@@ -422,14 +421,6 @@ const RBAC_ROLE_RULES = {
     modules: ['dashboard', 'projects', 'front-matter', 'chapters', 'anx1', 'anx2', 'annexure-f', 'workflow', 'history'],
     chapters: [1, 2, 3, 4, 5],
     access: 'Survey + Reviewer'
-  },
-  SDLC: {
-    label: 'SDLC',
-    upload: true,
-    review: false,
-    modules: ['sdlc-portal', 'dashboard', 'projects', 'history'],
-    chapters: [],
-    access: 'District-level data'
   },
   SDO: {
     label: 'SDO',
@@ -631,7 +622,6 @@ function getBackendRole() {
   if (cleaned) return cleaned;
   if (S?.role === 'admin') return 'ADMIN';
   if (S?.role === 'reviewer') return 'REVIEWER';
-  if (S?.role === 'sdlc') return 'SDLC';
   return 'OFFICER';
 }
 function getRoleRule() {
@@ -661,7 +651,7 @@ function getFirstAllowedView() {
     'anx1', 'anx2', 'anx3', 'anx4', 'anx5', 'anx6', 'anx7',
     'annexure-b', 'annexure-c', 'annexure-d', 'annexure-e', 'annexure-f',
     'annexure-g', 'annexure-h', 'annexure-i', 'annexure-j', 'annexure-k',
-    'workflow', 'history', 'sdlc-portal', 'users', 'audit-logs', 'model-dsr'
+    'workflow', 'history', 'users', 'audit-logs', 'model-dsr'
   ];
   return preferredViews.find(viewId => hasModuleAccess(viewId) && document.getElementById('view-' + viewId)) || 'dashboard';
 }
@@ -671,7 +661,7 @@ function getFirstAllowedProjectView() {
     'anx1', 'anx2', 'anx3', 'anx4', 'anx5', 'anx6', 'anx7',
     'annexure-b', 'annexure-c', 'annexure-d', 'annexure-e', 'annexure-f',
     'annexure-g', 'annexure-h', 'annexure-i', 'annexure-j', 'annexure-k',
-    'sdlc-portal', 'workflow', 'history'
+    'workflow', 'history'
   ];
   return projectViews.find(viewId => hasModuleAccess(viewId) && document.getElementById('view-' + viewId)) || 'projects';
 }
@@ -2630,20 +2620,13 @@ function renderRiverTags(riversString) {
 function switchAuthMode(mode) {
   const facultyTab = document.getElementById('tab-btn-faculty');
   const authorityTab = document.getElementById('tab-btn-authority');
-  const sdlcTab = document.getElementById('tab-btn-sdlc');
   const facultyForm = document.getElementById('auth-form-faculty');
   const authorityForm = document.getElementById('auth-form-authority');
-  const sdlcForm = document.getElementById('auth-form-sdlc');
   if (facultyTab && authorityTab && facultyForm && authorityForm) {
     facultyTab.classList.toggle('active', mode === 'faculty');
     authorityTab.classList.toggle('active', mode === 'authority');
-    if (sdlcTab) sdlcTab.classList.toggle('active', mode === 'sdlc');
     facultyForm.classList.toggle('active', mode === 'faculty');
     authorityForm.classList.toggle('active', mode === 'authority');
-    if (sdlcForm) {
-      sdlcForm.style.display = mode === 'sdlc' ? 'flex' : 'none';
-      sdlcForm.classList.toggle('active', mode === 'sdlc');
-    }
   }
   if (window.initLucide) initLucide();
 }
@@ -2703,8 +2686,6 @@ async function doLogin() {
       let uiRole = 'user';
       if (backendRole.includes('ADMIN')) {
           uiRole = 'admin';
-      } else if (backendRole.includes('SDLC')) {
-          uiRole = 'sdlc';
       } else if (backendRole.includes('DISTRICT_OWNER')) {
           uiRole = 'authority';
       } else if (backendRole.includes('REVIEWER') || backendRole.includes('STATE_ADMIN') || backendRole.includes('IIT_ROPAR') || backendRole.includes('GIS')) {
@@ -2868,46 +2849,7 @@ function doLogout() {
   if (typeof updateDarkModeIcon === 'function') {
     updateDarkModeIcon();
   }
-}
-async function doSdlcLogin() {
-  const email = document.getElementById('sdlc-email').value.trim();
-  const pass = document.getElementById('sdlc-pass').value;
-  const err = document.getElementById('sdlc-error');
-  if (!email || !pass) { err.style.display='block'; err.textContent='Please fill all fields.'; return; }
-  err.style.display='none';
-  try {
-    const data = await apiFetch('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ username: email, password: pass })
-    });
-    if (data.token) {
-      localStorage.setItem('dsr_token', data.token);
-    } else {
-      localStorage.removeItem('dsr_token');
-    }
-    S.backendRole = data.role || 'ROLE_SDLC';
-    S.permissions = data.permissions || [];
-    S.scope = data.scope || {};
-    S.accessLabel = data.accessLabel || '';
-    S.user = {
-      name: data.fullName || data.username || 'SDLC Committee',
-      email: data.email || email,
-      role: 'sdlc',
-      backendRole: S.backendRole,
-      district: data.scope?.district || 'Jalandhar',
-      scope: data.scope || {},
-      accessLabel: data.accessLabel || ''
-    };
-    S.role = 'sdlc';
-    localStorage.setItem('dsr_user', JSON.stringify(S.user));
-    localStorage.setItem('dsr_role', S.role);
-    await showAppScreen();
-  } catch (error) {
-    err.style.display='block';
-    err.textContent = error.message || 'Invalid SDLC credentials.';
-  }
-}
-async function showAppScreen() {
+}async function showAppScreen() {
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-app').classList.add('active');
   if (typeof initThemeFromStorage === 'function') {
@@ -2919,8 +2861,7 @@ async function showAppScreen() {
   if (sidebarAvatar) sidebarAvatar.textContent = init;
   const sidebarName = document.getElementById('sb-uname');
   if (sidebarName) sidebarName.textContent = S.user.name;
-  const isSdlc = S.role === 'sdlc';
-  const roleLabel = (typeof getRoleRule === 'function') ? getRoleRule().label : (S.role==='admin'?'System Admin':S.role==='reviewer'?'Section Reviewer':isSdlc?'SDLC Committee':'Report Coordinator');
+  const roleLabel = (typeof getRoleRule === 'function') ? getRoleRule().label : (S.role==='admin'?'System Admin':S.role==='reviewer'?'Section Reviewer':'Report Coordinator');
   const sidebarRole = document.getElementById('sb-urole');
   if (sidebarRole) sidebarRole.textContent = S.accessLabel || roleLabel;
   const navAuditLogs = document.getElementById('nav-audit-logs');
@@ -2951,22 +2892,14 @@ async function showAppScreen() {
     const el = document.getElementById(id);
     if (el) el.style.display = S.role === 'admin' ? 'block' : 'none';
   });
-  const sdlcNav = document.getElementById('sdlc-nav');
-  if (sdlcNav) sdlcNav.style.display = isSdlc ? 'block' : 'none';
   ['report-nav', 'annexure-nav', 'replenishment-nav', 'tables-nav', 'finalize-nav'].forEach(navId => {
     const el = document.getElementById(navId);
     if (el) {
-      if (isSdlc) el.style.display = 'none';
     }
   });
   await initApp();
   if (typeof repairMainContentStructure === 'function') repairMainContentStructure();
   let targetView = window.location.hash ? window.location.hash.slice(1).trim() : currentViewId;
-  if (isSdlc) {
-    targetView = 'sdlc-portal';
-  } else if (targetView === 'sdlc-portal') {
-    targetView = 'dashboard';
-  }
   if (typeof hasModuleAccess === 'function' && !hasModuleAccess(targetView)) {
     targetView = typeof getFirstAllowedView === 'function' ? getFirstAllowedView() : 'dashboard';
   }
@@ -3202,7 +3135,7 @@ function dashRunSearch(event) {
     { words: ['sign', 'signature', 'esign', 'approval'], view: 'esign', label: 'e-signature panel' },
     { words: ['workflow', 'review', 'status'], view: 'workflow', label: 'workflow' },
     { words: ['pdf', 'download', 'guideline', 'guidelines', 'generate'], view: 'generate', label: 'downloads and PDF generation' },
-    { words: ['help', 'faq', 'support', 'contact', 'rti'], view: 'sdlc-portal', label: 'help and support' },
+    { words: ['help', 'faq', 'support', 'contact', 'rti'], view: 'dashboard', label: 'help and support' },
     { words: ['district', 'progress', 'dashboard'], action: () => document.getElementById('dash-main-content')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), label: 'dashboard district section' }
   ];
   const match = routes.find(route => route.words.some(word => query.includes(word)));
@@ -3523,8 +3456,6 @@ async function openProject(id) {
       if (stateSnapshot.finalPdfName) S.activeProject.finalPdfName = stateSnapshot.finalPdfName;
       if (stateSnapshot.finalPdfGeneratedAt) S.activeProject.finalPdfGeneratedAt = stateSnapshot.finalPdfGeneratedAt;
       if (stateSnapshot.finalPdfPages) S.activeProject.finalPdfPages = stateSnapshot.finalPdfPages;
-      if (stateSnapshot.sdlcData) S.sdlcData = stateSnapshot.sdlcData;
-      else S.sdlcData = null;
       if (stateSnapshot.anx6PdfName) {
         S.activeProject.anx6PdfName = stateSnapshot.anx6PdfName;
         const index = S.projects.findIndex(p => p.id === S.activeProject.id);
@@ -3670,7 +3601,6 @@ async function persistProjectState() {
     finalPdfPages: S.activeProject.finalPdfPages || 0,
     anx6PdfName: S.activeProject.anx6PdfName,
     anx7PdfName: S.activeProject.anx7PdfName,
-    sdlcData: S.sdlcData,
     phaseMetadata: S.phaseMetadata || null,
     phaseChangeLog: S.phaseChangeLog || []
   };
@@ -5393,7 +5323,7 @@ function generateAllGraphsPDF() {
 /* js/users.js */
 /* User management */
 const USER_ROLE_OPTIONS = [
-  'IIT_ROPAR', 'SDLC', 'SDO', 'JE', 'AXEN', 'GIS',
+  'IIT_ROPAR', 'SDO', 'JE', 'AXEN', 'GIS',
   'REVIEWER_1', 'REVIEWER_2', 'ADMIN', 'OFFICER', 'DATA_ENTRY', 'REVIEWER'
 ];
 function usersBadge(ok) {
@@ -13370,79 +13300,7 @@ function generateFinalPDF() {
       }
     }
   });
-
-  if (S.sdlcData && S.sdlcData.projectId === S.activeProject.id && S.sdlcData.verified) {
-    doc.addPage();
-    addPageHeader('SDLC RECONCILIATION REPORT');
-    y = 25;
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(13);
-    doc.setTextColor(...navyArr);
-    doc.text('SDLC SURVEY VERIFICATION REPORT', W/2, y, {align:'center'});
-    y += 12;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.setTextColor(50, 50, 70);
-    const sdlcDesc = "In compliance with EMGSM 2020 guidelines, this annexure presents the joint physical verification and reconciliation results conducted by the Sub-Divisional Level Committee (SDLC). The tables below highlight differences compared between the draft DSR and the verified ground survey data.";
-    const linesDesc = doc.splitTextToSize(sdlcDesc, W - 2*pad);
-    doc.text(linesDesc, pad, y);
-    y += linesDesc.length * 5 + 8;
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.text('Annexure IV - Route Carrying Capacity Verification', pad, y);
-    y += 5;
-    doc.autoTable({
-      startY: y,
-      margin: {left:pad, right:pad},
-      styles: {fontSize: 8},
-      headStyles: {fillColor: navyArr},
-      head: [['Route Name', 'DSR Value', 'SDLC Value', 'Variance', 'Status']],
-      body: S.sdlcData.anx4.map(row => [row.name, row.dsrVal, row.sdlcVal, row.variance, row.matched ? 'MATCHED' : 'RECONCILED'])
-    });
-    y = doc.lastAutoTable.finalY + 10;
-    if (y > 220) { doc.addPage(); addPageHeader('SDLC RECONCILIATION REPORT'); y = 25; }
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.text('Annexure V - Elevation Bench Marks Verification', pad, y);
-    y += 5;
-    doc.autoTable({
-      startY: y,
-      margin: {left:pad, right:pad},
-      styles: {fontSize: 8},
-      headStyles: {fillColor: navyArr},
-      head: [['BM Station ID', 'DSR Coordinates', 'SDLC Coordinates', 'DSR Elevation', 'SDLC Elevation', 'Status']],
-      body: S.sdlcData.anx5.map(row => [row.id, row.dsrCoords, row.sdlcCoords, row.dsrElev, row.sdlcElev, row.matched ? 'MATCHED' : 'RECONCILED'])
-    });
-    y = doc.lastAutoTable.finalY + 10;
-    if (y > 220) { doc.addPage(); addPageHeader('SDLC RECONCILIATION REPORT'); y = 25; }
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.text('Annexure VI - Quarry Cluster Area Verification', pad, y);
-    y += 5;
-    doc.autoTable({
-      startY: y,
-      margin: {left:pad, right:pad},
-      styles: {fontSize: 8},
-      headStyles: {fillColor: navyArr},
-      head: [['Cluster ID', 'DSR Area', 'SDLC Area', 'Variance', 'Status']],
-      body: S.sdlcData.anx6.map(row => [row.id, row.dsrVal, row.sdlcVal, row.variance, row.matched ? 'MATCHED' : 'RECONCILED'])
-    });
-    y = doc.lastAutoTable.finalY + 10;
-    if (y > 220) { doc.addPage(); addPageHeader('SDLC RECONCILIATION REPORT'); y = 25; }
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.text('Annexure VII - Transportation Traffic Density Verification', pad, y);
-    y += 5;
-    doc.autoTable({
-      startY: y,
-      margin: {left:pad, right:pad},
-      styles: {fontSize: 8},
-      headStyles: {fillColor: navyArr},
-      head: [['Corridor / Route Name', 'DSR Traffic Density', 'SDLC Traffic Density', 'Variance', 'Status']],
-      body: S.sdlcData.anx7.map(row => [row.name, row.dsrVal, row.sdlcVal, row.variance, row.matched ? 'MATCHED' : 'RECONCILED'])
-    });
-  }
-  const total=doc.getNumberOfPages();
+  const total=doc.getNumberOfPages();
   for (let p=1;p<=total;p++) {
     doc.setPage(p);
     doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(120,120,140);
@@ -16495,253 +16353,7 @@ async function loadAuditLogs() {
 window.loadAuditLogs = loadAuditLogs;
 
 ;
-
-/* js/sdlc.js */
-/* ══════════════════════════════════════
-   SDLC PORTAL LOGIC & RECONCILIATION
-   ══════════════════════════════════════ */
-let sdlcActiveTab = 'anx4';
-const sdlcShowView = window.showView;
-window.showView = function(id, btn, push) {
-  if (id === 'sdlc-portal') {
-    initSdlcPortal();
-  }
-  if (sdlcShowView) {
-    sdlcShowView(id, btn, push);
-  }
-};
-function initSdlcPortal() {
-  populateSdlcProjects();
-  resetSdlcPortalUI();
-}
-function populateSdlcProjects() {
-  const select = document.getElementById('sdlc-project-select');
-  if (!select) return;
-  select.innerHTML = '<option value="">-- Select Project --</option>';
-  if (S.projects && S.projects.length > 0) {
-    S.projects.forEach(p => {
-      const opt = document.createElement('option');
-      opt.value = p.id;
-      opt.textContent = `${p.title} (${p.district})`;
-      select.appendChild(opt);
-    });
-  }
-}
-function resetSdlcPortalUI() {
-  const container = document.getElementById('sdlc-comparison-container');
-  if (container) container.style.display = 'none';
-  const status = document.getElementById('sdlc-portal-status');
-  if (status) {
-    status.textContent = 'Awaiting Upload';
-    status.className = 'badge badge-amber';
-  }
-  const fnText = document.getElementById('sdlc-upload-filename');
-  if (fnText) fnText.textContent = 'Supports official SDLC joint physical verification templates.';
-  document.getElementById('sdlc-chk-verify').checked = false;
-  document.getElementById('sdlc-chk-replace').checked = false;
-  S.sdlcData = null;
-}
-function onSdlcProjectChanged() {
-  const select = document.getElementById('sdlc-project-select');
-  if (!select || !select.value) {
-    resetSdlcPortalUI();
-    return;
-  }
-  const projId = parseInt(select.value);
-  const proj = S.projects.find(p => p.id === projId);
-  if (proj && S.sdlcData && S.sdlcData.projectId === projId) {
-    renderSdlcComparison();
-  } else {
-    resetSdlcPortalUI();
-  }
-}
-function switchSdlcTab(tab) {
-  sdlcActiveTab = tab;
-  ['anx4', 'anx5', 'anx6', 'anx7'].forEach(t => {
-    const el = document.getElementById('tab-sdlc-' + t);
-    if (el) el.classList.toggle('active', t === tab);
-  });
-  ['anx4', 'anx5', 'anx6', 'anx7'].forEach(t => {
-    const el = document.getElementById('sdlc-tab-content-' + t);
-    if (el) el.style.display = t === tab ? 'block' : 'none';
-  });
-}
-function loadDemoSdlcReport() {
-  const select = document.getElementById('sdlc-project-select');
-  if (!select || !select.value) {
-    alert("Please select a target DSR project first.");
-    return;
-  }
-  const projId = parseInt(select.value);
-  const proj = S.projects.find(p => p.id === projId);
-  const distName = proj ? proj.district : 'Jalandhar';
-  S.sdlcData = {
-    projectId: projId,
-    district: distName,
-    uploadedAt: new Date().toLocaleString(),
-    verified: false,
-    anx4: [
-      { name: `Route A (Lease to Highway - ${distName})`, dsrVal: '1500 Tons', sdlcVal: '1500 Tons', variance: '0%', matched: true },
-      { name: `Route B (Lease to Railhead - ${distName})`, dsrVal: '1200 Tons', sdlcVal: '1050 Tons', variance: '-12.5%', matched: false },
-      { name: `Route C (Quarry to Bypass)`, dsrVal: '900 Tons', sdlcVal: '900 Tons', variance: '0%', matched: true }
-    ],
-    anx5: [
-      { id: `BM-01-${distName.substring(0,3).toUpperCase()}`, dsrCoords: '31.326, 75.576', sdlcCoords: '31.326, 75.576', dsrElev: '228.40 m', sdlcElev: '228.40 m', matched: true },
-      { id: `BM-02-${distName.substring(0,3).toUpperCase()}`, dsrCoords: '31.341, 75.592', sdlcCoords: '31.340, 75.593', dsrElev: '229.15 m', sdlcElev: '228.80 m', matched: false },
-      { id: `BM-03-${distName.substring(0,3).toUpperCase()}`, dsrCoords: '31.350, 75.604', sdlcCoords: '31.350, 75.604', dsrElev: '227.60 m', sdlcElev: '227.60 m', matched: true }
-    ],
-    anx6: [
-      { id: `Cluster 1 (Sutlej bed - ${distName})`, dsrVal: '18.50 Ha', sdlcVal: '17.90 Ha', variance: '-0.60 Ha', matched: false },
-      { id: `Cluster 2 (Beas bed - ${distName})`, dsrVal: '14.20 Ha', sdlcVal: '14.20 Ha', variance: '0.00 Ha', matched: true }
-    ],
-    anx7: [
-      { name: `Highway Corridor - ${distName}`, dsrVal: '320 PCU/hr', sdlcVal: '375 PCU/hr', variance: '+17.2%', matched: false },
-      { name: `Tehsil Link Road - ${distName}`, dsrVal: '180 PCU/hr', sdlcVal: '180 PCU/hr', variance: '0%', matched: true }
-    ]
-  };
-  const fnText = document.getElementById('sdlc-upload-filename');
-  if (fnText) fnText.innerHTML = `<strong>Demo_SDLC_Survey_${distName}.xlsx</strong> loaded and compared.`;
-  renderSdlcComparison();
-  toast("Demo SDLC verification data loaded successfully!", "success");
-}
-function handleSdlcFileUpload(event) {
-  const select = document.getElementById('sdlc-project-select');
-  if (!select || !select.value) {
-    alert("Please select a target DSR project first.");
-    event.target.value = '';
-    return;
-  }
-  const file = event.target.files[0];
-  if (!file) return;
-  loadDemoSdlcReport(); // Standard fallback simulation
-  const fnText = document.getElementById('sdlc-upload-filename');
-  if (fnText) fnText.innerHTML = `<strong>${file.name}</strong> loaded and compared.`;
-}
-function renderSdlcComparison() {
-  if (!S.sdlcData) return;
-  const tbodyAnx4 = document.getElementById('sdlc-tbody-anx4');
-  if (tbodyAnx4) {
-    tbodyAnx4.innerHTML = S.sdlcData.anx4.map(row => `
-      <tr style="border-bottom: 1px solid var(--border);">
-        <td style="padding:10px; font-weight:600;">${row.name}</td>
-        <td style="padding:10px;">${row.dsrVal}</td>
-        <td style="padding:10px; color:${row.matched?'':'var(--saffron)'}; font-weight:${row.matched?'500':'700'};">${row.sdlcVal}</td>
-        <td style="padding:10px; color:${row.matched?'var(--text-soft)':'var(--saffron)'};">${row.variance}</td>
-        <td style="padding:10px;">
-          <span class="badge ${row.matched?'badge-green':'badge-saffron'}">${row.matched?'MATCHED':'MISMATCH'}</span>
-        </td>
-      </tr>
-    `).join('');
-  }
-  const tbodyAnx5 = document.getElementById('sdlc-tbody-anx5');
-  if (tbodyAnx5) {
-    tbodyAnx5.innerHTML = S.sdlcData.anx5.map(row => `
-      <tr style="border-bottom: 1px solid var(--border);">
-        <td style="padding:10px; font-weight:600;">${row.id}</td>
-        <td style="padding:10px; font-family:monospace;">${row.dsrCoords}</td>
-        <td style="padding:10px; font-family:monospace; color:${row.matched?'':'var(--saffron)'};">${row.sdlcCoords}</td>
-        <td style="padding:10px;">
-          Proj: ${row.dsrElev} <br>
-          <span style="color:${row.matched?'':'var(--saffron)'}; font-weight:${row.matched?'normal':'bold'};">SDLC: ${row.sdlcElev}</span>
-        </td>
-        <td style="padding:10px;">
-          <span class="badge ${row.matched?'badge-green':'badge-saffron'}">${row.matched?'MATCHED':'MISMATCH'}</span>
-        </td>
-      </tr>
-    `).join('');
-  }
-  const tbodyAnx6 = document.getElementById('sdlc-tbody-anx6');
-  if (tbodyAnx6) {
-    tbodyAnx6.innerHTML = S.sdlcData.anx6.map(row => `
-      <tr style="border-bottom: 1px solid var(--border);">
-        <td style="padding:10px; font-weight:600;">${row.id}</td>
-        <td style="padding:10px;">${row.dsrVal}</td>
-        <td style="padding:10px; color:${row.matched?'':'var(--saffron)'}; font-weight:${row.matched?'500':'700'};">${row.sdlcVal}</td>
-        <td style="padding:10px; color:${row.matched?'var(--text-soft)':'var(--saffron)'};">${row.variance}</td>
-        <td style="padding:10px;">
-          <span class="badge ${row.matched?'badge-green':'badge-saffron'}">${row.matched?'MATCHED':'MISMATCH'}</span>
-        </td>
-      </tr>
-    `).join('');
-  }
-  const tbodyAnx7 = document.getElementById('sdlc-tbody-anx7');
-  if (tbodyAnx7) {
-    tbodyAnx7.innerHTML = S.sdlcData.anx7.map(row => `
-      <tr style="border-bottom: 1px solid var(--border);">
-        <td style="padding:10px; font-weight:600;">${row.name}</td>
-        <td style="padding:10px;">${row.dsrVal}</td>
-        <td style="padding:10px; color:${row.matched?'':'var(--saffron)'}; font-weight:${row.matched?'500':'700'};">${row.sdlcVal}</td>
-        <td style="padding:10px; color:${row.matched?'var(--text-soft)':'var(--saffron)'};">${row.variance}</td>
-        <td style="padding:10px;">
-          <span class="badge ${row.matched?'badge-green':'badge-saffron'}">${row.matched?'MATCHED':'MISMATCH'}</span>
-        </td>
-      </tr>
-    `).join('');
-  }
-  let totalDiscrepancies = 0;
-  ['anx4', 'anx5', 'anx6', 'anx7'].forEach(key => {
-    totalDiscrepancies += S.sdlcData[key].filter(r => !r.matched).length;
-  });
-  const badgeContainer = document.getElementById('sdlc-discrepancy-summary-badges');
-  if (badgeContainer) {
-    badgeContainer.innerHTML = `
-      <span class="badge badge-navy" style="font-size:11.5px; padding:4px 8px;">Total Items: 9</span>
-      <span class="badge ${totalDiscrepancies > 0 ? 'badge-red' : 'badge-green'}" style="font-size:11.5px; padding:4px 8px;">
-        Discrepancies: ${totalDiscrepancies}
-      </span>
-    `;
-  }
-  const status = document.getElementById('sdlc-portal-status');
-  if (status) {
-    if (totalDiscrepancies > 0) {
-      status.textContent = 'Action Required: Mismatch Detected';
-      status.className = 'badge badge-red';
-    } else {
-      status.textContent = 'All Matched';
-      status.className = 'badge badge-green';
-    }
-  }
-  const container = document.getElementById('sdlc-comparison-container');
-  if (container) container.style.display = 'block';
-  switchSdlcTab(sdlcActiveTab);
-  if (window.initLucide) initLucide();
-}
-async function submitSdlcReconciliation() {
-  const select = document.getElementById('sdlc-project-select');
-  if (!select || !select.value) return;
-  const projId = parseInt(select.value);
-  if (!document.getElementById('sdlc-chk-verify').checked) {
-    alert("Please check the declaration box certifying SDLC survey verification approval.");
-    return;
-  }
-  try {
-    toast("Saving SDLC reconciliation data...", "info");
-    const originalActive = S.activeProject;
-    S.activeProject = S.projects.find(p => p.id === projId);
-    S.sdlcData.verified = true;
-    S.sdlcData.annotated = document.getElementById('sdlc-chk-replace').checked;
-    const remarks = `SDLC Reconciliation committed for Project ID ${projId}. Reconciled 4 discrepancies in Annexures IV, V, VI, VII.`;
-    if (typeof persistProjectState === 'function') {
-      await persistProjectState();
-    }
-    await apiFetch(`/reports/${projId}/workflow`, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'SDLC_RECONCILE', remarks: remarks })
-    });
-    S.activeProject = originalActive;
-    toast("Reconciliation completed successfully and logged!", "success");
-    alert("Success: SDLC Survey Data reconciled. The comparison tables will be appended at the end of the final generated DSR report.");
-    resetSdlcPortalUI();
-    select.value = "";
-  } catch (err) {
-    console.error(err);
-    toast("Failed to save reconciliation: " + err.message, "error");
-  }
-}
-
-;
-
-/* js/model-dsr.js */
+/* js/model-dsr.js */
 window.openModal = function(id) {
     const el = document.getElementById(id);
     if (el) {
