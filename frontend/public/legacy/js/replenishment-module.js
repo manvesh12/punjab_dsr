@@ -1765,283 +1765,801 @@ async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
     }
   }
 
-  // 2. Compile full HTML string
-  const fullHtml = compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds, reportId);
-  
-  // 3. Parse and split HTML into page items
-  const itemsToRender = [];
-  const parser = new DOMParser();
-  const docObj = parser.parseFromString(fullHtml, 'text/html');
-  const sectionBlocks = docObj.querySelectorAll('.section-block');
-  
-  if (sectionBlocks.length === 0) {
-    itemsToRender.push({ type: 'html', html: fullHtml });
-  } else {
-    sectionBlocks.forEach(block => {
-      const titleEl = block.querySelector(':scope > .section-title');
-      const hasSectionTitle = !!titleEl;
-      const titleText = titleEl ? titleEl.textContent : '';
-      if (titleEl) titleEl.remove();
-      
-      let currentHtmlGroup = [];
-      
-      function flushHtmlGroup() {
-        if (currentHtmlGroup.length > 0) {
-          const htmlBlock = `
-            <div class="sheet">
-              <div class="section-block">
-                ${hasSectionTitle ? `<h2 class="section-title">${titleText}</h2>` : ''}
-                ${currentHtmlGroup.join('\n')}
-              </div>
-            </div>
-          `;
-          itemsToRender.push({ type: 'html', html: htmlBlock });
-          currentHtmlGroup = [];
-        }
-      }
-      
-      Array.from(block.childNodes).forEach(node => {
-        if (node.nodeType === Node.ELEMENT_NODE) {
-          if (node.tagName === 'IMG') {
-            flushHtmlGroup();
-            itemsToRender.push({ type: 'image', src: node.getAttribute('src') });
-          } else if (node.classList.contains('annexure-uploaded-pages-simple') || (node.style.display === 'flex' && node.innerHTML.includes('<img'))) {
-            flushHtmlGroup();
-            const imgs = node.querySelectorAll('img');
-            imgs.forEach(img => {
-              itemsToRender.push({ type: 'image', src: img.getAttribute('src') });
-            });
-          } else {
-            currentHtmlGroup.push(node.outerHTML);
-          }
-        } else if (node.nodeType === Node.TEXT_NODE) {
-          const text = node.textContent.trim();
-          if (text) {
-            currentHtmlGroup.push(`<p>${text}</p>`);
-          }
-        }
-      });
-      
-      flushHtmlGroup();
-    });
-  }
-  
-  if (itemsToRender.length === 0) {
-    return null;
-  }
-  
-  // 4. Initialize jsPDF
+  // 2. Setup jsPDF configuration matching the final PDF exactly
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-  const pdfWidth = 210;
-  const pdfHeight = 297;
-  
-  // Create off-screen rendering element
-  const renderDiv = document.createElement('div');
-  renderDiv.style.position = 'fixed';
-  renderDiv.style.left = '-9999px';
-  renderDiv.style.top = '0';
-  renderDiv.style.width = '794px'; // 210mm A4 width at 96 DPI
-  renderDiv.style.minHeight = '1122px'; // 297mm A4 height at 96 DPI
-  renderDiv.style.backgroundColor = '#ffffff';
-  renderDiv.style.padding = '45px 50px';
-  renderDiv.style.boxSizing = 'border-box';
-  renderDiv.style.zIndex = '-99999';
-  document.body.appendChild(renderDiv);
-  
-  const styles = `
-    <style>
-      * { box-sizing: border-box; }
-      body { font-family: Arial, Helvetica, sans-serif; color: #111827; background: #ffffff; padding: 0; margin: 0; }
-      .sheet { width: 100%; }
-      .section-title {
-        color: #17324d;
-        border-bottom: 2px solid #17324d;
-        padding-bottom: 8px;
-        margin-bottom: 20px;
-        font-size: 18px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-      table { width: 100%; border-collapse: collapse; margin: 10px 0 18px; font-size: 11px; }
-      th, td { border: 1px solid #111827; padding: 6px 7px; vertical-align: top; word-break: break-word; }
-      th { background: #f3f4f6; font-weight: 700; text-align: left; }
-      p { font-size: 13px; line-height: 1.55; color: #374151; margin-top: 0; margin-bottom: 12px; }
-      .doc-head {
-        border-bottom: 2px solid #17324d;
-        padding-bottom: 14px;
-        margin-bottom: 20px;
-        text-align: center;
-      }
-      .doc-head h1 {
-        margin: 0 0 8px;
-        color: #17324d;
-        font-size: 24px;
-        line-height: 1.2;
-      }
-      .doc-head p {
-        margin: 0;
-        color: #526172;
-        font-size: 13px;
-      }
-      .cover-page {
-        text-align: center;
-        padding: 40px 0;
-        border: 3px double #17324d;
-        background: #fff;
-        min-height: 1000px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        box-sizing: border-box;
-      }
-      .field-value { display: inline-block; min-width: 80px; padding: 4px 6px; border-bottom: 1px solid #cbd5e1; }
-      .card, .card-bd, .annexure-line-main {
-        border: 0 !important;
-        background: transparent !important;
-        box-shadow: none !important;
-        padding: 0 !important;
-        margin: 0 0 18px !important;
-      }
-      .g2, .grid, .annexure-line-layout { display: block !important; }
-      input, textarea, select { border: none !important; background: transparent !important; color: #111827 !important; padding: 0 !important; font-size: 13px !important; }
-      .btn, button, .upload-zone, .card-hd, .modal, .file-item, .alert-box, .hint { display: none !important; }
-    </style>
-  `;
+  const W = 210;
+  const H = 297;
+  const pad = 12;
+  const tableWidth = W - (pad * 2);
+  const pageFrameMargin = 5;
+  const imagePageMargin = 4;
+  const navy = [11, 29, 58];
+  const blue = [26, 51, 102];
+  const saffron = [196, 154, 88];
+  const muted = [86, 96, 112];
 
-  async function renderHtmlToCanvasWithFallback(renderDiv, pageIndex) {
-    renderDiv.querySelectorAll('.leaflet-container, .leaflet-control-container, .leaflet-pane, .leaflet-top, .leaflet-bottom').forEach(el => el.remove());
-    renderDiv.querySelectorAll('script, style, iframe, button, .btn, .upload-zone, .modal').forEach(el => el.remove());
-    renderDiv.querySelectorAll('svg').forEach(el => el.remove());
-    renderDiv.querySelectorAll('img').forEach(img => {
-      const src = img.getAttribute('src');
-      if (!src || src === 'null' || src === 'undefined' || src.trim() === '') {
-        img.remove();
+  const titlePages = [];
+  const borderPages = [];
+  const uploadedPages = [];
+  let borderActive = false;
+
+  const originalAddPage = doc.addPage.bind(doc);
+  doc.addPage = function(...args) {
+    originalAddPage(...args);
+    const pNum = doc.getCurrentPageInfo().pageNumber;
+    if (borderActive) {
+      borderPages.push(pNum);
+    }
+  };
+
+  let isFirstPage = true;
+
+  const safe = (value, fallback = '-') => String(value ?? fallback).trim() || fallback;
+  const hasText = (value) => String(value ?? '').trim().length > 0;
+  const localFmtN = (v, dec = 2) => typeof fmtN === 'function' ? fmtN(v, dec) : Number(v).toFixed(dec);
+
+  const addTitlePage = (titleText, subtitleText = '') => {
+    if (isFirstPage) {
+      isFirstPage = false;
+    } else {
+      doc.addPage();
+    }
+    const pNum = doc.getCurrentPageInfo().pageNumber;
+    titlePages.push(pNum);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(22);
+    doc.setTextColor(0, 0, 0);
+    doc.text(titleText, W / 2, H / 2 - 10, { align: 'center', maxWidth: W - 40 });
+    const isRedundant = subtitleText && (
+      titleText.toLowerCase().includes(subtitleText.toLowerCase()) || 
+      subtitleText.toLowerCase().includes(titleText.toLowerCase()) ||
+      titleText.toLowerCase().replace(/[^a-z0-9]/g, '') === subtitleText.toLowerCase().replace(/[^a-z0-9]/g, '')
+    );
+    if (subtitleText && !isRedundant) {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(12);
+      doc.setTextColor(100, 100, 100);
+      doc.text(subtitleText, W / 2, H / 2 + 5, { align: 'center', maxWidth: W - 40 });
+    }
+  };
+
+  const writeParagraph = (text, y, options = {}) => {
+    if (!hasText(text)) return y;
+    doc.setFont('helvetica', options.bold ? 'bold' : 'normal');
+    doc.setFontSize(options.size || 10);
+    doc.setTextColor(...(options.color || [0, 0, 0]));
+    const lines = doc.splitTextToSize(String(text), options.width || W - (pad * 2));
+    doc.text(lines, options.x || pad, y);
+    return y + (lines.length * (options.lineHeight || 5.5)) + (options.after || 6);
+  };
+
+  const getImageFormat = (src) => /^data:image\/jpe?g/i.test(String(src || '')) ? 'JPEG' : 'PNG';
+
+  const drawFittedImagePage = (src) => {
+    const format = getImageFormat(src);
+    const props = doc.getImageProperties(src);
+    
+    const topMargin = 7;
+    const leftMargin = 7;
+    const bottomMargin = 20; // leaves space at the bottom (ends at y=277)
+    
+    const maxW = W - (leftMargin * 2);
+    const maxH = H - topMargin - bottomMargin;
+    
+    const ratio = Math.min(maxW / props.width, maxH / props.height);
+    const drawW = props.width * ratio;
+    const drawH = props.height * ratio;
+    const x = (W - drawW) / 2;
+    const y = topMargin + (maxH - drawH) / 2;
+    
+    doc.addImage(src, format, x, y, drawW, drawH, undefined, 'FAST');
+  };
+
+  const addImagePage = (src, title) => {
+    if (!src) return;
+    if (isFirstPage) {
+      isFirstPage = false;
+    } else {
+      doc.addPage();
+    }
+    const pNum = doc.getCurrentPageInfo().pageNumber;
+    uploadedPages.push(pNum);
+    try {
+      drawFittedImagePage(src);
+    } catch (err) {
+      try {
+        doc.addImage(src, 'JPEG', 7, 7, W - 14, H - 27, undefined, 'FAST');
+      } catch (innerErr) {
+        console.warn('Could not embed uploaded page:', innerErr);
       }
+    }
+  };
+
+  const addPreviewImagePage = (src, title) => {
+    if (!src) return;
+    if (isFirstPage) {
+      isFirstPage = false;
+    } else {
+      doc.addPage();
+    }
+    const pNum = doc.getCurrentPageInfo().pageNumber;
+    uploadedPages.push(pNum);
+    try {
+      drawFittedImagePage(src);
+    } catch (err) {
+      try {
+        doc.addImage(src, 'JPEG', 7, 7, W - 14, H - 27, undefined, 'FAST');
+      } catch (innerErr) {
+        console.warn('Could not embed live preview page:', innerErr);
+      }
+    }
+  };
+
+  const addUploadedPages = (pages, title) => {
+    if (!Array.isArray(pages) || !pages.length) return false;
+    pages.forEach((page, index) => addImagePage(page, `${title} - Page ${index + 1}`));
+    return true;
+  };
+
+  const simpleAnnexurePreviewIds = ['annexure-b', 'annexure-c', 'annexure-d', 'annexure-e', 'annexure-g', 'annexure-h', 'annexure-i'];
+  
+  const ensureSimpleAnnexurePreviewState = (viewId) => {
+    const letter = viewId.replace('annexure-', '').toUpperCase();
+    const stateKey = `annexure${letter}`;
+    if (!Array.isArray(S[stateKey])) S[stateKey] = [];
+    if (!S[stateKey].length) {
+      S[stateKey].push({
+        id: Date.now(),
+        name: `Annexure ${letter} - Entry 1`,
+        summary: `Upload your Annexure ${letter} PDF or image here.`,
+        fileName: null,
+        fileSize: null,
+        pages: null
+      });
+    }
+    const renderName = `renderAnnexure${letter}`;
+    if (typeof window[renderName] === 'function') window[renderName]();
+    return S[stateKey];
+  };
+
+  const addSimpleAnnexurePreviewPages = (title, viewId) => {
+    const letter = viewId.replace('annexure-', '').toUpperCase();
+    const fnName = `getAnnexure${letter}Pages`;
+    if (!window.pdfPreview || typeof pdfPreview[fnName] !== 'function') return false;
+    ensureSimpleAnnexurePreviewState(viewId);
+    let pages = pdfPreview[fnName]();
+    if (!pages.length && typeof pdfPreview.renderTextPageCanvas === 'function') {
+      pages = [{
+        src: pdfPreview.renderTextPageCanvas(`Annexure ${letter} - Entry 1`, `Upload your Annexure ${letter} PDF or image here.`, `Annexure ${letter}`),
+        label: `${title} - Page 1`,
+        generated: true
+      }];
+    }
+    if (!pages.length) return false;
+    pages.forEach((p, idx) => addPreviewImagePage(p.src, `${title} - Page ${idx + 1}`));
+    return true;
+  };
+
+  const fallbackTables = {
+    anx1: [
+      { title: 'a) Rivers:', selector: 'table[id^="anx1-rivers"]', all: true },
+      { title: 'b) De-Siltation Location (Lakes/Ponds/Dams etc.):', selector: 'table[id^="anx1-desilt"]', all: true },
+      { title: 'c) Patta lands/Khatedari land:', selector: 'table[id^="anx1-patta"]', all: true },
+      { title: 'd) M-Sand Plants:', selector: 'table[id^="anx1-msand"]', all: true }
+    ],
+    anx2: [
+      { title: 'Annexure II(a) - Mining Leases', selector: 'table[id^="anx2-leases"]', all: true },
+      { title: 'Annexure II(b) - Patta Lands', selector: 'table[id^="anx2-patta"]', all: true },
+      { title: 'Annexure II(c) - De-siltation', selector: 'table[id^="anx2-desilt"]', all: true },
+      { title: 'Annexure II(d) - M-Sand Plants', selector: 'table[id^="anx2-msand"]', all: true }
+    ],
+    anx3: [
+      { title: 'Annexure III(a) - Clusters', selector: 'table[id^="anx3-clusters"]', all: true },
+      { title: 'Annexure III(b) - Contiguous Clusters', selector: 'table[id^="anx3-contiguous"]', all: true }
+    ],
+    anx4: [
+      { title: 'Annexure IV(a) - Lease Routes', selector: 'table[id^="anx4-routes"]', all: true },
+      { title: 'Annexure IV(b) - Cluster Routes', selector: 'table[id^="anx4-cluster-routes"]', all: true }
+    ],
+    anx5: [
+      { title: 'Annexure V - Bench Mark & CORS', selector: 'table[id^="anx5-benchmarks"]', all: true },
+      { title: 'Annexure V - Mining Leases', selector: 'table[id^="anx5-mining"]', all: true },
+      { title: 'Annexure V - Patta Lands', selector: 'table[id^="anx5-patta"]', all: true },
+      { title: 'Annexure V - De-siltation', selector: 'table[id^="anx5-desilt"]', all: true },
+      { title: 'Annexure V - M-Sand Plants', selector: 'table[id^="anx5-msand"]', all: true }
+    ],
+    anx6: [
+      { title: 'Annexure VI - Final Cluster Details', selector: 'table[id^="anx6-final-clusters"]', all: true },
+      { title: 'Annexure VI - Contiguous Cluster Details', selector: 'table[id^="anx6-contiguous-clusters"]', all: true }
+    ],
+    anx7: [
+      { title: 'Annexure VII - Individual Routes', selector: 'table[id^="anx7-routes"]', all: true },
+      { title: 'Annexure VII - Cluster Routes', selector: 'table[id^="anx7-cluster-routes"]', all: true },
+      { title: 'Annexure VII - Transportation Routes', selector: 'table[id^="anx7-patta-final"]', all: true }
+    ],
+    'annexure-b': [
+      { title: 'Annexure B - Mining Leases', selector: 'table[id^="annexure-b-leases"]', all: true }
+    ],
+    'annexure-c': [
+      { title: 'Annexure C - Cluster details', selector: 'table[id^="annexure-c-details"]', all: true }
+    ],
+    'annexure-d': [
+      { title: 'Annexure D - Details', selector: 'table[id^="annexure-d-details"]', all: true }
+    ],
+    'annexure-e': [
+      { title: 'Annexure E - Details', selector: 'table[id^="annexure-e-details"]', all: true }
+    ],
+    'annexure-f': [
+      { title: 'Annexure F - Sand Ghats', selector: 'table[id^="annexure-f-sand"]', all: true },
+      { title: 'Annexure F - Bench Marks', selector: 'table[id^="annexure-f-benchmark"]', all: true },
+      { title: 'Annexure F - CORS Stations', selector: 'table[id^="annexure-f-cors"]', all: true }
+    ],
+    'annexure-g': [
+      { title: 'Annexure G - Details', selector: 'table[id^="annexure-g-details"]', all: true }
+    ],
+    'annexure-h': [
+      { title: 'Annexure H - Details', selector: 'table[id^="annexure-h-details"]', all: true }
+    ],
+    'annexure-i': [
+      { title: 'Annexure I - Details', selector: 'table[id^="annexure-i-details"]', all: true }
+    ],
+    'annexure-j': [
+      { title: 'Annexure J - Details', selector: 'table[id^="annexure-j-details"]', all: true }
+    ],
+    'annexure-k': [
+      { title: 'Annexure K - Proforma Auctioned Sites', selector: 'table[id^="annexure-k-proforma"]', all: true },
+      { title: 'Annexure K - Annexure A', selector: 'table[id^="annexure-k-annexure-a"]', all: true }
+    ]
+  };
+
+  const renderAnnexureTables = (viewId, title) => {
+    const configs = fallbackTables[viewId];
+    if (!configs) return false;
+    
+    let addedAny = false;
+    let startY = 25;
+    
+    configs.forEach((cfg) => {
+      const tables = cfg.all ? Array.from(document.querySelectorAll(cfg.selector)) : [document.querySelector(cfg.selector)].filter(Boolean);
+      tables.forEach((table) => {
+        const clone = table.cloneNode(true);
+        
+        clone.querySelectorAll('select').forEach(select => {
+          const val = select.value || '';
+          const textNode = document.createTextNode(val || 'NA');
+          select.parentNode.replaceChild(textNode, select);
+        });
+        
+        clone.querySelectorAll('input, textarea').forEach(input => {
+          const val = input.value || '';
+          const textNode = document.createTextNode(val || 'NA');
+          input.parentNode.replaceChild(textNode, input);
+        });
+
+        const headers = Array.from(clone.querySelectorAll('thead tr th, thead tr td, tbody tr th, tbody tr td'));
+        let actionColIndexes = [];
+        
+        clone.querySelectorAll('tr').forEach(row => {
+          const cells = Array.from(row.children);
+          cells.forEach((cell, idx) => {
+            const txt = (cell.textContent || '').trim().toLowerCase();
+            if (txt === 'action' || txt === 'actions' || cell.classList.contains('actions') || cell.classList.contains('action')) {
+              if (!actionColIndexes.includes(idx)) {
+                actionColIndexes.push(idx);
+              }
+            }
+          });
+        });
+
+        actionColIndexes.sort((a, b) => b - a);
+
+        clone.querySelectorAll('tr').forEach(row => {
+          const cells = Array.from(row.children);
+          actionColIndexes.forEach(idx => {
+            if (cells[idx]) cells[idx].remove();
+          });
+        });
+
+        clone.querySelectorAll('td, th').forEach(cell => {
+          cell.querySelectorAll('button, a, .btn, .actions, .edit-btn, .delete-btn, i, svg').forEach(el => el.remove());
+          const txt = (cell.textContent || '').trim();
+          if (!txt) {
+            cell.textContent = 'NA';
+          }
+        });
+
+        if (!addedAny) {
+          doc.addPage();
+          startY = 25;
+          addedAny = true;
+        } else {
+          if (startY > 250) {
+            doc.addPage();
+            startY = 25;
+          }
+        }
+
+        startY = writeParagraph(cfg.title, startY, { bold: true, size: 11, color: [0, 0, 0], after: 4 });
+
+        const firstRow = clone.querySelector('tr');
+        const colCount = firstRow ? firstRow.children.length : 0;
+        const isWide = colCount > 8;
+        const fontSize = isWide ? 5.8 : 7.5;
+        const cellPadding = isWide ? 1.2 : 2;
+
+        doc.autoTable({
+          html: clone,
+          startY: startY,
+          margin: { left: pad, right: pad },
+          tableWidth,
+          theme: 'grid',
+          styles: { fontSize: fontSize, cellPadding: cellPadding, lineColor: [0, 0, 0], lineWidth: 0.2, textColor: [0, 0, 0], overflow: 'linebreak' },
+          headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold', lineColor: [0, 0, 0], lineWidth: 0.2 },
+          alternateRowStyles: { fillColor: [255, 255, 255] }
+        });
+
+        startY = doc.lastAutoTable.finalY + 10;
+      });
     });
 
-    try {
-      const canvas = await html2canvas(renderDiv, {
-        scale: 1.5,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff'
-      });
-      return canvas.toDataURL('image/jpeg', 0.95);
-    } catch (err) {
-      console.warn(`HTML rendering Attempt 1 failed for page ${pageIndex + 1}:`, err);
+    return addedAny;
+  };
+
+  const getPreviewIframe = (viewId) => {
+    if (window.getAnnexurePreviewIframe) return window.getAnnexurePreviewIframe(viewId);
+    const ids = window.pdfPreview?.IFRAME_IDS || {};
+    return document.getElementById(ids[viewId] || 'pdf-preview-iframe');
+  };
+
+  const htmlPreviewToPdfBlob = async (iframe, filename, elementToRender) => {
+    await ensurePortalVendors(['html2pdf']);
+    const body = iframe?.contentDocument?.body;
+    const target = elementToRender || body;
+    if (!target) return null;
+    const opt = {
+      margin: 0,
+      filename,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, windowWidth: target.scrollWidth || document.body.scrollWidth },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', 'h4'] }
+    };
+    return withTimeout(
+      html2pdf().set(opt).from(target).toPdf().get('pdf').then(pdf => pdf.output('blob')),
+      9000,
+      filename
+    );
+  };
+
+  const waitForPreviewBlob = async (viewId) => {
+    const iframe = getPreviewIframe(viewId);
+    for (let attempt = 0; attempt < 30; attempt += 1) {
+      const src = iframe?.getAttribute('src') || '';
+      if (src && src !== 'about:blank') {
+        if (src.startsWith('blob:') || src.startsWith('http')) return withTimeout(fetch(src).then(res => res.blob()), 6000, `${viewId} preview fetch`);
+        if (src.startsWith('data:application/pdf')) return dataUrlToBlob(src);
+      }
+      if (iframe?.srcdoc && iframe.contentDocument?.body) {
+        return htmlPreviewToPdfBlob(iframe, `${viewId}.pdf`);
+      }
+      await new Promise(resolve => setTimeout(resolve, 150));
     }
-    
-    try {
-      const canvas = await html2canvas(renderDiv, {
-        scale: 1.0,
-        useCORS: false,
-        logging: false,
-        backgroundColor: '#ffffff'
-      });
-      return canvas.toDataURL('image/jpeg', 0.9);
-    } catch (err) {
-      console.warn(`HTML rendering Attempt 2 failed for page ${pageIndex + 1}:`, err);
-    }
-    
     return null;
+  };
+
+  const dataUrlToBlob = async (dataUrl) => {
+    const res = await fetch(dataUrl);
+    return res.blob();
+  };
+
+  const addLivePreviewHtmlPages = async (title, viewId) => {
+    if (!window.pdfPreview || typeof pdfPreview.buildAnnexureHtmlDocument !== 'function') return false;
+    let html = pdfPreview.buildAnnexureHtmlDocument(viewId);
+    if (!html) return false;
+    const iframe = document.createElement('iframe');
+    const previewWidth = 1040; // Force standard high-res width
+    html = html.replace('</style>', `
+          body{width:${previewWidth}px!important;max-width:${previewWidth}px!important;}
+          .sheet{width:${previewWidth}px!important;max-width:${previewWidth}px!important;box-shadow:none!important;margin:0!important;}
+        </style>`);
+    iframe.style.position = 'fixed';
+    iframe.style.left = '-10000px';
+    iframe.style.top = '0';
+    iframe.style.width = `${previewWidth}px`;
+    iframe.style.height = '1200px';
+    iframe.style.border = '0';
+    iframe.style.pointerEvents = 'none';
+    iframe.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(iframe);
+    try {
+      await ensurePortalVendors(['html2pdf', 'pdfjs']);
+      iframe.srcdoc = html;
+      await withTimeout(new Promise(resolve => {
+        iframe.onload = () => resolve();
+        setTimeout(resolve, 250);
+      }), 3000, `${viewId} HTML preview render`);
+      const body = iframe.contentDocument?.body;
+      if (body) {
+        body.style.width = `${previewWidth}px`;
+        body.style.maxWidth = `${previewWidth}px`;
+        body.style.overflow = 'visible';
+        iframe.style.height = (body.scrollHeight + 100) + 'px';
+      }
+      const elementToRender = body?.querySelector('.sheet') || body;
+      if (!elementToRender) return false;
+      
+      const blob = await htmlPreviewToPdfBlob(iframe, `${viewId}.pdf`, elementToRender);
+      if (!blob) return false;
+      const pages = await pdfBlobToImages(blob);
+      if (!pages.length) return false;
+      pages.forEach((page, index) => addPreviewImagePage(page, `${title} - Page ${index + 1}`));
+      return true;
+    } catch (err) {
+      console.warn(`Could not merge ${viewId} from HTML live preview:`, err);
+      return false;
+    } finally {
+      iframe.remove();
+    }
+  };
+
+  const addAnnexureExportBlobPages = async (title, viewId) => {
+    try {
+      await ensurePortalVendors(['jspdf', 'autotable', 'pdfjs']);
+      let blob = null;
+      if (viewId === 'annexure-f' && typeof exportAnnexureFPDF === 'function') {
+        blob = await exportAnnexureFPDF(null, false, true);
+      } else if (viewId === 'annexure-j' && typeof exportAnnexureJPDF === 'function') {
+        blob = await exportAnnexureJPDF(null, false, null, true);
+      } else if (viewId === 'annexure-k' && typeof exportAnnexureKPDF === 'function') {
+        blob = await exportAnnexureKPDF(null, false, true);
+      }
+      if (!blob) return false;
+      const pages = await pdfBlobToImages(blob);
+      if (!pages.length) return false;
+      pages.forEach((page, index) => addPreviewImagePage(page, `${title} - Page ${index + 1}`));
+      return true;
+    } catch (err) {
+      console.warn(`Could not merge ${viewId} from generated annexure PDF:`, err);
+      return false;
+    }
+  };
+
+  const addAnnexureFromPreview = async (title, viewId) => {
+    const uploaded = S.uploadedPDFs?.[viewId];
+    if (Array.isArray(uploaded) && uploaded.length > 0) {
+      uploaded.forEach((page, index) => addImagePage(page, `${title} - Page ${index + 1}`));
+      return true;
+    }
+
+    if (['annexure-f', 'annexure-j', 'annexure-k'].includes(viewId)) {
+      const addedGeneratedPdf = await addAnnexureExportBlobPages(title, viewId);
+      if (addedGeneratedPdf) return true;
+      const addedLivePreview = await addLivePreviewHtmlPages(title, viewId);
+      if (addedLivePreview) return true;
+    }
+
+    if (simpleAnnexurePreviewIds.includes(viewId)) {
+      return addSimpleAnnexurePreviewPages(title, viewId);
+    }
+    
+    if (viewId.startsWith('annexure-')) {
+      const letter = viewId.replace('annexure-', '').toUpperCase();
+      const simpleLetters = ['B', 'C', 'D', 'E', 'G', 'H', 'I'];
+      if (simpleLetters.includes(letter)) {
+        const fnName = `getAnnexure${letter}Pages`;
+        if (typeof pdfPreview[fnName] === 'function') {
+          const pages = pdfPreview[fnName]();
+          pages.forEach((p, idx) => addImagePage(p.src, `${title} - Page ${idx + 1}`));
+          return true;
+        }
+      }
+    }
+
+    let hasTables = false;
+    const renderedTables = renderAnnexureTables(viewId, title);
+    if (renderedTables) hasTables = true;
+    
+    let hasAttachments = false;
+    const prevBorderActive = borderActive;
+    if (viewId === 'annexure-f') {
+      const fAttachment = typeof getAnnexureFAttachment === 'function' ? getAnnexureFAttachment() : null;
+      if (fAttachment && fAttachment.pages && fAttachment.pages.length) {
+        borderActive = false;
+        fAttachment.pages.forEach((page, index) => addImagePage(page, `${title} - Supporting - Page ${index + 1}`));
+        borderActive = prevBorderActive;
+        hasAttachments = true;
+      }
+    } else if (viewId === 'annexure-j') {
+      const jAttachments = typeof getAnnexureJAttachments === 'function' ? getAnnexureJAttachments() : [];
+      let anyJ = false;
+      jAttachments.forEach(att => {
+        if (att.pages && att.pages.length) {
+          anyJ = true;
+        }
+      });
+      if (anyJ) {
+        borderActive = false;
+        jAttachments.forEach(att => {
+          if (att.pages && att.pages.length) {
+            att.pages.forEach((page, index) => addImagePage(page, `${title} - Supporting - Page ${index + 1}`));
+          }
+        });
+        borderActive = prevBorderActive;
+        hasAttachments = true;
+      }
+    } else if (viewId === 'annexure-k') {
+      const kAttachment = typeof getAnnexureKAttachment === 'function' ? getAnnexureKAttachment() : null;
+      if (kAttachment && kAttachment.pages && kAttachment.pages.length) {
+        borderActive = false;
+        kAttachment.pages.forEach((page, index) => addImagePage(page, `${title} - Supporting - Page ${index + 1}`));
+        borderActive = prevBorderActive;
+        hasAttachments = true;
+      }
+    }
+
+    if (!hasTables && !hasAttachments) {
+      const letter = viewId.replace('annexure-', '').toUpperCase();
+      const fnName = `getAnnexure${letter}Pages`;
+      if (typeof pdfPreview[fnName] === 'function') {
+        const pages = pdfPreview[fnName]();
+        pages.forEach((p, idx) => addPreviewImagePage(p.src, `${title} - Page ${idx + 1}`));
+      }
+    }
+
+    return renderedTables;
+  };
+
+  const pdfBlobToImages = async (blob) => {
+    await ensurePortalVendors(['pdfjs']);
+    const arrayBuffer = await blob.arrayBuffer();
+    const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const pages = [];
+    for (let pageNo = 1; pageNo <= pdf.numPages; pageNo += 1) {
+      const page = await pdf.getPage(pageNo);
+      const viewport = page.getViewport({ scale: 1.7 });
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      await page.render({ canvasContext: ctx, viewport }).promise;
+      pages.push(canvas.toDataURL('image/jpeg', 0.92));
+    }
+    return pages;
+  };
+
+  const withTimeout = (promise, ms, label) => Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(`${label} timed out`)), ms))
+  ]);
+
+  const district = (window.S && S.frontMatter && S.frontMatter.district) || (window.S && S.activeProject && S.activeProject.district) || 'Jalandhar';
+  const state = (window.S && S.frontMatter && S.frontMatter.state) || 'Punjab';
+  const year = (window.S && S.frontMatter && S.frontMatter.year) || (window.S && S.activeProject && S.activeProject.year) || '2025-26';
+  const version = (window.S && S.frontMatter && S.frontMatter.version) || 'Final Approved Draft';
+
+  // 3. Sort selected checkbox IDs according to sectionOrder
+  let sectionOrder = [
+    'front-matter',
+    'chapters',
+    'plates',
+    'graphs',
+    'anx1', 'anx2', 'anx3', 'anx4', 'anx5', 'anx6', 'anx7',
+    'annexure-b', 'annexure-c', 'annexure-d', 'annexure-e', 'annexure-f', 'annexure-g', 'annexure-h', 'annexure-i', 'annexure-j', 'annexure-k'
+  ];
+
+  if (reportId) {
+    const reports = loadLocalReports();
+    const report = reports.find(r => r.id === reportId);
+    if (report && report.sectionOrder && Array.isArray(report.sectionOrder)) {
+      sectionOrder = report.sectionOrder;
+    }
   }
 
-  // 5. Render loop
-  try {
-    for (let i = 0; i < itemsToRender.length; i++) {
-      const item = itemsToRender[i];
-      
-      if (i > 0) {
-        doc.addPage();
+  const orderedItems = [];
+  sectionOrder.forEach(secId => {
+    if (secId === 'front-matter') {
+      const fmSubsections = ['fm-cover', 'fm-toc', 'fm-pref', 'fm-ack', 'fm-cert'];
+      const activeFmSubs = fmSubsections.filter(id => checkedIds.includes(id));
+      if (activeFmSubs.length > 0) {
+        orderedItems.push({ id: 'front-matter', subIds: activeFmSubs });
       }
+    } else if (secId === 'chapters') {
+      const checkedChapters = (S.chapters || []).filter(ch => checkedIds.includes(`chapter-${ch.id}`));
+      if (checkedChapters.length > 0) {
+        orderedItems.push({ id: 'chapters', subIds: checkedChapters.map(ch => `chapter-${ch.id}`) });
+      }
+    } else if (secId === 'plates') {
+      const checkedPlates = (S.plates || []).filter(pl => checkedIds.includes(`plate-${pl.id}`));
+      if (checkedPlates.length > 0) {
+        orderedItems.push({ id: 'plates', subIds: checkedPlates.map(pl => `plate-${pl.id}`) });
+      }
+    } else if (secId === 'graphs') {
+      if (checkedIds.includes('graphs')) {
+        orderedItems.push({ id: 'graphs' });
+      }
+    } else if (secId.startsWith('custom-pdf-')) {
+      if (checkedIds.includes(secId)) {
+        orderedItems.push({ id: secId });
+      }
+    } else {
+      if (checkedIds.includes(secId)) {
+        orderedItems.push({ id: secId });
+      }
+    }
+  });
+
+  // 4. Render loop
+  try {
+    for (let index = 0; index < orderedItems.length; index++) {
+      const item = orderedItems[index];
       
-      if (item.type === 'image') {
-        try {
-          doc.addImage(item.src, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-        } catch (e) {
-          try {
-            doc.addImage(item.src, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-          } catch (err) {
-            console.error(`Error adding image to PDF at page ${i + 1}:`, err);
-            doc.setFontSize(14);
-            doc.text(`[Page ${i + 1}: Image could not be loaded]`, pdfWidth / 2, pdfHeight / 2, { align: 'center' });
-          }
-        }
-      } else {
-        renderDiv.innerHTML = styles + item.html;
-        
-        const imgData = await renderHtmlToCanvasWithFallback(renderDiv, i);
-        if (imgData) {
-          doc.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-        } else {
-          doc.setFont('Helvetica', 'normal');
-          doc.setTextColor(17, 24, 39);
-          
-          const titleEl = renderDiv.querySelector('.section-title');
-          const title = titleEl ? titleEl.textContent : 'Section';
-          doc.setFontSize(16);
-          doc.text(title, 20, 20);
-          doc.setLineWidth(0.5);
-          doc.line(20, 23, 190, 23);
-          
-          doc.setFontSize(10);
-          doc.setTextColor(75, 85, 99);
-          
-          let y = 32;
-          const paragraphs = Array.from(renderDiv.querySelectorAll('p, td, th')).map(el => el.textContent.trim()).filter(Boolean);
-          
-          for (const text of paragraphs) {
-            if (y > 275) {
-              doc.addPage();
-              y = 20;
+      if (item.id === 'front-matter') {
+        for (const subId of item.subIds) {
+          if (subId === 'fm-cover') {
+            const coverPages = window.pdfPreview ? window.pdfPreview.getFrontMatterPages().filter(p => /^cover/i.test(p.label)) : [];
+            if (coverPages.length > 0) {
+              coverPages.forEach(p => addImagePage(p.src, 'Cover Page'));
+            } else {
+              if (isFirstPage) {
+                isFirstPage = false;
+              } else {
+                doc.addPage();
+              }
+              doc.setFont('helvetica', 'bold');
+              doc.setFontSize(24);
+              doc.setTextColor(0, 0, 0);
+              doc.text('DISTRICT SURVEY REPORT', W / 2, 70, { align: 'center' });
+              doc.text(`FOR SAND MINING IN ${district.toUpperCase()} DISTRICT`, W / 2, 84, { align: 'center', maxWidth: W - 30 });
+              doc.setFont('helvetica', 'normal');
+              doc.setFontSize(12);
+              doc.text(`Government of Punjab\nDepartment of Mining and Geology`, W / 2, H / 2 - 10, { align: 'center' });
+              doc.setFont('helvetica', 'bold');
+              doc.setFontSize(11);
+              doc.text(`Year: ${year}`, W / 2, H - 50, { align: 'center' });
+              doc.text(`Version: ${version}`, W / 2, H - 42, { align: 'center' });
             }
-            const splitText = doc.splitTextToSize(text, 170);
-            doc.text(splitText, 20, y);
-            y += (splitText.length * 5) + 4;
+          } else if (subId === 'fm-toc') {
+            const tocPages = window.pdfPreview ? window.pdfPreview.getFrontMatterPages().filter(p => /^content|^toc/i.test(p.label)) : [];
+            if (tocPages.length > 0) {
+              tocPages.forEach(p => addImagePage(p.src, 'Table of Contents'));
+            }
+          } else if (subId === 'fm-pref') {
+            const prefPages = window.pdfPreview ? window.pdfPreview.getFrontMatterPages().filter(p => /^preface/i.test(p.label)) : [];
+            if (prefPages.length > 0) {
+              prefPages.forEach(p => addImagePage(p.src, 'Preface'));
+            }
+          } else if (subId === 'fm-ack') {
+            const ackPages = window.pdfPreview ? window.pdfPreview.getFrontMatterPages().filter(p => /^acknowledgement/i.test(p.label)) : [];
+            if (ackPages.length > 0) {
+              ackPages.forEach(p => addImagePage(p.src, 'Acknowledgement'));
+            }
+          } else if (subId === 'fm-cert') {
+            const certPages = window.pdfPreview ? window.pdfPreview.getFrontMatterPages().filter(p => /^certificate of compliance/i.test(p.label)) : [];
+            if (certPages.length > 0) {
+              certPages.forEach(p => addImagePage(p.src, 'Certificate of Compliance'));
+            }
           }
         }
+      } 
+      else if (item.id === 'chapters') {
+        for (const subId of item.subIds) {
+          const ch = (S.chapters || []).find(c => `chapter-${c.id}` === subId) || {};
+          const chNum = ch.id;
+          const chapterTitle = safe(ch.name, `Chapter ${chNum}`);
+          const chPages = window.pdfPreview ? window.pdfPreview.getChapterPages().filter(p => new RegExp('^Chapter ' + chNum + '\\b', 'i').test(p.label)) : [];
+          if (chPages.length > 0) {
+            addTitlePage(chapterTitle);
+            chPages.forEach(p => addImagePage(p.src, chapterTitle));
+          }
+        }
+      } 
+      else if (item.id === 'plates') {
+        for (const subId of item.subIds) {
+          const pl = (S.plates || []).find(p => `plate-${p.id}` === subId) || {};
+          const plateNo = pl.id;
+          const plateTitle = safe(pl.name, `Plate ${plateNo}`);
+          const platePages = window.pdfPreview ? window.pdfPreview.getPlatePages().filter(p => new RegExp('^Plate P' + plateNo + '\\b|^Plate ' + plateNo + '\\b', 'i').test(p.label)) : [];
+          if (platePages.length > 0) {
+            addTitlePage(plateTitle);
+            platePages.forEach(p => addImagePage(p.src, plateTitle));
+          }
+        }
+      } 
+      else if (item.id === 'graphs') {
+        addTitlePage('CROSS SECTION GRAPHS');
+        S.graphs.forEach((g, index) => {
+          doc.addPage();
+          let y = 25;
+          y = writeParagraph(`${index + 1}. ${safe(g.name || g.subName, 'Cross Section')}`, y, { bold: true, size: 12, color: [0, 0, 0] });
+          const calc = typeof calcGraph === 'function' ? calcGraph(g) : null;
+          doc.autoTable({
+            startY: y,
+            margin: { left: pad, right: pad },
+            tableWidth,
+            head: [['Metric', 'Value']],
+            body: [
+              ['Distance Points', safe(g.dist)],
+              ['Post Monsoon Levels', safe(g.post)],
+              ['Reduced Level', safe(g.red)],
+              ['Thalweg Level', safe(g.thal)],
+              ['Area', safe(g.area)],
+              ['Bulk Density', safe(g.bulk)],
+              ['Mining Percentage', safe(g.pct) + '%'],
+              ['Estimated Volume', calc ? localFmtN(calc.volume, 0) : '-']
+            ],
+            styles: { fontSize: 8, cellPadding: 2, lineColor: [0, 0, 0], lineWidth: 0.2, textColor: [0, 0, 0] },
+            headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold', lineColor: [0, 0, 0], lineWidth: 0.2 },
+            theme: 'grid'
+          });
+          y = doc.lastAutoTable.finalY + 8;
+          const canvas = document.getElementById(`canvas-${g.id}-post`) || document.getElementById(`canvas-${g.id}`);
+          if (canvas) {
+            try {
+              doc.addImage(canvas.toDataURL('image/png', 1), 'PNG', pad, y, tableWidth, 65);
+            } catch (err) {
+              console.warn('Cross-section canvas capture failed:', err);
+            }
+          }
+        });
+      } 
+      else if (item.id.startsWith('custom-pdf-')) {
+        const reports = loadLocalReports();
+        const report = reports.find(r => r.id === reportId);
+        const customSec = report && report.customSections && report.customSections.find(cs => cs.id === item.id);
+        const titleText = customSec ? customSec.name : 'Custom PDF Section';
+        const customPages = S.uploadedPDFs && S.uploadedPDFs[item.id];
+        addTitlePage(titleText);
+        if (customPages && customPages.length > 0) {
+          customPages.forEach((page, idx) => addImagePage(page, `${titleText} - Page ${idx + 1}`));
+        }
+      } 
+      else {
+        // Standard Annexures
+        const editableTitle = typeof getEditableAnnexureTitle === 'function' ? getEditableAnnexureTitle(item.id, item.id.toUpperCase()) : item.id.toUpperCase();
+        const isAllowed = ['anx1', 'anx2', 'anx3', 'anx4', 'anx5', 'anx6', 'anx7', 'annexure-f', 'annexure-j', 'annexure-k'].includes(item.id);
+        
+        borderActive = isAllowed;
+        addTitlePage(editableTitle);
+        await addAnnexureFromPreview(editableTitle, item.id);
+        borderActive = false;
       }
       
       // Yield to main thread to keep UI smooth
       await new Promise(resolve => setTimeout(resolve, 15));
     }
     
-    // Draw borders & page numbers (exactly like final DSR PDF format)
+    // 5. Draw footers and borders (exactly like final DSR PDF format)
     const totalPages = doc.getNumberOfPages();
-    const hasCover = checkedIds.includes('fm-cover');
-    const district = (window.S && S.frontMatter && S.frontMatter.district) || 'Jalandhar';
-    const pageFrameMargin = 5;
-    
     for (let p = 1; p <= totalPages; p++) {
       doc.setPage(p);
-      if (hasCover && p === 1) continue; // Skip cover page
+      if (p === 1 && checkedIds.includes('fm-cover')) continue; // Skip cover page if it is page 1
       
-      // Border frame rect
-      doc.setDrawColor(0, 0, 0);
-      doc.setLineWidth(0.3);
-      doc.rect(pageFrameMargin, pageFrameMargin, pdfWidth - (pageFrameMargin * 2), pdfHeight - pageFrameMargin - 18, 'S');
+      const isTitlePage = titlePages.includes(p);
       
-      // Page footer text
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7.5);
-      doc.setTextColor(0, 0, 0);
-      const districtNameUpper = String(district).toUpperCase();
-      const footerLeft = `PREPARED BY: SUB-DIVISIONAL COMMITTEE OF ${districtNameUpper} DISTRICT`;
-      const footerLeft2 = `ASSISTED BY: RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD`;
-      doc.text(footerLeft, pdfWidth / 2, 286, { align: 'center' });
-      doc.text(footerLeft2, pdfWidth / 2, 290, { align: 'center' });
-      doc.text(`Page ${p}`, pdfWidth - 8, 288, { align: 'right' });
+      if (borderPages.includes(p)) {
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.3);
+        doc.rect(pageFrameMargin, pageFrameMargin, W - (pageFrameMargin * 2), H - pageFrameMargin - 18, 'S');
+      }
+      
+      if (!isTitlePage) {
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7.5);
+        doc.setTextColor(0, 0, 0);
+        const districtNameUpper = String(district).toUpperCase();
+        const footerLeft = `PREPARED BY: SUB-DIVISIONAL COMMITTEE OF ${districtNameUpper} DISTRICT`;
+        const footerLeft2 = `ASSISTED BY: RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD`;
+        doc.text(footerLeft, W / 2, 286, { align: 'center' });
+        doc.text(footerLeft2, W / 2, 290, { align: 'center' });
+        doc.text(`Page ${p}`, W - 8, 288, { align: 'right' });
+      }
     }
     
     return doc.output('blob');
   } catch (err) {
     console.error('Unified report generation crashed:', err);
     return null;
-  } finally {
-    if (document.body.contains(renderDiv)) {
-      document.body.removeChild(renderDiv);
-    }
   }
 }
 
