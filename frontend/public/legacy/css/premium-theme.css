@@ -5162,7 +5162,8 @@ body:not(.view-dashboard-active):not(.view-projects-active) #sidebar .sb-nav[sty
   }
 }
 
-/* Hide global topbar entirely on dashboard */
-body.view-dashboard-active .topbar.dash-global-topbar {
+/* Hide global topbar entirely on dashboard and projects */
+body.view-dashboard-active .topbar.dash-global-topbar,
+body.view-projects-active .topbar.dash-global-topbar {
   display: none !important;
 }
