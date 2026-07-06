@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smart-dsr-cache-v17-replenishment-selected-sections';
+const CACHE_NAME = 'smart-dsr-cache-v18-front-matter-upload-pdfs';
 const urlsToCache = [
   './login.html',
   './css/styles.css',

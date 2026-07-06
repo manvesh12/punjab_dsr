@@ -171,6 +171,8 @@ window.removeCustomSectionPdf = removeCustomSectionPdf;
 window.deleteCustomSection = deleteCustomSection;
 window.closeCustomPdfModal = closeCustomPdfModal;
 window.confirmAddCustomSection = confirmAddCustomSection;
+window.handleFrontMatterPdfUpload = handleFrontMatterPdfUpload;
+window.removeFrontMatterPdfUpload = removeFrontMatterPdfUpload;
 
 function showReplenishmentOptions(container) {
   container.innerHTML = `
@@ -369,6 +371,7 @@ function downloadCustomReportPDFDirect(reportId) {
   const reports = loadLocalReports();
   const report = reports.find(r => r.id === reportId);
   if (!report) return;
+  restoreReportFrontMatterPdfs(report);
   
   const checkedIds = report.sections || [];
   if (checkedIds.length === 0) {
@@ -613,6 +616,94 @@ function confirmAddCustomSection(reportId, reportName) {
   }
 }
 
+function frontMatterUploadKey(sectionId) {
+  return {
+    'fm-cover': 'cover',
+    'fm-toc': 'toc',
+    'fm-pref': 'pref',
+    'fm-ack': 'ack',
+    'fm-cert': 'cert'
+  }[sectionId] || sectionId;
+}
+
+function restoreReportFrontMatterPdfs(report) {
+  if (!report || !report.frontMatterPdfs) return;
+  if (!S.uploadedPDFs) S.uploadedPDFs = {};
+  Object.keys(report.frontMatterPdfs).forEach(key => {
+    if (Array.isArray(report.frontMatterPdfs[key]) && report.frontMatterPdfs[key].length) {
+      S.uploadedPDFs[key] = report.frontMatterPdfs[key];
+    }
+  });
+}
+
+function handleFrontMatterPdfUpload(input, reportId, sectionId, reportName) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.type !== 'application/pdf') {
+    toast("Please upload a PDF file", "error");
+    input.value = '';
+    return;
+  }
+
+  const uploadKey = frontMatterUploadKey(sectionId);
+  toast("Processing front matter PDF... Please wait", "info");
+
+  const savePages = (pages) => {
+    if (!S.uploadedPDFs) S.uploadedPDFs = {};
+    S.uploadedPDFs[uploadKey] = pages;
+
+    const reports = loadLocalReports();
+    const report = reports.find(r => r.id === reportId);
+    if (report) {
+      if (!report.frontMatterPdfs) report.frontMatterPdfs = {};
+      report.frontMatterPdfs[uploadKey] = pages;
+      saveLocalReports(reports);
+
+      const editorContainer = document.getElementById('repl-editor-container');
+      if (editorContainer) renderCustomReportGenerator(editorContainer, report);
+    }
+
+    if (window.debouncedSaveState) window.debouncedSaveState();
+    toast("Front matter PDF uploaded successfully!", "success");
+  };
+
+  if (typeof renderPdfToImages === 'function') {
+    renderPdfToImages(file, (err, imgs) => {
+      input.value = '';
+      if (err) {
+        console.error(err);
+        toast("Failed to process PDF pages", "error");
+        return;
+      }
+      savePages(imgs);
+    });
+  } else {
+    const url = URL.createObjectURL(file);
+    input.value = '';
+    savePages([url]);
+  }
+}
+
+function removeFrontMatterPdfUpload(reportId, sectionId, reportName) {
+  if (!confirm("Are you sure you want to remove the uploaded front matter PDF?")) return;
+  const uploadKey = frontMatterUploadKey(sectionId);
+  const reports = loadLocalReports();
+  const report = reports.find(r => r.id === reportId);
+  if (report) {
+    if (report.frontMatterPdfs) {
+      delete report.frontMatterPdfs[uploadKey];
+    }
+    if (S.uploadedPDFs) {
+      delete S.uploadedPDFs[uploadKey];
+    }
+    saveLocalReports(reports);
+
+    const editorContainer = document.getElementById('repl-editor-container');
+    if (editorContainer) renderCustomReportGenerator(editorContainer, report);
+    toast("Front matter PDF removed successfully!", "success");
+  }
+}
+
 function handleCustomSectionPdfUpload(input, reportId, sectionId, reportName) {
   const file = input.files[0];
   if (!file) return;
@@ -792,11 +883,11 @@ function renderCustomReportGenerator(container, report) {
       type: 'DSR', 
       hasSubsections: true,
       subsections: [
-        { id: 'fm-cover', name: 'Cover Page' },
-        { id: 'fm-toc', name: 'Content Page' },
-        { id: 'fm-pref', name: 'Preface' },
-        { id: 'fm-ack', name: 'Acknowledgement' },
-        { id: 'fm-cert', name: 'Certificate of Compliance' }
+        { id: 'fm-cover', name: 'Cover Page', uploadKey: 'cover' },
+        { id: 'fm-toc', name: 'Content Page', uploadKey: 'toc' },
+        { id: 'fm-pref', name: 'Preface', uploadKey: 'pref' },
+        { id: 'fm-ack', name: 'Acknowledgement', uploadKey: 'ack' },
+        { id: 'fm-cert', name: 'Certificate of Compliance', uploadKey: 'cert' }
       ]
     },
     { 
@@ -833,6 +924,8 @@ function renderCustomReportGenerator(container, report) {
   ];
 
   // Restore custom PDF pages into S.uploadedPDFs
+  restoreReportFrontMatterPdfs(report);
+
   if (report.customPdfs) {
     if (!S.uploadedPDFs) S.uploadedPDFs = {};
     Object.keys(report.customPdfs).forEach(secId => {
@@ -935,12 +1028,33 @@ function renderCustomReportGenerator(container, report) {
     } else if (s.hasSubsections) {
       let subHtml = '';
       s.subsections.forEach(sub => {
+        const uploadKey = sub.uploadKey || frontMatterUploadKey(sub.id);
+        const uploadedPages = s.id === 'front-matter'
+          ? ((report.frontMatterPdfs && report.frontMatterPdfs[uploadKey]) || (S.uploadedPDFs && S.uploadedPDFs[uploadKey]))
+          : null;
+        const hasUploadedPages = Array.isArray(uploadedPages) && uploadedPages.length > 0;
+        const uploadControlHtml = s.id === 'front-matter' ? `
+          <div style="display:flex; align-items:center; gap:6px; margin-left:auto;">
+            ${hasUploadedPages ? `
+              <span title="Uploaded PDF pages" style="font-size:10px; color:#2563eb; background:#eff6ff; border:1px solid #bfdbfe; border-radius:999px; padding:2px 7px; font-weight:700; white-space:nowrap;">
+                PDF ${uploadedPages.length}p
+              </span>
+              <button type="button" title="Remove PDF" onclick="event.stopPropagation(); window.removeFrontMatterPdfUpload('${report.id}', '${sub.id}', '${escapedReportName}')" style="border:none; background:#fee2e2; color:#b91c1c; border-radius:4px; padding:3px 6px; font-size:10px; font-weight:700; cursor:pointer;">Remove</button>
+            ` : `
+              <button type="button" title="Upload PDF" onclick="event.stopPropagation(); document.getElementById('fm-upload-${sub.id}').click()" style="border:1px solid #bfdbfe; background:#eff6ff; color:#1d4ed8; border-radius:4px; padding:3px 7px; font-size:10px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
+                <i data-lucide="upload" style="width:11px; height:11px;"></i> Upload PDF
+              </button>
+            `}
+            <input type="file" id="fm-upload-${sub.id}" accept="application/pdf" style="display:none;" onchange="window.handleFrontMatterPdfUpload(this, '${report.id}', '${sub.id}', '${escapedReportName}')">
+          </div>
+        ` : '';
         subHtml += `
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-            <input type="checkbox" id="chk-${sub.id}" value="${sub.id}" data-parent="${s.id}" onchange="window.onSubCheckboxChange('${s.id}', '${escapedReportName}', '${report.id}')" style="width:14px; height:14px; cursor:pointer;">
-            <label for="chk-${sub.id}" style="font-size:12px; cursor:pointer; color:#475569; margin:0;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; min-height:24px;">
+            <input type="checkbox" id="chk-${sub.id}" value="${sub.id}" data-parent="${s.id}" onchange="window.onSubCheckboxChange('${s.id}', '${escapedReportName}', '${report.id}')" style="width:14px; height:14px; cursor:pointer; flex:0 0 auto;">
+            <label for="chk-${sub.id}" style="font-size:12px; cursor:pointer; color:#475569; margin:0; flex:1; min-width:0;">
               ${sub.name}
             </label>
+            ${uploadControlHtml}
           </div>
         `;
       });
@@ -1285,6 +1399,12 @@ function getLivePreviewAnnexureSectionHtml(viewId) {
 }
 
 function compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds, reportId) {
+  if (reportId) {
+    const reports = loadLocalReports();
+    const report = reports.find(r => r.id === reportId);
+    restoreReportFrontMatterPdfs(report);
+  }
+
   const district = (window.S && S.frontMatter && S.frontMatter.district) || 'Jalandhar';
   const year = (window.S && S.frontMatter && S.frontMatter.year) || '2025-26';
   const title = document.getElementById('fm-title')?.value || (S.frontMatter && S.frontMatter.title) || 'District Survey Report for Sand Mining';
@@ -1391,12 +1511,20 @@ function compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds, repor
           }
         } 
         else if (subId === 'fm-ack') {
-          subHtml = `
-            <div style="margin-bottom: 40px; page-break-after:always;">
+          const uploaded = S.uploadedPDFs && S.uploadedPDFs['ack'];
+          if (uploaded && uploaded.length) {
+            subHtml = `<div style="page-break-after:always;">
               <h2 class="section-title">Acknowledgement</h2>
-              <p style="font-size:13.5px; line-height:1.7; white-space:pre-wrap; color:#334155;">${ack || 'No acknowledgement text available.'}</p>
-            </div>
-          `;
+              ${uploaded.map(src => `<img src="${src}" style="max-width:100%; height:auto; display:block; margin:0 auto 10px;">`).join('')}
+            </div>`;
+          } else {
+            subHtml = `
+              <div style="margin-bottom: 40px; page-break-after:always;">
+                <h2 class="section-title">Acknowledgement</h2>
+                <p style="font-size:13.5px; line-height:1.7; white-space:pre-wrap; color:#334155;">${ack || 'No acknowledgement text available.'}</p>
+              </div>
+            `;
+          }
         } 
         else if (subId === 'fm-cert') {
           const uploaded = S.uploadedPDFs && S.uploadedPDFs['cert'];
@@ -1804,6 +1932,12 @@ function hidePdfProgressToast() {
 }
 
 async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
+  if (reportId) {
+    const reports = loadLocalReports();
+    const report = reports.find(r => r.id === reportId);
+    restoreReportFrontMatterPdfs(report);
+  }
+
   const localRenderTextPageCanvas = (title, bodyText, subtitle) => {
     const canvas = document.createElement('canvas');
     const scale = 3;
