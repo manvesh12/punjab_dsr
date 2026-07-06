@@ -260,26 +260,26 @@
 <a class="text-secondary-fixed font-bold border-b-2 border-secondary-fixed pb-1 h-full flex items-center text-label-md font-label-md opacity-90 transition-all duration-200 whitespace-nowrap text-body-md" href="home.html">Home</a>
 </li>
 <li class="h-full flex items-center">
-<a class="text-on-primary/80 dark:text-on-primary-container/80 hover:text-on-primary text-label-md font-label-md hover:text-secondary-fixed transition-colors duration-200 whitespace-nowrap h-full flex items-center text-body-md font-bold" href="login.html">About DSR</a>
+<a class="text-on-primary/80 dark:text-on-primary-container/80 hover:text-on-primary text-label-md font-label-md hover:text-secondary-fixed transition-colors duration-200 whitespace-nowrap h-full flex items-center text-body-md font-bold" href="#about-dsr">About DSR</a>
 </li>
 <li class="h-full flex items-center">
-<a class="text-on-primary/80 dark:text-on-primary-container/80 hover:text-on-primary text-label-md font-label-md hover:text-secondary-fixed transition-colors duration-200 whitespace-nowrap h-full flex items-center text-body-md font-bold" href="login.html">Services</a>
+<a class="text-on-primary/80 dark:text-on-primary-container/80 hover:text-on-primary text-label-md font-label-md hover:text-secondary-fixed transition-colors duration-200 whitespace-nowrap h-full flex items-center text-body-md font-bold" href="#services">Services</a>
 </li>
 <li class="h-full flex items-center">
-<a class="text-on-primary/80 dark:text-on-primary-container/80 hover:text-on-primary text-label-md font-label-md hover:text-secondary-fixed transition-colors duration-200 whitespace-nowrap h-full flex items-center text-body-md font-bold" href="login.html">District Reports</a>
+<a class="text-on-primary/80 dark:text-on-primary-container/80 hover:text-on-primary text-label-md font-label-md hover:text-secondary-fixed transition-colors duration-200 whitespace-nowrap h-full flex items-center text-body-md font-bold" href="#district-reports">District Reports</a>
 </li>
 <li class="h-full flex items-center">
-<a class="text-on-primary/80 dark:text-on-primary-container/80 hover:text-on-primary text-label-md font-label-md hover:text-secondary-fixed transition-colors duration-200 whitespace-nowrap h-full flex items-center text-body-md font-bold" href="login.html">Guidelines</a>
+<a class="text-on-primary/80 dark:text-on-primary-container/80 hover:text-on-primary text-label-md font-label-md hover:text-secondary-fixed transition-colors duration-200 whitespace-nowrap h-full flex items-center text-body-md font-bold" href="#guidelines">Guidelines</a>
 </li>
 <li class="h-full flex items-center">
-<a class="text-on-primary/80 dark:text-on-primary-container/80 hover:text-on-primary text-label-md font-label-md hover:text-secondary-fixed transition-colors duration-200 whitespace-nowrap h-full flex items-center mr-4 text-body-md font-bold" href="login.html">Helpdesk</a>
+<a class="text-on-primary/80 dark:text-on-primary-container/80 hover:text-on-primary text-label-md font-label-md hover:text-secondary-fixed transition-colors duration-200 whitespace-nowrap h-full flex items-center mr-4 text-body-md font-bold" href="#helpdesk">Helpdesk</a>
 </li>
 </ul>
 <div class="flex items-center gap-sm">
-<button aria-label="Language" class="text-on-primary hover:text-secondary-fixed transition-colors p-1">
+<button aria-label="Language" class="text-on-primary hover:text-secondary-fixed transition-colors p-1" onclick="openPortalPanel('language')">
 <span class="material-symbols-outlined" data-icon="language">language</span>
 </button>
-<button aria-label="Search" class="text-on-primary hover:text-secondary-fixed transition-colors p-1">
+<button aria-label="Search" class="text-on-primary hover:text-secondary-fixed transition-colors p-1" onclick="openPortalPanel('search')">
 <span class="material-symbols-outlined" data-icon="search">search</span>
 </button>
 <a class="bg-secondary text-white px-4 py-2 rounded text-label-md font-label-md font-bold hover:bg-secondary/90 transition-colors shadow-sm ml-2 whitespace-nowrap hidden md:block" href="login.html">Official Login</a>
@@ -355,13 +355,70 @@
 <span class="bg-secondary-container/20 text-secondary px-2 py-1 rounded text-[12px] font-bold uppercase tracking-wide border border-secondary-container/30">Latest Updates</span>
 <span class="text-on-surface-variant text-body-lg font-medium">District Survey Report preparation and review services are available through the portal.</span>
 </div>
-<a class="text-primary hover:text-secondary font-medium text-label-md inline-flex items-center gap-1 transition-colors whitespace-nowrap" href="login.html">
+<a class="text-primary hover:text-secondary font-medium text-label-md inline-flex items-center gap-1 transition-colors whitespace-nowrap" href="#notices">
                     View all notices <span class="material-symbols-outlined text-[16px]">arrow_right_alt</span>
 </a>
 </div>
 </div>
+<section id="about-dsr" class="py-xl bg-surface px-sm md:px-gutter">
+<div class="max-w-container-max mx-auto grid grid-cols-1 lg:grid-cols-3 gap-lg">
+<div class="lg:col-span-2">
+<span class="text-[12px] font-bold text-secondary uppercase tracking-wider mb-2 block">About DSR</span>
+<h2 class="text-headline-lg font-headline-lg text-primary-container mb-4">District Survey Report portal</h2>
+<p class="text-body-lg text-on-surface-variant leading-relaxed mb-4">The portal supports preparation, review, publication, and tracking of District Survey Reports for sand mining workflows in Punjab.</p>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+<div class="bg-surface-container border border-surface-container-highest rounded-xl p-4"><strong class="text-primary-container">Prepare</strong><p class="text-body-md text-on-surface-variant mt-1">Compile district data, annexures, maps, and supporting documents.</p></div>
+<div class="bg-surface-container border border-surface-container-highest rounded-xl p-4"><strong class="text-primary-container">Review</strong><p class="text-body-md text-on-surface-variant mt-1">Route submissions through department-level review and approval.</p></div>
+<div class="bg-surface-container border border-surface-container-highest rounded-xl p-4"><strong class="text-primary-container">Publish</strong><p class="text-body-md text-on-surface-variant mt-1">Generate final DSR PDFs and keep a traceable report history.</p></div>
+</div>
+</div>
+<form class="bg-white border border-surface-container-highest rounded-xl p-md shadow-sm" onsubmit="submitPortalEnquiry(event, 'about')">
+<h3 class="text-headline-sm font-bold text-primary-container mb-3">Ask about DSR</h3>
+<input class="w-full rounded-lg border-surface-container-highest mb-3" name="name" placeholder="Name" required>
+<input class="w-full rounded-lg border-surface-container-highest mb-3" name="email" type="email" placeholder="Email" required>
+<textarea class="w-full rounded-lg border-surface-container-highest mb-3" name="message" rows="3" placeholder="Your question" required></textarea>
+<button class="bg-primary-container text-white px-5 py-2 rounded-lg font-bold" type="submit">Submit enquiry</button>
+</form>
+</div>
+</section>
+<section id="services" class="py-xl bg-surface-container-low px-sm md:px-gutter">
+<div class="max-w-container-max mx-auto">
+<span class="text-[12px] font-bold text-secondary uppercase tracking-wider mb-2 block">Services</span>
+<h2 class="text-headline-lg font-headline-lg text-primary-container mb-6">Portal services</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+<a class="bg-white border border-surface-container-highest rounded-xl p-5 hover:shadow-md transition" href="login.html"><span class="material-symbols-outlined text-secondary">edit_document</span><h3 class="font-bold text-primary-container mt-2">Create DSR</h3><p class="text-body-md text-on-surface-variant mt-1">Start or continue a district report.</p></a>
+<a class="bg-white border border-surface-container-highest rounded-xl p-5 hover:shadow-md transition" href="#district-reports"><span class="material-symbols-outlined text-secondary">folder_open</span><h3 class="font-bold text-primary-container mt-2">View Reports</h3><p class="text-body-md text-on-surface-variant mt-1">Browse district-wise report records.</p></a>
+<a class="bg-white border border-surface-container-highest rounded-xl p-5 hover:shadow-md transition" href="#guidelines"><span class="material-symbols-outlined text-secondary">download</span><h3 class="font-bold text-primary-container mt-2">Guidelines</h3><p class="text-body-md text-on-surface-variant mt-1">Check formats and instructions.</p></a>
+<a class="bg-white border border-surface-container-highest rounded-xl p-5 hover:shadow-md transition" href="#helpdesk"><span class="material-symbols-outlined text-secondary">support_agent</span><h3 class="font-bold text-primary-container mt-2">Support</h3><p class="text-body-md text-on-surface-variant mt-1">Raise a portal support request.</p></a>
+</div>
+</div>
+</section>
+<section id="district-reports" class="py-xl bg-surface px-sm md:px-gutter">
+<div class="max-w-container-max mx-auto">
+<span class="text-[12px] font-bold text-secondary uppercase tracking-wider mb-2 block">District Reports</span>
+<h2 class="text-headline-lg font-headline-lg text-primary-container mb-6">Find a report</h2>
+<form class="grid grid-cols-1 md:grid-cols-4 gap-3 bg-white border border-surface-container-highest rounded-xl p-md shadow-sm" onsubmit="submitReportSearch(event)">
+<select class="rounded-lg border-surface-container-highest" name="district" required><option value="">District</option><option>Jalandhar</option><option>Ludhiana</option><option>Amritsar</option><option>Patiala</option></select>
+<select class="rounded-lg border-surface-container-highest" name="year" required><option value="">Year</option><option>2025-26</option><option>2024-25</option></select>
+<select class="rounded-lg border-surface-container-highest" name="status"><option>Any Status</option><option>Draft</option><option>Under Review</option><option>Published</option></select>
+<button class="bg-primary-container text-white px-5 py-2 rounded-lg font-bold" type="submit">Search reports</button>
+</form>
+<div id="report-search-results" class="mt-4 text-body-md text-on-surface-variant"></div>
+</div>
+</section>
+<section id="guidelines" class="py-xl bg-surface-container-low px-sm md:px-gutter">
+<div class="max-w-container-max mx-auto">
+<span class="text-[12px] font-bold text-secondary uppercase tracking-wider mb-2 block">Guidelines</span>
+<h2 class="text-headline-lg font-headline-lg text-primary-container mb-6">Forms and reference material</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<button class="text-left bg-white border border-surface-container-highest rounded-xl p-5 hover:shadow-md transition" onclick="downloadGuideline('DSR preparation checklist')"><h3 class="font-bold text-primary-container">DSR preparation checklist</h3><p class="text-body-md text-on-surface-variant mt-1">Step-wise checklist for district teams.</p></button>
+<button class="text-left bg-white border border-surface-container-highest rounded-xl p-5 hover:shadow-md transition" onclick="downloadGuideline('Annexure formats')"><h3 class="font-bold text-primary-container">Annexure formats</h3><p class="text-body-md text-on-surface-variant mt-1">Reference annexure structure and field guidance.</p></button>
+<button class="text-left bg-white border border-surface-container-highest rounded-xl p-5 hover:shadow-md transition" onclick="downloadGuideline('Review workflow manual')"><h3 class="font-bold text-primary-container">Review workflow manual</h3><p class="text-body-md text-on-surface-variant mt-1">Submission, review, return, and approval flow.</p></button>
+</div>
+</div>
+</section>
 <!-- Information & Helpdesk Section -->
-<section class="py-xl bg-surface px-sm md:px-gutter">
+<section id="notices" class="py-xl bg-surface px-sm md:px-gutter">
 <div class="max-w-container-max mx-auto">
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-lg">
 <!-- Notices -->
@@ -394,7 +451,7 @@
 </div>
 </div>
 <!-- Helpdesk Card -->
-<div class="lg:col-span-1">
+<div id="helpdesk" class="lg:col-span-1 scroll-mt-24">
 <div class="bg-surface-container border border-surface-container-highest rounded-xl p-md h-full flex flex-col relative overflow-hidden">
 <!-- Subtle geometric accent -->
 <div class="absolute -right-12 -top-12 w-32 h-32 bg-primary-fixed/30 rounded-full"></div>
@@ -404,9 +461,9 @@
 <p class="text-body-md text-on-surface-variant mb-6 flex-1">
                                     For technical support and portal-related queries, contact the departmental helpdesk during working hours.
                                 </p>
-<a href="login.html" class="bg-primary-container text-white py-3 px-6 rounded-lg text-label-md font-label-md font-bold hover:bg-on-tertiary-fixed-variant transition-colors shadow-sm self-start inline-block">
+<button type="button" onclick="openPortalPanel('helpdesk')" class="bg-primary-container text-white py-3 px-6 rounded-lg text-label-md font-label-md font-bold hover:bg-on-tertiary-fixed-variant transition-colors shadow-sm self-start inline-block">
                                     Contact Helpdesk
-                                </a>
+                                </button>
 </div>
 </div>
 </div>
@@ -416,7 +473,7 @@
 </main>
 <!-- Footer Component -->
 <footer class="bg-[#F5F1E9] border-t border-outline-variant/30 full-width" id="footer">
-<div class="grid grid-cols-1 md:grid-cols-4 gap-md py-xl px-base md:px-lg max-w-container-max mx-auto"><div class="md:col-span-2 flex flex-col gap-8">
+<div class="grid grid-cols-1 md:grid-cols-5 gap-md py-xl px-base md:px-lg max-w-container-max mx-auto"><div class="md:col-span-2 flex flex-col gap-8">
 <div class="flex items-center gap-6"><img alt="IIT Ropar Logo" class="h-16 w-auto object-contain mix-blend-multiply contrast-125" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFj63L8N_VdnfPM7gRHwDnnYKU7v1UKjD3gUyxbqa42kqCIIvl_zSu0VxnYu9LN6toV6P-zdUFTZuFs1ITkOzs9RbSuKgzm5HR7gMsp1h44tKTL3pU14IttD_xUKz3Ynr-lD9TH6lS4b6vi-_CfU6Ci9ymfJRnPhMl9oeLqVffqSwa36oCDP9HJbZ7ZpWL_iBR9jrbr7aFsdW8hzp6KzD_7ySF75wtUReyVAa4rD6TcWDi1vBrh8keAzlojEeJ-JlnroZgB0sCnMg"/><img alt="Punjab Govt Logo" class="h-16 w-auto object-contain mix-blend-multiply contrast-125" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA53LCR-u4obwOTZLGyltFxEGh6AB_1A8_pnqrsI5JBjB65RvbOosT909rUgchh9B2ot55qH116oW_sKVoJmI9iTM339KkIRzbFZD7Pyz0rFTxL7nMAGK5V3Ml6M2edKqgb7wX4zdWiM7ICybjbDWEztndYxcW1MSGiL5il7Ge-NLp9Oyz6HxQR3PIKnVvLHkCpQghp568QuyKvxaH2kjXH7UB3hqD-AJZphix5DGZvw1cez5pqbMe6Ijm905gkduyPMsQ5Lfv9hX8"/><img alt="SEnSRS Circular Logo" class="h-16 w-auto object-contain mix-blend-multiply contrast-125" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4kX_D4QEVJFycE3r0Z4XfHjAU7R8Fr4_zGs_PpPcqHt6O0bELCrbH1MQIF0N_CLymZlu3IjCHFMeFU0I3udZvrBQXESOYk-yOpQ5n5VND-Y30btfo70sJ1wqhy36wQbyV_YWkcdHi91HO1kJF5YV4wuLWcBBCDeh0kxknitPuE_obycDhlMfTWZY9797BiUc40oolaoXclR6TV-IYO2CdfFVZPZPm8USfX_9msrloeOWfRYo70ywaX0PYhH9jS221wJslb3ae8DU"/></div>
 <img alt="SEnSRS Logo" class="h-16 w-auto self-start object-contain mix-blend-multiply contrast-125" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgydF8VFd1ToJcgOyid1qmqsL6k9k15RDELu5_HUD-ELqrC3fk7RUBgzYBUjirPMK3aKKmO9ncHJ2XPsPiH3p5cWKl0iPcutPM_MlpKjneM-qDogZZFuaxdTVyhs8hakZ8EVwFeyfDuTbGssp7Pha86oaAV6JseWuxnj5pTN4gjK0grfJe70F5YDy3vG8OiD8jiFXxShbyD2DZeOtVShsgR40uG4Kot6No6eTC8eaLQ-PyyVVyxWK3J3VcEW954AnxcNu4nWCfiw4"/>
 <div class="flex flex-col gap-1">
@@ -426,21 +483,49 @@
 </div>
 </div>
 <div>
-<h4 class="text-secondary font-bold text-label-md uppercase tracking-wider mb-6">IMPORTANT LINKS</h4>
+<h4 class="text-secondary font-bold text-label-md uppercase tracking-wider mb-6">INSTITUTE LINKS</h4>
 <ul class="flex flex-col gap-4">
-<li class=""><a class="text-on-surface-variant hover:text-primary flex items-center gap-2 underline font-medium" href="login.html"><span class="material-symbols-outlined text-[18px]">open_in_new</span>About the Department</a></li>
-<li class=""><a class="text-on-surface-variant hover:text-primary flex items-center gap-2 underline font-medium" href="login.html"><span class="material-symbols-outlined text-[18px]">open_in_new</span>Privacy Policy</a></li>
-<li class=""><a class="text-on-surface-variant hover:text-primary flex items-center gap-2 underline font-medium" href="login.html"><span class="material-symbols-outlined text-[18px]">open_in_new</span>Terms of Use</a></li>
-<li class=""><a class="text-on-surface-variant hover:text-primary flex items-center gap-2 underline font-medium" href="login.html"><span class="material-symbols-outlined text-[18px]">open_in_new</span>Contact Helpdesk</a></li>
+<li><a class="text-on-surface-variant hover:text-primary flex items-center gap-2 font-medium" href="https://www.iitrpr.ac.in/guest-house" target="_blank"><span class="material-symbols-outlined text-[16px]">open_in_new</span>Guest House</a></li>
+<li><a class="text-on-surface-variant hover:text-primary flex items-center gap-2 font-medium" href="https://www.iitrpr.ac.in/" target="_blank"><span class="material-symbols-outlined text-[16px]">open_in_new</span>IIT Ropar</a></li>
+<li><a class="text-on-surface-variant hover:text-primary flex items-center gap-2 font-medium" href="https://www.iitrpr.ac.in/institute-bus-facility" target="_blank"><span class="material-symbols-outlined text-[16px]">open_in_new</span>Institute Bus Facility</a></li>
+<li><a class="text-on-surface-variant hover:text-primary flex items-center gap-2 font-medium" href="https://iitrpr.ac.in/medical-center/" target="_blank"><span class="material-symbols-outlined text-[16px]">open_in_new</span>Medical Center</a></li>
+<li><a class="text-on-surface-variant hover:text-primary flex items-center gap-2 font-medium" href="https://www.iitrpr.ac.in/RnD/download-form.php" target="_blank"><span class="material-symbols-outlined text-[16px]">open_in_new</span>Download Forms</a></li>
+<li><a class="text-on-surface-variant hover:text-primary flex items-center gap-2 font-medium" href="https://www.iitrpr.ac.in/list-holidays" target="_blank"><span class="material-symbols-outlined text-[16px]">open_in_new</span>List of Holidays</a></li>
 </ul>
 </div>
 <div>
-<h4 class="text-secondary font-bold text-label-md uppercase tracking-wider mb-6">SUPPORT</h4>
+<h4 class="text-secondary font-bold text-label-md uppercase tracking-wider mb-6">QUICK LINKS</h4>
 <ul class="flex flex-col gap-4">
-<li class=""><a class="text-on-surface-variant hover:text-primary underline font-medium" href="login.html">Helpdesk</a></li>
-<li class=""><a class="text-on-surface-variant hover:text-primary underline font-medium" href="login.html">Accessibility Statement</a></li>
-<li class=""><a class="text-on-surface-variant hover:text-primary underline font-medium" href="login.html">Feedback</a></li>
+<li><a class="text-on-surface-variant hover:text-primary font-medium" href="https://sensrs.com/publications/" target="_blank">Publications</a></li>
+<li><a class="text-on-surface-variant hover:text-primary font-medium" href="https://sensrs.com/opportunities/" target="_blank">Careers</a></li>
+<li><a class="text-on-surface-variant hover:text-primary font-medium" href="https://sensrs.com/events/" target="_blank">Events</a></li>
+<li><a class="text-on-surface-variant hover:text-primary font-medium" href="https://sensrs.com/gallery/" target="_blank">Gallery</a></li>
 </ul>
+</div>
+<div>
+<h4 class="text-secondary font-bold text-label-md uppercase tracking-wider mb-6">CONTACT INFO</h4>
+<ul class="flex flex-col gap-4 mb-6">
+<li class="flex items-start gap-2 text-on-surface-variant font-medium text-sm">
+  <span class="material-symbols-outlined text-[18px] mt-0.5">location_on</span>
+  <span>Indian Institute of Technology Ropar,<br/>Punjab, India</span>
+</li>
+<li class="flex items-center gap-2 text-on-surface-variant font-medium text-sm">
+  <span class="material-symbols-outlined text-[18px]">mail</span>
+  <a href="mailto:coe@sensrs.com" class="hover:text-primary">coe@sensrs.com</a>
+</li>
+<li class="flex items-center gap-2 text-on-surface-variant font-medium text-sm">
+  <span class="material-symbols-outlined text-[18px]">call</span>
+  <a href="tel:+01881-232632" class="hover:text-primary">+01881-232632</a>
+</li>
+</ul>
+<div class="flex items-center gap-3 text-[14px]">
+  <a href="https://www.facebook.com/coesensrs/" target="_blank" class="w-8 h-8 rounded-full bg-[#9c7a52] text-white flex items-center justify-center hover:bg-primary transition-colors">FB</a>
+  <a href="https://www.instagram.com/coesensrs/" target="_blank" class="w-8 h-8 rounded-full bg-[#9c7a52] text-white flex items-center justify-center hover:bg-primary transition-colors">IG</a>
+  <a href="https://www.linkedin.com/company/coesensrs/" target="_blank" class="w-8 h-8 rounded-full bg-[#9c7a52] text-white flex items-center justify-center hover:bg-primary transition-colors">IN</a>
+  <a href="https://x.com/coesensrs" target="_blank" class="w-8 h-8 rounded-full bg-[#9c7a52] text-white flex items-center justify-center hover:bg-primary transition-colors">X</a>
+  <a href="https://youtube.com/@coe.sensrs?si=fMohfceQB8dcfBms" target="_blank" class="w-8 h-8 rounded-full bg-[#9c7a52] text-white flex items-center justify-center hover:bg-primary transition-colors">YT</a>
+  <a href="https://play.google.com/store/apps/developer?id=SEnSRS" target="_blank" class="w-8 h-8 rounded-full bg-[#9c7a52] text-white flex items-center justify-center hover:bg-primary transition-colors">GP</a>
+</div>
 </div></div>
 <!-- Bottom Bar -->
 <div class="border-t border-outline-variant/30 dark:border-outline/30 py-8 px-base md:px-lg bg-surface-container-lowest">
@@ -501,6 +586,77 @@
     }, 300);
   }
 
+  const portalPanelContent = {
+    search: {
+      title: 'Search Portal',
+      icon: 'search',
+      html: '<form onsubmit="submitPortalSearch(event)" class="flex flex-col gap-3"><input name="query" class="w-full rounded-lg border-surface-container-highest" placeholder="Search reports, notices, guidelines..." required><button class="px-5 py-2 bg-primary text-white text-label-md font-bold rounded-lg hover:bg-on-tertiary-fixed-variant transition-colors shadow-sm" type="submit">Search</button><div id="portal-search-output" class="text-body-md text-on-surface-variant"></div></form>'
+    },
+    language: {
+      title: 'Language',
+      icon: 'translate',
+      html: '<div class="grid grid-cols-1 gap-3"><button onclick="setPortalLanguage(\'English\')" class="text-left p-3 rounded-lg border border-surface-container-highest hover:bg-surface-container">English</button><button onclick="setPortalLanguage(\'Hindi\')" class="text-left p-3 rounded-lg border border-surface-container-highest hover:bg-surface-container">Hindi / हिन्दी</button><button onclick="setPortalLanguage(\'Punjabi\')" class="text-left p-3 rounded-lg border border-surface-container-highest hover:bg-surface-container">Punjabi / ਪੰਜਾਬੀ</button></div>'
+    },
+    helpdesk: {
+      title: 'Contact Helpdesk',
+      icon: 'support_agent',
+      html: '<form onsubmit="submitPortalEnquiry(event, \'helpdesk\')" class="flex flex-col gap-3"><input name="name" class="w-full rounded-lg border-surface-container-highest" placeholder="Name" required><input name="email" type="email" class="w-full rounded-lg border-surface-container-highest" placeholder="Email" required><select name="topic" class="w-full rounded-lg border-surface-container-highest"><option>Login issue</option><option>Report submission</option><option>PDF generation</option><option>Other support</option></select><textarea name="message" rows="3" class="w-full rounded-lg border-surface-container-highest" placeholder="Describe the issue" required></textarea><button class="px-5 py-2 bg-primary text-white text-label-md font-bold rounded-lg hover:bg-on-tertiary-fixed-variant transition-colors shadow-sm" type="submit">Submit ticket</button></form>'
+    }
+  };
+
+  function openPortalPanel(type) {
+    const panel = portalPanelContent[type];
+    if (!panel) return;
+    document.getElementById('demo-modal-title').innerText = panel.title;
+    document.getElementById('demo-modal-icon').innerText = panel.icon;
+    document.getElementById('demo-modal-content').innerHTML = panel.html;
+    const modal = document.getElementById('demo-modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    setTimeout(() => {
+      modal.classList.remove('opacity-0');
+      modal.querySelector('div').classList.remove('scale-95');
+      modal.querySelector('div').classList.add('scale-100');
+    }, 10);
+  }
+
+  function savePortalSubmission(type, payload) {
+    const existing = JSON.parse(localStorage.getItem('dsr_public_submissions') || '[]');
+    existing.unshift({ type, payload, createdAt: new Date().toISOString() });
+    localStorage.setItem('dsr_public_submissions', JSON.stringify(existing.slice(0, 25)));
+  }
+
+  function submitPortalEnquiry(event, type) {
+    event.preventDefault();
+    const data = Object.fromEntries(new FormData(event.target).entries());
+    savePortalSubmission(type, data);
+    openDemoModal(type === 'helpdesk' ? 'Ticket submitted' : 'Enquiry submitted', 'Your request has been saved. The portal team can review this submission from the public enquiry queue when backend integration is enabled.', 'check_circle');
+    event.target.reset();
+  }
+
+  function submitReportSearch(event) {
+    event.preventDefault();
+    const data = Object.fromEntries(new FormData(event.target).entries());
+    const output = document.getElementById('report-search-results');
+    output.innerHTML = `<div class="bg-surface-container border border-surface-container-highest rounded-xl p-4"><strong>${data.district} DSR ${data.year}</strong><p class="mt-1">No public PDF is attached in this demo data set yet. Login officials can generate or publish the report from the dashboard.</p><a class="inline-flex mt-3 text-primary font-bold" href="login.html">Open official dashboard</a></div>`;
+  }
+
+  function submitPortalSearch(event) {
+    event.preventDefault();
+    const query = new FormData(event.target).get('query');
+    document.getElementById('portal-search-output').innerHTML = `Showing matches for <strong>${String(query).replace(/[<>&]/g, '')}</strong>: About DSR, District Reports, Guidelines, Helpdesk.`;
+  }
+
+  function downloadGuideline(name) {
+    savePortalSubmission('guideline-download', { name });
+    openDemoModal('Guideline ready', `${name} has been added to your download request list. Official files can be attached here when the department uploads final documents.`, 'download');
+  }
+
+  function setPortalLanguage(language) {
+    localStorage.setItem('dsr_public_language', language);
+    openDemoModal('Language selected', `${language} has been saved for this browser.`, 'translate');
+  }
+
   // Intercept all links to login.html that shouldn't go to login
   document.addEventListener('DOMContentLoaded', () => {
     const links = document.querySelectorAll('a[href="login.html"]');
@@ -509,7 +665,7 @@
       const text = link.innerText.replace(/arrow_forward|arrow_right_alt|open_in_new|search|language/g, '').trim();
       
       // Keep actual login links working
-      const isLoginLink = text.includes('Login') || text.includes('Access DSR Portal') || link.innerText.includes('Official Login');
+      const isLoginLink = text.includes('Login') || text.includes('Access DSR Portal') || text.includes('Create DSR') || text.includes('Open official dashboard') || link.innerText.includes('Official Login');
       
       if (!isLoginLink) {
         link.addEventListener('click', (e) => {
