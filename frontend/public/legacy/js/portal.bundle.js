@@ -13052,55 +13052,92 @@ function doSign() {
 function renderFinalChecklist() {
   const el = document.getElementById('final-checklist');
   if (!el) return;
-  const sigs = S.signatures ? S.signatures.filter(s => s.signed).length : 0;
+  const p = S.activeProject;
+  if (!p) {
+    el.innerHTML = '<div style="font-size:12.5px;color:var(--text-soft);text-align:center;padding:20px 0;">Please select a project first.</div>';
+    return;
+  }
   
-  const fmOk = !!(S.frontMatter && (
-      (S.frontMatter.title && S.frontMatter.title !== 'District Survey Report for Sand Mining') ||
-      (S.frontMatter.district && S.frontMatter.district !== 'Jalandhar') ||
-      (S.frontMatter.preface && S.frontMatter.preface.trim().length > 5)
-    )) || (S.frontMatterFiles && Object.keys(S.frontMatterFiles).length > 0);
-  
-  let chapterCount = S.chapters ? Object.values(S.chapters).filter(c => c && typeof c === 'string' && c.trim() && c.length > 20).length : 0;
-    if (S.chapterPDFs) chapterCount += Object.keys(S.chapterPDFs).length;
-    const chaptersOk = chapterCount >= 10;
-  const platesOk = S.plates && S.plates.length > 0;
-  const graphsOk = S.graphs && S.graphs.length > 0;
+  const fmOk = !!(
+    S.uploadedPDFs && 
+    S.uploadedPDFs.cover && 
+    S.uploadedPDFs.cert && 
+    S.uploadedPDFs.toc && 
+    (S.uploadedPDFs.pref || (S.frontMatter && S.frontMatter.preface && S.frontMatter.preface.trim().length > 10)) && 
+    (S.uploadedPDFs.ack || (S.frontMatter && S.frontMatter.acknowledgement && S.frontMatter.acknowledgement.trim().length > 10))
+  );
+
+  const uploadedChaptersCount = S.chapters ? S.chapters.filter(ch => ch.fileName || (S.chapterPDFs && S.chapterPDFs[ch.id])).length : 0;
+  const chaptersOk = S.chapters && S.chapters.length >= 2 && uploadedChaptersCount >= S.chapters.length;
+
+  const uploadedPlatesCount = S.plates ? S.plates.filter(pl => pl.fileName).length : 0;
+  const platesOk = S.plates && S.plates.length > 0 && uploadedPlatesCount >= S.plates.length;
+
+  const graphsOk = !!(S.graphsOpened || (S.graphs && S.graphs.length > 0));
+
   const anx1Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx1;
   const anx2Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx2;
   const anx3Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx3;
   const anx4Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx4;
-  const demandOk = S.demandDistricts && S.demandDistricts.length > 0;
+  const anx5Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx5;
+  const anx6Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx6;
+  const anx7Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx7;
+  const annexuresOk = !!(S.annexuresOpened || (anx1Ok && anx2Ok && anx3Ok && anx4Ok && anx5Ok && anx6Ok && anx7Ok));
+
+  const hasTableData = (S.annexureB && S.annexureB.length > 0) || 
+                       (S.annexureC && S.annexureC.length > 0) || 
+                       (S.annexureD && S.annexureD.length > 0) || 
+                       (S.annexureE && S.annexureE.length > 0) ||
+                       (S.annexureG && S.annexureG.length > 0) ||
+                       (S.annexureH && S.annexureH.length > 0) ||
+                       (S.annexureI && S.annexureI.length > 0) ||
+                       (S.annexureJ && S.annexureJ.length > 0) ||
+                       (S.auctionData && S.auctionData.length > 0);
+  const tablesOk = !!(S.tablesOpened || hasTableData);
+
+  const pdfOk = !!(S.activeProject && (S.activeProject.finalPdfName || S.activeProject.finalPdfGeneratedAt));
+
+  // Sequential locked conditions
+  const setupOk = true;
+  const step2Done = setupOk && fmOk;
+  const step3Done = step2Done && chaptersOk;
+  const step4Done = step3Done && platesOk;
+  const graphsDone = step4Done && graphsOk;
+  const step5Done = graphsDone && annexuresOk;
+  const step6Done = step5Done && tablesOk;
+  const step7Done = step6Done && pdfOk;
 
   const items = [
-    { name: 'Front Matter', sub: 'Cover, preface, content page', ok: fmOk },
-    { name: 'Chapters (10)', sub: 'All 10 EMGSM 2020 chapters', ok: chaptersOk },
-    { name: 'Plates', sub: 'Maps, graphs, and site images', ok: platesOk },
-    { name: 'Cross Section Graphs', sub: 'Elevation profiles generated', ok: graphsOk },
-    { name: 'Annexure I - Sources', sub: 'Rivers, de-siltation, patta lands, M-sand', ok: anx1Ok },
-    { name: 'Annexure II - Mining Leases', sub: 'All potential leases listed', ok: anx2Ok },
-    { name: 'Annexure III - Clusters', sub: 'Cluster and contiguous cluster details', ok: anx3Ok },
-    { name: 'Annexure IV - Transportation', sub: 'Route details for all leases', ok: anx4Ok },
-    { name: 'Demand & Summary Tables', sub: 'District-wise projections', ok: demandOk }
+    { n: 'Project Setup', ok: setupOk, note: 'District, year, mineral type' },
+    { n: 'Front Matter', ok: step2Done, note: step2Done ? 'Cover page, certificate, table of contents, preface and acknowledgement completed' : (setupOk ? 'Pending Cover, Certificate, Table of Contents, Preface, or Acknowledgement upload' : 'Locked - complete previous stages first') },
+    { n: 'All Chapters', ok: step3Done, note: step3Done ? 'All chapters uploaded/filled' : (step2Done ? `${uploadedChaptersCount}/${S.chapters ? S.chapters.length : 2} chapters uploaded/filled` : 'Locked - complete previous stages first') },
+    { n: 'Plate Section', ok: step4Done, note: step4Done ? 'All plates setup' : (step3Done ? `${uploadedPlatesCount}/${S.plates ? S.plates.length : 2} plates setup` : 'Locked - complete previous stages first') },
+    { n: 'Cross Section Graphs', ok: graphsDone, note: graphsDone ? 'Cross sections generated or opened' : (step4Done ? 'Pending generation or page view' : 'Locked - complete previous stages first') },
+    { n: 'Annexures I-VII', ok: step5Done, note: step5Done ? 'All 7 annexure PDFs uploaded or opened' : (graphsDone ? 'Pending Annexure I to VII PDF upload or page view' : 'Locked - complete previous stages first') },
+    { n: 'Annexures B to K', ok: step6Done, note: step6Done ? 'Annexures B to K opened' : (step5Done ? 'Pending tables page view' : 'Locked - complete previous stages first') },
+    { n: 'Report PDF Generation', ok: step7Done, note: step7Done ? 'Final DSR report generated' : (step6Done ? 'Pending final report compilation' : 'Locked - complete previous stages first') }
   ];
+
   el.innerHTML = items.map(it => `
-    <div class="checklist-item ${it.ok ? 'done' : ''}" style="margin-bottom:8px">
-      <div class="ci-left">
-        <div class="ci-icon" style="background:${it.ok ? 'var(--green-lt)' : 'var(--bg)'};color:${it.ok ? 'var(--green)' : 'var(--text-faint)'};display:flex;align-items:center;justify-content:center;">
-          <i data-lucide="${it.ok ? 'check' : 'minus'}" style="width:16px;height:16px;"></i>
-        </div>
-        <div><div class="ci-name">${it.name}</div><div class="ci-sub">${it.sub}</div></div>
+    <div style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="display:flex;align-items:center;color:${it.ok ? 'var(--green)' : 'var(--text-faint)'}">
+        <i data-lucide="${it.ok ? 'check-circle-2' : 'circle'}" style="width:16px;height:16px;"></i>
+      </span>
+      <div style="flex:1">
+        <div style="font-size:12.5px;font-weight:600;color:${it.ok ? 'var(--text)' : 'var(--text-soft)'}">${it.n}</div>
+        <div style="font-size:10.5px;color:var(--text-soft)">${it.note}</div>
       </div>
-      <span class="badge ${it.ok ? 'badge-green' : 'badge-gray'}">${it.ok ? 'Ready' : 'Pending'}</span>
+      <span class="badge ${it.ok ? 'badge-green' : 'badge-amber'}">${it.ok ? 'Done' : 'Pending'}</span>
     </div>`).join('');
+
   const countEl = document.getElementById('pdf-page-count');
   if (countEl) countEl.textContent = S.activeProject?.finalPdfPages || `~${(S.chapters.length * 4) + (S.plates.length * 1) + 32} estimated`;
   const resultBox = document.getElementById('final-pdf-result');
   if (resultBox) resultBox.style.display = S.activeProject?.finalPdfName ? 'block' : 'none';
-  const warningBox = null;
-  if (warningBox && S.activeProject?.finalPdfName) warningBox.style.display = 'none';
   if (typeof updateFinalPdfAdminUI === 'function') updateFinalPdfAdminUI();
-  initLucide();
+  if (window.initLucide) initLucide();
 }
+
 function renderWorkflowChecklist() {
   const el=document.getElementById('workflow-checklist'); if(!el) return;
   const p = S.activeProject;
