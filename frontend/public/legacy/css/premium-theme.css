@@ -5822,3 +5822,15 @@ body.view-projects-active .topbar.dash-global-topbar {
   padding-left: max(30px, calc((100% - 1560px) / 2)) !important;
   padding-right: max(30px, calc((100% - 1560px) / 2)) !important;
 }
+
+/* Force global topbar to stretch full width on all views including dashboard */
+.topbar.dash-global-topbar,
+.dash-global-topbar .dash-switcher-bar,
+.dash-global-topbar .dash-gov-utility-strip,
+.dash-global-topbar .dash-gov-brand-row,
+.dash-global-topbar .dash-gov-menu-bar,
+.dash-global-topbar .dash-gov-notice-ticker {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
