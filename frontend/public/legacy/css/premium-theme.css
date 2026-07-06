@@ -5810,27 +5810,52 @@ body.view-projects-active .topbar.dash-global-topbar {
   }
 }
 
-/* Center topbar content for large screens (e.g. 67% zoom) */
-.dash-switcher-bar,
-.dash-gov-utility-strip,
-.dash-gov-menu-bar,
-.dash-gov-notice-ticker {
-  padding-left: max(24px, calc((100% - 1560px) / 2)) !important;
-  padding-right: max(24px, calc((100% - 1560px) / 2)) !important;
-}
-.dash-gov-brand-row {
-  padding-left: max(30px, calc((100% - 1560px) / 2)) !important;
-  padding-right: max(30px, calc((100% - 1560px) / 2)) !important;
+/* Final portal topbar edge fix.
+   Desktop app zoom makes a fixed 100vw header render short; 121vw compensates
+   the 0.83 zoom and removes the visible blank strip on the right. */
+@media (min-width: 1024px) {
+  .topbar.dash-global-topbar {
+    left: 0 !important;
+    right: auto !important;
+    width: 121vw !important;
+    min-width: 121vw !important;
+    max-width: none !important;
+  }
+
+  .dash-global-topbar .dash-switcher-bar,
+  .dash-global-topbar .dash-gov-utility-strip,
+  .dash-global-topbar .dash-gov-brand-row,
+  .dash-global-topbar .dash-gov-menu-bar,
+  .dash-global-topbar .dash-gov-notice-ticker {
+    width: 100% !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
+  }
+
+  .dash-switcher-bar,
+  .dash-gov-utility-strip,
+  .dash-gov-menu-bar,
+  .dash-gov-notice-ticker {
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+  }
+
+  .dash-gov-brand-row {
+    padding-left: 30px !important;
+    padding-right: 30px !important;
+  }
 }
 
-/* Force global topbar to stretch full width on all views including dashboard */
-.topbar.dash-global-topbar,
-.dash-global-topbar .dash-switcher-bar,
-.dash-global-topbar .dash-gov-utility-strip,
-.dash-global-topbar .dash-gov-brand-row,
-.dash-global-topbar .dash-gov-menu-bar,
-.dash-global-topbar .dash-gov-notice-ticker {
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
+/* Settings page: remove extra vertical gap below the fixed topbar. */
+body:has(#view-settings.active) .page-body {
+  padding-top: 0 !important;
 }
+
+#view-settings {
+  padding-top: 0 !important;
+}
+
+#view-settings > .header-row {
+  margin-top: 0 !important;
+}
+
