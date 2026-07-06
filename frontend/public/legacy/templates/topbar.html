@@ -37,50 +37,7 @@
       <button onclick="document.querySelector('.view.active')?.scrollIntoView({behavior:'smooth', block:'start'})" data-i18n="skipContent">Skip to Content</button>
     </div>
   </div>
-  <div class="dash-gov-brand-row">
-    <div class="dash-brand-left">
-      <button id="tb-sidebar-toggle" type="button" class="dash-action-icon-btn" onclick="return toggleSidebar(event)" title="Toggle sidebar" aria-label="Toggle sidebar" aria-expanded="false">
-        <i data-lucide="menu" style="width:16px; height:16px;"></i>
-      </button>
-      <img src="assets/dsr-logo.png" alt="Smart DSR Punjab Logo" style="width:96px; height:96px; flex-shrink:0;  object-fit: cover; ">
-      <div class="dash-brand-texts" onclick="clearActiveProject(); showView('dashboard', null);">
-        <span class="dash-brand-bilingual" data-i18n="brandBilingual">Government of Punjab - IIT Ropar Research Cell - EMGSM 2020</span>
-        <h1 class="dash-brand-title" data-i18n="brandTitle">District Survey Report Automation Portal</h1>
-        <span class="dash-brand-subtitle" data-i18n="brandSubtitle">DSR Automation for Sand Mining</span>
-      </div>
-    </div>
-    <div class="dash-brand-right">
 
-      <div class="tb-nav-dropdown">
-        <button type="button" class="dash-action-icon-btn" onclick="toggleNotificationDropdown()" title="Notifications" aria-label="Notifications">
-          <i data-lucide="bell" style="width:16px; height:16px;"></i>
-          <span id="tb-notif-dot"></span>
-        </button>
-        <div class="tb-dropdown-menu" id="tb-notif-dropdown">
-          <div class="tb-dropdown-title">Notifications</div>
-          <div id="tb-notif-list" class="tb-empty-note">No new notifications</div>
-        </div>
-      </div>
-      <button class="dash-action-icon-btn" onclick="dashFocusSearch()" title="Search portal" aria-label="Search portal">
-        <i data-lucide="search" style="width:16px; height:16px;"></i>
-      </button>
-      <button class="dash-action-icon-btn" onclick="clearActiveProject(); showView('dashboard', null); setTimeout(()=>document.getElementById('dash-contact-section')?.scrollIntoView({behavior:'smooth', block:'start'}), 80);" title="Help" aria-label="Help">
-        <i data-lucide="help-circle" style="width:16px; height:16px;"></i>
-      </button>
-      <button class="dash-action-icon-btn" onclick="dashSharePortal()" title="Copy portal link" aria-label="Copy portal link">
-        <i data-lucide="share-2" style="width:16px; height:16px;"></i>
-      </button>
-      <button class="dash-action-icon-btn dash-theme-toggle tb-theme-toggle" onclick="toggleDarkMode()" title="Toggle dark mode" aria-label="Toggle dark mode" data-theme-toggle>
-        <i data-lucide="moon" style="width:16px; height:16px;"></i>
-      </button>
-      <button id="tb-btn-new-project" class="dash-btn-logout dash-btn-new-project" onclick="newProjectModal()">
-        <i data-lucide="plus-circle" style="width:15px; height:15px; stroke-width: 2.5;"></i> New Project
-      </button>
-      <button onclick="doLogout()" class="dash-btn-logout">
-        <i data-lucide="log-out" style="width:15px; height:15px; stroke-width: 2.5;"></i> Logout
-      </button>
-    </div>
-  </div>
   <div class="dash-gov-menu-bar">
     <ul class="dash-menu-links">
       <li class="dash-menu-link-item">
