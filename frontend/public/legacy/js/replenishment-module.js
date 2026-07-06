@@ -104,6 +104,33 @@ if (annexureNav && replenishmentNav) {
   }).observe(annexureNav, { attributes: true, attributeFilter: ['style'] });
 }
 
+const REPLENISHMENT_SECTION_TITLES = {
+  anx1: 'Annexure I - Sources',
+  anx2: 'Annexure II - Leases',
+  anx3: 'Annexure III - Clusters',
+  anx4: 'Annexure IV - Transport',
+  anx5: 'Annexure V - Bench Mark & CORS',
+  anx6: 'Annexure VI - Final Cluster Details',
+  anx7: 'Annexure VII - Transportation Routes',
+  'annexure-b': 'Annexure B',
+  'annexure-c': 'Annexure C',
+  'annexure-d': 'Annexure D',
+  'annexure-e': 'Annexure E',
+  'annexure-f': 'Annexure F',
+  'annexure-g': 'Annexure G',
+  'annexure-h': 'Annexure H',
+  'annexure-i': 'Annexure I',
+  'annexure-j': 'Annexure J',
+  'annexure-k': 'Annexure K'
+};
+
+function getReplenishmentSectionTitle(viewId) {
+  const fallback = REPLENISHMENT_SECTION_TITLES[viewId] || String(viewId || '').toUpperCase();
+  return typeof getEditableAnnexureTitle === 'function'
+    ? getEditableAnnexureTitle(viewId, fallback)
+    : fallback;
+}
+
 // Helper: load reports from localStorage
 function loadLocalReports() {
   if (!S.activeProject) return [];
@@ -352,13 +379,18 @@ function downloadCustomReportPDFDirect(reportId) {
   generateReplenishmentPDF(report.name, checkedIds, reportId);
 }
 
+function getCurrentSelectedReportSectionIds() {
+  const scope = document.getElementById('draggable-sections-list') || document;
+  const checkboxes = scope.querySelectorAll('input[id^="chk-"]:checked');
+  return Array.from(new Set(Array.from(checkboxes).map(c => c.value).filter(Boolean)));
+}
+
 function saveReportSelection(reportId) {
   const reports = loadLocalReports();
   const report = reports.find(r => r.id === reportId);
   if (!report) return;
   
-  const checkboxes = document.querySelectorAll('input[id^="chk-"]:checked, input[id^="chk-"][data-parent]:checked');
-  report.sections = Array.from(checkboxes).map(c => c.value);
+  report.sections = getCurrentSelectedReportSectionIds();
   
   saveLocalReports(reports);
 }
@@ -1106,8 +1138,7 @@ function updateCustomReportPreview(reportName, reportId) {
 
 async function realUpdateCustomReportPreview(reportName, reportId) {
   const renderToken = ++previewRenderToken;
-  const checkboxes = document.querySelectorAll('input[id^="chk-"]:checked');
-  const checkedIds = Array.from(checkboxes).map(c => c.value);
+  const checkedIds = getCurrentSelectedReportSectionIds();
   
   const indeterminateParents = Array.from(document.querySelectorAll('input[id^="chk-"]')).filter(c => c.indeterminate).map(c => c.value);
   const allActiveIds = [...checkedIds, ...indeterminateParents];
@@ -1584,7 +1615,7 @@ function compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds, repor
           bodyHtml += attachmentHtml;
         }
         
-        const title = window.pdfPreview.SECTION_TITLES[item.id] || item.id.toUpperCase();
+        const title = getReplenishmentSectionTitle(item.id);
         
         sectionHtml = `
           <div class="section-block">
@@ -1712,11 +1743,14 @@ function compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds, repor
 function downloadCustomReportPDF(reportName, reportId) {
   const reports = loadLocalReports();
   const report = reports.find(r => r.id === reportId);
-  const checkedIds = report ? (report.sections || []) : [];
+  if (reportId) {
+    saveReportSelection(reportId);
+  }
+  const currentCheckedIds = getCurrentSelectedReportSectionIds();
+  const checkedIds = currentCheckedIds.length ? currentCheckedIds : (report ? (report.sections || []) : []);
   
   if (checkedIds.length === 0) {
-    const checkboxes = document.querySelectorAll('input[id^="chk-"]:checked');
-    checkedIds.push(...Array.from(checkboxes).map(c => c.value));
+    checkedIds.push(...currentCheckedIds);
   }
   
   generateReplenishmentPDF(reportName, checkedIds, reportId);
@@ -2432,12 +2466,14 @@ async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
         }
       });
       if (!addedAny) {
-        const placeholderSrc = localRenderTextPageCanvas(`Annexure ${letter} - Entry 1`, `Upload your Annexure ${letter} PDF or image here.`, `Annexure ${letter}`);
+        const placeholderSrc = localRenderTextPageCanvas(title, 'No uploaded PDF or table data is available for this selected section yet.', 'Selected Replenishment Section');
         addPreviewImagePage(placeholderSrc, `${title} - Page 1`);
+        addedAny = true;
       }
+      if (addedAny) return true;
     }
 
-    return renderedTables;
+    return renderedTables || hasAttachments;
   };
 
   const pdfBlobToImages = async (blob) => {
@@ -2550,21 +2586,41 @@ async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
             const tocPages = window.pdfPreview ? window.pdfPreview.getFrontMatterPages().filter(p => /^content/i.test(p.label)) : [];
             if (tocPages.length > 0) {
               tocPages.forEach(p => addImagePage(p.src, 'Table of Contents'));
+            } else {
+              addPreviewImagePage(
+                localRenderTextPageCanvas('Content Page', 'No uploaded content page is available for this selected front-matter section yet.', 'Front Matter'),
+                'Content Page'
+              );
             }
           } else if (subId === 'fm-pref') {
             const prefPages = window.pdfPreview ? window.pdfPreview.getFrontMatterPages().filter(p => /^preface/i.test(p.label)) : [];
             if (prefPages.length > 0) {
               prefPages.forEach(p => addImagePage(p.src, 'Preface'));
+            } else {
+              addPreviewImagePage(
+                localRenderTextPageCanvas('Preface', 'No preface text or uploaded preface PDF is available for this selected front-matter section yet.', 'Front Matter'),
+                'Preface'
+              );
             }
           } else if (subId === 'fm-ack') {
             const ackPages = window.pdfPreview ? window.pdfPreview.getFrontMatterPages().filter(p => /^acknowledgement/i.test(p.label)) : [];
             if (ackPages.length > 0) {
               ackPages.forEach(p => addImagePage(p.src, 'Acknowledgement'));
+            } else {
+              addPreviewImagePage(
+                localRenderTextPageCanvas('Acknowledgement', 'No acknowledgement text is available for this selected front-matter section yet.', 'Front Matter'),
+                'Acknowledgement'
+              );
             }
           } else if (subId === 'fm-cert') {
             const certPages = window.pdfPreview ? window.pdfPreview.getFrontMatterPages().filter(p => /^certificate of compliance/i.test(p.label)) : [];
             if (certPages.length > 0) {
               certPages.forEach(p => addImagePage(p.src, 'Certificate of Compliance'));
+            } else {
+              addPreviewImagePage(
+                localRenderTextPageCanvas('Certificate of Compliance', 'No certificate page is available for this selected front-matter section yet.', 'Front Matter'),
+                'Certificate of Compliance'
+              );
             }
           }
         }
@@ -2575,10 +2631,17 @@ async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
           const chNum = chIdx !== -1 ? chIdx + 1 : 1;
           const ch = (S.chapters || [])[chNum - 1] || {};
           const chapterTitle = safe(ch.name, `Chapter ${chNum}`);
-          const chPages = ch.pages || [];
+          const chPages = (S.chapterPDFs && S.chapterPDFs[ch.id]) || ch.pages || [];
+          addTitlePage(chapterTitle);
           if (chPages.length > 0) {
-            addTitlePage(chapterTitle);
             chPages.forEach(p => addImagePage(p, chapterTitle));
+          } else {
+            const fallback = localRenderTextPageCanvas(
+              chapterTitle,
+              ch.summary || 'No uploaded chapter PDF is available for this selected chapter yet.',
+              `Chapter ${chNum}`
+            );
+            addPreviewImagePage(fallback, chapterTitle);
           }
         }
       } 
@@ -2589,9 +2652,16 @@ async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
           const pl = (S.plates || [])[plateNo - 1] || {};
           const plateTitle = safe(pl.name, `Plate ${plateNo}`);
           const platePages = pl.pages || [];
+          addTitlePage(plateTitle);
           if (platePages.length > 0) {
-            addTitlePage(plateTitle);
             platePages.forEach(p => addImagePage(p, plateTitle));
+          } else {
+            const fallback = localRenderTextPageCanvas(
+              plateTitle,
+              pl.summary || 'No uploaded plate PDF or image is available for this selected plate yet.',
+              `Plate ${plateNo}`
+            );
+            addPreviewImagePage(fallback, plateTitle);
           }
         }
       } 
@@ -2604,19 +2674,24 @@ async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
         addTitlePage(titleText);
         if (customPages && customPages.length > 0) {
           customPages.forEach((page, idx) => addImagePage(page, `${titleText} - Page ${idx + 1}`));
+        } else {
+          const fallback = localRenderTextPageCanvas(
+            titleText,
+            'No uploaded PDF is available for this selected custom section yet.',
+            'Custom PDF Section'
+          );
+          addPreviewImagePage(fallback, titleText);
         }
       } 
       else {
         // Standard Annexures
-        if (hasAnnexureContent(item.id)) {
-          const editableTitle = typeof getEditableAnnexureTitle === 'function' ? getEditableAnnexureTitle(item.id, item.id.toUpperCase()) : item.id.toUpperCase();
-          const isAllowed = ['anx1', 'anx2', 'anx3', 'anx4', 'anx5', 'anx6', 'anx7', 'annexure-f', 'annexure-j', 'annexure-k'].includes(item.id);
-          
-          borderActive = isAllowed;
-          addTitlePage(editableTitle);
-          await addAnnexureFromPreview(editableTitle, item.id);
-          borderActive = false;
-        }
+        const editableTitle = getReplenishmentSectionTitle(item.id);
+        const isAllowed = ['anx1', 'anx2', 'anx3', 'anx4', 'anx5', 'anx6', 'anx7', 'annexure-f', 'annexure-j', 'annexure-k'].includes(item.id);
+
+        borderActive = isAllowed;
+        addTitlePage(editableTitle);
+        await addAnnexureFromPreview(editableTitle, item.id);
+        borderActive = false;
       }
       
       // Yield to main thread to keep UI smooth
