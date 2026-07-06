@@ -1703,6 +1703,36 @@ function hidePdfProgressToast() {
 }
 
 async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
+  const hasAnnexureContent = (viewId) => {
+    if (['annexure-f', 'annexure-j', 'annexure-k'].includes(viewId)) {
+      if (window.pdfPreview && typeof pdfPreview.prepareAnnexureLivePreviewSource === 'function') {
+        pdfPreview.prepareAnnexureLivePreviewSource(viewId);
+      }
+      if (viewId === 'annexure-j' && typeof getAnnexureJDemandTables === 'function' && getAnnexureJDemandTables().length) {
+        return true;
+      }
+    }
+    const hasUpload = Array.isArray(S.uploadedPDFs?.[viewId]) && S.uploadedPDFs[viewId].length > 0;
+    if (simpleAnnexurePreviewIds.includes(viewId)) {
+      return true;
+    }
+    
+    let hasLetterUpload = false;
+    if (viewId.startsWith('annexure-')) {
+      const letter = viewId.replace('annexure-', '').toUpperCase();
+      const stateKey = 'annexure' + letter;
+      const entries = S[stateKey];
+      if (Array.isArray(entries)) {
+        hasLetterUpload = entries.length > 0;
+      }
+    }
+
+    const hasDomTable = !!document.querySelector("table[id*=\"" + viewId + "\"], table[id*=\"" + viewId.replace('annexure-', 'anx') + "\"]");
+    const iframe = document.getElementById("iframe-" + viewId);
+    const hasIframe = !!(iframe && (iframe.getAttribute('src') || iframe.srcdoc));
+    return hasUpload || hasLetterUpload || hasDomTable || hasIframe;
+  };
+
   if (!checkedIds || checkedIds.length === 0) {
     return null;
   }
@@ -2388,25 +2418,16 @@ async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
             const prefPages = window.pdfPreview ? window.pdfPreview.getFrontMatterPages().filter(p => /^preface/i.test(p.label)) : [];
             if (prefPages.length > 0) {
               prefPages.forEach(p => addImagePage(p.src, 'Preface'));
-            } else if (window.pdfPreview && typeof window.pdfPreview.renderTextPageCanvas === 'function') {
-              const prefText = S.frontMatter?.preface || 'No preface text has been entered.';
-              addImagePage(window.pdfPreview.renderTextPageCanvas('PREFACE', prefText, 'District Survey Report'), 'Preface');
             }
           } else if (subId === 'fm-ack') {
             const ackPages = window.pdfPreview ? window.pdfPreview.getFrontMatterPages().filter(p => /^acknowledgement/i.test(p.label)) : [];
             if (ackPages.length > 0) {
               ackPages.forEach(p => addImagePage(p.src, 'Acknowledgement'));
-            } else if (window.pdfPreview && typeof window.pdfPreview.renderTextPageCanvas === 'function') {
-              const ackText = S.frontMatter?.acknowledgement || 'No acknowledgement text has been entered.';
-              addImagePage(window.pdfPreview.renderTextPageCanvas('ACKNOWLEDGEMENT', ackText, 'District Survey Report'), 'Acknowledgement');
             }
           } else if (subId === 'fm-cert') {
             const certPages = window.pdfPreview ? window.pdfPreview.getFrontMatterPages().filter(p => /^certificate of compliance/i.test(p.label)) : [];
             if (certPages.length > 0) {
               certPages.forEach(p => addImagePage(p.src, 'Certificate of Compliance'));
-            } else if (window.pdfPreview && typeof window.pdfPreview.renderTextPageCanvas === 'function') {
-              const certText = `This District Survey Report has been prepared for ${district} District, ${state}${year ? `, for ${year}` : ''}.\n\nThe report content is maintained in the DSR Automation Portal and can be reviewed section by section before final PDF generation.`;
-              addImagePage(window.pdfPreview.renderTextPageCanvas('CERTIFICATE OF COMPLIANCE', certText, 'District Survey Report'), 'Certificate of Compliance');
             }
           }
         }
@@ -2421,12 +2442,6 @@ async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
           if (chPages.length > 0) {
             addTitlePage(chapterTitle);
             chPages.forEach(p => addImagePage(p.src, chapterTitle));
-          } else {
-            addTitlePage(chapterTitle);
-            if (window.pdfPreview && typeof window.pdfPreview.renderTextPageCanvas === 'function') {
-              const summaryText = ch.summary || 'Upload a chapter PDF to preview the original chapter document here.';
-              addImagePage(window.pdfPreview.renderTextPageCanvas(ch.name || `CHAPTER ${chNum}`, summaryText), chapterTitle);
-            }
           }
         }
       } 
@@ -2440,12 +2455,6 @@ async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
           if (platePages.length > 0) {
             addTitlePage(plateTitle);
             platePages.forEach(p => addImagePage(p.src, plateTitle));
-          } else {
-            addTitlePage(plateTitle);
-            if (window.pdfPreview && typeof window.pdfPreview.renderTextPageCanvas === 'function') {
-              const summaryText = pl.summary || 'No plate description has been entered.';
-              addImagePage(window.pdfPreview.renderTextPageCanvas(pl.name || `PLATE P${plateNo}`, summaryText), plateTitle);
-            }
           }
         }
       } 
@@ -2462,13 +2471,15 @@ async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
       } 
       else {
         // Standard Annexures
-        const editableTitle = typeof getEditableAnnexureTitle === 'function' ? getEditableAnnexureTitle(item.id, item.id.toUpperCase()) : item.id.toUpperCase();
-        const isAllowed = ['anx1', 'anx2', 'anx3', 'anx4', 'anx5', 'anx6', 'anx7', 'annexure-f', 'annexure-j', 'annexure-k'].includes(item.id);
-        
-        borderActive = isAllowed;
-        addTitlePage(editableTitle);
-        await addAnnexureFromPreview(editableTitle, item.id);
-        borderActive = false;
+        if (hasAnnexureContent(item.id)) {
+          const editableTitle = typeof getEditableAnnexureTitle === 'function' ? getEditableAnnexureTitle(item.id, item.id.toUpperCase()) : item.id.toUpperCase();
+          const isAllowed = ['anx1', 'anx2', 'anx3', 'anx4', 'anx5', 'anx6', 'anx7', 'annexure-f', 'annexure-j', 'annexure-k'].includes(item.id);
+          
+          borderActive = isAllowed;
+          addTitlePage(editableTitle);
+          await addAnnexureFromPreview(editableTitle, item.id);
+          borderActive = false;
+        }
       }
       
       // Yield to main thread to keep UI smooth
