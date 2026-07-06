@@ -86,7 +86,7 @@ async function initModelDsrView() {
   `;
   
   try {
-    const studies = await apiFetch(`/api/projects/${S.activeProject.id}/replenishment`);
+    const studies = await apiFetch(`/projects/${S.activeProject.id}/replenishment`);
     window.modelDsrReports = (studies || []).filter(s => s.reportState?.type === 'model_dsr').map(s => ({
       id: s.id,
       name: s.title,
@@ -160,7 +160,7 @@ function getModelDsrSectionTitle(viewId) {
 async function loadLocalReports() {
   if (!S.activeProject) return [];
   try {
-    const studies = await apiFetch(`/api/projects/${S.activeProject.id}/replenishment`);
+    const studies = await apiFetch(`/projects/${S.activeProject.id}/replenishment`);
     return (studies || []).filter(s => s.reportState?.type === 'model_dsr').map(s => ({
       id: s.id,
       name: s.title,
@@ -193,7 +193,7 @@ async function saveReportToServer(report) {
         sectionOrder: report.sectionOrder || []
       }
     };
-    await apiFetch(`/api/replenishment/${report.id}`, {
+    await apiFetch(`/replenishment/${report.id}`, {
       method: 'PUT',
       body: JSON.stringify(payload)
     });
@@ -307,7 +307,7 @@ async function submitCustomReportName() {
   }
   
   try {
-    const res = await apiFetch(`/api/projects/${S.activeProject.id}/replenishment`, {
+    const res = await apiFetch(`/projects/${S.activeProject.id}/replenishment`, {
       method: 'POST',
       body: JSON.stringify({
         title: reportName,
@@ -411,7 +411,7 @@ async function showExistingReportsList() {
 
 async function openCustomReport(reportId) {
   try {
-    const s = await apiFetch(`/api/replenishment/${reportId}`);
+    const s = await apiFetch(`/replenishment/${reportId}`);
     const report = {
       id: s.id,
       name: s.title,
@@ -434,10 +434,10 @@ async function openCustomReport(reportId) {
 
 async function renameCustomReport(reportId) {
   try {
-    const s = await apiFetch(`/api/replenishment/${reportId}`);
+    const s = await apiFetch(`/replenishment/${reportId}`);
     showCustomPromptModal("Rename Report", s.title, async (newName) => {
       try {
-        await apiFetch(`/api/replenishment/${reportId}`, {
+        await apiFetch(`/replenishment/${reportId}`, {
           method: 'PUT',
           body: JSON.stringify({
             title: newName
@@ -462,7 +462,7 @@ function deleteCustomReport(reportId) {
     tone: "danger",
     onConfirm: async () => {
       try {
-        await apiFetch(`/api/replenishment/${reportId}`, {
+        await apiFetch(`/replenishment/${reportId}`, {
           method: 'DELETE'
         });
         toast("Report deleted successfully!", "success");
@@ -476,7 +476,7 @@ function deleteCustomReport(reportId) {
 
 async function downloadCustomReportPDFDirect(reportId) {
   try {
-    const s = await apiFetch(`/api/replenishment/${reportId}`);
+    const s = await apiFetch(`/replenishment/${reportId}`);
     const report = {
       id: s.id,
       name: s.title,

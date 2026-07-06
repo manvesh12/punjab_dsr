@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smart-dsr-cache-v22-decoupled-backend-custom-builders';
+const CACHE_NAME = 'smart-dsr-cache-v23-fixed-backend-url-prefixes';
 const urlsToCache = [
   './login.html',
   './css/styles.css',
