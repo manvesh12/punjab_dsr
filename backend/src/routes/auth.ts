@@ -584,16 +584,15 @@ authRouter.post("/register-invited", async (req, res) => {
 authRouter.post("/verify-invited-otp", async (req, res) => {
   const parsed = z.object({
     token: z.string().min(1),
-    mobileNumber: z.string().min(10),
     otp: z.string().length(6)
   }).safeParse(req.body);
 
   if (!parsed.success) {
-    res.status(400).json({ error: "Invalid payload. Need valid token, mobile and 6-digit OTP." });
+    res.status(400).json({ error: "Invalid payload. Need valid token and 6-digit OTP." });
     return;
   }
 
-  const { token, mobileNumber, otp } = parsed.data;
+  const { token, otp } = parsed.data;
 
   const invitation = await prisma.invitation.findUnique({
     where: { token, status: "PENDING" }
@@ -604,8 +603,18 @@ authRouter.post("/verify-invited-otp", async (req, res) => {
     return;
   }
 
+  // Look up user by invitation email to retrieve their mobile number
+  const userRecord = await prisma.user.findFirst({
+    where: { email: invitation.email }
+  });
+
+  if (!userRecord || !userRecord.mobileNumber) {
+    res.status(400).json({ error: "User profile not found. Please complete the registration form first." });
+    return;
+  }
+
   const otpRecord = await prisma.otpVerification.findFirst({
-    where: { identifier: mobileNumber, purpose: "REGISTER", used: false },
+    where: { identifier: userRecord.mobileNumber, purpose: "REGISTER", used: false },
     orderBy: { createdAt: 'desc' }
   });
 
