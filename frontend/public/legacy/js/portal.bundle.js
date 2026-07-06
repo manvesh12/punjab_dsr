@@ -2199,33 +2199,105 @@ function fmtN(v, dec = 2) {
 }
 /* ── District Management System ── */
 const DISTRICT_COLORS = {
-  'Jalandhar': {
-    light: { bg: 'rgba(234, 88, 12, 0.15)', border: '#EA580C', text: '#9a3412', glow: 'rgba(234, 88, 12, 0.25)' },
-    dark: { bg: 'rgba(249, 115, 22, 0.25)', border: '#fb923c', text: '#fff7ed', glow: 'rgba(251, 146, 60, 0.4)' }
+  'Amritsar': {
+    light: { bg: 'rgba(37, 99, 235, 0.15)', border: '#2563eb', text: '#1d4ed8', glow: 'rgba(37, 99, 235, 0.25)' },
+    dark: { bg: 'rgba(37, 99, 235, 0.25)', border: '#3b82f6', text: '#f8fafc', glow: 'rgba(59, 130, 246, 0.4)' }
   },
-  'Ludhiana': {
-    light: { bg: 'rgba(6, 182, 212, 0.15)', border: '#0891b2', text: '#155e75', glow: 'rgba(6, 182, 212, 0.25)' },
-    dark: { bg: 'rgba(6, 182, 212, 0.25)', border: '#22d3ee', text: '#ecfeff', glow: 'rgba(34, 211, 238, 0.4)' }
+  'Barnala': {
+    light: { bg: 'rgba(22, 163, 74, 0.15)', border: '#16a34a', text: '#15803d', glow: 'rgba(22, 163, 74, 0.25)' },
+    dark: { bg: 'rgba(22, 163, 74, 0.25)', border: '#4ade80', text: '#f8fafc', glow: 'rgba(74, 222, 128, 0.4)' }
   },
-  'Mansa': {
-    light: { bg: 'rgba(147, 51, 234, 0.15)', border: '#9333EA', text: '#6b21a8', glow: 'rgba(147, 51, 234, 0.25)' },
+  'Bathinda': {
+    light: { bg: 'rgba(220, 38, 38, 0.15)', border: '#dc2626', text: '#991b1b', glow: 'rgba(220, 38, 38, 0.25)' },
+    dark: { bg: 'rgba(220, 38, 38, 0.25)', border: '#f87171', text: '#f8fafc', glow: 'rgba(248, 113, 113, 0.4)' }
+  },
+  'Faridkot': {
+    light: { bg: 'rgba(147, 51, 234, 0.15)', border: '#9333ea', text: '#6b21a8', glow: 'rgba(147, 51, 234, 0.25)' },
     dark: { bg: 'rgba(168, 85, 247, 0.25)', border: '#c084fc', text: '#faf5ff', glow: 'rgba(192, 132, 252, 0.4)' }
   },
-  'Hoshiarpur': {
-    light: { bg: 'rgba(15, 118, 110, 0.15)', border: '#0F766E', text: '#115e59', glow: 'rgba(15, 118, 110, 0.25)' },
-    dark: { bg: 'rgba(20, 184, 166, 0.25)', border: '#2dd4bf', text: '#f0fdfa', glow: 'rgba(45, 212, 191, 0.4)' }
+  'Fatehgarh Sahib': {
+    light: { bg: 'rgba(217, 119, 6, 0.15)', border: '#d97706', text: '#92400e', glow: 'rgba(217, 119, 6, 0.25)' },
+    dark: { bg: 'rgba(217, 119, 6, 0.25)', border: '#fbbf24', text: '#fffbeb', glow: 'rgba(251, 191, 36, 0.4)' }
   },
-  'Pathankot': {
-    light: { bg: 'rgba(234, 88, 12, 0.15)', border: '#EA580C', text: '#9a3412', glow: 'rgba(234, 88, 12, 0.25)' },
+  'Fazilka': {
+    light: { bg: 'rgba(8, 145, 178, 0.15)', border: '#0891b2', text: '#155e75', glow: 'rgba(8, 145, 178, 0.25)' },
+    dark: { bg: 'rgba(8, 145, 178, 0.25)', border: '#22d3ee', text: '#ecfeff', glow: 'rgba(34, 211, 238, 0.4)' }
+  },
+  'Ferozepur': {
+    light: { bg: 'rgba(190, 18, 60, 0.15)', border: '#be123c', text: '#9f1239', glow: 'rgba(190, 18, 60, 0.25)' },
+    dark: { bg: 'rgba(190, 18, 60, 0.25)', border: '#fb7185', text: '#fff1f2', glow: 'rgba(251, 113, 133, 0.4)' }
+  },
+  'Gurdaspur': {
+    light: { bg: 'rgba(79, 70, 229, 0.15)', border: '#4f46e5', text: '#3730a3', glow: 'rgba(79, 70, 229, 0.25)' },
+    dark: { bg: 'rgba(99, 102, 241, 0.25)', border: '#818cf8', text: '#e0e7ff', glow: 'rgba(129, 140, 248, 0.4)' }
+  },
+  'Hoshiarpur': {
+    light: { bg: 'rgba(21, 128, 61, 0.15)', border: '#15803d', text: '#166534', glow: 'rgba(21, 128, 61, 0.25)' },
+    dark: { bg: 'rgba(34, 197, 94, 0.25)', border: '#4ade80', text: '#f0fdf4', glow: 'rgba(74, 222, 128, 0.4)' }
+  },
+  'Jalandhar': {
+    light: { bg: 'rgba(234, 88, 12, 0.15)', border: '#ea580c', text: '#9a3412', glow: 'rgba(234, 88, 12, 0.25)' },
     dark: { bg: 'rgba(249, 115, 22, 0.25)', border: '#fb923c', text: '#fff7ed', glow: 'rgba(251, 146, 60, 0.4)' }
   },
+  'Kapurthala': {
+    light: { bg: 'rgba(15, 118, 110, 0.15)', border: '#0f766e', text: '#115e59', glow: 'rgba(15, 118, 110, 0.25)' },
+    dark: { bg: 'rgba(20, 184, 166, 0.25)', border: '#2dd4bf', text: '#f0fdfa', glow: 'rgba(45, 212, 191, 0.4)' }
+  },
+  'Ludhiana': {
+    light: { bg: 'rgba(124, 58, 237, 0.15)', border: '#7c3aed', text: '#5b21b6', glow: 'rgba(124, 58, 237, 0.25)' },
+    dark: { bg: 'rgba(139, 92, 246, 0.25)', border: '#a78bfa', text: '#f5f3ff', glow: 'rgba(167, 139, 250, 0.4)' }
+  },
+  'Malerkotla': {
+    light: { bg: 'rgba(180, 83, 9, 0.15)', border: '#b45309', text: '#78350f', glow: 'rgba(180, 83, 9, 0.25)' },
+    dark: { bg: 'rgba(180, 83, 9, 0.25)', border: '#fb923c', text: '#fff7ed', glow: 'rgba(251, 146, 60, 0.4)' }
+  },
+  'Mansa': {
+    light: { bg: 'rgba(3, 105, 161, 0.15)', border: '#0369a1', text: '#075985', glow: 'rgba(3, 105, 161, 0.25)' },
+    dark: { bg: 'rgba(14, 165, 233, 0.25)', border: '#38bdf8', text: '#f0f9ff', glow: 'rgba(56, 189, 248, 0.4)' }
+  },
+  'Moga': {
+    light: { bg: 'rgba(101, 163, 13, 0.15)', border: '#65a30d', text: '#4f7e0b', glow: 'rgba(101, 163, 13, 0.25)' },
+    dark: { bg: 'rgba(132, 204, 22, 0.25)', border: '#a3e635', text: '#f7fee7', glow: 'rgba(163, 230, 53, 0.4)' }
+  },
+  'Pathankot': {
+    light: { bg: 'rgba(192, 38, 211, 0.15)', border: '#c026d3', text: '#86198f', glow: 'rgba(192, 38, 211, 0.25)' },
+    dark: { bg: 'rgba(217, 70, 239, 0.25)', border: '#f472b6', text: '#fdf2f8', glow: 'rgba(244, 114, 182, 0.4)' }
+  },
+  'Patiala': {
+    light: { bg: 'rgba(71, 85, 105, 0.15)', border: '#475569', text: '#334155', glow: 'rgba(71, 85, 105, 0.25)' },
+    dark: { bg: 'rgba(100, 116, 139, 0.25)', border: '#94a3b8', text: '#f8fafc', glow: 'rgba(148, 163, 184, 0.4)' }
+  },
   'Rupnagar': {
-    light: { bg: 'rgba(225, 29, 72, 0.15)', border: '#E11D48', text: '#9f1239', glow: 'rgba(225, 29, 72, 0.25)' },
+    light: { bg: 'rgba(2, 132, 199, 0.15)', border: '#0284c7', text: '#0369a1', glow: 'rgba(2, 132, 199, 0.25)' },
+    dark: { bg: 'rgba(14, 165, 233, 0.25)', border: '#38bdf8', text: '#f0f9ff', glow: 'rgba(56, 189, 248, 0.4)' }
+  },
+  'Sahibzada Ajit Singh Nagar': {
+    light: { bg: 'rgba(202, 138, 4, 0.15)', border: '#ca8a04', text: '#854d0e', glow: 'rgba(202, 138, 4, 0.25)' },
+    dark: { bg: 'rgba(234, 179, 8, 0.25)', border: '#fde047', text: '#fef9c3', glow: 'rgba(253, 224, 71, 0.4)' }
+  },
+  'SAS Nagar': {
+    light: { bg: 'rgba(202, 138, 4, 0.15)', border: '#ca8a04', text: '#854d0e', glow: 'rgba(202, 138, 4, 0.25)' },
+    dark: { bg: 'rgba(234, 179, 8, 0.25)', border: '#fde047', text: '#fef9c3', glow: 'rgba(253, 224, 71, 0.4)' }
+  },
+  'Sangrur': {
+    light: { bg: 'rgba(225, 29, 72, 0.15)', border: '#e11d48', text: '#9f1239', glow: 'rgba(225, 29, 72, 0.25)' },
     dark: { bg: 'rgba(244, 63, 94, 0.25)', border: '#fda4af', text: '#fff1f2', glow: 'rgba(253, 164, 175, 0.4)' }
   },
+  'Shaheed Bhagat Singh Nagar': {
+    light: { bg: 'rgba(5, 150, 105, 0.15)', border: '#059669', text: '#065f46', glow: 'rgba(5, 150, 105, 0.25)' },
+    dark: { bg: 'rgba(16, 185, 129, 0.25)', border: '#6ee7b7', text: '#ecfdf5', glow: 'rgba(110, 231, 183, 0.4)' }
+  },
+  'SBS Nagar': {
+    light: { bg: 'rgba(5, 150, 105, 0.15)', border: '#059669', text: '#065f46', glow: 'rgba(5, 150, 105, 0.25)' },
+    dark: { bg: 'rgba(16, 185, 129, 0.25)', border: '#6ee7b7', text: '#ecfdf5', glow: 'rgba(110, 231, 183, 0.4)' }
+  },
+  'Sri Muktsar Sahib': {
+    light: { bg: 'rgba(29, 78, 216, 0.15)', border: '#1d4ed8', text: '#1e40af', glow: 'rgba(29, 78, 216, 0.25)' },
+    dark: { bg: 'rgba(37, 99, 235, 0.25)', border: '#60a5fa', text: '#eff6ff', glow: 'rgba(96, 165, 250, 0.4)' }
+  },
   'Tarn Taran': {
-    light: { bg: 'rgba(2, 132, 199, 0.15)', border: '#0284C7', text: '#075985', glow: 'rgba(2, 132, 199, 0.25)' },
-    dark: { bg: 'rgba(14, 165, 233, 0.25)', border: '#38bdf8', text: '#f0f9ff', glow: 'rgba(56, 189, 248, 0.4)' }
+    light: { bg: 'rgba(162, 28, 175, 0.15)', border: '#a21caf', text: '#701a75', glow: 'rgba(162, 28, 175, 0.25)' },
+    dark: { bg: 'rgba(192, 38, 211, 0.25)', border: '#e879f9', text: '#fdf4ff', glow: 'rgba(232, 121, 249, 0.4)' }
   }
 };
 function getDistrictStyle(name, forceDark = false) {
@@ -13014,7 +13086,7 @@ function renderWorkflowChecklist() {
     (S.uploadedPDFs && (S.uploadedPDFs.cover || S.uploadedPDFs.cert || S.uploadedPDFs.toc || S.uploadedPDFs.pref))
   );
 
-  const uploadedChaptersCount = S.chapters ? S.chapters.filter(ch => ch.fileName || (S.chapterPDFs && S.chapterPDFs[ch.id]) || (ch.summary && ch.summary.trim().length > 20)).length : 0;
+  const uploadedChaptersCount = S.chapters ? S.chapters.filter(ch => ch.fileName || (S.chapterPDFs && S.chapterPDFs[ch.id])).length : 0;
   const chaptersOk = S.chapters && S.chapters.length >= 10 && uploadedChaptersCount >= S.chapters.length;
 
   const uploadedPlatesCount = S.plates ? S.plates.filter(pl => pl.fileName).length : 0;
@@ -13115,7 +13187,7 @@ function renderWorkflowStepBar() {
     (S.frontMatter && S.frontMatter.preface && S.frontMatter.preface.trim().length > 10 && S.frontMatter.acknowledgement && S.frontMatter.acknowledgement.trim().length > 10) ||
     (S.uploadedPDFs && (S.uploadedPDFs.cover || S.uploadedPDFs.cert || S.uploadedPDFs.toc || S.uploadedPDFs.pref))
   );
-  const uploadedChaptersCount = S.chapters ? S.chapters.filter(ch => ch.fileName || (S.chapterPDFs && S.chapterPDFs[ch.id]) || (ch.summary && ch.summary.trim().length > 20)).length : 0;
+  const uploadedChaptersCount = S.chapters ? S.chapters.filter(ch => ch.fileName || (S.chapterPDFs && S.chapterPDFs[ch.id])).length : 0;
   const step3Done = step2Done && (S.chapters && S.chapters.length >= 10 && uploadedChaptersCount >= S.chapters.length);
   const uploadedPlatesCount = S.plates ? S.plates.filter(pl => pl.fileName).length : 0;
   const step4Done = step3Done && (S.plates && S.plates.length > 0 && uploadedPlatesCount >= S.plates.length);
@@ -13170,9 +13242,7 @@ function renderWorkflowStepBar() {
     `;
   }).join('');
   if (window.initLucide) initLucide();
-}
-
-function generateFinalPDF() {
+}function generateFinalPDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
   const W=210, pad=15;
@@ -17525,25 +17595,24 @@ function calculateProjectProgress(state) {
     (state.frontMatter && state.frontMatter.preface && state.frontMatter.preface.trim().length > 10 && state.frontMatter.acknowledgement && state.frontMatter.acknowledgement.trim().length > 10) ||
     (state.uploadedPDFs && (state.uploadedPDFs.cover || state.uploadedPDFs.cert || state.uploadedPDFs.toc || state.uploadedPDFs.pref))
   );
-  if (fmOk) {
-    progress += 15;
-  } else {
-    if (state.frontMatter && (state.frontMatter.preface || state.frontMatter.acknowledgement)) {
-      progress += 5;
-    }
-  }
+  if (!fmOk) return progress;
+  progress += 15;
 
   // Step 3: Chapters (20%)
-  if (state.chapters && state.chapters.length > 0) {
-    const uploadedChaptersCount = state.chapters.filter(ch => ch.fileName || (state.chapterPDFs && state.chapterPDFs[ch.id]) || (ch.summary && ch.summary.trim().length > 20)).length;
-    progress += Math.min(20, uploadedChaptersCount * 2);
+  const uploadedChaptersCount = state.chapters ? state.chapters.filter(ch => ch.fileName || (state.chapterPDFs && state.chapterPDFs[ch.id])).length : 0;
+  const chaptersOk = state.chapters && state.chapters.length >= 10 && uploadedChaptersCount >= state.chapters.length;
+  if (!chaptersOk) {
+    return progress + Math.min(20, uploadedChaptersCount * 2);
   }
+  progress += 20;
 
   // Step 4: Plates (15%)
-  if (state.plates && state.plates.length > 0) {
-    const uploadedPlatesCount = state.plates.filter(p => p.fileName).length;
-    progress += Math.min(15, Math.floor((uploadedPlatesCount / state.plates.length) * 15));
+  const uploadedPlatesCount = state.plates ? state.plates.filter(p => p.fileName).length : 0;
+  const platesOk = state.plates && state.plates.length > 0 && uploadedPlatesCount >= state.plates.length;
+  if (!platesOk) {
+    return progress + Math.min(15, Math.floor((uploadedPlatesCount / (state.plates ? state.plates.length : 2)) * 15));
   }
+  progress += 15;
 
   // Step 5: Annexures (20%)
   let annexureCount = 0;
@@ -17553,7 +17622,11 @@ function calculateProjectProgress(state) {
     if (state.uploadedPDFs.anx3) annexureCount++;
     if (state.uploadedPDFs.anx4) annexureCount++;
   }
-  progress += annexureCount * 5;
+  const annexuresOk = annexureCount === 4;
+  if (!annexuresOk) {
+    return progress + annexureCount * 5;
+  }
+  progress += 20;
 
   // Step 6: Tables (10%)
   const hasTableData = (state.annexureB && state.annexureB.length > 0) || 
@@ -17565,15 +17638,13 @@ function calculateProjectProgress(state) {
                        (state.annexureI && state.annexureI.length > 0) ||
                        (state.annexureJ && state.annexureJ.length > 0) ||
                        (state.auctionData && state.auctionData.length > 0);
-  if (hasTableData) {
-    progress += 10;
-  }
+  if (!hasTableData) return progress;
+  progress += 10;
 
   // Step 7: PDF (10%)
   const hasPdf = !!(state.finalPdfName || state.finalPdfGeneratedAt);
-  if (hasPdf) {
-    progress += 10;
-  }
+  if (!hasPdf) return progress;
+  progress += 10;
 
   return Math.min(100, Math.floor(progress));
 }
