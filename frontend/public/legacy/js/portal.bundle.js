@@ -1889,7 +1889,7 @@ function showView(id, btn, push = true) {
         S.graphsOpened = true;
         changed = true;
       }
-    } else if (['anx1', 'anx2', 'anx3', 'anx4'].includes(id)) {
+    } else if (['anx1', 'anx2', 'anx3', 'anx4', 'anx5', 'anx6', 'anx7'].includes(id)) {
       if (!S.annexuresOpened) {
         S.annexuresOpened = true;
         changed = true;
@@ -13119,7 +13119,7 @@ function renderWorkflowChecklist() {
   );
 
   const uploadedChaptersCount = S.chapters ? S.chapters.filter(ch => ch.fileName || (S.chapterPDFs && S.chapterPDFs[ch.id])).length : 0;
-  const chaptersOk = S.chapters && S.chapters.length >= 10 && uploadedChaptersCount >= S.chapters.length;
+  const chaptersOk = S.chapters && S.chapters.length >= 2 && uploadedChaptersCount >= S.chapters.length;
 
   const uploadedPlatesCount = S.plates ? S.plates.filter(pl => pl.fileName).length : 0;
   const platesOk = S.plates && S.plates.length > 0 && uploadedPlatesCount >= S.plates.length;
@@ -13130,7 +13130,10 @@ function renderWorkflowChecklist() {
   const anx2Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx2;
   const anx3Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx3;
   const anx4Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx4;
-  const annexuresOk = !!(S.annexuresOpened || (anx1Ok && anx2Ok && anx3Ok && anx4Ok));
+  const anx5Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx5;
+  const anx6Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx6;
+  const anx7Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx7;
+  const annexuresOk = !!(S.annexuresOpened || (anx1Ok && anx2Ok && anx3Ok && anx4Ok && anx5Ok && anx6Ok && anx7Ok));
 
   const hasTableData = (S.annexureB && S.annexureB.length > 0) || 
                        (S.annexureC && S.annexureC.length > 0) || 
@@ -13158,16 +13161,16 @@ function renderWorkflowChecklist() {
   const items=[
     {n:'Project Setup',ok:setupOk,note:'District, year, mineral type'},
     {n:'Front Matter',ok:step2Done,note:step2Done ? 'Cover page, certificate, table of contents, preface and acknowledgement completed' : (setupOk ? 'Pending Cover, Certificate, Table of Contents, Preface, or Acknowledgement upload' : 'Locked - complete previous stages first')},
-    {n:'All 10 Chapters',ok:step3Done,note:step3Done ? 'All 10 chapters uploaded/filled' : (step2Done ? `${uploadedChaptersCount}/10 chapters uploaded/filled` : 'Locked - complete previous stages first')},
+    {n:'All Chapters',ok:step3Done,note:step3Done ? 'All chapters uploaded/filled' : (step2Done ? `${uploadedChaptersCount}/${S.chapters ? S.chapters.length : 2} chapters uploaded/filled` : 'Locked - complete previous stages first')},
     {n:'Plate Section',ok:step4Done,note:step4Done ? 'All plates setup' : (step3Done ? `${uploadedPlatesCount}/${S.plates ? S.plates.length : 2} plates setup` : 'Locked - complete previous stages first')},
     {n:'Cross Section Graphs',ok:graphsDone,note:graphsDone ? 'Cross sections generated or opened' : (step4Done ? 'Pending generation or page view' : 'Locked - complete previous stages first')},
-    {n:'Annexures I-IV',ok:step5Done,note:step5Done ? 'All 4 annexure PDFs uploaded or opened' : (graphsDone ? 'Pending Annexure I, II, III or IV PDF upload or page view' : 'Locked - complete previous stages first')},
+    {n:'Annexures I-VII',ok:step5Done,note:step5Done ? 'All 7 annexure PDFs uploaded or opened' : (graphsDone ? 'Pending Annexure I to VII PDF upload or page view' : 'Locked - complete previous stages first')},
     {n:'Annexures B to K',ok:step6Done,note:step6Done ? 'Annexures B to K opened' : (step5Done ? 'Pending tables page view' : 'Locked - complete previous stages first')},
     {n:'Report PDF Generation',ok:step7Done,note:step7Done ? 'Final DSR report generated' : (step6Done ? 'Pending final report compilation' : 'Locked - complete previous stages first')}
   ];
   el.innerHTML=items.map(it=>`
     <div style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--border)">
-      <span style="display:flex;align-items:center;color:	ext{ }${it.ok?'var(--green)':'var(--text-faint)'}">
+      <span style="display:flex;align-items:center;color:${it.ok?'var(--green)':'var(--text-faint)'}">
         <i data-lucide="${it.ok?'check-circle-2':'circle'}" style="width:16px;height:16px;"></i>
       </span>
       <div style="flex:1"><div style="font-size:12.5px;font-weight:600;color:${it.ok?'var(--text)':'var(--text-soft)'}">${it.n}</div><div style="font-size:10.5px;color:var(--text-soft)">${it.note}</div></div>
@@ -13224,7 +13227,7 @@ function renderWorkflowStepBar() {
     (S.uploadedPDFs.ack || (S.frontMatter && S.frontMatter.acknowledgement && S.frontMatter.acknowledgement.trim().length > 10))
   );
   const uploadedChaptersCount = S.chapters ? S.chapters.filter(ch => ch.fileName || (S.chapterPDFs && S.chapterPDFs[ch.id])).length : 0;
-  const step3Done = step2Done && (S.chapters && S.chapters.length >= 10 && uploadedChaptersCount >= S.chapters.length);
+  const step3Done = step2Done && (S.chapters && S.chapters.length >= 2 && uploadedChaptersCount >= S.chapters.length);
   const uploadedPlatesCount = S.plates ? S.plates.filter(pl => pl.fileName).length : 0;
   const step4Done = step3Done && (S.plates && S.plates.length > 0 && uploadedPlatesCount >= S.plates.length);
   
@@ -13232,7 +13235,10 @@ function renderWorkflowStepBar() {
   const anx2Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx2;
   const anx3Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx3;
   const anx4Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx4;
-  const step5Done = step4Done && (S.annexuresOpened || (anx1Ok && anx2Ok && anx3Ok && anx4Ok));
+  const anx5Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx5;
+  const anx6Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx6;
+  const anx7Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx7;
+  const step5Done = step4Done && (S.annexuresOpened || (anx1Ok && anx2Ok && anx3Ok && anx4Ok && anx5Ok && anx6Ok && anx7Ok));
   const hasTableData = (S.annexureB && S.annexureB.length > 0) || 
                        (S.annexureC && S.annexureC.length > 0) || 
                        (S.annexureD && S.annexureD.length > 0) || 
@@ -17642,9 +17648,9 @@ function calculateProjectProgress(state) {
 
   // Step 3: Chapters (20%)
   const uploadedChaptersCount = state.chapters ? state.chapters.filter(ch => ch.fileName || (state.chapterPDFs && state.chapterPDFs[ch.id])).length : 0;
-  const chaptersOk = state.chapters && state.chapters.length >= 10 && uploadedChaptersCount >= state.chapters.length;
+  const chaptersOk = state.chapters && state.chapters.length >= 2 && uploadedChaptersCount >= state.chapters.length;
   if (!chaptersOk) {
-    return progress + Math.min(20, uploadedChaptersCount * 2);
+    return progress + Math.min(20, uploadedChaptersCount * 10);
   }
   progress += 20;
 
@@ -17663,10 +17669,13 @@ function calculateProjectProgress(state) {
     if (state.uploadedPDFs.anx2) annexureCount++;
     if (state.uploadedPDFs.anx3) annexureCount++;
     if (state.uploadedPDFs.anx4) annexureCount++;
+    if (state.uploadedPDFs.anx5) annexureCount++;
+    if (state.uploadedPDFs.anx6) annexureCount++;
+    if (state.uploadedPDFs.anx7) annexureCount++;
   }
-  const annexuresOk = state.annexuresOpened || (annexureCount === 4);
+  const annexuresOk = state.annexuresOpened || (annexureCount === 7);
   if (!annexuresOk) {
-    return progress + annexureCount * 5;
+    return progress + Math.round(annexureCount * (20 / 7));
   }
   progress += 20;
 
