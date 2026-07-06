@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smart-dsr-cache-v24-fixed-layout-spacing';
+const CACHE_NAME = 'smart-dsr-cache-v25-fixed-viewport-stretch';
 const urlsToCache = [
   './login.html',
   './css/styles.css',

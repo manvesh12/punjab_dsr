@@ -5861,3 +5861,11 @@ body:has(#view-settings.active) .page-body {
   margin-top: 0 !important;
 }
 
+
+
+/* Force full viewport stretching under any HTML zoom level */
+html, body, #screen-app {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 100% !important;
+}
