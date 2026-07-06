@@ -1,22 +1,31 @@
 import { Router } from "express";
 import { Redis } from "ioredis";
+import { config } from "../lib/config.js";
 
 export const streamRouter = Router();
 
-// Configure Redis subscriber (in production, use environment variables)
-const redisHost = process.env.REDIS_HOST || "127.0.0.1";
-const redisPort = Number(process.env.REDIS_PORT) || 6379;
+// Configure Redis connections using the centralized URL config (supporting Upstash, TLS, etc.)
+function getRedisOptions() {
+  try {
+    const url = new URL(config.queueRedisUrl);
+    return {
+      host: url.hostname,
+      port: Number(url.port || 6379),
+      username: url.username || undefined,
+      password: url.password || undefined,
+      ...(url.protocol === "rediss:" ? { tls: {} } : {})
+    };
+  } catch (err) {
+    // fallback to localhost Redis
+    return {
+      host: "127.0.0.1",
+      port: 6379
+    };
+  }
+}
 
-const redisSubscriber = new Redis({
-  host: redisHost,
-  port: redisPort,
-});
-
-// We can have a publisher to manually publish events for testing
-const redisPublisher = new Redis({
-  host: redisHost,
-  port: redisPort,
-});
+const redisSubscriber = new Redis(getRedisOptions());
+const redisPublisher = new Redis(getRedisOptions());
 
 // GET /api/stream/events
 // Standard Server-Sent Events (SSE) endpoint
