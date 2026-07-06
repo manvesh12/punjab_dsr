@@ -5935,7 +5935,7 @@
 
   <div class="toast" id="toast"></div>
 
-<script defer src="js/portal.bundle.js?v=repl-model-dsr-backend-20260707-v5"></script>
+<script defer src="js/portal.bundle.js?v=repl-model-dsr-backend-20260707-v6"></script>
 <script defer src="js/model-dsr-module.js?v=12"></script>
 <script defer src="js/replenishment-module.js?v=24"></script>
 <script>
@@ -6008,8 +6008,9 @@ document.addEventListener("DOMContentLoaded", function() {
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
+        navigator.serviceWorker.register('./sw.js?v=login-fix-v28')
           .then(registration => {
+            registration.update();
             console.log('ServiceWorker registration successful with scope: ', registration.scope);
           })
           .catch(err => {

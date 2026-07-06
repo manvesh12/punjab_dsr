@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smart-dsr-cache-v27-zoom-cleanup';
+const CACHE_NAME = 'smart-dsr-cache-v28-login-fix';
 const urlsToCache = [
   './login.html',
   './css/styles.css',
@@ -23,7 +23,34 @@ self.addEventListener('install', event => {
 self.addEventListener('fetch', event => {
   // Only intercept GET requests
   if (event.request.method !== 'GET') return;
-  
+
+  const requestUrl = new URL(event.request.url);
+  const shouldNetworkFirst =
+    event.request.mode === 'navigate' ||
+    event.request.destination === 'document' ||
+    event.request.destination === 'script' ||
+    event.request.destination === 'style' ||
+    requestUrl.pathname.endsWith('.html') ||
+    requestUrl.pathname.endsWith('.js') ||
+    requestUrl.pathname.endsWith('.css');
+
+  if (shouldNetworkFirst) {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          if (response && response.status === 200 && response.type === 'basic') {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then(cache => {
+              cache.put(event.request, responseToCache);
+            });
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then(response => {
