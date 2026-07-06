@@ -633,4 +633,487 @@
     });
   });
 </script>
+<style>
+  .dsr-action-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 120;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: rgba(15, 46, 71, 0.64);
+    backdrop-filter: blur(8px);
+  }
+  .dsr-action-modal.is-open {
+    display: flex;
+  }
+  .dsr-action-panel {
+    width: min(960px, 100%);
+    max-height: min(86vh, 760px);
+    overflow: auto;
+    background: #ffffff;
+    border: 1px solid #d5e3fd;
+    border-radius: 12px;
+    box-shadow: 0 24px 80px rgba(15, 46, 71, 0.28);
+  }
+  .dsr-action-head {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 24px;
+    background: #f8f9ff;
+    border-bottom: 1px solid #d5e3fd;
+  }
+  .dsr-action-kicker {
+    color: #8c4f00;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .dsr-action-title {
+    margin: 2px 0 0;
+    color: #1e293b;
+    font-size: 26px;
+    line-height: 32px;
+    font-weight: 800;
+  }
+  .dsr-close-btn {
+    width: 40px;
+    height: 40px;
+    border: 1px solid #c3c7ce;
+    border-radius: 8px;
+    color: #1e293b;
+    background: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .dsr-close-btn:hover {
+    background: #eff4ff;
+  }
+  .dsr-action-body {
+    padding: 24px;
+  }
+  .dsr-card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .dsr-service-card {
+    border: 1px solid #d5e3fd;
+    border-radius: 10px;
+    padding: 18px;
+    background: #ffffff;
+    min-height: 100%;
+  }
+  .dsr-service-card h4 {
+    margin: 10px 0 8px;
+    color: #1e293b;
+    font-size: 18px;
+    line-height: 24px;
+    font-weight: 800;
+  }
+  .dsr-service-card p,
+  .dsr-action-help {
+    color: #43474d;
+    font-size: 14px;
+    line-height: 20px;
+  }
+  .dsr-card-index {
+    color: #8c4f00;
+    font-size: 13px;
+    font-weight: 800;
+  }
+  .dsr-pill-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 14px 0 18px;
+  }
+  .dsr-pill {
+    border: 1px solid #d5e3fd;
+    border-radius: 999px;
+    padding: 5px 9px;
+    color: #334155;
+    background: #f8f9ff;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .dsr-action-btn {
+    width: 100%;
+    min-height: 42px;
+    border-radius: 8px;
+    background: #1e293b;
+    color: #ffffff;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .dsr-action-btn:hover {
+    background: #60401b;
+  }
+  .dsr-metric-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 18px;
+  }
+  .dsr-metric {
+    border: 1px solid #d5e3fd;
+    border-radius: 10px;
+    padding: 18px;
+    background: #f8f9ff;
+  }
+  .dsr-metric strong {
+    display: block;
+    color: #1e293b;
+    font-size: 28px;
+    line-height: 34px;
+  }
+  .dsr-login-form {
+    display: grid;
+    gap: 12px;
+    max-width: 460px;
+  }
+  .dsr-login-form label {
+    display: grid;
+    gap: 5px;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 800;
+  }
+  .dsr-login-form input,
+  .dsr-login-form select {
+    width: 100%;
+    border: 1px solid #c3c7ce;
+    border-radius: 8px;
+    padding: 11px 12px;
+    color: #0d1c2f;
+    background: #ffffff;
+  }
+  .dsr-search-results {
+    display: grid;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .dsr-result-link {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    border: 1px solid #d5e3fd;
+    border-radius: 8px;
+    padding: 12px 14px;
+    color: #1e293b;
+    font-weight: 800;
+  }
+  @media (max-width: 760px) {
+    .dsr-card-grid,
+    .dsr-metric-row {
+      grid-template-columns: 1fr;
+    }
+    .dsr-action-title {
+      font-size: 22px;
+      line-height: 28px;
+    }
+  }
+</style>
+<div id="dsr-action-modal" class="dsr-action-modal" aria-hidden="true">
+  <div class="dsr-action-panel" role="dialog" aria-modal="true" aria-labelledby="dsr-action-title">
+    <div class="dsr-action-head">
+      <div>
+        <div id="dsr-action-kicker" class="dsr-action-kicker">DSR Portal</div>
+        <h3 id="dsr-action-title" class="dsr-action-title">Portal Action</h3>
+      </div>
+      <button type="button" class="dsr-close-btn" aria-label="Close" data-dsr-close>
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div id="dsr-action-body" class="dsr-action-body"></div>
+  </div>
+</div>
+<script>
+  (() => {
+    const modal = document.getElementById('dsr-action-modal');
+    const titleEl = document.getElementById('dsr-action-title');
+    const kickerEl = document.getElementById('dsr-action-kicker');
+    const bodyEl = document.getElementById('dsr-action-body');
+
+    const escapeHtml = (value) => String(value || '').replace(/[&<>"']/g, (char) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    }[char]));
+
+    const openPanel = (title, html, kicker = 'DSR Portal') => {
+      titleEl.textContent = title;
+      kickerEl.textContent = kicker;
+      bodyEl.innerHTML = html;
+      modal.classList.add('is-open');
+      modal.setAttribute('aria-hidden', 'false');
+      const firstInput = bodyEl.querySelector('input, select, button, a');
+      if (firstInput) firstInput.focus();
+    };
+
+    const closePanel = () => {
+      modal.classList.remove('is-open');
+      modal.setAttribute('aria-hidden', 'true');
+      bodyEl.innerHTML = '';
+    };
+
+    const cards = {
+      services: {
+        title: 'Services Portal',
+        kicker: 'Citizen & department services',
+        html: `
+          <p class="dsr-action-help">Choose a service to continue. Public services open here, while secured officer work continues through the login page.</p>
+          <div class="dsr-card-grid" style="margin-top:18px;">
+            <div class="dsr-service-card">
+              <span class="dsr-card-index">01</span>
+              <h4>District Survey Reports</h4>
+              <p>Search published DSR records by district, year, and status.</p>
+              <div class="dsr-pill-list"><span class="dsr-pill">District-wise</span><span class="dsr-pill">Published reports</span></div>
+              <button class="dsr-action-btn" data-dsr-panel="reports">Open Reports</button>
+            </div>
+            <div class="dsr-service-card">
+              <span class="dsr-card-index">02</span>
+              <h4>Track DSR Status</h4>
+              <p>Check a submitted report using a project or application reference number.</p>
+              <div class="dsr-pill-list"><span class="dsr-pill">Application ID</span><span class="dsr-pill">Workflow status</span></div>
+              <button class="dsr-action-btn" data-dsr-panel="status">Track Status</button>
+            </div>
+            <div class="dsr-service-card">
+              <span class="dsr-card-index">03</span>
+              <h4>Guidelines & Downloads</h4>
+              <p>Open manuals, notices, templates, and reference documents.</p>
+              <div class="dsr-pill-list"><span class="dsr-pill">Manuals</span><span class="dsr-pill">Forms</span></div>
+              <button class="dsr-action-btn" data-dsr-panel="guidelines">View Downloads</button>
+            </div>
+          </div>`
+      },
+      reports: {
+        title: 'District Reports',
+        kicker: 'Public DSR records',
+        html: `
+          <p class="dsr-action-help">Filter district reports. The public catalogue is ready for backend data connection.</p>
+          <form class="dsr-login-form" data-dsr-form="reports" style="margin-top:18px;">
+            <label>District
+              <select required>
+                <option value="">Select district</option>
+                <option>Amritsar</option><option>Bathinda</option><option>Jalandhar</option><option>Ludhiana</option><option>Rupnagar</option><option>SAS Nagar</option>
+              </select>
+            </label>
+            <label>Report year
+              <select required><option>2026</option><option>2025</option><option>2024</option></select>
+            </label>
+            <button class="dsr-action-btn" type="submit">Search Reports</button>
+          </form>
+          <div class="dsr-search-results" id="dsr-results-box"></div>`
+      },
+      status: {
+        title: 'Track DSR Status',
+        kicker: 'Workflow tracking',
+        html: `
+          <p class="dsr-action-help">Enter a project/application reference to view the current DSR review stage.</p>
+          <form class="dsr-login-form" data-dsr-form="status" style="margin-top:18px;">
+            <label>Application or Project ID
+              <input required placeholder="Example: DSR-PB-2026-001" />
+            </label>
+            <button class="dsr-action-btn" type="submit">Check Status</button>
+          </form>
+          <div class="dsr-search-results" id="dsr-results-box"></div>
+          <div class="dsr-metric-row">
+            <div class="dsr-metric"><strong>24</strong><span>Reports in preparation</span></div>
+            <div class="dsr-metric"><strong>08</strong><span>Pending review</span></div>
+            <div class="dsr-metric"><strong>16</strong><span>Cleared this month</span></div>
+          </div>`
+      },
+      guidelines: {
+        title: 'Guidelines & Downloads',
+        kicker: 'Document centre',
+        html: `
+          <p class="dsr-action-help">Common documents are grouped here for quick access.</p>
+          <div class="dsr-search-results">
+            <a class="dsr-result-link" href="login.html"><span>DSR preparation user manual</span><span class="material-symbols-outlined">open_in_new</span></a>
+            <a class="dsr-result-link" href="login.html"><span>District report checklist</span><span class="material-symbols-outlined">open_in_new</span></a>
+            <a class="dsr-result-link" href="login.html"><span>Mining workflow reference forms</span><span class="material-symbols-outlined">open_in_new</span></a>
+          </div>`
+      },
+      helpdesk: {
+        title: 'DSR Helpdesk',
+        kicker: 'Support',
+        html: `
+          <p class="dsr-action-help">Raise a technical or workflow support request. This mirrors the reference page's focused desk view while staying within your DSR portal.</p>
+          <form class="dsr-login-form" data-dsr-form="helpdesk" style="margin-top:18px;">
+            <label>Your official email
+              <input type="email" required placeholder="name@punjab.gov.in" />
+            </label>
+            <label>Issue type
+              <select required><option>Login support</option><option>Project workflow</option><option>PDF/report generation</option><option>Data correction</option></select>
+            </label>
+            <label>Message
+              <input required placeholder="Briefly describe the issue" />
+            </label>
+            <button class="dsr-action-btn" type="submit">Prepare Ticket</button>
+          </form>`
+      },
+      roles: {
+        title: 'Forms Portal',
+        kicker: 'Select your role',
+        html: `
+          <p class="dsr-action-help">Each role opens the appropriate secured dashboard path, similar to the reference Forms Portal.</p>
+          <div class="dsr-card-grid" style="margin-top:18px;">
+            <div class="dsr-service-card">
+              <span class="dsr-card-index">01</span>
+              <h4>District / SDLC Staff</h4>
+              <p>Create and update district survey report data with draft tracking.</p>
+              <div class="dsr-pill-list"><span class="dsr-pill">Form creation</span><span class="dsr-pill">Drafts</span><span class="dsr-pill">Submission</span></div>
+              <button class="dsr-action-btn" data-dsr-login-role="District / SDLC Staff">Continue as Staff</button>
+            </div>
+            <div class="dsr-service-card">
+              <span class="dsr-card-index">02</span>
+              <h4>Reviewer / Officer</h4>
+              <p>Review submissions, verify documents, and move files through the workflow.</p>
+              <div class="dsr-pill-list"><span class="dsr-pill">Verification</span><span class="dsr-pill">Remarks</span><span class="dsr-pill">Routing</span></div>
+              <button class="dsr-action-btn" data-dsr-login-role="Reviewer / Officer">Continue as Officer</button>
+            </div>
+            <div class="dsr-service-card">
+              <span class="dsr-card-index">03</span>
+              <h4>Admin</h4>
+              <p>Manage users, permissions, approval paths, and audit dashboards.</p>
+              <div class="dsr-pill-list"><span class="dsr-pill">Roles</span><span class="dsr-pill">Settings</span><span class="dsr-pill">Audit</span></div>
+              <button class="dsr-action-btn" data-dsr-login-role="Admin">Continue as Admin</button>
+            </div>
+          </div>`
+      },
+      search: {
+        title: 'Search Portal',
+        kicker: 'Quick search',
+        html: `
+          <form class="dsr-login-form" data-dsr-form="search">
+            <label>Search reports, services, guidelines or helpdesk
+              <input required placeholder="Type a keyword" />
+            </label>
+            <button class="dsr-action-btn" type="submit">Search</button>
+          </form>
+          <div class="dsr-search-results" id="dsr-results-box"></div>`
+      }
+    };
+
+    const showLoginForm = (role) => {
+      openPanel(`${role} Login`, `
+        <form class="dsr-login-form" data-dsr-form="login">
+          <label>Role
+            <input value="${escapeHtml(role)}" readonly />
+          </label>
+          <label>Official Email
+            <input type="email" required placeholder="name@punjab.gov.in" />
+          </label>
+          <label>Password
+            <input type="password" required placeholder="Enter password" />
+          </label>
+          <button class="dsr-action-btn" type="submit">Login</button>
+          <a href="forgot-password.html" style="color:#1e293b;font-weight:800;">Forgot password?</a>
+        </form>`, 'Secure access');
+    };
+
+    const openNamedPanel = (name) => {
+      const panel = cards[name] || cards.services;
+      openPanel(panel.title, panel.html, panel.kicker);
+    };
+
+    const textOf = (el) => (el.innerText || el.textContent || '').replace(/arrow_forward|arrow_right_alt|open_in_new|description|search|language/gi, '').replace(/\s+/g, ' ').trim();
+
+    document.addEventListener('click', (event) => {
+      const target = event.target.closest('a, button');
+      if (!target) return;
+
+      if (target.matches('[data-dsr-close]')) {
+        event.preventDefault();
+        closePanel();
+        return;
+      }
+
+      const panelName = target.getAttribute('data-dsr-panel');
+      if (panelName) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        openNamedPanel(panelName);
+        return;
+      }
+
+      const loginRole = target.getAttribute('data-dsr-login-role');
+      if (loginRole) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        showLoginForm(loginRole);
+        return;
+      }
+
+      const label = textOf(target);
+      const href = target.getAttribute('href') || '';
+      const aria = target.getAttribute('aria-label') || '';
+      let nextPanel = '';
+
+      if (aria === 'Search' || label === 'Search') nextPanel = 'search';
+      else if (label.includes('Services') || label.includes('View all services')) nextPanel = 'services';
+      else if (label.includes('District Reports') || label.includes('View District Reports') || label.includes('Reports')) nextPanel = 'reports';
+      else if (label.includes('Track') || label.includes('Status')) nextPanel = 'status';
+      else if (label.includes('Guidelines') || label.includes('Downloads') || label.includes('Policy') || label.includes('Terms') || label.includes('Manual')) nextPanel = 'guidelines';
+      else if (label.includes('Helpdesk') || label.includes('Support') || label.includes('Contact') || label.includes('Feedback')) nextPanel = 'helpdesk';
+      else if (label.includes('Department Login')) nextPanel = 'roles';
+
+      const isPublicLoginPlaceholder = href.endsWith('login.html') && nextPanel;
+      if (nextPanel && (target.tagName === 'BUTTON' || isPublicLoginPlaceholder)) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        openNamedPanel(nextPanel);
+      }
+    }, true);
+
+    document.addEventListener('submit', (event) => {
+      const form = event.target.closest('[data-dsr-form]');
+      if (!form) return;
+      event.preventDefault();
+      const type = form.getAttribute('data-dsr-form');
+      const resultBox = document.getElementById('dsr-results-box');
+      if (type === 'login') {
+        window.location.href = 'login.html';
+        return;
+      }
+      if (type === 'reports' && resultBox) {
+        resultBox.innerHTML = `
+          <a class="dsr-result-link" href="login.html"><span>Draft DSR - selected district</span><span>Under review</span></a>
+          <a class="dsr-result-link" href="login.html"><span>Published DSR archive</span><span>Open</span></a>`;
+      } else if (type === 'status' && resultBox) {
+        resultBox.innerHTML = '<div class="dsr-metric"><strong>Review</strong><span>Your reference is currently shown as pending departmental review in demo mode.</span></div>';
+      } else if (type === 'search' && resultBox) {
+        const query = escapeHtml(form.querySelector('input')?.value || 'DSR');
+        resultBox.innerHTML = `
+          <button class="dsr-result-link" data-dsr-panel="reports"><span>Search reports for "${query}"</span><span class="material-symbols-outlined">arrow_forward</span></button>
+          <button class="dsr-result-link" data-dsr-panel="guidelines"><span>Search guidelines for "${query}"</span><span class="material-symbols-outlined">arrow_forward</span></button>
+          <button class="dsr-result-link" data-dsr-panel="helpdesk"><span>Need help with "${query}"?</span><span class="material-symbols-outlined">arrow_forward</span></button>`;
+      } else if (type === 'helpdesk') {
+        openPanel('Ticket Prepared', '<p class="dsr-action-help">Your helpdesk request is ready. Backend ticket submission can be connected to the live support API when available.</p><button class="dsr-action-btn" data-dsr-close>Done</button>', 'Support');
+      }
+    });
+
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) closePanel();
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && modal.classList.contains('is-open')) closePanel();
+    });
+  })();
+</script>
 </body></html>
