@@ -215,6 +215,9 @@
           font-size: 1.15em !important;
         }
       </style>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e293b">
+  <link rel="apple-touch-icon" href="assets/dsr-logo.png">
 </head>
 <body class="bg-surface text-on-surface font-body-md antialiased subpixel-antialiased selection:bg-primary-container selection:text-on-primary-container">
 <!-- Pre-header (Government Banner) -->
@@ -770,4 +773,18 @@
     });
   });
 </script>
+  <!-- PWA Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(registration => {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+          })
+          .catch(err => {
+            console.log('ServiceWorker registration failed: ', err);
+          });
+      });
+    }
+  </script>
 </body></html>

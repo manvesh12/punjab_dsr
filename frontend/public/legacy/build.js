@@ -173,12 +173,64 @@ document.addEventListener("DOMContentLoaded", function() {
 </style>`;
     html += '\n</body>\n</html>';
 
+    // Inject PWA configuration (manifest and service worker registration)
+    if (!html.includes('manifest.json')) {
+      html = html.replace(
+        '</head>',
+        `  <link rel="manifest" href="manifest.json">\n  <meta name="theme-color" content="#1e293b">\n  <link rel="apple-touch-icon" href="assets/dsr-logo.png">\n</head>`
+      );
+    }
+    if (!html.includes('navigator.serviceWorker.register')) {
+      html = html.replace(
+        '</body>',
+        `  <!-- PWA Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(registration => {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+          })
+          .catch(err => {
+            console.log('ServiceWorker registration failed: ', err);
+          });
+      });
+    }
+  </script>\n</body>`
+      );
+    }
+
     // Write built file (App / Login portal)
     fs.writeFileSync(DIST_FILE, html, 'utf8');
     console.log(`Successfully compiled DSR Portal into ${DIST_FILE}`);
 
     // Copy home.html to index.html and home.html (Landing page)
     let homeHtml = applyAssetVersion(fs.readFileSync(path.join(SRC_DIR, 'templates', 'home.html'), 'utf8'));
+    if (!homeHtml.includes('manifest.json')) {
+      homeHtml = homeHtml.replace(
+        '</head>',
+        `  <link rel="manifest" href="manifest.json">\n  <meta name="theme-color" content="#1e293b">\n  <link rel="apple-touch-icon" href="assets/dsr-logo.png">\n</head>`
+      );
+    }
+    if (!homeHtml.includes('navigator.serviceWorker.register')) {
+      homeHtml = homeHtml.replace(
+        '</body>',
+        `  <!-- PWA Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(registration => {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+          })
+          .catch(err => {
+            console.log('ServiceWorker registration failed: ', err);
+          });
+      });
+    }
+  </script>\n</body>`
+      );
+    }
     fs.writeFileSync(path.join(SRC_DIR, 'home.html'), homeHtml, 'utf8');
     fs.writeFileSync(path.join(SRC_DIR, 'index.html'), homeHtml, 'utf8');
     console.log(`Successfully generated home.html and index.html (Landing Page) from templates/home.html`);
