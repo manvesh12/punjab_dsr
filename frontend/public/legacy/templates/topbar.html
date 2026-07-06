@@ -73,9 +73,7 @@
       <button class="dash-action-icon-btn dash-theme-toggle tb-theme-toggle" onclick="toggleDarkMode()" title="Toggle dark mode" aria-label="Toggle dark mode" data-theme-toggle>
         <i data-lucide="moon" style="width:16px; height:16px;"></i>
       </button>
-      <button id="tb-btn-new-project" class="dash-btn-logout dash-btn-new-project" onclick="newProjectModal()">
-        <i data-lucide="plus-circle" style="width:15px; height:15px; stroke-width: 2.5;"></i> New Project
-      </button>
+
       <button onclick="doLogout()" class="dash-btn-logout">
         <i data-lucide="log-out" style="width:15px; height:15px; stroke-width: 2.5;"></i> Logout
       </button>
@@ -102,11 +100,7 @@
           <a href="#" onclick="newProjectModal(); return false;">Add New Project</a>
         </div>
       </li>
-      <li class="dash-menu-link-item">
-        <button class="tb-sub-nav-btn" onclick="newProjectModal()">
-          <i data-lucide="plus-circle" style="width:15px; height:15px; opacity:0.8;"></i> <span data-i18n="navNewProject">+ New Project</span>
-        </button>
-      </li>
+
       <li class="dash-menu-link-item">
         <button class="tb-sub-nav-btn" onclick="showView('workflow', this)">
           <i data-lucide="activity" style="width:15px; height:15px; opacity:0.8;"></i> <span data-i18n="navWorkflow">Workflow</span>
