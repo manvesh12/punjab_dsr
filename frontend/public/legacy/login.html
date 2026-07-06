@@ -537,7 +537,7 @@
     </div>
     <div class="dash-notice-marquee-container">
       <div class="dash-notice-marquee-text">
-        <span data-i18n="noticeText">DSR submissions for Punjab districts 2025-26 are now open - Deadline: 30 September 2026 - New: Digital E-Sign integration live for all districts - EMGSM 2020 compliance mandatory</span>
+        <span data-i18n="noticeText">DSR submissions for Punjab districts 2025-26 are now open - Deadline: 30 September 2026 - EMGSM 2020 compliance mandatory</span>
       </div>
     </div>
     <span class="tb-district" id="tb-district-badge">Punjab</span>
@@ -1752,7 +1752,7 @@
       </div>
       <div class="dash-notice-marquee-container">
         <div class="dash-notice-marquee-text">
-          <span data-i18n="noticeText">DSR submissions for Punjab districts 2025-26 are now open - Deadline: 30 September 2026 - New: Digital E-Sign integration live for all districts - EMGSM 2020 compliance mandatory</span>
+          <span data-i18n="noticeText">DSR submissions for Punjab districts 2025-26 are now open - Deadline: 30 September 2026 - EMGSM 2020 compliance mandatory</span>
         </div>
       </div>
     </div>
@@ -1919,16 +1919,7 @@
               </div>
             </div>
           </li>
-          <li class="dash-update-item">
-            <div class="dash-update-dot"></div>
-            <div class="dash-update-content">
-              <span class="dash-update-text">Digital E-Sign integration completed - now live for all enrolled officers</span>
-              <div class="dash-update-meta">
-                <span>05 Jun 2026</span>
-                <span class="dash-badge-new">NEW</span>
-              </div>
-            </div>
-          </li>
+
           <li class="dash-update-item">
             <div class="dash-update-dot"></div>
             <div class="dash-update-content">
@@ -1970,13 +1961,7 @@
               <span class="dash-quick-subtitle">View & edit</span>
             </div>
           </div>
-          <div onclick="showView('esign', null)" class="dash-quick-access-btn">
-            <div class="dash-quick-icon-box" style="color: #F2A123;"><i data-lucide="clock" style="width: 20px; height: 20px;"></i></div>
-            <div class="dash-quick-text-box">
-              <span class="dash-quick-title">Pending Signs</span>
-              <span class="dash-quick-subtitle">Awaiting auth</span>
-            </div>
-          </div>
+
           <div onclick="showView('generate', null)" class="dash-quick-access-btn">
             <div class="dash-quick-icon-box" style="color: #3B82F6;"><i data-lucide="file-text" style="width: 20px; height: 20px;"></i></div>
             <div class="dash-quick-text-box">
@@ -2361,7 +2346,7 @@
               </div>
               <div class="dash-notice-marquee-container">
                 <div class="dash-notice-marquee-text">
-                  <span data-i18n="noticeText">DSR submissions for Punjab districts 2025-26 are now open - Deadline: 30 September 2026 - New: Digital E-Sign integration live for all districts - EMGSM 2020 compliance mandatory</span>
+                  <span data-i18n="noticeText">DSR submissions for Punjab districts 2025-26 are now open - Deadline: 30 September 2026 - EMGSM 2020 compliance mandatory</span>
                 </div>
               </div>
             </div>
@@ -2423,99 +2408,13 @@
               </div>
             </div>
           </div>
-          <div class="step-bar">
-            <div class="step done">
-              <div class="step-dot">OK</div>
-              <div class="step-lbl">Project Setup</div>
-            </div>
-            <div class="step active">
-              <div class="step-dot">2</div>
-              <div class="step-lbl">Front Matter</div>
-            </div>
-            <div class="step">
-              <div class="step-dot">3</div>
-              <div class="step-lbl">Chapters</div>
-            </div>
-            <div class="step">
-              <div class="step-dot">4</div>
-              <div class="step-lbl">Plates</div>
-            </div>
-            <div class="step">
-              <div class="step-dot">5</div>
-              <div class="step-lbl">Annexures</div>
-            </div>
-            <div class="step">
-              <div class="step-dot">6</div>
-              <div class="step-lbl">Tables</div>
-            </div>
-            <div class="step">
-              <div class="step-dot">7</div>
-              <div class="step-lbl">PDF</div>
-            </div>
-            <div class="step">
-              <div class="step-dot">8</div>
-              <div class="step-lbl">E-Sign</div>
-            </div>
+          <div class="step-bar" id="workflow-step-bar">
           </div>
-          <div class="g2">
-            <div class="card">
-              <div class="card-hd">
-                <div class="card-title">Section Completion Status</div>
-              </div>
-              <div class="card-bd" id="workflow-checklist"></div>
+          <div class="card">
+            <div class="card-hd">
+              <div class="card-title">Section Completion Status</div>
             </div>
-            <div class="card">
-              <div class="card-hd">
-                <div class="card-title">E-Signature Hierarchy</div>
-              </div>
-              <div class="card-bd">
-                <div class="notif notif-warn" style="margin-bottom:14px; display:flex; align-items:center; gap:8px;">
-                  <i data-lucide="alert-triangle" style="width:16px; height:16px; flex-shrink:0;"></i>
-                  <span>Signatures must be completed in strict sequential order.</span>
-                </div>
-                <div class="timeline">
-                  <div class="tl-item">
-                    <div class="tl-line"></div>
-                    <div class="tl-dot done">1</div>
-                    <div class="tl-content">
-                      <div class="tl-title">Sub-Divisional Officer</div>
-                      <div class="tl-sub">First signatory · Data verification</div>
-                    </div>
-                  </div>
-                  <div class="tl-item">
-                    <div class="tl-line"></div>
-                    <div class="tl-dot active">2</div>
-                    <div class="tl-content">
-                      <div class="tl-title">District Mining Officer</div>
-                      <div class="tl-sub">Technical review & approval</div>
-                    </div>
-                  </div>
-                  <div class="tl-item">
-                    <div class="tl-line"></div>
-                    <div class="tl-dot">3</div>
-                    <div class="tl-content">
-                      <div class="tl-title">Deputy Commissioner</div>
-                      <div class="tl-sub">Administrative sanction</div>
-                    </div>
-                  </div>
-                  <div class="tl-item">
-                    <div class="tl-line"></div>
-                    <div class="tl-dot">4</div>
-                    <div class="tl-content">
-                      <div class="tl-title">Director, Mining</div>
-                      <div class="tl-sub">State-level final approval</div>
-                    </div>
-                  </div>
-                  <div class="tl-item">
-                    <div class="tl-dot">5</div>
-                    <div class="tl-content">
-                      <div class="tl-title">Principal Secretary</div>
-                      <div class="tl-sub">Final submission clearance</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <div class="card-bd" id="workflow-checklist"></div>
           </div>
         </div>
 
@@ -5077,18 +4976,6 @@
             This section is also available under Additional Annexures. Data is shared.
           </div>
           <div id="benchmark-table-content"></div>
-        </div>
-
-              <div id="view-esign" class="view">
-          <div class="header-row">
-            <div>
-              <div class="page-title">E-Signature Panel</div>
-              <div class="page-sub">Sequential digital signing workflow · 5-level authority hierarchy</div>
-            </div>
-          </div>
-          <div class="notif notif-info" style="margin-bottom:16px">🔐 Signatures are sequential - each authority must
-            complete before the next is notified. Supports DSC, Aadhaar eSign, and OTP-based signing.</div>
-          <div id="sig-list" style="display:flex;flex-direction:column;gap:10px"></div>
         </div>
 
               <div id="view-generate" class="view">

@@ -3025,11 +3025,11 @@ function updateTopBarProjectsDropdown() {
 function getProjectLiveProgressStatus(p) {
   if (!p) return '<span style="color:var(--text-soft)">No project selected</span>';
   const progress = Number(p.progress) || 0;
-  if (p.status === 'Completed') return '<span style="color:var(--green)">OK Fully Approved & Generated</span>';
-  if (progress >= 100) return '<span style="color:var(--teal)">Pending Authority E-Signatures</span>';
-  if (progress > 80) return '<span style="color:var(--saffron)">Finalizing Annexures & Tables</span>';
-  if (progress > 40) return '<span style="color:var(--saffron)">Uploading Chapters & Plates</span>';
-  if (progress > 0) return '<span style="color:var(--primary)">Front Matter & Baseline Data</span>';
+  if (p.status === 'Completed' || progress >= 100) return '<span style="color:var(--green)">OK Fully Approved & Generated</span>';
+  if (progress > 80) return '<span style="color:var(--saffron)">Finalizing DSR Report PDF</span>';
+  if (progress > 50) return '<span style="color:var(--saffron)">Completing Annexures & Tables</span>';
+  if (progress > 20) return '<span style="color:var(--primary)">Uploading Chapters & Plates</span>';
+  if (progress > 10) return '<span style="color:var(--primary)">Front Matter & Baseline Data</span>';
   return '<span style="color:var(--text-soft)">Initial Project Setup</span>';
 }
 function populateWorkflowProjectSelect() {
@@ -3053,6 +3053,8 @@ function renderWorkflowProjectLiveCard() {
       badge.textContent = 'No project selected';
       badge.className = 'badge badge-blue';
     }
+    if (typeof renderWorkflowStepBar === 'function') renderWorkflowStepBar();
+    if (typeof renderWorkflowChecklist === 'function') renderWorkflowChecklist();
     return;
   }
   const progress = Math.max(0, Math.min(100, Number(p.progress) || 0));
@@ -3081,6 +3083,8 @@ function renderWorkflowProjectLiveCard() {
     </div>`;
   if (typeof refreshDistrictBadgesInDOM === 'function') refreshDistrictBadgesInDOM();
   if (window.initLucide) initLucide(card);
+  if (typeof renderWorkflowStepBar === 'function') renderWorkflowStepBar();
+  if (typeof renderWorkflowChecklist === 'function') renderWorkflowChecklist();
 }
 async function selectWorkflowProject(projectId) {
   if (!projectId) {
@@ -12986,15 +12990,53 @@ function renderFinalChecklist() {
 }
 function renderWorkflowChecklist() {
   const el=document.getElementById('workflow-checklist'); if(!el) return;
+  const p = S.activeProject;
+  if (!p) {
+    el.innerHTML = '<div style="font-size:12.5px;color:var(--text-soft);text-align:center;padding:20px 0;">Please select a project above to view workflow completion checklist.</div>';
+    return;
+  }
+  
+  const fmOk = !!(
+    (S.frontMatter && S.frontMatter.preface && S.frontMatter.preface.trim().length > 10 && S.frontMatter.acknowledgement && S.frontMatter.acknowledgement.trim().length > 10) ||
+    (S.uploadedPDFs && (S.uploadedPDFs.cover || S.uploadedPDFs.cert || S.uploadedPDFs.toc || S.uploadedPDFs.pref))
+  );
+
+  const uploadedChaptersCount = S.chapters ? S.chapters.filter(ch => ch.fileName || (S.chapterPDFs && S.chapterPDFs[ch.id]) || (ch.summary && ch.summary.trim().length > 20)).length : 0;
+  const chaptersOk = S.chapters && S.chapters.length >= 10 && uploadedChaptersCount >= S.chapters.length;
+
+  const uploadedPlatesCount = S.plates ? S.plates.filter(pl => pl.fileName).length : 0;
+  const platesOk = S.plates && S.plates.length > 0 && uploadedPlatesCount >= S.plates.length;
+
+  const graphsOk = S.graphs && S.graphs.length > 0;
+
+  const anx1Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx1;
+  const anx2Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx2;
+  const anx3Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx3;
+  const anx4Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx4;
+  const annexuresOk = anx1Ok && anx2Ok && anx3Ok && anx4Ok;
+
+  const hasTableData = (S.annexureB && S.annexureB.length > 0) || 
+                       (S.annexureC && S.annexureC.length > 0) || 
+                       (S.annexureD && S.annexureD.length > 0) || 
+                       (S.annexureE && S.annexureE.length > 0) ||
+                       (S.annexureG && S.annexureG.length > 0) ||
+                       (S.annexureH && S.annexureH.length > 0) ||
+                       (S.annexureI && S.annexureI.length > 0) ||
+                       (S.annexureJ && S.annexureJ.length > 0) ||
+                       (S.auctionData && S.auctionData.length > 0);
+  const tablesOk = hasTableData;
+
+  const pdfOk = !!(S.activeProject && (S.activeProject.finalPdfName || S.activeProject.finalPdfGeneratedAt));
+
   const items=[
     {n:'Project Setup',ok:true,note:'District, year, mineral type'},
-    {n:'Front Matter',ok:true,note:'Cover, preface, acknowledgement'},
-    {n:'All 10 Chapters',ok:S.chapters.length>=10,note:`${S.chapters.length}/10 chapters added`},
-    {n:'Plate Section',ok:S.plates.length>0,note:`${S.plates.length} plates setup`},
-    {n:'Cross Section Graphs',ok:S.graphs.length>0,note:`${S.graphs.length} sections generated`},
-    {n:'Annexures I-IV',ok:true,note:'All 4 annexures filled'},
-    {n:'Data Tables',ok:true,note:'Demand, auction, summary tables'},
-    {n:'E-Signatures',ok:false,note:`${S.signatures.filter(s=>s.signed).length}/5 signed`}
+    {n:'Front Matter',ok:fmOk,note:fmOk ? 'Cover page, preface and acknowledgement completed' : 'Pending cover page, preface or acknowledgement'},
+    {n:'All 10 Chapters',ok:chaptersOk,note:`${uploadedChaptersCount}/10 chapters uploaded/filled`},
+    {n:'Plate Section',ok:platesOk,note:`${uploadedPlatesCount}/&nbsp;${S.plates ? S.plates.length : 2} plates setup`},
+    {n:'Cross Section Graphs',ok:graphsOk,note:graphsOk ? 'Cross sections generated' : 'Pending generation'},
+    {n:'Annexures I-IV',ok:annexuresOk,note:annexuresOk ? 'All 4 annexure PDFs uploaded' : 'Pending Annexure I, II, III or IV PDF upload'},
+    {n:'Data Tables',ok:tablesOk,note:tablesOk ? 'Annexure tables populated' : 'Pending tables input'},
+    {n:'Report PDF Generation',ok:pdfOk,note:pdfOk ? 'Final DSR report generated' : 'Pending final report compilation'}
   ];
   el.innerHTML=items.map(it=>`
     <div style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--border)">
@@ -13004,7 +13046,106 @@ function renderWorkflowChecklist() {
       <div style="flex:1"><div style="font-size:12.5px;font-weight:600;color:var(--text)">${it.n}</div><div style="font-size:10.5px;color:var(--text-soft)">${it.note}</div></div>
       <span class="badge ${it.ok?'badge-green':'badge-amber'}">${it.ok?'Done':'Pending'}</span>
     </div>`).join('');
-  initLucide();
+  if (window.initLucide) initLucide();
+}
+
+function renderWorkflowStepBar() {
+  const el = document.getElementById('workflow-step-bar');
+  if (!el) return;
+  const p = S.activeProject;
+  if (!p) {
+    el.innerHTML = `
+      <div class="step">
+        <div class="step-dot">1</div>
+        <div class="step-lbl">Project Setup</div>
+      </div>
+      <div class="step">
+        <div class="step-dot">2</div>
+        <div class="step-lbl">Front Matter</div>
+      </div>
+      <div class="step">
+        <div class="step-dot">3</div>
+        <div class="step-lbl">Chapters</div>
+      </div>
+      <div class="step">
+        <div class="step-dot">4</div>
+        <div class="step-lbl">Plates</div>
+      </div>
+      <div class="step">
+        <div class="step-dot">5</div>
+        <div class="step-lbl">Annexures</div>
+      </div>
+      <div class="step">
+        <div class="step-dot">6</div>
+        <div class="step-lbl">Tables</div>
+      </div>
+      <div class="step">
+        <div class="step-dot">7</div>
+        <div class="step-lbl">PDF</div>
+      </div>
+    `;
+    return;
+  }
+
+  const step1Done = true;
+  const step2Done = !!(
+    (S.frontMatter && S.frontMatter.preface && S.frontMatter.preface.trim().length > 10 && S.frontMatter.acknowledgement && S.frontMatter.acknowledgement.trim().length > 10) ||
+    (S.uploadedPDFs && (S.uploadedPDFs.cover || S.uploadedPDFs.cert || S.uploadedPDFs.toc || S.uploadedPDFs.pref))
+  );
+  const uploadedChaptersCount = S.chapters ? S.chapters.filter(ch => ch.fileName || (S.chapterPDFs && S.chapterPDFs[ch.id]) || (ch.summary && ch.summary.trim().length > 20)).length : 0;
+  const step3Done = S.chapters && S.chapters.length >= 10 && uploadedChaptersCount >= S.chapters.length;
+  const uploadedPlatesCount = S.plates ? S.plates.filter(pl => pl.fileName).length : 0;
+  const step4Done = S.plates && S.plates.length > 0 && uploadedPlatesCount >= S.plates.length;
+  const anx1Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx1;
+  const anx2Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx2;
+  const anx3Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx3;
+  const anx4Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx4;
+  const step5Done = anx1Ok && anx2Ok && anx3Ok && anx4Ok;
+  const hasTableData = (S.annexureB && S.annexureB.length > 0) || 
+                       (S.annexureC && S.annexureC.length > 0) || 
+                       (S.annexureD && S.annexureD.length > 0) || 
+                       (S.annexureE && S.annexureE.length > 0) ||
+                       (S.annexureG && S.annexureG.length > 0) ||
+                       (S.annexureH && S.annexureH.length > 0) ||
+                       (S.annexureI && S.annexureI.length > 0) ||
+                       (S.annexureJ && S.annexureJ.length > 0) ||
+                       (S.auctionData && S.auctionData.length > 0);
+  const step6Done = hasTableData;
+  const step7Done = !!(S.activeProject && (S.activeProject.finalPdfName || S.activeProject.finalPdfGeneratedAt));
+
+  let activeStep = 1;
+  if (!step1Done) activeStep = 1;
+  else if (!step2Done) activeStep = 2;
+  else if (!step3Done) activeStep = 3;
+  else if (!step4Done) activeStep = 4;
+  else if (!step5Done) activeStep = 5;
+  else if (!step6Done) activeStep = 6;
+  else if (!step7Done) activeStep = 7;
+  else activeStep = 8; // All done
+
+  const steps = [
+    { num: 1, label: 'Project Setup', done: step1Done, labelText: 'OK' },
+    { num: 2, label: 'Front Matter', done: step2Done, labelText: '2' },
+    { num: 3, label: 'Chapters', done: step3Done, labelText: '3' },
+    { num: 4, label: 'Plates', done: step4Done, labelText: '4' },
+    { num: 5, label: 'Annexures', done: step5Done, labelText: '5' },
+    { num: 6, label: 'Tables', done: step6Done, labelText: '6' },
+    { num: 7, label: 'PDF', done: step7Done, labelText: '7' }
+  ];
+
+  el.innerHTML = steps.map(s => {
+    let classes = 'step';
+    if (s.done) classes += ' done';
+    if (s.num === activeStep) classes += ' active';
+    const dotText = s.done ? 'OK' : s.labelText;
+    return `
+      <div class="${classes}">
+        <div class="step-dot">${dotText}</div>
+        <div class="step-lbl">${s.label}</div>
+      </div>
+    `;
+  }).join('');
+  if (window.initLucide) initLucide();
 }
 
 ;
@@ -16851,7 +16992,7 @@ const PORTAL_I18N = {
     navContact: 'Contact',
     searchPlaceholder: 'Search portal...',
     noticeLabel: 'Notice',
-    noticeText: 'DSR submissions for Punjab districts 2025-26 are now open - Deadline: 30 September 2026 - New: Digital E-Sign integration live for all districts - EMGSM 2020 compliance mandatory',
+    noticeText: 'DSR submissions for Punjab districts 2025-26 are now open - Deadline: 30 September 2026 - EMGSM 2020 compliance mandatory',
     langEnglish: 'English',
     langHindi: 'Hindi',
     langPunjabi: 'Punjabi'
@@ -16873,7 +17014,7 @@ const PORTAL_I18N = {
     navContact: 'संपर्क',
     searchPlaceholder: 'पोर्टल खोजें...',
     noticeLabel: 'सूचना',
-    noticeText: 'पंजाब जिलों के लिए DSR जमा करना 2025-26 के लिए खुला है - अंतिम तिथि: 30 सितंबर 2026 - नया: सभी जिलों के लिए डिजिटल ई-साइन लाइव - EMGSM 2020 अनुपालन अनिवार्य',
+    noticeText: 'पंजाब जिलों के लिए DSR जमा करना 2025-26 के लिए खुला है - अंतिम तिथि: 30 सितंबर 2026 - EMGSM 2020 अनुपालन अनिवार्य',
     langEnglish: 'अंग्रेजी',
     langHindi: 'हिंदी',
     langPunjabi: 'पंजाबी'
@@ -16895,7 +17036,7 @@ const PORTAL_I18N = {
     navContact: 'ਸੰਪਰਕ',
     searchPlaceholder: 'ਪੋਰਟਲ ਖੋਜੋ...',
     noticeLabel: 'ਸੂਚਨਾ',
-    noticeText: 'ਪੰਜਾਬ ਦੇ ਜ਼ਿਲ੍ਹਿਆਂ ਲਈ DSR ਜਮ੍ਹਾਂ 2025-26 ਲਈ ਖੁੱਲ੍ਹੇ ਹਨ - ਆਖਰੀ ਤਾਰੀਖ: 30 ਸਤੰਬਰ 2026 - ਨਵਾਂ: ਸਾਰੇ ਜ਼ਿਲ੍ਹਿਆਂ ਲਈ ਡਿਜ਼ਿਟਲ ਈ-ਸਾਈਨ ਲਾਈਵ - EMGSM 2020 ਦੀ ਪਾਲਣਾ ਲਾਜ਼ਮੀ',
+    noticeText: 'ਪੰਜਾਬ ਦੇ ਜ਼ਿਲ੍ਹਿਆਂ ਲਈ DSR ਜਮ੍ਹਾਂ 2025-26 ਲਈ ਖੁੱਲ੍ਹੇ ਹਨ - ਆਖਰੀ ਤਾਰੀਖ: 30 ਸਤੰਬਰ 2026 - EMGSM 2020 ਦੀ ਪਾਲਣਾ ਲਾਜ਼ਮੀ',
     langEnglish: 'ਅੰਗਰੇਜ਼ੀ',
     langHindi: 'ਹਿੰਦੀ',
     langPunjabi: 'ਪੰਜਾਬੀ'
@@ -17357,38 +17498,67 @@ document.addEventListener('DOMContentLoaded', () => {
 ;
 function calculateProjectProgress(state) {
   let progress = 0;
-  if (state.frontMatter) {
-    let fmScore = 0;
-    if (state.frontMatter.title && state.frontMatter.title !== 'District Survey Report for Sand Mining') fmScore += 1;
-    if (state.frontMatter.district && state.frontMatter.district !== 'Jalandhar') fmScore += 1;
-    if (state.frontMatter.state && state.frontMatter.state !== 'Punjab') fmScore += 1;
-    if (state.frontMatter.preface && state.frontMatter.preface.trim().length > 5) fmScore += 1;
-    if (state.frontMatter.acknowledgement && state.frontMatter.acknowledgement.trim().length > 5) fmScore += 1;
-    progress += fmScore;
+
+  // Step 1: Project Setup (always done if project loaded)
+  progress += 10;
+
+  // Step 2: Front Matter (15%)
+  const fmOk = !!(
+    (state.frontMatter && state.frontMatter.preface && state.frontMatter.preface.trim().length > 10 && state.frontMatter.acknowledgement && state.frontMatter.acknowledgement.trim().length > 10) ||
+    (state.uploadedPDFs && (state.uploadedPDFs.cover || state.uploadedPDFs.cert || state.uploadedPDFs.toc || state.uploadedPDFs.pref))
+  );
+  if (fmOk) {
+    progress += 15;
+  } else {
+    if (state.frontMatter && (state.frontMatter.preface || state.frontMatter.acknowledgement)) {
+      progress += 5;
+    }
   }
-  if (state.frontMatterFiles) {
-    progress += Math.min(5, Object.keys(state.frontMatterFiles).length * 2);
+
+  // Step 3: Chapters (20%)
+  if (state.chapters && state.chapters.length > 0) {
+    const uploadedChaptersCount = state.chapters.filter(ch => ch.fileName || (state.chapterPDFs && state.chapterPDFs[ch.id]) || (ch.summary && ch.summary.trim().length > 20)).length;
+    progress += Math.min(20, uploadedChaptersCount * 2);
   }
-  let chapterCount = 0;
-  if (state.chapters) {
-    chapterCount += Object.values(state.chapters).filter(c => c && typeof c === 'string' && c.trim() && c.length > 20).length;
+
+  // Step 4: Plates (15%)
+  if (state.plates && state.plates.length > 0) {
+    const uploadedPlatesCount = state.plates.filter(p => p.fileName).length;
+    progress += Math.min(15, Math.floor((uploadedPlatesCount / state.plates.length) * 15));
   }
-  if (state.chapterPDFs) {
-    chapterCount += Object.keys(state.chapterPDFs).length;
-  }
-  progress += Math.min(30, chapterCount * 3);
-  if (state.plates && state.plates.length > 0) progress += 5;
-  if (state.graphs && state.graphs.length > 0) progress += 5;
+
+  // Step 5: Annexures (20%)
+  let annexureCount = 0;
   if (state.uploadedPDFs) {
-    const types = Object.keys(state.uploadedPDFs);
-    progress += Math.min(30, types.length * 5);
+    if (state.uploadedPDFs.anx1) annexureCount++;
+    if (state.uploadedPDFs.anx2) annexureCount++;
+    if (state.uploadedPDFs.anx3) annexureCount++;
+    if (state.uploadedPDFs.anx4) annexureCount++;
   }
-  const hasAdditional = state.annexureB || state.annexureC || state.annexureD || state.annexureE;
-  if (hasAdditional && Object.keys(hasAdditional).length > 0) progress += 10;
-  if (state.signatures) {
-    const signedCount = state.signatures.filter(s => s.signed).length;
-    progress += Math.min(10, signedCount * 2);
+  progress += annexureCount * 5;
+
+  // Step 6: Tables (10%)
+  const hasTableData = (state.annexureB && state.annexureB.length > 0) || 
+                       (state.annexureC && state.annexureC.length > 0) || 
+                       (state.annexureD && state.annexureD.length > 0) || 
+                       (state.annexureE && state.annexureE.length > 0) ||
+                       (state.annexureG && state.annexureG.length > 0) ||
+                       (state.annexureH && state.annexureH.length > 0) ||
+                       (state.annexureI && state.annexureI.length > 0) ||
+                       (state.annexureJ && state.annexureJ.length > 0) ||
+                       (state.auctionData && state.auctionData.length > 0);
+  if (hasTableData) {
+    progress += 10;
   }
+
+  // Step 7: PDF (10%)
+  const hasPdf = !!(state.finalPdfName || state.finalPdfGeneratedAt);
+  if (hasPdf) {
+    progress += 10;
+  }
+
+  return Math.min(100, Math.floor(progress));
+}
   return Math.min(100, Math.floor(progress));
 }
 

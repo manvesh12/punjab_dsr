@@ -1420,21 +1420,24 @@ html.dark .form-card:hover {
   border: 2px solid var(--border) !important;
 }
 .step.done .step-dot {
-  background: var(--p-accent-gold) !important;
-  border-color: var(--p-accent-gold) !important;
+  background: var(--green) !important;
+  border-color: var(--green) !important;
   color: #fff !important;
-  box-shadow: 0 0 0 4px var(--p-accent-gold-lt) !important;
+  box-shadow: 0 0 0 4px var(--green-lt) !important;
 }
 .step.active .step-dot {
-  background: var(--card) !important;
-  border-color: var(--p-accent) !important;
-  color: var(--p-accent) !important;
-  box-shadow: 0 0 0 4px var(--primary-lt) !important;
+  background: var(--p-accent-gold) !important;
+  border-color: var(--p-accent-gold) !important;
+  color: #17324D !important;
+  font-weight: 800 !important;
+  box-shadow: 0 0 0 4px var(--p-accent-gold-lt) !important;
 }
 html.dark .step.active .step-dot {
-  border-color: #2ecc71 !important;
-  color: #2ecc71 !important;
-  box-shadow: 0 0 0 4px var(--primary-lt) !important;
+  background: var(--p-accent-gold) !important;
+  border-color: var(--p-accent-gold) !important;
+  color: #17324D !important;
+  font-weight: 800 !important;
+  box-shadow: 0 0 0 4px var(--p-accent-gold-lt) !important;
 }
 .tl-dot.done {
   background: var(--p-accent-gold-lt) !important;
