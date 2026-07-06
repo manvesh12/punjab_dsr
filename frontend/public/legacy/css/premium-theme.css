@@ -2472,13 +2472,13 @@ html.dark .reviewer-notes-footer {
   }
 }
 
-/* Global app chrome adjustment: lift the full topbar/notice stack slightly. */
+/* Global app chrome adjustment: lift the full topbar/notice stack clear of page content. */
 body:not(.view-dashboard-active):not(.view-projects-active) .topbar.dash-global-topbar {
-  top: -4px !important;
+  top: -18px !important;
 }
 
 body.sidebar-hidden:not(.view-dashboard-active):not(.view-projects-active) .topbar.dash-global-topbar {
-  top: -4px !important;
+  top: -18px !important;
 }
 
 /* Fix blurry search placeholder */
