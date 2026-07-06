@@ -1012,6 +1012,89 @@ function renderCustomReportGenerator(container, report) {
 
 // Debouncer for rendering preview to fix lagging/freezing
 let previewTimeout = null;
+let previewRenderToken = 0;
+
+function buildReplenishmentPreviewSrcdoc(reportName, pageImages) {
+  const pagesHtml = pageImages.map((src, index) => `
+    <figure class="repl-preview-page">
+      <img src="${src}" alt="Page ${index + 1}">
+    </figure>
+  `).join('');
+
+  return `<!doctype html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+          * { box-sizing: border-box; }
+          html, body { margin: 0; min-height: 100%; }
+          body {
+            background: #e2e8f0;
+            color: #0f172a;
+            font-family: Arial, Helvetica, sans-serif;
+            padding: 18px;
+          }
+          .repl-preview-title {
+            max-width: 820px;
+            margin: 0 auto 12px;
+            color: #334155;
+            font-size: 12px;
+            font-weight: 700;
+          }
+          .repl-preview-page {
+            width: min(100%, 820px);
+            margin: 0 auto 18px;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
+          }
+          .repl-preview-page img {
+            display: block;
+            width: 100%;
+            height: auto;
+          }
+          @media (max-width: 700px) {
+            body { padding: 10px; }
+            .repl-preview-page { margin-bottom: 12px; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="repl-preview-title">${escapeHtml(reportName)} - ${pageImages.length} page${pageImages.length === 1 ? '' : 's'}</div>
+        ${pagesHtml}
+      </body>
+    </html>`;
+}
+
+async function renderReplenishmentPdfBlobToImages(blob) {
+  if (!blob) return [];
+  if (typeof ensurePortalVendors === 'function') {
+    await ensurePortalVendors(['pdfjs']);
+  }
+  if (!window.pdfjsLib) {
+    throw new Error('PDF.js is not available for live preview rendering.');
+  }
+  if (!window.pdfjsLib.GlobalWorkerOptions.workerSrc) {
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.16.105/build/pdf.worker.min.js';
+  }
+
+  const data = new Uint8Array(await blob.arrayBuffer());
+  const pdf = await window.pdfjsLib.getDocument({ data }).promise;
+  const pages = [];
+  for (let pageNo = 1; pageNo <= pdf.numPages; pageNo += 1) {
+    const page = await pdf.getPage(pageNo);
+    const viewport = page.getViewport({ scale: 1.45 });
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    await page.render({ canvasContext: ctx, viewport }).promise;
+    pages.push(canvas.toDataURL('image/jpeg', 0.9));
+  }
+  return pages;
+}
+
 function updateCustomReportPreview(reportName, reportId) {
   if (previewTimeout) {
     clearTimeout(previewTimeout);
@@ -1022,6 +1105,7 @@ function updateCustomReportPreview(reportName, reportId) {
 }
 
 async function realUpdateCustomReportPreview(reportName, reportId) {
+  const renderToken = ++previewRenderToken;
   const checkboxes = document.querySelectorAll('input[id^="chk-"]:checked');
   const checkedIds = Array.from(checkboxes).map(c => c.value);
   
@@ -1089,13 +1173,16 @@ async function realUpdateCustomReportPreview(reportName, reportId) {
   try {
     const blob = await generateReplenishmentPdfBlob(reportName, checkedIds, reportId);
     if (blob) {
+      if (renderToken !== previewRenderToken) return;
       if (window.activeReplenishmentPdfBlobUrl) {
         try { URL.revokeObjectURL(window.activeReplenishmentPdfBlobUrl); } catch (_) {}
       }
-      window.activeReplenishmentPdfBlobUrl = URL.createObjectURL(blob);
       const newIframe = iframe.cloneNode(true);
-      newIframe.removeAttribute('srcdoc');
-      newIframe.src = `${window.activeReplenishmentPdfBlobUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`;
+      newIframe.removeAttribute('src');
+      window.activeReplenishmentPdfBlobUrl = null;
+      const pageImages = await renderReplenishmentPdfBlobToImages(blob);
+      if (renderToken !== previewRenderToken) return;
+      newIframe.srcdoc = buildReplenishmentPreviewSrcdoc(reportName, pageImages);
       iframe.parentNode.replaceChild(newIframe, iframe);
     }
   } catch (err) {
@@ -1321,28 +1408,6 @@ function compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds, repor
               <h2 class="section-title">Table of Contents</h2>
               ${uploaded.map(src => `<img src="${src}" style="max-width:100%; height:auto; display:block; margin:0 auto 10px;">`).join('')}
             </div>`;
-          } else {
-            subHtml = `
-              <div style="margin-bottom: 40px; page-break-after:always;">
-                <h2 class="section-title">Table of Contents</h2>
-                <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 20px;">
-                  <thead>
-                    <tr style="border-bottom: 2px solid #17324d; background: #f8fafc;">
-                      <th style="padding: 10px; text-align: left;">S.No.</th>
-                      <th style="padding: 10px; text-align: left;">Section Description</th>
-                      <th style="padding: 10px; text-align: right;">Page Reference</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 8px 10px;">1</td><td style="padding: 8px 10px; font-weight: bold;">Front Matter</td><td style="padding: 8px 10px; text-align: right;">i-v</td></tr>
-                    <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 8px 10px;">2</td><td style="padding: 8px 10px; font-weight: bold;">Report Chapters Outline</td><td style="padding: 8px 10px; text-align: right;">1-45</td></tr>
-                    <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 8px 10px;">3</td><td style="padding: 8px 10px; font-weight: bold;">Plate Section</td><td style="padding: 8px 10px; text-align: right;">46-55</td></tr>
-                    <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 8px 10px;">4</td><td style="padding: 8px 10px; font-weight: bold;">Cross Section Elevation Graphs</td><td style="padding: 8px 10px; text-align: right;">56-62</td></tr>
-                    <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 8px 10px;">5</td><td style="padding: 8px 10px; font-weight: bold;">Annexures (I to VII & B to K)</td><td style="padding: 8px 10px; text-align: right;">63-120</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            `;
           }
         } 
         else if (subId === 'fm-lot') {
@@ -1413,7 +1478,9 @@ function compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds, repor
           `;
         }
         
-        combinedContent += `<div class="section-block">${subHtml}</div>`;
+        if (subHtml && subHtml.trim()) {
+          combinedContent += `<div class="section-block">${subHtml}</div>`;
+        }
       });
     }
     else if (item.id === 'chapters') {
@@ -2483,9 +2550,6 @@ async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
             const tocPages = window.pdfPreview ? window.pdfPreview.getFrontMatterPages().filter(p => /^content/i.test(p.label)) : [];
             if (tocPages.length > 0) {
               tocPages.forEach(p => addImagePage(p.src, 'Table of Contents'));
-            } else {
-              const tocText = '1. Front Matter....................................................................................i\n2. Chapters Outline...............................................................................1\n3. Plate Section...................................................................................46\n4. Cross Section Graphs...........................................................................56\n5. Annexures Reference Data.....................................................................63';
-              addImagePage(localRenderTextPageCanvas('TABLE OF CONTENTS', tocText, 'District Survey Report'), 'Table of Contents');
             }
           } else if (subId === 'fm-pref') {
             const prefPages = window.pdfPreview ? window.pdfPreview.getFrontMatterPages().filter(p => /^preface/i.test(p.label)) : [];
