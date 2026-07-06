@@ -13041,7 +13041,7 @@ function renderFinalChecklist() {
   if (countEl) countEl.textContent = S.activeProject?.finalPdfPages || `~${(S.chapters.length * 4) + (S.plates.length * 1) + 32} estimated`;
   const resultBox = document.getElementById('final-pdf-result');
   if (resultBox) resultBox.style.display = S.activeProject?.finalPdfName ? 'block' : 'none';
-  const warningBox = document.getElementById('final-pdf-warnings');
+  const warningBox = null;
   if (warningBox && S.activeProject?.finalPdfName) warningBox.style.display = 'none';
   if (typeof updateFinalPdfAdminUI === 'function') updateFinalPdfAdminUI();
   initLucide();
@@ -13458,7 +13458,7 @@ async function generateFinalPDF(regenerate = false) {
   const progressLabel = document.getElementById('final-pdf-progress-label');
   const progressPct = document.getElementById('final-pdf-progress-pct');
   const progressBar = document.getElementById('final-pdf-progress-bar');
-  const warningBox = document.getElementById('final-pdf-warnings');
+  const warningBox = null;
   const resultBox = document.getElementById('final-pdf-result');
   const generateBtn = document.getElementById('final-pdf-generate-btn');
   const setProgress = (label, pct) => {
@@ -13488,8 +13488,7 @@ async function generateFinalPDF(regenerate = false) {
     if (typeof persistProjectState === 'function') {
       await persistProjectState();
     }
-    const warnings = validateFinalPdfInputs();
-    showWarnings(warnings);
+    const warnings = [];
     setProgress('Building PDF...', 28);
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -14505,7 +14504,6 @@ async function generateFinalPDF(regenerate = false) {
     if (previewContainer && window.finalDsrPdfBlobUrl) {
       previewContainer.innerHTML = `<iframe title="Final DSR PDF Live Preview" src="${window.finalDsrPdfBlobUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH" style="width:100%;height:800px;border:none;border-radius:6px;background:#fff;"></iframe>`;
     }
-    showWarnings(warnings);
     if (typeof initLucide === 'function') initLucide();
     toast(`${regenerate ? 'Regenerated' : 'Generated'} final DSR PDF: ${fileName}`, 'success');
   } catch (err) {
@@ -14544,7 +14542,7 @@ function canAccessFinalDsrPdf() {
   return true;
 }
 function showFinalPdfAccessDenied() {
-  const message = 'Access Denied - Only Administrators can download or email the Final DSR PDF.';
+  const message = 'Access Denied - Only Administrators can download the Final DSR PDF.';
   if (typeof toast === 'function') toast(message, 'error');
   else alert(message);
 }

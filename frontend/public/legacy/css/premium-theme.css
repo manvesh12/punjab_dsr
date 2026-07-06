@@ -4866,3 +4866,7 @@ html.dark .reviewer-notes-footer {
     right: 12px;
     bottom: 12px;
   }
+/* Generate PDF screen: remove the decorative live-preview box and keep options full-width. */
+.final-pdf-layout > div:nth-child(2) {
+  display: none !important;
+}

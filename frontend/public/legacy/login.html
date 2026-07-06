@@ -2672,7 +2672,7 @@
               <div class="step-lbl">E-Sign</div>
             </div>
           </div>
-          <div class="g2">
+          <div class="g2 final-pdf-layout" style="grid-template-columns:minmax(0, 860px);max-width:900px;">
             <div class="card">
               <div class="card-hd">
                 <div class="card-title">Section Completion Status</div>
@@ -5328,7 +5328,7 @@
                 </div>
                 <div class="card-bd">
                   <div id="final-pdf-admin-lock" style="display:none;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--off);padding:14px;margin-bottom:14px;color:var(--text-soft);font-size:12.5px;font-weight:600;">
-                    Access Denied - Only Administrators can download or email the Final DSR PDF.
+                    Access Denied - Only Administrators can download the Final DSR PDF.
                   </div>
                   <div class="field-group">
                     <div class="field-row">
@@ -5358,14 +5358,12 @@
                     <div style="height:7px;border-radius:999px;background:var(--border);overflow:hidden;">
                       <div id="final-pdf-progress-bar" style="height:100%;width:0%;background:var(--saffron);transition:width .22s ease;"></div>
                     </div>
-                    <div id="final-pdf-warnings" style="display:none;margin-top:10px;font-size:11px;color:var(--amber);line-height:1.45;"></div>
                   </div>
                   <div id="final-pdf-result" style="display:none;margin-top:14px;border:1px solid var(--green);background:var(--green-lt);border-radius:var(--r-sm);padding:12px;">
                     <div style="font-size:12.5px;font-weight:700;color:var(--green);margin-bottom:8px;">Final DSR PDF generated successfully.</div>
                     <div style="display:flex;gap:8px;flex-wrap:wrap;">
                       <button class="btn btn-outline btn-sm final-pdf-admin-action" onclick="previewFinalPDF()"><i data-lucide="eye" style="width:13px;height:13px;"></i> Preview PDF</button>
                       <button class="btn btn-navy btn-sm final-pdf-admin-action" onclick="downloadFinalPDF()"><i data-lucide="download" style="width:13px;height:13px;"></i> Download PDF</button>
-                      <button class="btn btn-teal btn-sm final-pdf-admin-action" onclick="emailFinalPDF()"><i data-lucide="mail" style="width:13px;height:13px;"></i> Email PDF</button>
                       <button class="btn btn-saffron btn-sm final-pdf-admin-action" onclick="generateFinalPDF(true)"><i data-lucide="refresh-cw" style="width:13px;height:13px;"></i> Regenerate PDF</button>
                     </div>
                   </div>
