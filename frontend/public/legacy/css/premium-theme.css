@@ -4901,8 +4901,6 @@ body:not(.view-dashboard-active):not(.view-projects-active) #sidebar .sb-nav[sty
 @media (min-width: 1024px) {
   body:not(.view-dashboard-active):not(.view-projects-active) {
     --project-topbar-h: 292px !important;
-    --project-zoom-comp: 1.205 !important;
-    --project-visual-w: calc(100vw * var(--project-zoom-comp)) !important;
   }
 
   body:not(.view-dashboard-active):not(.view-projects-active) .topbar.dash-global-topbar {
@@ -4913,9 +4911,8 @@ body:not(.view-dashboard-active):not(.view-projects-active) #sidebar .sb-nav[sty
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
-    right: auto !important;
-    width: var(--project-visual-w) !important;
-    max-width: none !important;
+    right: 0 !important;
+    width: 100% !important;
     height: var(--project-topbar-h) !important;
     min-height: var(--project-topbar-h) !important;
     max-height: var(--project-topbar-h) !important;
@@ -5037,7 +5034,7 @@ body:not(.view-dashboard-active):not(.view-projects-active) #sidebar .sb-nav[sty
   body:not(.view-dashboard-active):not(.view-projects-active) #sidebar[style] {
     top: var(--project-topbar-h) !important;
     bottom: 0 !important;
-    height: calc((100vh * var(--project-zoom-comp)) - var(--project-topbar-h)) !important;
+    height: auto !important;
     max-height: none !important;
     z-index: 650 !important;
   }
@@ -5064,17 +5061,14 @@ body:not(.view-dashboard-active):not(.view-projects-active) #sidebar .sb-nav[sty
   body:not(.view-dashboard-active):not(.view-projects-active) .app-workspace.preview-open {
     margin-left: var(--sidebar-w) !important;
     padding-top: var(--project-topbar-h) !important;
-    width: calc(var(--project-visual-w) - var(--sidebar-w)) !important;
-    max-width: none !important;
     min-height: calc(100vh - var(--project-topbar-h)) !important;
-    grid-template-columns: minmax(0, 1fr) minmax(520px, clamp(620px, 34vw, 760px)) !important;
+    grid-template-columns: minmax(0, 1fr) clamp(520px, 32vw, 720px) !important;
     align-items: start !important;
   }
 
   body.sidebar-hidden:not(.view-dashboard-active):not(.view-projects-active) .app-workspace,
   body.sidebar-hidden.preview-open:not(.view-dashboard-active):not(.view-projects-active) .app-workspace {
     margin-left: 0 !important;
-    width: var(--project-visual-w) !important;
   }
 
   body:not(.view-dashboard-active):not(.view-projects-active) .main-content {
@@ -5099,9 +5093,7 @@ body:not(.view-dashboard-active):not(.view-projects-active) #sidebar .sb-nav[sty
     max-height: calc(100vh - var(--project-topbar-h) - 24px) !important;
     min-height: 440px !important;
     align-self: start !important;
-    margin: 12px 24px 18px 0 !important;
-    width: auto !important;
-    max-width: none !important;
+    margin: 12px 18px 18px 0 !important;
     z-index: 2 !important;
   }
 
