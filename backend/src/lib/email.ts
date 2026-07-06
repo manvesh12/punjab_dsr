@@ -22,7 +22,7 @@ function getSmtpTransporter() {
     greetingTimeout: 10000,  // 10 seconds
     socketTimeout: 15000,     // 15 seconds
     family: 4,                // Force IPv4 to resolve Render IPv6 issues
-  });
+  } as any);
 }
 
 async function sendEmailViaBrevo(to: string, subject: string, text: string, html: string) {
