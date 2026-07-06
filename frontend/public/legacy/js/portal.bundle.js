@@ -1,7 +1,7 @@
 
 /* js/api.js */
 var API_BASE_URL = (() => {
-    if (!window.location || window.location.protocol === 'file:') return 'http://localhost:8081/api';
+    if (!window.location || window.location.protocol === 'file:') return 'http://localhost:8080/api';
     return `${window.location.origin}/api`;
 })();
 async function apiFetch(endpoint, options = {}) {
@@ -17557,8 +17557,6 @@ function calculateProjectProgress(state) {
     progress += 10;
   }
 
-  return Math.min(100, Math.floor(progress));
-}
   return Math.min(100, Math.floor(progress));
 }
 
