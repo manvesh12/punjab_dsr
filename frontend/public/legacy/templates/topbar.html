@@ -15,7 +15,7 @@
   <div class="dash-gov-utility-strip">
     <div class="dash-gov-left">
       <span class="dash-badge-in">IN</span>
-      <span style="font-weight: 700; color: #E2E8F0;">Government of Punjab | DSR Portal</span>
+      <span style="font-weight: 700; color: #E2E8F0;">Government of Punjab | W375-61487</span>
     </div>
     <div class="dash-gov-right">
       <button class="dash-lang-btn" data-lang="en" onclick="applyPortalLanguage('en')">English</button>
@@ -50,6 +50,9 @@
       </div>
     </div>
     <div class="dash-brand-right">
+      <button class="dash-gov-badge dash-badge-emgsm" onclick="showView('workflow', null)" style="margin-right: 12px; cursor: pointer; border: 1px solid #A7F3D0; background: #EBFDF5; color: #047857;">
+        <i data-lucide="leaf" style="width:13px; height:13px;"></i> EMGSM 2020
+      </button>
 
       <div class="tb-nav-dropdown">
         <button type="button" class="dash-action-icon-btn" onclick="toggleNotificationDropdown()" title="Notifications" aria-label="Notifications">
@@ -104,6 +107,11 @@
       <li class="dash-menu-link-item">
         <button class="tb-sub-nav-btn" onclick="showView('workflow', this)">
           <i data-lucide="activity" style="width:15px; height:15px; opacity:0.8;"></i> <span data-i18n="navWorkflow">Workflow</span>
+        </button>
+      </li>
+      <li class="dash-menu-link-item" id="tb-nav-audit-logs" style="display:none">
+        <button class="tb-sub-nav-btn" onclick="showView('audit-logs', this)">
+          <i data-lucide="clipboard-list" style="width:15px; height:15px; opacity:0.8;"></i> <span data-i18n="navAudit">Audit Logs</span>
         </button>
       </li>
 

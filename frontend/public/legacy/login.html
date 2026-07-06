@@ -14,8 +14,8 @@
   <link
     href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=repl-model-dsr-backend-20260707-v3">
-  <link rel="stylesheet" href="css/premium-theme.css?v=repl-model-dsr-backend-20260707-v3">
+  <link rel="stylesheet" href="css/styles.css?v=repl-model-dsr-backend-20260707-v4">
+  <link rel="stylesheet" href="css/premium-theme.css?v=repl-model-dsr-backend-20260707-v4">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script defer src="https://cdn.jsdelivr.net/npm/lucide@0.363.0/dist/umd/lucide.min.js"></script>
@@ -409,7 +409,7 @@
   <div class="dash-gov-utility-strip">
     <div class="dash-gov-left">
       <span class="dash-badge-in">IN</span>
-      <span style="font-weight: 700; color: #E2E8F0;">Government of Punjab | DSR Portal</span>
+      <span style="font-weight: 700; color: #E2E8F0;">Government of Punjab | W375-61487</span>
     </div>
     <div class="dash-gov-right">
       <button class="dash-lang-btn" data-lang="en" onclick="applyPortalLanguage('en')">English</button>
@@ -444,6 +444,9 @@
       </div>
     </div>
     <div class="dash-brand-right">
+      <button class="dash-gov-badge dash-badge-emgsm" onclick="showView('workflow', null)" style="margin-right: 12px; cursor: pointer; border: 1px solid #A7F3D0; background: #EBFDF5; color: #047857;">
+        <i data-lucide="leaf" style="width:13px; height:13px;"></i> EMGSM 2020
+      </button>
 
       <div class="tb-nav-dropdown">
         <button type="button" class="dash-action-icon-btn" onclick="toggleNotificationDropdown()" title="Notifications" aria-label="Notifications">
@@ -498,6 +501,11 @@
       <li class="dash-menu-link-item">
         <button class="tb-sub-nav-btn" onclick="showView('workflow', this)">
           <i data-lucide="activity" style="width:15px; height:15px; opacity:0.8;"></i> <span data-i18n="navWorkflow">Workflow</span>
+        </button>
+      </li>
+      <li class="dash-menu-link-item" id="tb-nav-audit-logs" style="display:none">
+        <button class="tb-sub-nav-btn" onclick="showView('audit-logs', this)">
+          <i data-lucide="clipboard-list" style="width:15px; height:15px; opacity:0.8;"></i> <span data-i18n="navAudit">Audit Logs</span>
         </button>
       </li>
 
@@ -2270,7 +2278,7 @@
             <div class="dash-gov-utility-strip">
               <div class="dash-gov-left">
                 <span class="dash-badge-in">IN</span>
-                <span style="font-weight: 700; color: #E2E8F0;">Government of Punjab | DSR Portal</span>
+                <span style="font-weight: 700; color: #E2E8F0;">Government of Punjab | W375-61487</span>
               </div>
               <div class="dash-gov-right">
                 <button class="dash-lang-btn" data-lang="en" onclick="applyPortalLanguage('en')">English</button>
@@ -6040,7 +6048,7 @@
 
   <div class="toast" id="toast"></div>
 
-<script defer src="js/portal.bundle.js?v=repl-model-dsr-backend-20260707-v3"></script>
+<script defer src="js/portal.bundle.js?v=repl-model-dsr-backend-20260707-v4"></script>
 <script defer src="js/model-dsr-module.js?v=12"></script>
 <script defer src="js/replenishment-module.js?v=24"></script>
 <script>
