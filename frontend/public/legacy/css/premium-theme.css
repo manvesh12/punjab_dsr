@@ -5816,15 +5816,15 @@ body.view-projects-active .topbar.dash-global-topbar {
 }
 
 /* Final portal topbar edge fix.
-   Desktop app zoom makes a fixed 100vw header render short; 121vw compensates
-   the 0.83 zoom and removes the visible blank strip on the right. */
+   Keep the fixed portal header painted past the viewport edge so browser zoom
+   and scrollbar rounding never leave a blank strip on the right. */
 @media (min-width: 1024px) {
   .topbar.dash-global-topbar {
     left: 0 !important;
-    right: 0 !important;
-    width: 100% !important;
-    min-width: 100% !important;
-    max-width: 100% !important;
+    right: auto !important;
+    width: calc(100vw + 32px) !important;
+    min-width: calc(100vw + 32px) !important;
+    max-width: none !important;
   }
 
   .dash-global-topbar .dash-switcher-bar,
@@ -5833,6 +5833,7 @@ body.view-projects-active .topbar.dash-global-topbar {
   .dash-global-topbar .dash-gov-menu-bar,
   .dash-global-topbar .dash-gov-notice-ticker {
     width: 100% !important;
+    min-width: 100% !important;
     max-width: none !important;
     box-sizing: border-box !important;
   }
