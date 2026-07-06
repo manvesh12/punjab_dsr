@@ -5905,3 +5905,22 @@ html, body, #screen-app {
   max-width: 100% !important;
   min-width: 100% !important;
 }
+
+@media (min-width: 1024px) {
+  .topbar.dash-global-topbar {
+    left: 0 !important;
+    right: auto !important;
+    width: 122vw !important;
+    min-width: 122vw !important;
+    max-width: none !important;
+  }
+
+  .dash-global-topbar .dash-gov-utility-strip,
+  .dash-global-topbar .dash-gov-brand-row,
+  .dash-global-topbar .dash-gov-menu-bar,
+  .dash-global-topbar .dash-gov-notice-ticker {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: none !important;
+  }
+}
