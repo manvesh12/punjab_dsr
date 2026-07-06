@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smart-dsr-cache-v2-annex-fjk';
+const CACHE_NAME = 'smart-dsr-cache-v3-annex-fjk-reorder';
 const urlsToCache = [
   './login.html',
   './css/styles.css',
