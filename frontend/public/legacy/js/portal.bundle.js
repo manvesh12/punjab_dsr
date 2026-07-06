@@ -2200,8 +2200,8 @@ function fmtN(v, dec = 2) {
 /* ── District Management System ── */
 const DISTRICT_COLORS = {
   'Jalandhar': {
-    light: { bg: 'rgba(79, 70, 229, 0.15)', border: '#4F46E5', text: '#3730a3', glow: 'rgba(79, 70, 229, 0.25)' },
-    dark: { bg: 'rgba(99, 102, 241, 0.25)', border: '#818cf8', text: '#e0e7ff', glow: 'rgba(129, 140, 248, 0.4)' }
+    light: { bg: 'rgba(234, 88, 12, 0.15)', border: '#EA580C', text: '#9a3412', glow: 'rgba(234, 88, 12, 0.25)' },
+    dark: { bg: 'rgba(249, 115, 22, 0.25)', border: '#fb923c', text: '#fff7ed', glow: 'rgba(251, 146, 60, 0.4)' }
   },
   'Ludhiana': {
     light: { bg: 'rgba(6, 182, 212, 0.15)', border: '#0891b2', text: '#155e75', glow: 'rgba(6, 182, 212, 0.25)' },
@@ -13041,22 +13041,32 @@ function renderWorkflowChecklist() {
 
   const pdfOk = !!(S.activeProject && (S.activeProject.finalPdfName || S.activeProject.finalPdfGeneratedAt));
 
+  // Sequential locked conditions
+  const setupOk = true;
+  const step2Done = setupOk && fmOk;
+  const step3Done = step2Done && chaptersOk;
+  const step4Done = step3Done && platesOk;
+  const graphsDone = step4Done && graphsOk;
+  const step5Done = graphsDone && annexuresOk;
+  const step6Done = step5Done && tablesOk;
+  const step7Done = step6Done && pdfOk;
+
   const items=[
-    {n:'Project Setup',ok:true,note:'District, year, mineral type'},
-    {n:'Front Matter',ok:fmOk,note:fmOk ? 'Cover page, preface and acknowledgement completed' : 'Pending cover page, preface or acknowledgement'},
-    {n:'All 10 Chapters',ok:chaptersOk,note:`${uploadedChaptersCount}/10 chapters uploaded/filled`},
-    {n:'Plate Section',ok:platesOk,note:`${uploadedPlatesCount}/&nbsp;${S.plates ? S.plates.length : 2} plates setup`},
-    {n:'Cross Section Graphs',ok:graphsOk,note:graphsOk ? 'Cross sections generated' : 'Pending generation'},
-    {n:'Annexures I-IV',ok:annexuresOk,note:annexuresOk ? 'All 4 annexure PDFs uploaded' : 'Pending Annexure I, II, III or IV PDF upload'},
-    {n:'Data Tables',ok:tablesOk,note:tablesOk ? 'Annexure tables populated' : 'Pending tables input'},
-    {n:'Report PDF Generation',ok:pdfOk,note:pdfOk ? 'Final DSR report generated' : 'Pending final report compilation'}
+    {n:'Project Setup',ok:setupOk,note:'District, year, mineral type'},
+    {n:'Front Matter',ok:step2Done,note:step2Done ? 'Cover page, preface and acknowledgement completed' : (setupOk ? 'Pending cover page, preface or acknowledgement' : 'Locked - complete previous stages first')},
+    {n:'All 10 Chapters',ok:step3Done,note:step3Done ? '10/10 chapters uploaded/filled' : (step2Done ? `${uploadedChaptersCount}/10 chapters uploaded/filled` : 'Locked - complete previous stages first')},
+    {n:'Plate Section',ok:step4Done,note:step4Done ? 'All plates setup' : (step3Done ? `${uploadedPlatesCount}/${S.plates ? S.plates.length : 2} plates setup` : 'Locked - complete previous stages first')},
+    {n:'Cross Section Graphs',ok:graphsDone,note:graphsDone ? 'Cross sections generated' : (step4Done ? 'Pending generation' : 'Locked - complete previous stages first')},
+    {n:'Annexures I-IV',ok:step5Done,note:step5Done ? 'All 4 annexure PDFs uploaded' : (graphsDone ? 'Pending Annexure I, II, III or IV PDF upload' : 'Locked - complete previous stages first')},
+    {n:'Data Tables',ok:step6Done,note:step6Done ? 'Annexure tables populated' : (step5Done ? 'Pending tables input' : 'Locked - complete previous stages first')},
+    {n:'Report PDF Generation',ok:step7Done,note:step7Done ? 'Final DSR report generated' : (step6Done ? 'Pending final report compilation' : 'Locked - complete previous stages first')}
   ];
   el.innerHTML=items.map(it=>`
     <div style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--border)">
       <span style="display:flex;align-items:center;color:${it.ok?'var(--green)':'var(--text-faint)'}">
         <i data-lucide="${it.ok?'check-circle-2':'circle'}" style="width:16px;height:16px;"></i>
       </span>
-      <div style="flex:1"><div style="font-size:12.5px;font-weight:600;color:var(--text)">${it.n}</div><div style="font-size:10.5px;color:var(--text-soft)">${it.note}</div></div>
+      <div style="flex:1"><div style="font-size:12.5px;font-weight:600;color:${it.ok?'var(--text)':'var(--text-soft)'}">${it.n}</div><div style="font-size:10.5px;color:var(--text-soft)">${it.note}</div></div>
       <span class="badge ${it.ok?'badge-green':'badge-amber'}">${it.ok?'Done':'Pending'}</span>
     </div>`).join('');
   if (window.initLucide) initLucide();
@@ -13101,19 +13111,20 @@ function renderWorkflowStepBar() {
   }
 
   const step1Done = true;
-  const step2Done = !!(
+  const step2Done = step1Done && !!(
     (S.frontMatter && S.frontMatter.preface && S.frontMatter.preface.trim().length > 10 && S.frontMatter.acknowledgement && S.frontMatter.acknowledgement.trim().length > 10) ||
     (S.uploadedPDFs && (S.uploadedPDFs.cover || S.uploadedPDFs.cert || S.uploadedPDFs.toc || S.uploadedPDFs.pref))
   );
   const uploadedChaptersCount = S.chapters ? S.chapters.filter(ch => ch.fileName || (S.chapterPDFs && S.chapterPDFs[ch.id]) || (ch.summary && ch.summary.trim().length > 20)).length : 0;
-  const step3Done = S.chapters && S.chapters.length >= 10 && uploadedChaptersCount >= S.chapters.length;
+  const step3Done = step2Done && (S.chapters && S.chapters.length >= 10 && uploadedChaptersCount >= S.chapters.length);
   const uploadedPlatesCount = S.plates ? S.plates.filter(pl => pl.fileName).length : 0;
-  const step4Done = S.plates && S.plates.length > 0 && uploadedPlatesCount >= S.plates.length;
+  const step4Done = step3Done && (S.plates && S.plates.length > 0 && uploadedPlatesCount >= S.plates.length);
+  
   const anx1Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx1;
   const anx2Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx2;
   const anx3Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx3;
   const anx4Ok = S.uploadedPDFs && !!S.uploadedPDFs.anx4;
-  const step5Done = anx1Ok && anx2Ok && anx3Ok && anx4Ok;
+  const step5Done = step4Done && (anx1Ok && anx2Ok && anx3Ok && anx4Ok);
   const hasTableData = (S.annexureB && S.annexureB.length > 0) || 
                        (S.annexureC && S.annexureC.length > 0) || 
                        (S.annexureD && S.annexureD.length > 0) || 
@@ -13123,8 +13134,8 @@ function renderWorkflowStepBar() {
                        (S.annexureI && S.annexureI.length > 0) ||
                        (S.annexureJ && S.annexureJ.length > 0) ||
                        (S.auctionData && S.auctionData.length > 0);
-  const step6Done = hasTableData;
-  const step7Done = !!(S.activeProject && (S.activeProject.finalPdfName || S.activeProject.finalPdfGeneratedAt));
+  const step6Done = step5Done && hasTableData;
+  const step7Done = step6Done && !!(S.activeProject && (S.activeProject.finalPdfName || S.activeProject.finalPdfGeneratedAt));
 
   let activeStep = 1;
   if (!step1Done) activeStep = 1;
@@ -13161,12 +13172,6 @@ function renderWorkflowStepBar() {
   if (window.initLucide) initLucide();
 }
 
-;
-
-/* js/pdf.js */
-/* ══════════════════════════════════════
-   PDF GENERATION & REVIEW
- ══════════════════════════════════════ */
 function generateFinalPDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
