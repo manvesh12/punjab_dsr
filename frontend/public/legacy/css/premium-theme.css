@@ -5778,3 +5778,34 @@ body.view-projects-active .topbar.dash-global-topbar {
     padding-top: var(--project-topbar-h) !important;
   }
 }
+
+/* Desktop zoom compensation: fixed headers otherwise stop short of the viewport,
+   leaving a blank strip on the right side. */
+@media (min-width: 1024px) {
+  body.view-dashboard-active .topbar.dash-global-topbar,
+  body.view-projects-active .topbar.dash-global-topbar,
+  body:not(.view-dashboard-active):not(.view-projects-active) .topbar.dash-global-topbar {
+    width: calc(100vw / 0.83) !important;
+    max-width: none !important;
+    right: auto !important;
+  }
+
+  body.view-dashboard-active .dash-global-topbar .dash-switcher-bar,
+  body.view-dashboard-active .dash-global-topbar .dash-gov-utility-strip,
+  body.view-dashboard-active .dash-global-topbar .dash-gov-brand-row,
+  body.view-dashboard-active .dash-global-topbar .dash-gov-menu-bar,
+  body.view-dashboard-active .dash-global-topbar .dash-gov-notice-ticker,
+  body.view-projects-active .dash-global-topbar .dash-switcher-bar,
+  body.view-projects-active .dash-global-topbar .dash-gov-utility-strip,
+  body.view-projects-active .dash-global-topbar .dash-gov-brand-row,
+  body.view-projects-active .dash-global-topbar .dash-gov-menu-bar,
+  body.view-projects-active .dash-global-topbar .dash-gov-notice-ticker,
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar .dash-switcher-bar,
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar .dash-gov-utility-strip,
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar .dash-gov-brand-row,
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar .dash-gov-menu-bar,
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar .dash-gov-notice-ticker {
+    width: 100% !important;
+    max-width: none !important;
+  }
+}
