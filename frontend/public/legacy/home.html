@@ -559,6 +559,39 @@
     grid-template-columns: 1fr 0.9fr 1.45fr;
     gap: 64px;
   }
+  .sensrs-footer-brand {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 34px 24px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+  }
+  .sensrs-footer-logos {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 22px;
+  }
+  .sensrs-footer-logos img {
+    height: 64px;
+    width: auto;
+    max-width: 190px;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+  }
+  .sensrs-footer-main-logo {
+    height: 70px !important;
+    max-width: 260px !important;
+  }
+  .sensrs-footer-brand-text {
+    max-width: 430px;
+    color: #5f544b;
+    font-size: 15px;
+    line-height: 22px;
+    text-align: right;
+  }
   .sensrs-footer-title {
     margin: 0 0 22px;
     color: #7b5939;
@@ -633,6 +666,13 @@
     font-size: 14px;
   }
   @media (max-width: 900px) {
+    .sensrs-footer-brand {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+    .sensrs-footer-brand-text {
+      text-align: left;
+    }
     .sensrs-footer-grid {
       grid-template-columns: 1fr;
       gap: 34px;
@@ -640,6 +680,15 @@
   }
 </style>
 <footer class="sensrs-footer-clean" id="footer">
+  <div class="sensrs-footer-brand">
+    <div class="sensrs-footer-logos">
+      <img alt="IIT Ropar Logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFj63L8N_VdnfPM7gRHwDnnYKU7v1UKjD3gUyxbqa42kqCIIvl_zSu0VxnYu9LN6toV6P-zdUFTZuFs1ITkOzs9RbSuKgzm5HR7gMsp1h44tKTL3pU14IttD_xUKz3Ynr-lD9TH6lS4b6vi-_CfU6Ci9ymfJRnPhMl9oeLqVffqSwa36oCDP9HJbZ7ZpWL_iBR9jrbr7aFsdW8hzp6KzD_7ySF75wtUReyVAa4rD6TcWDi1vBrh8keAzlojEeJ-JlnroZgB0sCnMg"/>
+      <img alt="Punjab Government Logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA53LCR-u4obwOTZLGyltFxEGh6AB_1A8_pnqrsI5JBjB65RvbOosT909rUgchh9B2ot55qH116oW_sKVoJmI9iTM339KkIRzbFZD7Pyz0rFTxL7nMAGK5V3Ml6M2edKqgb7wX4zdWiM7ICybjbDWEztndYxcW1MSGiL5il7Ge-NLp9Oyz6HxQR3PIKnVvLHkCpQghp568QuyKvxaH2kjXH7UB3hqD-AJZphix5DGZvw1cez5pqbMe6Ijm905gkduyPMsQ5Lfv9hX8"/>
+      <img alt="SEnSRS Circular Logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4kX_D4QEVJFycE3r0Z4XfHjAU7R8Fr4_zGs_PpPcqHt6O0bELCrbH1MQIF0N_CLymZlu3IjCHFMeFU0I3udZvrBQXESOYk-yOpQ5n5VND-Y30btfo70sJ1wqhy36wQbyV_YWkcdHi91HO1kJF5YV4wuLWcBBCDeh0kxknitPuE_obycDhlMfTWZY9797BiUc40oolaoXclR6TV-IYO2CdfFVZPZPm8USfX_9msrloeOWfRYo70ywaX0PYhH9jS221wJslb3ae8DU"/>
+      <img class="sensrs-footer-main-logo" alt="SEnSRS Logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgydF8VFd1ToJcgOyid1qmqsL6k9k15RDELu5_HUD-ELqrC3fk7RUBgzYBUjirPMK3aKKmO9ncHJ2XPsPiH3p5cWKl0iPcutPM_MlpKjneM-qDogZZFuaxdTVyhs8hakZ8EVwFeyfDuTbGssp7Pha86oaAV6JseWuxnj5pTN4gjK0grfJe70F5YDy3vG8OiD8jiFXxShbyD2DZeOtVShsgR40uG4Kot6No6eTC8eaLQ-PyyVVyxWK3J3VcEW954AnxcNu4nWCfiw4"/>
+    </div>
+    <p class="sensrs-footer-brand-text">District Survey Report Portal with technical support from IIT Ropar and SEnSRS.</p>
+  </div>
   <div class="sensrs-footer-grid">
     <section>
       <h4 class="sensrs-footer-title">Institute Links</h4>
