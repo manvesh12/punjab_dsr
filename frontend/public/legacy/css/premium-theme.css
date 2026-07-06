@@ -5923,4 +5923,46 @@ html, body, #screen-app {
     min-width: 100% !important;
     max-width: none !important;
   }
+
+  .dash-global-topbar .dash-gov-utility-strip {
+    height: 32px !important;
+    min-height: 32px !important;
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+  }
+
+  .dash-global-topbar .dash-gov-brand-row {
+    height: 92px !important;
+    min-height: 92px !important;
+    padding: 12px 32px !important;
+  }
+
+  .dash-global-topbar .dash-gov-menu-bar {
+    height: 45px !important;
+    min-height: 45px !important;
+    border-bottom: 3px solid #f2a123 !important;
+  }
+
+  .dash-global-topbar .dash-gov-notice-ticker {
+    height: 52px !important;
+    min-height: 52px !important;
+    padding: 10px 32px !important;
+  }
+
+  .dash-global-topbar .dash-brand-left img {
+    width: 64px !important;
+    height: 64px !important;
+    object-fit: contain !important;
+  }
+
+  .dash-global-topbar .dash-brand-title {
+    font-size: 30px !important;
+    line-height: 1.05 !important;
+  }
+
+  .dash-global-topbar .dash-action-icon-btn,
+  .dash-global-topbar .dash-btn-logout,
+  .dash-global-topbar .dash-gov-badge {
+    height: 38px !important;
+  }
 }

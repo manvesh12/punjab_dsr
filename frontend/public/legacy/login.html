@@ -14,8 +14,8 @@
   <link
     href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=repl-model-dsr-backend-20260707-v4">
-  <link rel="stylesheet" href="css/premium-theme.css?v=repl-model-dsr-backend-20260707-v4">
+  <link rel="stylesheet" href="css/styles.css?v=repl-model-dsr-backend-20260707-v11">
+  <link rel="stylesheet" href="css/premium-theme.css?v=repl-model-dsr-backend-20260707-v11">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script defer src="https://cdn.jsdelivr.net/npm/lucide@0.363.0/dist/umd/lucide.min.js"></script>
@@ -454,6 +454,9 @@
       <button class="dash-action-icon-btn" onclick="dashSharePortal()" title="Copy portal link" aria-label="Copy portal link">
         <i data-lucide="share-2" style="width:16px; height:16px;"></i>
       </button>
+      <button class="dash-action-icon-btn" onclick="showView('workflow', null)" title="Workflow shortcuts" aria-label="Workflow shortcuts">
+        <i data-lucide="git-branch" style="width:16px; height:16px;"></i>
+      </button>
       <button class="dash-action-icon-btn dash-theme-toggle tb-theme-toggle" onclick="toggleDarkMode()" title="Toggle dark mode" aria-label="Toggle dark mode" data-theme-toggle>
         <i data-lucide="moon" style="width:16px; height:16px;"></i>
       </button>
@@ -524,7 +527,7 @@
     </div>
     <div class="dash-notice-marquee-container">
       <div class="dash-notice-marquee-text">
-        <span data-i18n="noticeText">DSR submissions for Punjab districts 2025-26 are now open - Deadline: 30 September 2026 - EMGSM 2020 compliance mandatory</span>
+        <span data-i18n="noticeText">DSR preparation live for all districts - EMGSM 2020 compliance</span>
       </div>
     </div>
     <span class="tb-district" id="tb-district-badge">Punjab</span>
