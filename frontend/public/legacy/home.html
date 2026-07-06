@@ -260,19 +260,19 @@
 <a class="text-secondary-fixed font-bold border-b-2 border-secondary-fixed pb-1 h-full flex items-center text-label-md font-label-md opacity-90 transition-all duration-200 whitespace-nowrap text-body-md" href="home.html">Home</a>
 </li>
 <li class="h-full flex items-center">
-<a class="text-on-primary/80 dark:text-on-primary-container/80 hover:text-on-primary text-label-md font-label-md hover:text-secondary-fixed transition-colors duration-200 whitespace-nowrap h-full flex items-center text-body-md font-bold" href="#about-dsr">About DSR</a>
+<a class="text-on-primary/80 dark:text-on-primary-container/80 hover:text-on-primary text-label-md font-label-md hover:text-secondary-fixed transition-colors duration-200 whitespace-nowrap h-full flex items-center text-body-md font-bold" href="#" onclick="openPortalPanel('about'); return false;">About DSR</a>
 </li>
 <li class="h-full flex items-center">
-<a class="text-on-primary/80 dark:text-on-primary-container/80 hover:text-on-primary text-label-md font-label-md hover:text-secondary-fixed transition-colors duration-200 whitespace-nowrap h-full flex items-center text-body-md font-bold" href="#services">Services</a>
+<a class="text-on-primary/80 dark:text-on-primary-container/80 hover:text-on-primary text-label-md font-label-md hover:text-secondary-fixed transition-colors duration-200 whitespace-nowrap h-full flex items-center text-body-md font-bold" href="#" onclick="openPortalPanel('services'); return false;">Services</a>
 </li>
 <li class="h-full flex items-center">
-<a class="text-on-primary/80 dark:text-on-primary-container/80 hover:text-on-primary text-label-md font-label-md hover:text-secondary-fixed transition-colors duration-200 whitespace-nowrap h-full flex items-center text-body-md font-bold" href="#district-reports">District Reports</a>
+<a class="text-on-primary/80 dark:text-on-primary-container/80 hover:text-on-primary text-label-md font-label-md hover:text-secondary-fixed transition-colors duration-200 whitespace-nowrap h-full flex items-center text-body-md font-bold" href="#" onclick="openPortalPanel('reports'); return false;">District Reports</a>
 </li>
 <li class="h-full flex items-center">
-<a class="text-on-primary/80 dark:text-on-primary-container/80 hover:text-on-primary text-label-md font-label-md hover:text-secondary-fixed transition-colors duration-200 whitespace-nowrap h-full flex items-center text-body-md font-bold" href="#guidelines">Guidelines</a>
+<a class="text-on-primary/80 dark:text-on-primary-container/80 hover:text-on-primary text-label-md font-label-md hover:text-secondary-fixed transition-colors duration-200 whitespace-nowrap h-full flex items-center text-body-md font-bold" href="#" onclick="openPortalPanel('guidelines'); return false;">Guidelines</a>
 </li>
 <li class="h-full flex items-center">
-<a class="text-on-primary/80 dark:text-on-primary-container/80 hover:text-on-primary text-label-md font-label-md hover:text-secondary-fixed transition-colors duration-200 whitespace-nowrap h-full flex items-center mr-4 text-body-md font-bold" href="#helpdesk">Helpdesk</a>
+<a class="text-on-primary/80 dark:text-on-primary-container/80 hover:text-on-primary text-label-md font-label-md hover:text-secondary-fixed transition-colors duration-200 whitespace-nowrap h-full flex items-center mr-4 text-body-md font-bold" href="#" onclick="openPortalPanel('helpdesk'); return false;">Helpdesk</a>
 </li>
 </ul>
 <div class="flex items-center gap-sm">
@@ -360,7 +360,7 @@
 </a>
 </div>
 </div>
-<section id="about-dsr" class="py-xl bg-surface px-sm md:px-gutter">
+<section id="about-dsr" class="hidden py-xl bg-surface px-sm md:px-gutter">
 <div class="max-w-container-max mx-auto grid grid-cols-1 lg:grid-cols-3 gap-lg">
 <div class="lg:col-span-2">
 <span class="text-[12px] font-bold text-secondary uppercase tracking-wider mb-2 block">About DSR</span>
@@ -381,7 +381,7 @@
 </form>
 </div>
 </section>
-<section id="services" class="py-xl bg-surface-container-low px-sm md:px-gutter">
+<section id="services" class="hidden py-xl bg-surface-container-low px-sm md:px-gutter">
 <div class="max-w-container-max mx-auto">
 <span class="text-[12px] font-bold text-secondary uppercase tracking-wider mb-2 block">Services</span>
 <h2 class="text-headline-lg font-headline-lg text-primary-container mb-6">Portal services</h2>
@@ -393,7 +393,7 @@
 </div>
 </div>
 </section>
-<section id="district-reports" class="py-xl bg-surface px-sm md:px-gutter">
+<section id="district-reports" class="hidden py-xl bg-surface px-sm md:px-gutter">
 <div class="max-w-container-max mx-auto">
 <span class="text-[12px] font-bold text-secondary uppercase tracking-wider mb-2 block">District Reports</span>
 <h2 class="text-headline-lg font-headline-lg text-primary-container mb-6">Find a report</h2>
@@ -406,7 +406,7 @@
 <div id="report-search-results" class="mt-4 text-body-md text-on-surface-variant"></div>
 </div>
 </section>
-<section id="guidelines" class="py-xl bg-surface-container-low px-sm md:px-gutter">
+<section id="guidelines" class="hidden py-xl bg-surface-container-low px-sm md:px-gutter">
 <div class="max-w-container-max mx-auto">
 <span class="text-[12px] font-bold text-secondary uppercase tracking-wider mb-2 block">Guidelines</span>
 <h2 class="text-headline-lg font-headline-lg text-primary-container mb-6">Forms and reference material</h2>
@@ -587,6 +587,26 @@
   }
 
   const portalPanelContent = {
+    about: {
+      title: 'About DSR',
+      icon: 'info',
+      html: '<div class="space-y-4"><p>The District Survey Report portal supports preparation, review, publication, and tracking of sand mining DSR workflows in Punjab.</p><div class="grid grid-cols-1 md:grid-cols-3 gap-3"><div class="p-3 rounded-lg border border-surface-container-highest"><strong>Prepare</strong><p class="text-sm mt-1">Compile data, annexures, maps, and supporting documents.</p></div><div class="p-3 rounded-lg border border-surface-container-highest"><strong>Review</strong><p class="text-sm mt-1">Route submissions through departmental approval.</p></div><div class="p-3 rounded-lg border border-surface-container-highest"><strong>Publish</strong><p class="text-sm mt-1">Generate final PDFs and report history.</p></div></div><form onsubmit="submitPortalEnquiry(event, \'about\')" class="flex flex-col gap-3 pt-2"><input name="name" class="w-full rounded-lg border-surface-container-highest" placeholder="Name" required><input name="email" type="email" class="w-full rounded-lg border-surface-container-highest" placeholder="Email" required><textarea name="message" rows="3" class="w-full rounded-lg border-surface-container-highest" placeholder="Your question" required></textarea><button class="px-5 py-2 bg-primary text-white text-label-md font-bold rounded-lg hover:bg-on-tertiary-fixed-variant transition-colors shadow-sm" type="submit">Submit enquiry</button></form></div>'
+    },
+    services: {
+      title: 'Portal Services',
+      icon: 'apps',
+      html: '<div class="grid grid-cols-1 md:grid-cols-2 gap-3"><a class="p-4 rounded-lg border border-surface-container-highest hover:bg-surface-container" href="login.html"><strong>Create DSR</strong><p class="text-sm mt-1">Start or continue a district report.</p></a><button class="text-left p-4 rounded-lg border border-surface-container-highest hover:bg-surface-container" onclick="openPortalPanel(\'reports\')"><strong>View Reports</strong><p class="text-sm mt-1">Browse district-wise report records.</p></button><button class="text-left p-4 rounded-lg border border-surface-container-highest hover:bg-surface-container" onclick="openPortalPanel(\'guidelines\')"><strong>Guidelines</strong><p class="text-sm mt-1">Check formats and instructions.</p></button><button class="text-left p-4 rounded-lg border border-surface-container-highest hover:bg-surface-container" onclick="openPortalPanel(\'helpdesk\')"><strong>Support</strong><p class="text-sm mt-1">Raise a portal support request.</p></button></div>'
+    },
+    reports: {
+      title: 'District Reports',
+      icon: 'folder_open',
+      html: '<form onsubmit="submitReportSearch(event)" class="grid grid-cols-1 gap-3"><select class="rounded-lg border-surface-container-highest" name="district" required><option value="">District</option><option>Jalandhar</option><option>Ludhiana</option><option>Amritsar</option><option>Patiala</option></select><select class="rounded-lg border-surface-container-highest" name="year" required><option value="">Year</option><option>2025-26</option><option>2024-25</option></select><select class="rounded-lg border-surface-container-highest" name="status"><option>Any Status</option><option>Draft</option><option>Under Review</option><option>Published</option></select><button class="px-5 py-2 bg-primary text-white text-label-md font-bold rounded-lg hover:bg-on-tertiary-fixed-variant transition-colors shadow-sm" type="submit">Search reports</button><div id="report-search-results" class="text-body-md text-on-surface-variant"></div></form>'
+    },
+    guidelines: {
+      title: 'Guidelines',
+      icon: 'download',
+      html: '<div class="grid grid-cols-1 gap-3"><button class="text-left p-4 rounded-lg border border-surface-container-highest hover:bg-surface-container" onclick="downloadGuideline(\'DSR preparation checklist\')"><strong>DSR preparation checklist</strong><p class="text-sm mt-1">Step-wise checklist for district teams.</p></button><button class="text-left p-4 rounded-lg border border-surface-container-highest hover:bg-surface-container" onclick="downloadGuideline(\'Annexure formats\')"><strong>Annexure formats</strong><p class="text-sm mt-1">Reference annexure structure and field guidance.</p></button><button class="text-left p-4 rounded-lg border border-surface-container-highest hover:bg-surface-container" onclick="downloadGuideline(\'Review workflow manual\')"><strong>Review workflow manual</strong><p class="text-sm mt-1">Submission, review, return, and approval flow.</p></button></div>'
+    },
     search: {
       title: 'Search Portal',
       icon: 'search',
