@@ -644,7 +644,6 @@ function renderCustomReportGenerator(container, report) {
 
   initDragAndDrop(report.id, reportName);
 }
-}
 
 // Debouncer for rendering preview to fix lagging/freezing
 let previewTimeout = null;
