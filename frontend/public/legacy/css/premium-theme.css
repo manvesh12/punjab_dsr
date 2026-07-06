@@ -5809,3 +5809,16 @@ body.view-projects-active .topbar.dash-global-topbar {
     max-width: none !important;
   }
 }
+
+/* Center topbar content for large screens (e.g. 67% zoom) */
+.dash-switcher-bar,
+.dash-gov-utility-strip,
+.dash-gov-menu-bar,
+.dash-gov-notice-ticker {
+  padding-left: max(24px, calc((100% - 1560px) / 2)) !important;
+  padding-right: max(24px, calc((100% - 1560px) / 2)) !important;
+}
+.dash-gov-brand-row {
+  padding-left: max(30px, calc((100% - 1560px) / 2)) !important;
+  padding-right: max(30px, calc((100% - 1560px) / 2)) !important;
+}
