@@ -2516,10 +2516,10 @@ html.dark .dash-notice-marquee-text, html.dark .dash-notice-marquee-text span {
 }
 
 
-body:not(.view-dashboard-active):not(.view-projects-active) {
+.use-huge-topbar-never {
   --topbar-h: 304px !important;
 }
-body:not(.view-dashboard-active):not(.view-projects-active) .topbar.dash-global-topbar {
+.use-huge-topbar-never .topbar.dash-global-topbar {
   top: 0 !important;
   left: var(--sidebar-w) !important;
   right: 0 !important;
@@ -2540,20 +2540,20 @@ body:not(.view-dashboard-active):not(.view-projects-active) .topbar.dash-global-
 }
 body.view-dashboard-active .topbar.dash-global-topbar,
 body.view-projects-active .topbar.dash-global-topbar {
-  display: none !important;
+  /* display: none !important; */
 }
-body.sidebar-hidden:not(.view-dashboard-active):not(.view-projects-active) .topbar.dash-global-topbar {
+.use-huge-topbar-never .topbar.dash-global-topbar {
   left: 0 !important;
   width: 100% !important;
 }
-body:not(.view-dashboard-active):not(.view-projects-active) .app-workspace {
+.use-huge-topbar-never .app-workspace {
   padding-top: var(--topbar-h) !important;
 }
-body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar .dash-switcher-bar,
-body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar .dash-gov-utility-strip,
-body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar .dash-gov-brand-row,
-body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar .dash-gov-menu-bar,
-body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar .dash-gov-notice-ticker {
+.use-huge-topbar-never .dash-global-topbar .dash-switcher-bar,
+.use-huge-topbar-never .dash-global-topbar .dash-gov-utility-strip,
+.use-huge-topbar-never .dash-global-topbar .dash-gov-brand-row,
+.use-huge-topbar-never .dash-global-topbar .dash-gov-menu-bar,
+.use-huge-topbar-never .dash-global-topbar .dash-gov-notice-ticker {
   width: 100% !important;
   max-width: none !important;
   box-sizing: border-box !important;
@@ -5163,3 +5163,19 @@ body:not(.view-dashboard-active):not(.view-projects-active) #sidebar .sb-nav[sty
     font-size: 12px !important;
   }
 }
+
+ / *   H i d e   i n t e r n a l   h e a d e r s   s o   g l o b a l   t o p b a r   t a k e s   o v e r   * / 
+ # v i e w - d a s h b o a r d   . d a s h - p o r t a l - w r a p p e r   >   . d a s h - s w i t c h e r - b a r , 
+ # v i e w - d a s h b o a r d   . d a s h - p o r t a l - w r a p p e r   >   . d a s h - g o v - u t i l i t y - s t r i p , 
+ # v i e w - d a s h b o a r d   . d a s h - p o r t a l - w r a p p e r   >   . d a s h - g o v - b r a n d - r o w , 
+ # v i e w - d a s h b o a r d   . d a s h - p o r t a l - w r a p p e r   >   . d a s h - g o v - m e n u - b a r , 
+ # v i e w - d a s h b o a r d   . d a s h - p o r t a l - w r a p p e r   >   . d a s h - g o v - n o t i c e - t i c k e r , 
+ # v i e w - p r o j e c t s   . d a s h - p o r t a l - w r a p p e r   >   . d a s h - s w i t c h e r - b a r , 
+ # v i e w - p r o j e c t s   . d a s h - p o r t a l - w r a p p e r   >   . d a s h - g o v - u t i l i t y - s t r i p , 
+ # v i e w - p r o j e c t s   . d a s h - p o r t a l - w r a p p e r   >   . d a s h - g o v - b r a n d - r o w , 
+ # v i e w - p r o j e c t s   . d a s h - p o r t a l - w r a p p e r   >   . d a s h - g o v - m e n u - b a r , 
+ # v i e w - p r o j e c t s   . d a s h - p o r t a l - w r a p p e r   >   . d a s h - g o v - n o t i c e - t i c k e r   { 
+     d i s p l a y :   n o n e   ! i m p o r t a n t ; 
+ } 
+  
+ 
