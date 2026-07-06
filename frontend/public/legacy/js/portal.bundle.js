@@ -14497,6 +14497,10 @@ async function generateFinalPDF(regenerate = false) {
     if (resultBox) resultBox.style.display = 'block';
     const pageCountEl = document.getElementById('pdf-page-count');
     if (pageCountEl) pageCountEl.textContent = totalPages;
+    const previewContainer = document.querySelector('#view-generate .pdf-preview');
+    if (previewContainer && window.finalDsrPdfBlobUrl) {
+      previewContainer.innerHTML = `<iframe src="${window.finalDsrPdfBlobUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH" style="width:100%;height:800px;border:none;border-radius:6px;background:#fff;"></iframe>`;
+    }
     showWarnings(warnings);
     if (typeof initLucide === 'function') initLucide();
     toast(`${regenerate ? 'Regenerated' : 'Generated'} final DSR PDF: ${fileName}`, 'success');
