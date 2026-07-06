@@ -2400,6 +2400,8 @@ async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
             const coverPages = window.pdfPreview ? window.pdfPreview.getFrontMatterPages().filter(p => /^cover/i.test(p.label)) : [];
             if (coverPages.length > 0) {
               coverPages.forEach(p => addImagePage(p.src, 'Cover Page'));
+            } else if (window.pdfPreview && typeof window.pdfPreview.renderCoverPageCanvas === 'function') {
+              addImagePage(window.pdfPreview.renderCoverPageCanvas(), 'Cover Page');
             } else {
               if (isFirstPage) {
                 isFirstPage = false;
@@ -2420,24 +2422,36 @@ async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
               doc.text(`Version: ${version}`, W / 2, H - 42, { align: 'center' });
             }
           } else if (subId === 'fm-toc') {
-            const tocPages = window.pdfPreview ? window.pdfPreview.getFrontMatterPages().filter(p => /^content|^toc/i.test(p.label)) : [];
+            const tocPages = window.pdfPreview ? window.pdfPreview.getFrontMatterPages().filter(p => /^content/i.test(p.label)) : [];
             if (tocPages.length > 0) {
               tocPages.forEach(p => addImagePage(p.src, 'Table of Contents'));
+            } else if (window.pdfPreview && typeof window.pdfPreview.renderTextPageCanvas === 'function') {
+              const tocText = `1. Front Matter....................................................................................i\n2. Chapters Outline...............................................................................1\n3. Plate Section...................................................................................46\n4. Cross Section Graphs...........................................................................56\n5. Annexures Reference Data.....................................................................63`;
+              addImagePage(window.pdfPreview.renderTextPageCanvas('TABLE OF CONTENTS', tocText, 'District Survey Report'), 'Table of Contents');
             }
           } else if (subId === 'fm-pref') {
             const prefPages = window.pdfPreview ? window.pdfPreview.getFrontMatterPages().filter(p => /^preface/i.test(p.label)) : [];
             if (prefPages.length > 0) {
               prefPages.forEach(p => addImagePage(p.src, 'Preface'));
+            } else if (window.pdfPreview && typeof window.pdfPreview.renderTextPageCanvas === 'function') {
+              const prefText = S.frontMatter?.preface || 'No preface text has been entered.';
+              addImagePage(window.pdfPreview.renderTextPageCanvas('PREFACE', prefText, 'District Survey Report'), 'Preface');
             }
           } else if (subId === 'fm-ack') {
             const ackPages = window.pdfPreview ? window.pdfPreview.getFrontMatterPages().filter(p => /^acknowledgement/i.test(p.label)) : [];
             if (ackPages.length > 0) {
               ackPages.forEach(p => addImagePage(p.src, 'Acknowledgement'));
+            } else if (window.pdfPreview && typeof window.pdfPreview.renderTextPageCanvas === 'function') {
+              const ackText = S.frontMatter?.acknowledgement || 'No acknowledgement text has been entered.';
+              addImagePage(window.pdfPreview.renderTextPageCanvas('ACKNOWLEDGEMENT', ackText, 'District Survey Report'), 'Acknowledgement');
             }
           } else if (subId === 'fm-cert') {
             const certPages = window.pdfPreview ? window.pdfPreview.getFrontMatterPages().filter(p => /^certificate of compliance/i.test(p.label)) : [];
             if (certPages.length > 0) {
               certPages.forEach(p => addImagePage(p.src, 'Certificate of Compliance'));
+            } else if (window.pdfPreview && typeof window.pdfPreview.renderTextPageCanvas === 'function') {
+              const certText = `This District Survey Report has been prepared for ${district} District, ${state}${year ? `, for ${year}` : ''}.\n\nThe report content is maintained in the DSR Automation Portal and can be reviewed section by section before final PDF generation.`;
+              addImagePage(window.pdfPreview.renderTextPageCanvas('CERTIFICATE OF COMPLIANCE', certText, 'District Survey Report'), 'Certificate of Compliance');
             }
           }
         }
@@ -2451,6 +2465,12 @@ async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
           if (chPages.length > 0) {
             addTitlePage(chapterTitle);
             chPages.forEach(p => addImagePage(p.src, chapterTitle));
+          } else {
+            addTitlePage(chapterTitle);
+            if (window.pdfPreview && typeof window.pdfPreview.renderTextPageCanvas === 'function') {
+              const summaryText = ch.summary || 'Upload a chapter PDF to preview the original chapter document here.';
+              addImagePage(window.pdfPreview.renderTextPageCanvas(ch.name || `CHAPTER ${chNum}`, summaryText), chapterTitle);
+            }
           }
         }
       } 
@@ -2463,6 +2483,12 @@ async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
           if (platePages.length > 0) {
             addTitlePage(plateTitle);
             platePages.forEach(p => addImagePage(p.src, plateTitle));
+          } else {
+            addTitlePage(plateTitle);
+            if (window.pdfPreview && typeof window.pdfPreview.renderTextPageCanvas === 'function') {
+              const summaryText = pl.summary || 'No plate description has been entered.';
+              addImagePage(window.pdfPreview.renderTextPageCanvas(pl.name || `PLATE P${plateNo}`, summaryText), plateTitle);
+            }
           }
         }
       } 
@@ -2508,7 +2534,7 @@ async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
         const report = reports.find(r => r.id === reportId);
         const customSec = report && report.customSections && report.customSections.find(cs => cs.id === item.id);
         const titleText = customSec ? customSec.name : 'Custom PDF Section';
-        const customPages = S.uploadedPDFs && S.uploadedPDFs[item.id];
+        const customPages = (S.uploadedPDFs && S.uploadedPDFs[item.id]) || (report && report.customPdfs && report.customPdfs[item.id]);
         addTitlePage(titleText);
         if (customPages && customPages.length > 0) {
           customPages.forEach((page, idx) => addImagePage(page, `${titleText} - Page ${idx + 1}`));
