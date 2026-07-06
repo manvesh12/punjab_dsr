@@ -21,6 +21,7 @@ function getSmtpTransporter() {
     connectionTimeout: 10000, // 10 seconds
     greetingTimeout: 10000,  // 10 seconds
     socketTimeout: 15000,     // 15 seconds
+    family: 4,                // Force IPv4 to resolve Render IPv6 issues
   });
 }
 
