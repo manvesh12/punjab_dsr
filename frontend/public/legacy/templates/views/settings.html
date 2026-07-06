@@ -47,27 +47,6 @@
         </div>
       </div>
 
-      <!-- Dashboard Updates Configuration -->
-      <div class="card" style="box-shadow: 0 8px 32px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.05); margin-top: 24px;">
-        <div class="card-hd" style="display: flex; align-items: center; gap: 8px;">
-          <i data-lucide="bell" style="width: 16px; height: 16px; color: var(--p-accent-gold);"></i>
-          <span class="card-title">Dashboard Updates Configuration</span>
-        </div>
-        <div class="card-bd" style="padding: 20px;">
-          <div class="form-group" style="margin-bottom: 20px;">
-            <label style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 13px; color: var(--text);">Latest Updates List</label>
-            <textarea id="settings-dashboard-updates" class="inp" rows="6" style="width: 100%; resize: vertical; padding: 12px; font-family: inherit; font-size: 13px; background: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.1);" placeholder="Update text | 08 Jun 2026 | NEW"></textarea>
-            <div style="font-size: 11px; color: var(--text-soft); margin-top: 8px;">
-              Enter updates for the dashboard, one per line. Format: <code>Update Text | Date | NEW</code>. (Date and NEW are optional).
-            </div>
-          </div>
-          <button class="btn btn-saffron" id="settings-updates-save-btn" onclick="saveDashboardUpdates()" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; height: 38px; padding: 0 20px;">
-            <i data-lucide="save" style="width: 14px; height: 14px;"></i>
-            Save Updates
-          </button>
-        </div>
-      </div>
-
       <!-- Info Meta Panel -->
       <div class="card" style="box-shadow: 0 8px 32px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.01);">
         <div class="card-hd" style="display: flex; align-items: center; gap: 8px;">
@@ -153,16 +132,6 @@
       const textEl = document.getElementById('settings-notice-text');
       if (textEl) textEl.value = localNotice;
       updateNoticeUI(localNotice);
-    }
-
-    const localUpdates = localStorage.getItem('dashboardUpdatesList');
-    if (localUpdates) {
-      try {
-        const updates = JSON.parse(localUpdates);
-        const textVal = updates.map(u => `${u.text}${u.date ? ' | ' + u.date : ''}${u.isNew ? ' | NEW' : ''}`).join('\n');
-        const updatesEl = document.getElementById('settings-dashboard-updates');
-        if (updatesEl) updatesEl.value = textVal;
-      } catch(e) {}
     }
 
     try {
@@ -275,32 +244,6 @@
     btn.disabled = false;
     btn.innerText = 'Save Changes';
   }
-
-  function saveDashboardUpdates() {
-    const textVal = document.getElementById('settings-dashboard-updates').value;
-    const updates = textVal.split('\n').map(line => {
-      const parts = line.split('|').map(p => p.trim());
-      if(!parts[0]) return null;
-      return {
-        text: parts[0],
-        date: parts[1] || new Date().toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'}),
-        isNew: parts[2] && parts[2].toUpperCase() === 'NEW'
-      };
-    }).filter(Boolean);
-    
-    localStorage.setItem('dashboardUpdatesList', JSON.stringify(updates));
-    
-    if (typeof toast === 'function') {
-      toast('Dashboard updates saved locally!', 'success');
-    } else {
-      alert('Dashboard updates saved locally!');
-    }
-    
-    if (typeof renderDashboard === 'function') {
-      renderDashboard();
-    }
-  }
-  window.saveDashboardUpdates = saveDashboardUpdates;
 
   // Load notice settings immediately on template parse
   document.addEventListener('DOMContentLoaded', () => {

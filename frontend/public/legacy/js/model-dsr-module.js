@@ -402,8 +402,8 @@ window.newProjectModal = async function() {
     try {
       const models = await apiFetch('/api/model-dsrs');
       const published = models.filter(m => m.status === 'PUBLISHED');
-      modelSelect.innerHTML = '<option value="">-- None (Empty Project) --</option>' + 
-        published.map(m => \`<option value="\${m.id}">\${m.title} (v\${m.version})</option>\`).join('');
+      modelSelect.innerHTML = '<option value="">-- None (Empty Project) --</option>' +
+        published.map(m => `<option value="${m.id}">${m.title} (v${m.version})</option>`).join('');
     } catch (err) {
       console.error("Failed to load Model DSRs", err);
     }
@@ -419,7 +419,7 @@ const originalCreateProject = window.createProject;
 window.createProject = async function() {
   const modelId = document.getElementById('proj-model-dsr')?.value;
   
-  const title = document.getElementById('proj-title').value || \`District Survey Report - \${document.getElementById('proj-district').value}\`;
+  const title = document.getElementById('proj-title').value || `District Survey Report - ${document.getElementById('proj-district').value}`;
   const payload = {
     projectName: title,
     district: document.getElementById('proj-district').value,
@@ -438,11 +438,11 @@ window.createProject = async function() {
     
     // 2. If a Model DSR was selected, import it immediately
     if (modelId && createdProject.id) {
-      await apiFetch(\`/api/model-dsrs/\${modelId}/import\`, {
+      await apiFetch(`/api/model-dsrs/${modelId}/import`, {
         method: 'POST',
         body: JSON.stringify({ projectId: createdProject.id })
       });
-      toast(\`Model DSR imported into \${createdProject.projectName}\`, 'success');
+      toast(`Model DSR imported into ${createdProject.projectName}`, 'success');
     } else {
       toast('Project created successfully', 'success');
     }
