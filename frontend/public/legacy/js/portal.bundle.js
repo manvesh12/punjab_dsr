@@ -14491,7 +14491,11 @@ async function generateFinalPDF(regenerate = false) {
       if (typeof persistProjectState === 'function') await persistProjectState();
       if (typeof renderDashboard === 'function') renderDashboard();
     }
-    window.finalDsrPdfBlobUrl = URL.createObjectURL(doc.output('blob'));
+    if (window.finalDsrPdfBlobUrl) {
+      try { URL.revokeObjectURL(window.finalDsrPdfBlobUrl); } catch (_) {}
+    }
+    window.finalDsrPdfBlob = doc.output('blob');
+    window.finalDsrPdfBlobUrl = URL.createObjectURL(window.finalDsrPdfBlob);
     window.finalDsrPdfFileName = fileName;
     setProgress('Finalizing Document...', 100);
     if (resultBox) resultBox.style.display = 'block';
@@ -14499,7 +14503,7 @@ async function generateFinalPDF(regenerate = false) {
     if (pageCountEl) pageCountEl.textContent = totalPages;
     const previewContainer = document.querySelector('#view-generate .pdf-preview');
     if (previewContainer && window.finalDsrPdfBlobUrl) {
-      previewContainer.innerHTML = `<iframe src="${window.finalDsrPdfBlobUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH" style="width:100%;height:800px;border:none;border-radius:6px;background:#fff;"></iframe>`;
+      previewContainer.innerHTML = `<iframe title="Final DSR PDF Live Preview" src="${window.finalDsrPdfBlobUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH" style="width:100%;height:800px;border:none;border-radius:6px;background:#fff;"></iframe>`;
     }
     showWarnings(warnings);
     if (typeof initLucide === 'function') initLucide();
@@ -14532,7 +14536,8 @@ function validateFinalPdfInputs() {
   return warnings;
 }
 function getFinalPdfUrl(inline = true) {
-  if (!S.activeProject?.id || !S.activeProject?.finalPdfName) return window.finalDsrPdfBlobUrl || '';
+  if (window.finalDsrPdfBlobUrl) return window.finalDsrPdfBlobUrl;
+  if (!S.activeProject?.id || !S.activeProject?.finalPdfName) return '';
   return window.projectPdfUrl ? window.projectPdfUrl('final', inline) : `/api/download-pdf?projectId=${encodeURIComponent(S.activeProject.id)}&annexureId=final${inline ? '&inline=true' : ''}`;
 }
 function canAccessFinalDsrPdf() {
@@ -14562,6 +14567,7 @@ async function fetchFinalPdfBlob(inline = true) {
     toast('Generate the final PDF first.', 'info');
     return null;
   }
+  if (window.finalDsrPdfBlob && url === window.finalDsrPdfBlobUrl) return window.finalDsrPdfBlob;
   if (url.startsWith('blob:')) return fetch(url).then(res => res.blob());
   const response = await fetch(url, {
     headers: {
