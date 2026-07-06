@@ -5108,7 +5108,7 @@ body:not(.view-dashboard-active):not(.view-projects-active) #sidebar .sb-nav[sty
     width: 100% !important;
     margin-left: 0 !important;
     padding-left: 24px !important;
-    padding-right: 24px !important;
+    padding-right: 550px !important;
   }
 }
 
