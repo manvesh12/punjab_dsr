@@ -5167,3 +5167,365 @@ body.view-dashboard-active .topbar.dash-global-topbar,
 body.view-projects-active .topbar.dash-global-topbar {
   display: none !important;
 }
+
+/* Strict, stable global portal topbar.
+   This sits last so older size and preview-spacing rules cannot distort the header. */
+@media (min-width: 1024px) {
+  body:not(.view-dashboard-active):not(.view-projects-active) {
+    --project-topbar-h: 250px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .topbar.dash-global-topbar {
+    display: grid !important;
+    grid-template-rows: 34px 32px 92px 42px 50px !important;
+    height: var(--project-topbar-h) !important;
+    min-height: var(--project-topbar-h) !important;
+    max-height: var(--project-topbar-h) !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+    border-bottom: 2px solid #c49a58 !important;
+    box-shadow: 0 10px 30px rgba(23, 50, 77, 0.12) !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar .dash-switcher-bar,
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar .dash-gov-utility-strip,
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar .dash-gov-brand-row,
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar .dash-gov-menu-bar,
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar .dash-gov-notice-ticker {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding-left: 22px !important;
+    padding-right: 22px !important;
+    box-sizing: border-box !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-switcher-bar {
+    height: 34px !important;
+    min-height: 34px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-gov-utility-strip {
+    height: 32px !important;
+    min-height: 32px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    gap: 14px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-gov-left,
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-gov-right {
+    min-width: 0 !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-gov-right {
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    overflow: hidden !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-gov-brand-row {
+    height: 92px !important;
+    min-height: 92px !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+    gap: 18px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-brand-left {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    gap: 14px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-brand-left img {
+    width: 64px !important;
+    height: 64px !important;
+    object-fit: contain !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-brand-texts {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-brand-title,
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar .dash-brand-title {
+    max-width: 100% !important;
+    margin: 2px 0 !important;
+    font-size: clamp(22px, 1.65vw, 30px) !important;
+    line-height: 1.12 !important;
+    white-space: normal !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-brand-bilingual,
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-brand-subtitle {
+    display: block !important;
+    max-width: 100% !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-brand-right {
+    flex: 0 0 auto !important;
+    min-width: 0 !important;
+    max-width: 48vw !important;
+    flex-wrap: wrap !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-action-icon-btn {
+    width: 34px !important;
+    height: 34px !important;
+    flex: 0 0 34px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-btn-logout,
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-btn-new-project {
+    min-height: 34px !important;
+    padding: 0 12px !important;
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-gov-menu-bar {
+    height: 42px !important;
+    min-height: 42px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    gap: 16px !important;
+    overflow: visible !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-menu-links {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scrollbar-width: none !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-menu-links::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-menu-link-item {
+    flex: 0 0 auto !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-menu-link-item button,
+  body:not(.view-dashboard-active):not(.view-projects-active) .tb-sub-nav-btn {
+    min-height: 42px !important;
+    height: 42px !important;
+    padding: 0 10px !important;
+    white-space: nowrap !important;
+    font-size: 12px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-menu-search {
+    width: clamp(190px, 18vw, 280px) !important;
+    min-width: 190px !important;
+    flex: 0 0 auto !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-gov-notice-ticker {
+    height: 50px !important;
+    min-height: 50px !important;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+    gap: 12px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) #sidebar,
+  body:not(.view-dashboard-active):not(.view-projects-active) #sidebar[style] {
+    top: var(--project-topbar-h) !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .app-workspace,
+  body.preview-open:not(.view-dashboard-active):not(.view-projects-active) .app-workspace,
+  body:not(.view-dashboard-active):not(.view-projects-active) .app-workspace.preview-open {
+    padding-top: var(--project-topbar-h) !important;
+    min-height: calc(100vh - var(--project-topbar-h)) !important;
+  }
+
+  body.preview-open:not(.view-dashboard-active):not(.view-projects-active) .pdf-preview-panel.open,
+  body:not(.view-dashboard-active):not(.view-projects-active) .app-workspace.preview-open > .pdf-preview-panel.open {
+    top: calc(var(--project-topbar-h) + 12px) !important;
+    height: calc(100vh - var(--project-topbar-h) - 24px) !important;
+    max-height: calc(100vh - var(--project-topbar-h) - 24px) !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .page-body {
+    padding-top: 20px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) #view-front-matter > .header-row,
+  body:not(.view-dashboard-active):not(.view-projects-active) #view-chapters > .header-row,
+  body:not(.view-dashboard-active):not(.view-projects-active) #view-plates > .header-row,
+  body:not(.view-dashboard-active):not(.view-projects-active) #view-graphs > .header-row,
+  body:not(.view-dashboard-active):not(.view-projects-active) #view-anx1 > .header-row,
+  body:not(.view-dashboard-active):not(.view-projects-active) #view-anx2 > .header-row,
+  body:not(.view-dashboard-active):not(.view-projects-active) #view-anx3 > .header-row,
+  body:not(.view-dashboard-active):not(.view-projects-active) #view-anx4 > .header-row,
+  body:not(.view-dashboard-active):not(.view-projects-active) #view-anx5 > .header-row,
+  body:not(.view-dashboard-active):not(.view-projects-active) #view-anx6 > .header-row,
+  body:not(.view-dashboard-active):not(.view-projects-active) #view-anx7 > .header-row,
+  body:not(.view-dashboard-active):not(.view-projects-active) #view-annexure-b > .header-row,
+  body:not(.view-dashboard-active):not(.view-projects-active) #view-annexure-c > .header-row,
+  body:not(.view-dashboard-active):not(.view-projects-active) #view-annexure-d > .header-row,
+  body:not(.view-dashboard-active):not(.view-projects-active) #view-annexure-e > .header-row,
+  body:not(.view-dashboard-active):not(.view-projects-active) #view-annexure-f > .header-row,
+  body:not(.view-dashboard-active):not(.view-projects-active) #view-annexure-g > .header-row,
+  body:not(.view-dashboard-active):not(.view-projects-active) #view-annexure-h > .header-row,
+  body:not(.view-dashboard-active):not(.view-projects-active) #view-annexure-i > .header-row,
+  body:not(.view-dashboard-active):not(.view-projects-active) #view-annexure-j > .header-row,
+  body:not(.view-dashboard-active):not(.view-projects-active) #view-annexure-k > .header-row,
+  body:not(.view-dashboard-active):not(.view-projects-active) #view-generate > .header-row,
+  body:not(.view-dashboard-active):not(.view-projects-active) #view-history > .header-row,
+  body:not(.view-dashboard-active):not(.view-projects-active) #view-workflow > .header-row,
+  body:not(.view-dashboard-active):not(.view-projects-active) #view-settings > .header-row,
+  body:not(.view-dashboard-active):not(.view-projects-active) #view-users > .header-row,
+  body:not(.view-dashboard-active):not(.view-projects-active) #view-audit-logs > .header-row {
+    margin-top: 0 !important;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1280px) {
+  body:not(.view-dashboard-active):not(.view-projects-active) {
+    --project-topbar-h: 258px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .topbar.dash-global-topbar {
+    grid-template-rows: 34px 32px 100px 42px 50px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-gov-brand-row {
+    height: 100px !important;
+    min-height: 100px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-brand-right {
+    max-width: 42vw !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  body:not(.view-dashboard-active):not(.view-projects-active) {
+    --project-topbar-h: 158px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .topbar.dash-global-topbar {
+    display: flex !important;
+    flex-direction: column !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-switcher-bar,
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-gov-utility-strip {
+    display: none !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-gov-brand-row {
+    min-height: 96px !important;
+    padding: 10px 14px !important;
+    gap: 10px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-brand-left {
+    min-width: 0 !important;
+    gap: 10px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-brand-left img {
+    width: 50px !important;
+    height: 50px !important;
+    object-fit: contain !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-brand-title {
+    font-size: 16px !important;
+    line-height: 1.15 !important;
+    white-space: normal !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-brand-bilingual,
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-brand-subtitle {
+    font-size: 10px !important;
+    white-space: normal !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-brand-right {
+    flex: 0 0 auto !important;
+    gap: 6px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-brand-right .dash-action-icon-btn:not(#tb-sidebar-toggle),
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-brand-right .dash-btn-new-project {
+    display: none !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-btn-logout {
+    min-height: 32px !important;
+    padding: 0 10px !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-gov-menu-bar {
+    min-height: 38px !important;
+    padding: 0 10px !important;
+    gap: 0 !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-menu-links {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scrollbar-width: none !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-menu-links::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-menu-link-item {
+    flex: 0 0 auto !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-menu-link-item button,
+  body:not(.view-dashboard-active):not(.view-projects-active) .tb-sub-nav-btn {
+    min-height: 38px !important;
+    padding: 0 10px !important;
+    white-space: nowrap !important;
+    font-size: 12px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-menu-search {
+    display: none !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-gov-notice-ticker {
+    min-height: 24px !important;
+    padding: 4px 10px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .app-workspace {
+    margin-left: 0 !important;
+    padding-top: var(--project-topbar-h) !important;
+  }
+}
