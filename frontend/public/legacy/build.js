@@ -47,7 +47,7 @@ const JS_FILES = [
   'js/main.js'
 ];
 
-const ASSET_VERSION = 'project-layout-fix-20260706-v1';
+const ASSET_VERSION = 'project-layout-fix-20260706-v2';
 const applyAssetVersion = (html) => html.replace(/\{\{ASSET_VERSION\}\}/g, ASSET_VERSION);
 
 function buildJsBundle() {
