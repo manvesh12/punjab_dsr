@@ -214,6 +214,13 @@
         .font-large {
           font-size: 1.15em !important;
         }
+        body,
+        button,
+        input,
+        select,
+        textarea {
+          font-family: "Noto Sans", "Inter", "Segoe UI", Arial, sans-serif;
+        }
       </style>
 </head>
 <body class="bg-surface text-on-surface font-body-md antialiased subpixel-antialiased selection:bg-primary-container selection:text-on-primary-container">
@@ -543,6 +550,8 @@
     background: #f5f1e9;
     color: #4b4037;
     border-top: 1px solid rgba(115, 119, 126, 0.24);
+    font-family: "Noto Sans", "Inter", "Segoe UI", Arial, sans-serif;
+    font-weight: 400;
   }
   .sensrs-footer-clean a {
     color: inherit;
@@ -554,7 +563,7 @@
   .sensrs-footer-grid {
     max-width: 1120px;
     margin: 0 auto;
-    padding: 38px 24px 54px;
+    padding: 34px 24px 54px;
     display: grid;
     grid-template-columns: 1fr 0.9fr 1.45fr;
     gap: 64px;
@@ -593,17 +602,17 @@
     text-align: right;
   }
   .sensrs-footer-title {
-    margin: 0 0 22px;
+    margin: 0 0 24px;
     color: #7b5939;
-    font-size: 15px;
+    font-size: 15.5px;
     line-height: 20px;
     font-weight: 800;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.11em;
     text-transform: uppercase;
   }
   .sensrs-footer-list {
     display: grid;
-    gap: 16px;
+    gap: 17px;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -612,8 +621,9 @@
     display: inline-flex;
     align-items: center;
     gap: 12px;
-    font-size: 18px;
-    line-height: 24px;
+    font-size: 17.5px;
+    line-height: 25px;
+    font-weight: 400;
   }
   .sensrs-footer-link .material-symbols-outlined {
     color: #936941;
@@ -625,8 +635,9 @@
     gap: 14px;
     align-items: start;
     margin-bottom: 18px;
-    font-size: 18px;
+    font-size: 17.5px;
     line-height: 27px;
+    font-weight: 400;
   }
   .sensrs-contact-row .material-symbols-outlined {
     color: #936941;
