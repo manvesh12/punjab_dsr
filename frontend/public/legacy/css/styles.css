@@ -187,6 +187,10 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+body:has(#screen-app.screen.active) {
+  overflow: hidden;
+}
+
 html.dark body {
   background:
     radial-gradient(circle at 15% 40%, rgba(59, 130, 246, 0.05) 0%, transparent 45%),
@@ -831,9 +835,74 @@ transparent;
   padding-bottom: 20px;
 }
 html.dark .sidebar { background: var(--card); border-right-color: var(--border); }
-.sidebar::-webkit-scrollbar { width: 4px; }
-.sidebar::-webkit-scrollbar-thumb { background: rgba(0,0,0,.1); border-radius: 4px; }
-html.dark .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); }
+.sidebar,
+.sb-nav,
+.main-content,
+.pdf-preview-scroll,
+.preview-body,
+.modal-bd,
+.tbl-wrap {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(13, 29, 54, 0.34) transparent;
+}
+.sidebar::-webkit-scrollbar,
+.sb-nav::-webkit-scrollbar,
+.main-content::-webkit-scrollbar,
+.pdf-preview-scroll::-webkit-scrollbar,
+.preview-body::-webkit-scrollbar,
+.modal-bd::-webkit-scrollbar,
+.tbl-wrap::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.sidebar::-webkit-scrollbar-track,
+.sb-nav::-webkit-scrollbar-track,
+.main-content::-webkit-scrollbar-track,
+.pdf-preview-scroll::-webkit-scrollbar-track,
+.preview-body::-webkit-scrollbar-track,
+.modal-bd::-webkit-scrollbar-track,
+.tbl-wrap::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar::-webkit-scrollbar-thumb,
+.sb-nav::-webkit-scrollbar-thumb,
+.main-content::-webkit-scrollbar-thumb,
+.pdf-preview-scroll::-webkit-scrollbar-thumb,
+.preview-body::-webkit-scrollbar-thumb,
+.modal-bd::-webkit-scrollbar-thumb,
+.tbl-wrap::-webkit-scrollbar-thumb {
+  background: rgba(13, 29, 54, 0.28);
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+}
+.sidebar::-webkit-scrollbar-thumb:hover,
+.sb-nav::-webkit-scrollbar-thumb:hover,
+.main-content::-webkit-scrollbar-thumb:hover,
+.pdf-preview-scroll::-webkit-scrollbar-thumb:hover,
+.preview-body::-webkit-scrollbar-thumb:hover,
+.modal-bd::-webkit-scrollbar-thumb:hover,
+.tbl-wrap::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(13, 29, 54, 0.45);
+}
+html.dark .sidebar,
+html.dark .sb-nav,
+html.dark .main-content,
+html.dark .pdf-preview-scroll,
+html.dark .preview-body,
+html.dark .modal-bd,
+html.dark .tbl-wrap {
+  scrollbar-color: rgba(255, 255, 255, 0.34) transparent;
+}
+html.dark .sidebar::-webkit-scrollbar-thumb,
+html.dark .sb-nav::-webkit-scrollbar-thumb,
+html.dark .main-content::-webkit-scrollbar-thumb,
+html.dark .pdf-preview-scroll::-webkit-scrollbar-thumb,
+html.dark .preview-body::-webkit-scrollbar-thumb,
+html.dark .modal-bd::-webkit-scrollbar-thumb,
+html.dark .tbl-wrap::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.26);
+}
 
 .sb-head { padding: 24px 20px; border-bottom: 1px solid var(--border); }
 .sb-logo { display: flex; align-items: center; gap: 12px; }
@@ -1043,7 +1112,9 @@ html.dark .tb-dropdown-menu { background: var(--card); border-color: var(--borde
   display: grid;
   grid-template-columns: 1fr;
   align-items: start;
+  height: 100vh;
   min-height: 100vh;
+  overflow: hidden;
   transition: margin-left 0.3s ease;
 }
 body.sidebar-hidden .app-workspace { margin-left: 0; }
@@ -1204,9 +1275,11 @@ body.preview-open .app-workspace {
   grid-row: 1;
   width: 100%;
   min-width: 0;
-  overflow-x: visible;
-  overflow-y: visible;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
   min-height: calc(100vh - var(--topbar-h));
+  height: calc(100vh - var(--topbar-h));
 }
 
 .app-workspace > .view {
