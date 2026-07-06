@@ -1,6 +1,6 @@
 (function() {
-// Replenishment Study Module
-// Handles the UI, compilation, and custom PDF generation for Model DSR
+// Model DSR Report Module
+// Handles the UI, compilation, and custom PDF generation for Model DSR reports.
 
 function injectDraggableStyles() {
   if (document.getElementById('draggable-styles')) return;
@@ -64,6 +64,9 @@ async function initModelDsrView() {
   if (contentContainer) contentContainer.style.display = 'none';
   if (!editorContainer) return;
   
+  const replenishmentEditor = document.getElementById('repl-editor-container');
+  if (replenishmentEditor) replenishmentEditor.innerHTML = '';
+
   editorContainer.style.display = 'block';
 
   if (!S.activeProject || !S.activeProject.id) {
@@ -71,7 +74,7 @@ async function initModelDsrView() {
       <div class="card" style="margin-top:20px; padding:40px; text-align:center; max-width:600px; margin:20px auto;">
         <i data-lucide="info" style="width:48px;height:48px;color:#3b82f6;display:block;margin:0 auto 16px;"></i>
         <h2 style="color:#17324d;">No Active Project</h2>
-        <p style="color:#64748b; margin-top:8px;">Please select a DSR project from the projects list first to manage its Replenishment Reports.</p>
+        <p style="color:#64748b; margin-top:8px;">Please select a DSR project from the projects list first to manage its Model DSR reports.</p>
       </div>
     `;
     if (window.lucide) lucide.createIcons();
@@ -85,22 +88,7 @@ async function initModelDsrView() {
     </div>
   `;
   
-  try {
-    const studies = await apiFetch(`/projects/${S.activeProject.id}/replenishment`);
-    window.modelDsrReports = (studies || []).filter(s => s.reportState?.type === 'model_dsr').map(s => ({
-      id: s.id,
-      name: s.title,
-      createdAt: s.createdAt,
-      sections: s.reportState?.sections || [],
-      frontMatterPdfs: s.reportState?.frontMatterPdfs || {},
-      customPdfs: s.reportState?.customPdfs || {},
-      customSections: s.reportState?.customSections || [],
-      sectionOrder: s.reportState?.sectionOrder || []
-    }));
-  } catch (err) {
-    console.error("Failed to load reports from database:", err);
-    window.modelDsrReports = [];
-  }
+  await refreshLocalReportsFromServer();
   
   // Show the main option cards
   window.showModelDsrOptions(editorContainer);
@@ -115,7 +103,7 @@ window.showView = function(viewId, caller) {
   }
 };
 
-if (window.location.hash === '#replenishment' || window.currentViewId === 'replenishment') {
+if (window.location.hash === '#model-dsr' || window.currentViewId === 'model-dsr') {
   setTimeout(() => initModelDsrView(), 100);
 }
 
@@ -156,25 +144,85 @@ function getModelDsrSectionTitle(viewId) {
     : fallback;
 }
 
-// Helper: load reports from server database
-async function loadLocalReports() {
+let localReportsCache = [];
+
+function getReportsStorageKey() {
+  return S.activeProject && S.activeProject.id ? `model_dsr_reports_${S.activeProject.id}` : '';
+}
+
+function normalizeBackendReport(study) {
+  const state = study && study.reportState && typeof study.reportState === 'object' ? study.reportState : {};
+  return {
+    id: study.id,
+    name: study.title,
+    createdAt: study.createdAt,
+    sections: Array.isArray(state.sections) ? state.sections : [],
+    frontMatterPdfs: state.frontMatterPdfs || {},
+    customPdfs: state.customPdfs || {},
+    customSections: Array.isArray(state.customSections) ? state.customSections : [],
+    sectionOrder: Array.isArray(state.sectionOrder) ? state.sectionOrder : []
+  };
+}
+
+function cacheReports(reports) {
+  localReportsCache = Array.isArray(reports) ? reports : [];
+  window.modelDsrReports = localReportsCache;
+  const key = getReportsStorageKey();
+  if (key) {
+    try {
+      localStorage.setItem(key, JSON.stringify(localReportsCache));
+    } catch (err) {
+      console.warn("Failed to cache Model DSR reports locally:", err);
+    }
+  }
+  return localReportsCache;
+}
+
+function loadLocalReports() {
   if (!S.activeProject) return [];
+  if (localReportsCache.length) return localReportsCache;
+  const key = getReportsStorageKey();
+  if (!key) return [];
+  try {
+    return cacheReports(JSON.parse(localStorage.getItem(key) || '[]'));
+  } catch (err) {
+    console.warn("Failed to load local Model DSR cache:", err);
+    return cacheReports([]);
+  }
+}
+
+async function refreshLocalReportsFromServer() {
+  const fallbackReports = loadLocalReports();
+  if (!S.activeProject || !S.activeProject.id) return fallbackReports;
   try {
     const studies = await apiFetch(`/projects/${S.activeProject.id}/replenishment`);
-    return (studies || []).filter(s => s.reportState?.type === 'model_dsr').map(s => ({
-      id: s.id,
-      name: s.title,
-      createdAt: s.createdAt,
-      sections: s.reportState?.sections || [],
-      frontMatterPdfs: s.reportState?.frontMatterPdfs || {},
-      customPdfs: s.reportState?.customPdfs || {},
-      customSections: s.reportState?.customSections || [],
-      sectionOrder: s.reportState?.sectionOrder || []
-    }));
+    const reports = (studies || [])
+      .filter(study => study.reportState?.type === 'model_dsr')
+      .map(normalizeBackendReport);
+    return cacheReports(reports);
   } catch (err) {
     console.error("Failed to load reports from database:", err);
-    return [];
+    return fallbackReports;
   }
+}
+
+function upsertLocalReport(report) {
+  const reports = loadLocalReports();
+  const index = reports.findIndex(r => r.id === report.id);
+  if (index >= 0) {
+    reports[index] = report;
+  } else {
+    reports.unshift(report);
+  }
+  cacheReports(reports);
+  return report;
+}
+
+function saveLocalReports(reports) {
+  cacheReports(reports);
+  localReportsCache.forEach(report => {
+    saveReportToServer(report);
+  });
 }
 
 // Helper: save report to server database
@@ -233,7 +281,7 @@ function showModelDsrOptions(container) {
     <div style="max-width: 800px; margin: 40px auto; padding: 0 20px;">
       <div style="text-align: center; margin-bottom: 40px;">
         <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 24px; font-weight: 800; color: #1e293b; margin: 0 0 10px 0;">Model DSR</h2>
-        <p style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; color: #64748b; margin: 0;">Create and compile custom reports for replenishment studies by selecting specific DSR sections.</p>
+        <p style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; color: #64748b; margin: 0;">Create and compile Model DSR reports by selecting specific DSR sections.</p>
       </div>
       
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
@@ -277,7 +325,7 @@ function showCreateReportForm() {
       <div style="display: flex; flex-direction: column; gap: 16px;">
         <div class="field" style="display: flex; flex-direction: column; gap: 6px; text-align: left;">
           <label for="new-report-name-input" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">Report Title</label>
-          <input type="text" id="new-report-name-input" placeholder="e.g. Monsoon Replenishment Report 2026" style="padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s;" onkeydown="if(event.key==='Enter') window.mdsrSubmitCustomReportName()">
+          <input type="text" id="new-report-name-input" placeholder="e.g. Model DSR Report 2026" style="padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s;" onkeydown="if(event.key==='Enter') window.mdsrSubmitCustomReportName()">
         </div>
         <div style="display: flex; gap: 10px;">
           <button class="btn btn-outline" onclick="window.showModelDsrOptions(document.getElementById('model-dsr-editor-container'))" style="flex:1; height: 42px; border-radius: 8px; cursor: pointer;">Back</button>
@@ -333,7 +381,7 @@ async function submitCustomReportName() {
       sectionOrder: []
     };
     
-    window.activeReport = newReport;
+    window.activeReport = upsertLocalReport(newReport);
     const editorContainer = document.getElementById('model-dsr-editor-container');
     if (editorContainer) {
       renderCustomReportGenerator(editorContainer, newReport);
@@ -348,7 +396,7 @@ async function showExistingReportsList() {
   if (!editorContainer) return;
   
   editorContainer.innerHTML = `<div style="padding:40px; text-align:center; font-weight:700; color:#1e293b;">Loading saved reports...</div>`;
-  const reports = await loadLocalReports();
+  const reports = await refreshLocalReportsFromServer();
   
   let rowsHtml = '';
   if (reports.length === 0) {
@@ -412,16 +460,7 @@ async function showExistingReportsList() {
 async function openCustomReport(reportId) {
   try {
     const s = await apiFetch(`/replenishment/${reportId}`);
-    const report = {
-      id: s.id,
-      name: s.title,
-      createdAt: s.createdAt,
-      sections: s.reportState?.sections || [],
-      frontMatterPdfs: s.reportState?.frontMatterPdfs || {},
-      customPdfs: s.reportState?.customPdfs || {},
-      customSections: s.reportState?.customSections || [],
-      sectionOrder: s.reportState?.sectionOrder || []
-    };
+    const report = upsertLocalReport(normalizeBackendReport(s));
     window.activeReport = report;
     const editorContainer = document.getElementById('model-dsr-editor-container');
     if (editorContainer) {
@@ -477,16 +516,7 @@ function deleteCustomReport(reportId) {
 async function downloadCustomReportPDFDirect(reportId) {
   try {
     const s = await apiFetch(`/replenishment/${reportId}`);
-    const report = {
-      id: s.id,
-      name: s.title,
-      createdAt: s.createdAt,
-      sections: s.reportState?.sections || [],
-      frontMatterPdfs: s.reportState?.frontMatterPdfs || {},
-      customPdfs: s.reportState?.customPdfs || {},
-      customSections: s.reportState?.customSections || [],
-      sectionOrder: s.reportState?.sectionOrder || []
-    };
+    const report = upsertLocalReport(normalizeBackendReport(s));
     restoreReportFrontMatterPdfs(report);
     
     const checkedIds = report.sections || [];
@@ -805,7 +835,7 @@ function handleFrontMatterPdfUpload(input, reportId, sectionId, reportName) {
 function removeFrontMatterPdfUpload(reportId, sectionId, reportName) {
   showCustomConfirmModal({
     title: "Remove front matter PDF?",
-    message: "The uploaded PDF for this front matter part will be removed from this replenishment report.",
+    message: "The uploaded PDF for this front matter part will be removed from this Model DSR report.",
     confirmText: "Remove",
     tone: "danger",
     onConfirm: () => {
@@ -2735,7 +2765,7 @@ async function generateModelDsrPdfBlob(reportName, checkedIds, reportId) {
         }
       });
       if (!addedAny) {
-        const placeholderSrc = localRenderTextPageCanvas(title, 'No uploaded PDF or table data is available for this selected section yet.', 'Selected Replenishment Section');
+        const placeholderSrc = localRenderTextPageCanvas(title, 'No uploaded PDF or table data is available for this selected section yet.', 'Selected Model DSR Section');
         addPreviewImagePage(placeholderSrc, `${title} - Page 1`);
         addedAny = true;
       }
@@ -3007,21 +3037,21 @@ async function generateModelDsrPDF(reportName, checkedIds, reportId) {
     return;
   }
   
-  showPdfProgressToast('Generating Replenishment PDF report...');
+  showPdfProgressToast('Generating Model DSR PDF report...');
   
   try {
     const blob = await generateModelDsrPdfBlob(reportName, checkedIds, reportId);
     hidePdfProgressToast();
     
     if (blob) {
-      const filename = `${reportName.replace(/\s+/g, '_')}_Replenishment_Report.pdf`;
+      const filename = `${reportName.replace(/\s+/g, '_')}_Model_DSR_Report.pdf`;
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = filename;
       document.body.appendChild(a);
       a.click();
       a.remove();
-      toast('Replenishment Report PDF downloaded successfully!', 'success');
+      toast('Model DSR PDF downloaded successfully!', 'success');
     } else {
       toast('PDF compilation failed.', 'error');
     }

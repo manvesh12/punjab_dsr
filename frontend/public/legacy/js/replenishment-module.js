@@ -64,6 +64,9 @@ async function initReplenishmentView() {
   if (contentContainer) contentContainer.style.display = 'none';
   if (!editorContainer) return;
   
+  const modelDsrEditor = document.getElementById('model-dsr-editor-container');
+  if (modelDsrEditor) modelDsrEditor.innerHTML = '';
+
   editorContainer.style.display = 'block';
 
   if (!S.activeProject || !S.activeProject.id) {
@@ -85,22 +88,7 @@ async function initReplenishmentView() {
     </div>
   `;
   
-  try {
-    const studies = await apiFetch(`/projects/${S.activeProject.id}/replenishment`);
-    window.replenishmentReports = (studies || []).filter(s => s.reportState?.type === 'replenishment').map(s => ({
-      id: s.id,
-      name: s.title,
-      createdAt: s.createdAt,
-      sections: s.reportState?.sections || [],
-      frontMatterPdfs: s.reportState?.frontMatterPdfs || {},
-      customPdfs: s.reportState?.customPdfs || {},
-      customSections: s.reportState?.customSections || [],
-      sectionOrder: s.reportState?.sectionOrder || []
-    }));
-  } catch (err) {
-    console.error("Failed to load reports from database:", err);
-    window.replenishmentReports = [];
-  }
+  await refreshLocalReportsFromServer();
   
   // Show the main option cards
   window.showReplenishmentOptions(editorContainer);
@@ -156,25 +144,85 @@ function getReplenishmentSectionTitle(viewId) {
     : fallback;
 }
 
-// Helper: load reports from server database
-async function loadLocalReports() {
+let localReportsCache = [];
+
+function getReportsStorageKey() {
+  return S.activeProject && S.activeProject.id ? `repl_reports_${S.activeProject.id}` : '';
+}
+
+function normalizeBackendReport(study) {
+  const state = study && study.reportState && typeof study.reportState === 'object' ? study.reportState : {};
+  return {
+    id: study.id,
+    name: study.title,
+    createdAt: study.createdAt,
+    sections: Array.isArray(state.sections) ? state.sections : [],
+    frontMatterPdfs: state.frontMatterPdfs || {},
+    customPdfs: state.customPdfs || {},
+    customSections: Array.isArray(state.customSections) ? state.customSections : [],
+    sectionOrder: Array.isArray(state.sectionOrder) ? state.sectionOrder : []
+  };
+}
+
+function cacheReports(reports) {
+  localReportsCache = Array.isArray(reports) ? reports : [];
+  window.replenishmentReports = localReportsCache;
+  const key = getReportsStorageKey();
+  if (key) {
+    try {
+      localStorage.setItem(key, JSON.stringify(localReportsCache));
+    } catch (err) {
+      console.warn("Failed to cache replenishment reports locally:", err);
+    }
+  }
+  return localReportsCache;
+}
+
+function loadLocalReports() {
   if (!S.activeProject) return [];
+  if (localReportsCache.length) return localReportsCache;
+  const key = getReportsStorageKey();
+  if (!key) return [];
+  try {
+    return cacheReports(JSON.parse(localStorage.getItem(key) || '[]'));
+  } catch (err) {
+    console.warn("Failed to load local replenishment cache:", err);
+    return cacheReports([]);
+  }
+}
+
+async function refreshLocalReportsFromServer() {
+  const fallbackReports = loadLocalReports();
+  if (!S.activeProject || !S.activeProject.id) return fallbackReports;
   try {
     const studies = await apiFetch(`/projects/${S.activeProject.id}/replenishment`);
-    return (studies || []).filter(s => s.reportState?.type === 'replenishment').map(s => ({
-      id: s.id,
-      name: s.title,
-      createdAt: s.createdAt,
-      sections: s.reportState?.sections || [],
-      frontMatterPdfs: s.reportState?.frontMatterPdfs || {},
-      customPdfs: s.reportState?.customPdfs || {},
-      customSections: s.reportState?.customSections || [],
-      sectionOrder: s.reportState?.sectionOrder || []
-    }));
+    const reports = (studies || [])
+      .filter(study => !study.reportState?.type || study.reportState?.type === 'replenishment')
+      .map(normalizeBackendReport);
+    return cacheReports(reports);
   } catch (err) {
     console.error("Failed to load reports from database:", err);
-    return [];
+    return fallbackReports;
   }
+}
+
+function upsertLocalReport(report) {
+  const reports = loadLocalReports();
+  const index = reports.findIndex(r => r.id === report.id);
+  if (index >= 0) {
+    reports[index] = report;
+  } else {
+    reports.unshift(report);
+  }
+  cacheReports(reports);
+  return report;
+}
+
+function saveLocalReports(reports) {
+  cacheReports(reports);
+  localReportsCache.forEach(report => {
+    saveReportToServer(report);
+  });
 }
 
 // Helper: save report to server database
@@ -333,7 +381,7 @@ async function submitCustomReportName() {
       sectionOrder: []
     };
     
-    window.activeReport = newReport;
+    window.activeReport = upsertLocalReport(newReport);
     const editorContainer = document.getElementById('repl-editor-container');
     if (editorContainer) {
       renderCustomReportGenerator(editorContainer, newReport);
@@ -348,7 +396,7 @@ async function showExistingReportsList() {
   if (!editorContainer) return;
   
   editorContainer.innerHTML = `<div style="padding:40px; text-align:center; font-weight:700; color:#1e293b;">Loading saved reports...</div>`;
-  const reports = await loadLocalReports();
+  const reports = await refreshLocalReportsFromServer();
   
   let rowsHtml = '';
   if (reports.length === 0) {
@@ -412,16 +460,7 @@ async function showExistingReportsList() {
 async function openCustomReport(reportId) {
   try {
     const s = await apiFetch(`/replenishment/${reportId}`);
-    const report = {
-      id: s.id,
-      name: s.title,
-      createdAt: s.createdAt,
-      sections: s.reportState?.sections || [],
-      frontMatterPdfs: s.reportState?.frontMatterPdfs || {},
-      customPdfs: s.reportState?.customPdfs || {},
-      customSections: s.reportState?.customSections || [],
-      sectionOrder: s.reportState?.sectionOrder || []
-    };
+    const report = upsertLocalReport(normalizeBackendReport(s));
     window.activeReport = report;
     const editorContainer = document.getElementById('repl-editor-container');
     if (editorContainer) {
@@ -477,16 +516,7 @@ function deleteCustomReport(reportId) {
 async function downloadCustomReportPDFDirect(reportId) {
   try {
     const s = await apiFetch(`/replenishment/${reportId}`);
-    const report = {
-      id: s.id,
-      name: s.title,
-      createdAt: s.createdAt,
-      sections: s.reportState?.sections || [],
-      frontMatterPdfs: s.reportState?.frontMatterPdfs || {},
-      customPdfs: s.reportState?.customPdfs || {},
-      customSections: s.reportState?.customSections || [],
-      sectionOrder: s.reportState?.sectionOrder || []
-    };
+    const report = upsertLocalReport(normalizeBackendReport(s));
     restoreReportFrontMatterPdfs(report);
     
     const checkedIds = report.sections || [];

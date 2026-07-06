@@ -65,6 +65,15 @@ replenishmentRouter.post("/projects/:projectId/replenishment", requireAuth, asyn
       }
     }
 
+    const incomingReportState =
+      body.reportState && typeof body.reportState === "object" && !Array.isArray(body.reportState)
+        ? (body.reportState as Prisma.JsonObject)
+        : {};
+    const reportState = {
+      ...(syncedState as Record<string, unknown>),
+      ...incomingReportState
+    } as Prisma.InputJsonObject;
+
     const study = await prisma.replenishmentStudy.create({
       data: {
         projectId: parsedProjectId,
@@ -72,7 +81,7 @@ replenishmentRouter.post("/projects/:projectId/replenishment", requireAuth, asyn
         status: ReportStatus.DRAFT,
         createdBy: req.user?.id,
         surveyData: body.surveyData || {},
-        reportState: syncedState
+        reportState
       }
     });
 

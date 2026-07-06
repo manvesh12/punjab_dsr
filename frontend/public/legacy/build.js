@@ -47,7 +47,7 @@ const JS_FILES = [
   'js/main.js'
 ];
 
-const ASSET_VERSION = 'white-confirm-modals-20260706-v1';
+const ASSET_VERSION = 'repl-model-dsr-backend-20260707-v1';
 const applyAssetVersion = (html) => html.replace(/\{\{ASSET_VERSION\}\}/g, ASSET_VERSION);
 
 function buildJsBundle() {
@@ -102,8 +102,8 @@ function compile() {
 
     // 6. Append bundled and extra JS modules + Leaflet map script + styles
     html += `\n<script defer src="${JS_BUNDLE_FILE}?v=${ASSET_VERSION}-v3"></script>`;
-    html += `\n<script defer src="js/model-dsr-module.js?v=11"></script>`;
-    html += `\n<script defer src="js/replenishment-module.js?v=23"></script>`;
+    html += `\n<script defer src="js/model-dsr-module.js?v=12"></script>`;
+    html += `\n<script defer src="js/replenishment-module.js?v=24"></script>`;
     
     html += `\n<script>
 document.addEventListener("DOMContentLoaded", function() {
