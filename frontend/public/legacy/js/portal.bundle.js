@@ -4194,8 +4194,8 @@ function bindChapterUploadButtons(root) {
   });
 }
 function triggerChapterUpload(id) {
-  const ch = S.chapters.find(x => x.id === id);
-  const idx = S.chapters.findIndex(x => x.id === id);
+  const ch = S.chapters.find(x => String(x.id) === String(id));
+  const idx = S.chapters.findIndex(x => String(x.id) === String(id));
   if (!ch) {
     toast('Chapter not found.', 'error');
     return;
@@ -4231,13 +4231,13 @@ function addChapter() {
   if (window.debouncedSaveState) window.debouncedSaveState();
 }
 function deleteChapter(id) {
-  const idx = S.chapters.findIndex(c => c.id === id);
+  const idx = S.chapters.findIndex(c => String(c.id) === String(id));
   if (typeof canEditChapter === 'function' && !canEditChapter(idx + 1)) {
     toast('This chapter is locked for your role.', 'error');
     return;
   }
   customConfirm('Remove this chapter completely?', () => {
-    S.chapters = S.chapters.filter(c => c.id !== id);
+    S.chapters = S.chapters.filter(c => String(c.id) !== String(id));
     if (S.chapterPDFs) delete S.chapterPDFs[id];
     renderChapters();
     if (window.pdfPreview) window.pdfPreview.notifyUpdate('chapters');
@@ -4258,8 +4258,8 @@ function moveChapter(idx, dir) {
 function handleChapterUpload(e, id) {
   const f = e.target.files[0];
   if (!f) return;
-  const ch = S.chapters.find(x => x.id === id);
-  const idx = S.chapters.findIndex(x => x.id === id);
+  const ch = S.chapters.find(x => String(x.id) === String(id));
+  const idx = S.chapters.findIndex(x => String(x.id) === String(id));
   if (!ch) return;
   if (typeof canEditChapter === 'function' && !canEditChapter(idx + 1)) {
     toast('This chapter is locked for your role.', 'error');
@@ -4302,8 +4302,8 @@ function handleChapterUpload(e, id) {
   });
 }
 function deleteChapterFile(id) {
-  const ch = S.chapters.find(x => x.id === id);
-  const idx = S.chapters.findIndex(x => x.id === id);
+  const ch = S.chapters.find(x => String(x.id) === String(id));
+  const idx = S.chapters.findIndex(x => String(x.id) === String(id));
   if (typeof canEditChapter === 'function' && !canEditChapter(idx + 1)) {
     toast('This chapter is locked for your role.', 'error');
     return;
@@ -4404,7 +4404,7 @@ function updatePlateField(index, field, value) {
 }
 function deletePlateReq(id) {
   customConfirm('Remove this plate completely?', () => {
-    S.plates = S.plates.filter(p => p.id !== id);
+    S.plates = S.plates.filter(p => String(p.id) !== String(id));
     renderPlates();
     if (window.pdfPreview) window.pdfPreview.notifyUpdate('plates');
     if (window.debouncedSaveState) window.debouncedSaveState();
@@ -4420,7 +4420,7 @@ function movePlate(idx, dir) {
 function handlePlateUpload(e, id) {
   const f = e.target.files[0];
   if (!f) return;
-  const p = S.plates.find(x => x.id === id);
+  const p = S.plates.find(x => String(x.id) === String(id));
   if (!p) return;
   const sizeStr = (f.size / 1024).toFixed(1) + ' KB';
   if (f.type === 'application/pdf') {
@@ -4472,7 +4472,7 @@ function handlePlateUpload(e, id) {
   }
 }
 function deletePlateFile(id) {
-  const p = S.plates.find(x => x.id === id);
+  const p = S.plates.find(x => String(x.id) === String(id));
   if (p) {
     p.fileName = null;
     p.fileSize = null;
