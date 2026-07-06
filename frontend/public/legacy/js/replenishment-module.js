@@ -85,6 +85,8 @@ window.onParentCheckboxChange = onParentCheckboxChange;
 window.onSubCheckboxChange = onSubCheckboxChange;
 window.updateCustomReportPreview = updateCustomReportPreview;
 window.downloadCustomReportPDF = downloadCustomReportPDF;
+window.initDragAndDrop = initDragAndDrop;
+window.saveNewSectionOrder = saveNewSectionOrder;
 
 function showReplenishmentOptions(container) {
   container.innerHTML = `
@@ -290,7 +292,7 @@ function downloadCustomReportPDFDirect(reportId) {
     return;
   }
   
-  generateReplenishmentPDF(report.name, checkedIds);
+  generateReplenishmentPDF(report.name, checkedIds, reportId);
 }
 
 function saveReportSelection(reportId) {
@@ -302,6 +304,95 @@ function saveReportSelection(reportId) {
   report.sections = Array.from(checkboxes).map(c => c.value);
   
   saveLocalReports(reports);
+}
+
+function initDragAndDrop(reportId, reportName) {
+  const container = document.getElementById('draggable-sections-list');
+  if (!container) return;
+  
+  let dragEl = null;
+  
+  const items = container.querySelectorAll('.draggable-section-item');
+  items.forEach(item => {
+    const handle = item.querySelector('.drag-handle');
+    if (handle) {
+      handle.addEventListener('mousedown', () => {
+        item.setAttribute('draggable', 'true');
+      });
+      handle.addEventListener('mouseup', () => {
+        item.removeAttribute('draggable');
+      });
+    }
+    
+    item.addEventListener('dragstart', (e) => {
+      dragEl = item;
+      item.style.opacity = '0.5';
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', item.getAttribute('data-section-id'));
+    });
+    
+    item.addEventListener('dragend', () => {
+      dragEl = null;
+      items.forEach(it => {
+        it.style.opacity = '1';
+        it.style.border = '1px solid #e2e8f0';
+        it.style.background = '#f8fafc';
+      });
+      item.removeAttribute('draggable');
+      
+      // Save new order
+      saveNewSectionOrder(reportId, reportName);
+    });
+    
+    item.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      
+      if (item === dragEl) return;
+      
+      const bounding = item.getBoundingClientRect();
+      const offset = e.clientY - bounding.top;
+      if (offset > bounding.height / 2) {
+        item.after(dragEl);
+      } else {
+        item.before(dragEl);
+      }
+    });
+    
+    item.addEventListener('dragenter', (e) => {
+      e.preventDefault();
+      if (item !== dragEl) {
+        item.style.border = '1px dashed #2563eb';
+        item.style.background = '#eff6ff';
+      }
+    });
+    
+    item.addEventListener('dragleave', () => {
+      if (item !== dragEl) {
+        item.style.border = '1px solid #e2e8f0';
+        item.style.background = '#f8fafc';
+      }
+    });
+  });
+}
+
+function saveNewSectionOrder(reportId, reportName) {
+  const container = document.getElementById('draggable-sections-list');
+  if (!container) return;
+  
+  const items = container.querySelectorAll('.draggable-section-item');
+  const sectionOrder = Array.from(items).map(item => item.getAttribute('data-section-id'));
+  
+  const reports = loadLocalReports();
+  const report = reports.find(r => r.id === reportId);
+  if (report) {
+    report.sectionOrder = sectionOrder;
+    saveLocalReports(reports);
+  }
+  
+  // Save checkbox selections and update live preview
+  saveReportSelection(reportId);
+  window.updateCustomReportPreview(reportName, reportId);
 }
 
 function hydrateCheckboxStates(checkedIds) {
@@ -418,6 +509,37 @@ function renderCustomReportGenerator(container, report) {
     { id: 'annexure-k', name: 'Annexure K', type: 'More Annexures' }
   ];
 
+  // Ensure report has a valid and complete sectionOrder
+  const allSectionIds = sections.map(s => s.id);
+  if (!report.sectionOrder || !Array.isArray(report.sectionOrder)) {
+    report.sectionOrder = allSectionIds;
+    const reports = loadLocalReports();
+    const existing = reports.find(r => r.id === report.id);
+    if (existing) {
+      existing.sectionOrder = report.sectionOrder;
+      saveLocalReports(reports);
+    }
+  } else {
+    // Append any missing section IDs to sectionOrder (in case new sections are added in code later)
+    const missingIds = allSectionIds.filter(id => !report.sectionOrder.includes(id));
+    if (missingIds.length > 0) {
+      report.sectionOrder = [...report.sectionOrder, ...missingIds];
+      const reports = loadLocalReports();
+      const existing = reports.find(r => r.id === report.id);
+      if (existing) {
+        existing.sectionOrder = report.sectionOrder;
+        saveLocalReports(reports);
+      }
+    }
+  }
+
+  // Sort sections based on report.sectionOrder
+  sections.sort((a, b) => {
+    const idxA = report.sectionOrder.indexOf(a.id);
+    const idxB = report.sectionOrder.indexOf(b.id);
+    return idxA - idxB;
+  });
+
   let checklistHtml = '';
   sections.forEach(s => {
     const escapedReportName = reportName.replace(/'/g, "\\'");
@@ -435,22 +557,28 @@ function renderCustomReportGenerator(container, report) {
       });
 
       checklistHtml += `
-        <div style="margin-bottom:12px; padding:8px; background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0;">
+        <div class="draggable-section-item" data-section-id="${s.id}" style="margin-bottom:12px; padding:8px 12px; background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0; position:relative; transition: all 0.2s ease;">
           <div style="display:flex; align-items:center; gap:10px;">
+            <span class="drag-handle" style="cursor: grab; color: #94a3b8; display: flex; align-items: center; padding: 4px 2px;">
+              <i data-lucide="grip-vertical" style="width: 14px; height: 14px;"></i>
+            </span>
             <input type="checkbox" id="chk-${s.id}" value="${s.id}" onchange="window.onParentCheckboxChange('${s.id}', '${escapedReportName}', '${report.id}')" style="width:16px; height:16px; cursor:pointer;">
             <label for="chk-${s.id}" style="font-size:13px; font-weight:700; cursor:pointer; color:#1e293b; display:flex; align-items:center; gap:6px; margin:0; width:100%;">
               <span style="font-size:9px; padding:2px 6px; background:#cbd5e1; border-radius:10px; text-transform:uppercase; color:#475569; font-weight:700;">${s.type}</span>
               <span>${s.name}</span>
             </label>
           </div>
-          <div id="sub-container-${s.id}" style="padding-left:26px; margin-top:8px; display:flex; flex-direction:column; gap:4px; border-left: 2px dashed #cbd5e1; margin-left: 7px;">
+          <div id="sub-container-${s.id}" style="padding-left:18px; margin-top:8px; display:flex; flex-direction:column; gap:4px; border-left: 2px dashed #cbd5e1; margin-left: 35px;">
             ${subHtml}
           </div>
         </div>
       `;
     } else {
       checklistHtml += `
-        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px; padding:8px; background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0;">
+        <div class="draggable-section-item" data-section-id="${s.id}" style="display:flex; align-items:center; gap:10px; margin-bottom:12px; padding:8px 12px; background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0; position:relative; transition: all 0.2s ease;">
+          <span class="drag-handle" style="cursor: grab; color: #94a3b8; display: flex; align-items: center; padding: 4px 2px;">
+            <i data-lucide="grip-vertical" style="width: 14px; height: 14px;"></i>
+          </span>
           <input type="checkbox" id="chk-${s.id}" value="${s.id}" onchange="window.updateCustomReportPreview('${escapedReportName}', '${report.id}')" style="width:16px; height:16px; cursor:pointer;">
           <label for="chk-${s.id}" style="font-size:13px; font-weight:700; cursor:pointer; color:#1e293b; display:flex; align-items:center; gap:6px; margin:0; width:100%;">
             <span style="font-size:9px; padding:2px 6px; background:#e2e8f0; border-radius:10px; text-transform:uppercase; color:#475569; font-weight:700;">${s.type}</span>
@@ -479,8 +607,15 @@ function renderCustomReportGenerator(container, report) {
       <div class="card-bd" style="flex:1; display:grid; grid-template-columns: 1fr 1.2fr; gap:20px; overflow:hidden; padding:20px;">
         <!-- LEFT COLUMN: Checklist -->
         <div style="overflow-y:auto; padding-right:10px; border-right:1px solid #e2e8f0; max-height:100%;">
-          <h3 style="margin-top:0; color:#0f172a; margin-bottom:15px; font-size:14px; font-weight:700;">Select Sections:</h3>
-          ${checklistHtml}
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h3 style="margin:0; color:#0f172a; font-size:14px; font-weight:700;">Select Sections:</h3>
+            <span style="font-size:11px; color:#64748b; background:#f1f5f9; padding:2px 8px; border-radius:4px; display:inline-flex; align-items:center; gap:4px;">
+              <i data-lucide="grip-vertical" style="width:12px; height:12px;"></i> Drag to reorder
+            </span>
+          </div>
+          <div id="draggable-sections-list">
+            ${checklistHtml}
+          </div>
         </div>
         
         <!-- RIGHT COLUMN: Preview -->
@@ -502,6 +637,13 @@ function renderCustomReportGenerator(container, report) {
   
   // Render live preview on load
   updateCustomReportPreview(reportName, report.id);
+
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+
+  initDragAndDrop(report.id, reportName);
+}
 }
 
 // Debouncer for rendering preview to fix lagging/freezing
@@ -540,7 +682,7 @@ function realUpdateCustomReportPreview(reportName, reportId) {
     saveReportSelection(reportId);
   }
   
-  const selectedHtml = compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds);
+  const selectedHtml = compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds, reportId);
   iframe.srcdoc = selectedHtml;
 }
 
@@ -605,7 +747,7 @@ function getLivePreviewAnnexureSectionHtml(viewId) {
   `;
 }
 
-function compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds) {
+function compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds, reportId) {
   const district = (window.S && S.frontMatter && S.frontMatter.district) || 'Jalandhar';
   const year = (window.S && S.frontMatter && S.frontMatter.year) || '2025-26';
   const title = document.getElementById('fm-title')?.value || (S.frontMatter && S.frontMatter.title) || 'District Survey Report for Sand Mining';
@@ -616,38 +758,51 @@ function compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds) {
   const preface = document.getElementById('fm-preface')?.value || (S.frontMatter && S.frontMatter.preface) || '';
   const ack = document.getElementById('fm-acknowledgement')?.value || (S.frontMatter && S.frontMatter.acknowledgement) || '';
 
-  // Order checked sections according to sidebar structure
+  // Order checked sections according to saved sectionOrder (or default if not present)
+  let sectionOrder = [
+    'front-matter',
+    'chapters',
+    'plates',
+    'graphs',
+    'anx1', 'anx2', 'anx3', 'anx4', 'anx5', 'anx6', 'anx7',
+    'annexure-b', 'annexure-c', 'annexure-d', 'annexure-e', 'annexure-f', 'annexure-g', 'annexure-h', 'annexure-i', 'annexure-j', 'annexure-k'
+  ];
+
+  if (reportId) {
+    const reports = loadLocalReports();
+    const report = reports.find(r => r.id === reportId);
+    if (report && report.sectionOrder && Array.isArray(report.sectionOrder)) {
+      sectionOrder = report.sectionOrder;
+    }
+  }
+
   const orderedIds = [];
   
-  // 1. Front Matter subsections
-  const fmSubsections = ['fm-cover', 'fm-toc', 'fm-pref', 'fm-ack', 'fm-cert'];
-  const activeFmSubs = fmSubsections.filter(id => checkedIds.includes(id));
-  if (activeFmSubs.length > 0) {
-    orderedIds.push({ id: 'front-matter', subIds: activeFmSubs });
-  }
-  
-  // 2. Chapters
-  const checkedChapters = (S.chapters || []).filter(ch => checkedIds.includes(`chapter-${ch.id}`));
-  if (checkedChapters.length > 0) {
-    orderedIds.push({ id: 'chapters', subIds: checkedChapters.map(ch => `chapter-${ch.id}`) });
-  }
-  
-  // 3. Plates
-  const checkedPlates = (S.plates || []).filter(pl => checkedIds.includes(`plate-${pl.id}`));
-  if (checkedPlates.length > 0) {
-    orderedIds.push({ id: 'plates', subIds: checkedPlates.map(pl => `plate-${pl.id}`) });
-  }
-  
-  // 4. Graphs
-  if (checkedIds.includes('graphs')) {
-    orderedIds.push({ id: 'graphs' });
-  }
-  
-  // 5. Annexures
-  const annexureIds = ['anx1', 'anx2', 'anx3', 'anx4', 'anx5', 'anx6', 'anx7', 'annexure-b', 'annexure-c', 'annexure-d', 'annexure-e', 'annexure-f', 'annexure-g', 'annexure-h', 'annexure-i', 'annexure-j', 'annexure-k'];
-  annexureIds.forEach(anxId => {
-    if (checkedIds.includes(anxId)) {
-      orderedIds.push({ id: anxId });
+  sectionOrder.forEach(secId => {
+    if (secId === 'front-matter') {
+      const fmSubsections = ['fm-cover', 'fm-toc', 'fm-pref', 'fm-ack', 'fm-cert'];
+      const activeFmSubs = fmSubsections.filter(id => checkedIds.includes(id));
+      if (activeFmSubs.length > 0) {
+        orderedIds.push({ id: 'front-matter', subIds: activeFmSubs });
+      }
+    } else if (secId === 'chapters') {
+      const checkedChapters = (S.chapters || []).filter(ch => checkedIds.includes(`chapter-${ch.id}`));
+      if (checkedChapters.length > 0) {
+        orderedIds.push({ id: 'chapters', subIds: checkedChapters.map(ch => `chapter-${ch.id}`) });
+      }
+    } else if (secId === 'plates') {
+      const checkedPlates = (S.plates || []).filter(pl => checkedIds.includes(`plate-${pl.id}`));
+      if (checkedPlates.length > 0) {
+        orderedIds.push({ id: 'plates', subIds: checkedPlates.map(pl => `plate-${pl.id}`) });
+      }
+    } else if (secId === 'graphs') {
+      if (checkedIds.includes('graphs')) {
+        orderedIds.push({ id: 'graphs' });
+      }
+    } else {
+      if (checkedIds.includes(secId)) {
+        orderedIds.push({ id: secId });
+      }
     }
   });
 
@@ -1096,7 +1251,7 @@ function downloadCustomReportPDF(reportName, reportId) {
     checkedIds.push(...Array.from(checkboxes).map(c => c.value));
   }
   
-  generateReplenishmentPDF(reportName, checkedIds);
+  generateReplenishmentPDF(reportName, checkedIds, reportId);
 }
 
 function showPdfProgressToast(message) {
@@ -1146,7 +1301,7 @@ function hidePdfProgressToast() {
   }
 }
 
-async function generateReplenishmentPDF(reportName, checkedIds) {
+async function generateReplenishmentPDF(reportName, checkedIds, reportId) {
   if (!checkedIds || checkedIds.length === 0) {
     toast("No sections selected to download.", "error");
     return;
@@ -1176,7 +1331,7 @@ async function generateReplenishmentPDF(reportName, checkedIds) {
   showPdfProgressToast('Assembling selected sections...');
   
   // 2. Compile full HTML string
-  const fullHtml = compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds);
+  const fullHtml = compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds, reportId);
   
   // 3. Parse and split HTML into page items (HTML blocks or Images)
   const itemsToRender = [];
