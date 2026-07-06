@@ -578,7 +578,7 @@ authRouter.post("/register-invited", async (req, res) => {
     });
   }
 
-  res.json({ success: true, message: "OTP sent to your email" });
+  res.json({ success: true, requiresOtp: true, message: "OTP sent to your email" });
 });
 
 authRouter.post("/verify-invited-otp", async (req, res) => {
