@@ -142,6 +142,8 @@ window.addCustomSection = addCustomSection;
 window.handleCustomSectionPdfUpload = handleCustomSectionPdfUpload;
 window.removeCustomSectionPdf = removeCustomSectionPdf;
 window.deleteCustomSection = deleteCustomSection;
+window.closeCustomPdfModal = closeCustomPdfModal;
+window.confirmAddCustomSection = confirmAddCustomSection;
 
 function showReplenishmentOptions(container) {
   container.innerHTML = `
@@ -365,7 +367,25 @@ function initDragAndDrop(reportId, reportName) {
   const container = document.getElementById('draggable-sections-list');
   if (!container) return;
   
+  const scrollContainer = document.getElementById('repl-checklist-scroll-container');
   let dragEl = null;
+  let autoScrollInterval = null;
+  
+  function startAutoScroll(direction) {
+    if (autoScrollInterval) return;
+    autoScrollInterval = setInterval(() => {
+      if (scrollContainer) {
+        scrollContainer.scrollTop += direction * 7;
+      }
+    }, 15);
+  }
+  
+  function stopAutoScroll() {
+    if (autoScrollInterval) {
+      clearInterval(autoScrollInterval);
+      autoScrollInterval = null;
+    }
+  }
   
   const items = container.querySelectorAll('.draggable-section-item');
   items.forEach(item => {
@@ -390,6 +410,7 @@ function initDragAndDrop(reportId, reportName) {
     
     item.addEventListener('dragend', () => {
       dragEl = null;
+      stopAutoScroll();
       items.forEach(it => {
         it.classList.remove('dragging');
         it.classList.remove('drag-over');
@@ -403,6 +424,19 @@ function initDragAndDrop(reportId, reportName) {
     item.addEventListener('dragover', (e) => {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
+      
+      if (scrollContainer) {
+        const rect = scrollContainer.getBoundingClientRect();
+        const y = e.clientY;
+        const threshold = 50;
+        if (y - rect.top < threshold) {
+          startAutoScroll(-1);
+        } else if (rect.bottom - y < threshold) {
+          startAutoScroll(1);
+        } else {
+          stopAutoScroll();
+        }
+      }
       
       if (item === dragEl) return;
       
@@ -426,6 +460,24 @@ function initDragAndDrop(reportId, reportName) {
       item.classList.remove('drag-over');
     });
   });
+  
+  if (scrollContainer) {
+    scrollContainer.addEventListener('dragover', (e) => {
+      const rect = scrollContainer.getBoundingClientRect();
+      const y = e.clientY;
+      const threshold = 50;
+      if (y - rect.top < threshold) {
+        startAutoScroll(-1);
+      } else if (rect.bottom - y < threshold) {
+        startAutoScroll(1);
+      } else {
+        stopAutoScroll();
+      }
+    });
+    scrollContainer.addEventListener('dragleave', () => {
+      stopAutoScroll();
+    });
+  }
 }
 
 function saveNewSectionOrder(reportId, reportName) {
@@ -473,15 +525,90 @@ function resetSectionOrder(reportId, reportName) {
 }
 
 function addCustomSection(reportId, reportName) {
-  const name = prompt("Enter a title for the new custom PDF section:");
-  if (!name || !name.trim()) return;
+  closeCustomPdfModal();
+  
+  const escapedReportName = reportName.replace(/'/g, "\\'");
+  
+  if (!document.getElementById('custom-pdf-modal-styles')) {
+    const style = document.createElement('style');
+    style.id = 'custom-pdf-modal-styles';
+    style.innerHTML = `
+      @keyframes customPdfFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      @keyframes customPdfSlideUp {
+        from { transform: translateY(10px); opacity: 0; }
+        to { transform: translateY(30px); opacity: 1; }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+  
+  const overlay = document.createElement('div');
+  overlay.id = 'custom-pdf-modal-overlay';
+  overlay.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    z-index: 10000;
+    animation: customPdfFadeIn 0.2s ease forwards;
+  `;
+  
+  overlay.innerHTML = `
+    <div style="background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); width: 100%; max-width: 420px; padding: 24px; text-align: left; animation: customPdfSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; display: flex; flex-direction: column; gap: 16px; margin-top: 15vh;">
+      <div>
+        <h3 style="margin: 0 0 6px 0; color: #1e293b; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 800;">Add Custom PDF Section</h3>
+        <p style="margin: 0; color: #64748b; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; line-height: 1.5;">Enter a title for the new custom PDF section in your report.</p>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <label for="custom-pdf-title-input" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">Section Title</label>
+        <input type="text" id="custom-pdf-title-input" placeholder="e.g. Geological Mapping Report" style="padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 13.5px; outline: none; transition: border-color 0.2s;" onkeydown="if(event.key==='Enter') document.getElementById('custom-pdf-modal-confirm-btn').click()">
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 4px;">
+        <button onclick="window.closeCustomPdfModal()" class="btn btn-outline" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer; height: auto;">Cancel</button>
+        <button id="custom-pdf-modal-confirm-btn" onclick="window.confirmAddCustomSection('${reportId}', '${escapedReportName}')" class="btn btn-primary" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px; height: auto;">Add Section</button>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(overlay);
+  
+  setTimeout(() => {
+    const input = document.getElementById('custom-pdf-title-input');
+    if (input) input.focus();
+  }, 100);
+}
+
+function closeCustomPdfModal() {
+  const overlay = document.getElementById('custom-pdf-modal-overlay');
+  if (overlay) overlay.remove();
+}
+
+function confirmAddCustomSection(reportId, reportName) {
+  const input = document.getElementById('custom-pdf-title-input');
+  if (!input) return;
+  const name = input.value.trim();
+  if (!name) {
+    toast("Please enter a section title", "error");
+    return;
+  }
+  
+  closeCustomPdfModal();
   
   const reports = loadLocalReports();
   const report = reports.find(r => r.id === reportId);
   if (report) {
     if (!report.customSections) report.customSections = [];
     const newSecId = 'custom-pdf-' + Date.now();
-    const newSec = { id: newSecId, name: name.trim(), type: 'Custom PDF', isCustom: true };
+    const newSec = { id: newSecId, name: name, type: 'Custom PDF', isCustom: true };
     
     report.customSections.push(newSec);
     if (!report.sectionOrder) report.sectionOrder = [];
@@ -880,7 +1007,7 @@ function renderCustomReportGenerator(container, report) {
       </div>
       <div class="card-bd" style="flex:1; display:grid; grid-template-columns: 1fr 1.2fr; gap:20px; overflow:hidden; padding:20px;">
         <!-- LEFT COLUMN: Checklist -->
-        <div style="overflow-y:auto; padding-right:10px; border-right:1px solid #e2e8f0; max-height:100%;">
+        <div id="repl-checklist-scroll-container" style="overflow-y:auto; padding-right:10px; border-right:1px solid #e2e8f0; max-height:100%;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:8px;">
             <h3 style="margin:0; color:#0f172a; font-size:14px; font-weight:700;">Select Sections:</h3>
             <div style="display:flex; align-items:center; gap:8px;">
