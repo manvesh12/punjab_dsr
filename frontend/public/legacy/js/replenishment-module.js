@@ -1,7 +1,57 @@
 // Replenishment Study Module
 // Handles the UI, compilation, and custom PDF generation for Replenishment Studies
 
+function injectDraggableStyles() {
+  if (document.getElementById('draggable-styles')) return;
+  const style = document.createElement('style');
+  style.id = 'draggable-styles';
+  style.innerHTML = `
+    .draggable-section-item {
+      background: #ffffff !important;
+      border: 1px solid #e2e8f0 !important;
+      border-radius: 8px !important;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
+      margin-bottom: 10px !important;
+      padding: 10px 14px !important;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    .draggable-section-item:hover {
+      border-color: #cbd5e1 !important;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+    }
+    .draggable-section-item.dragging {
+      opacity: 0.3 !important;
+      background: #f8fafc !important;
+      border: 1.5px dashed #cbd5e1 !important;
+      box-shadow: none !important;
+    }
+    .draggable-section-item.drag-over {
+      border: 1.5px dashed #3b82f6 !important;
+      background: #eff6ff !important;
+    }
+    .drag-handle {
+      cursor: grab !important;
+      color: #94a3b8 !important;
+      display: flex !important;
+      align-items: center !important;
+      padding: 6px 4px !important;
+      border-radius: 4px !important;
+      background: #f1f5f9 !important;
+      transition: all 0.15s ease !important;
+    }
+    .drag-handle:hover {
+      background: #cbd5e1 !important;
+      color: #1e293b !important;
+    }
+    .drag-handle:active {
+      cursor: grabbing !important;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
 function initReplenishmentView() {
+  injectDraggableStyles();
   const container = document.getElementById('view-replenishment');
   if (!container) return;
   
@@ -87,6 +137,7 @@ window.updateCustomReportPreview = updateCustomReportPreview;
 window.downloadCustomReportPDF = downloadCustomReportPDF;
 window.initDragAndDrop = initDragAndDrop;
 window.saveNewSectionOrder = saveNewSectionOrder;
+window.resetSectionOrder = resetSectionOrder;
 
 function showReplenishmentOptions(container) {
   container.innerHTML = `
@@ -326,7 +377,9 @@ function initDragAndDrop(reportId, reportName) {
     
     item.addEventListener('dragstart', (e) => {
       dragEl = item;
-      item.style.opacity = '0.5';
+      setTimeout(() => {
+        item.classList.add('dragging');
+      }, 0);
       e.dataTransfer.effectAllowed = 'move';
       e.dataTransfer.setData('text/plain', item.getAttribute('data-section-id'));
     });
@@ -334,9 +387,8 @@ function initDragAndDrop(reportId, reportName) {
     item.addEventListener('dragend', () => {
       dragEl = null;
       items.forEach(it => {
-        it.style.opacity = '1';
-        it.style.border = '1px solid #e2e8f0';
-        it.style.background = '#f8fafc';
+        it.classList.remove('dragging');
+        it.classList.remove('drag-over');
       });
       item.removeAttribute('draggable');
       
@@ -362,16 +414,12 @@ function initDragAndDrop(reportId, reportName) {
     item.addEventListener('dragenter', (e) => {
       e.preventDefault();
       if (item !== dragEl) {
-        item.style.border = '1px dashed #2563eb';
-        item.style.background = '#eff6ff';
+        item.classList.add('drag-over');
       }
     });
     
     item.addEventListener('dragleave', () => {
-      if (item !== dragEl) {
-        item.style.border = '1px solid #e2e8f0';
-        item.style.background = '#f8fafc';
-      }
+      item.classList.remove('drag-over');
     });
   });
 }
@@ -393,6 +441,31 @@ function saveNewSectionOrder(reportId, reportName) {
   // Save checkbox selections and update live preview
   saveReportSelection(reportId);
   window.updateCustomReportPreview(reportName, reportId);
+}
+
+function resetSectionOrder(reportId, reportName) {
+  if (!confirm("Are you sure you want to reset the section order to default?")) return;
+  
+  const reports = loadLocalReports();
+  const report = reports.find(r => r.id === reportId);
+  if (report) {
+    const defaultOrder = [
+      'front-matter',
+      'chapters',
+      'plates',
+      'graphs',
+      'anx1', 'anx2', 'anx3', 'anx4', 'anx5', 'anx6', 'anx7',
+      'annexure-b', 'annexure-c', 'annexure-d', 'annexure-e', 'annexure-f', 'annexure-g', 'annexure-h', 'annexure-i', 'annexure-j', 'annexure-k'
+    ];
+    report.sectionOrder = defaultOrder;
+    saveLocalReports(reports);
+    
+    const editorContainer = document.getElementById('repl-editor-container');
+    if (editorContainer) {
+      renderCustomReportGenerator(editorContainer, report);
+    }
+    toast("Section order reset to default successfully!", "success");
+  }
 }
 
 function hydrateCheckboxStates(checkedIds) {
@@ -607,11 +680,16 @@ function renderCustomReportGenerator(container, report) {
       <div class="card-bd" style="flex:1; display:grid; grid-template-columns: 1fr 1.2fr; gap:20px; overflow:hidden; padding:20px;">
         <!-- LEFT COLUMN: Checklist -->
         <div style="overflow-y:auto; padding-right:10px; border-right:1px solid #e2e8f0; max-height:100%;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:8px;">
             <h3 style="margin:0; color:#0f172a; font-size:14px; font-weight:700;">Select Sections:</h3>
-            <span style="font-size:11px; color:#64748b; background:#f1f5f9; padding:2px 8px; border-radius:4px; display:inline-flex; align-items:center; gap:4px;">
-              <i data-lucide="grip-vertical" style="width:12px; height:12px;"></i> Drag to reorder
-            </span>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button onclick="window.resetSectionOrder('${report.id}', '${escapedReportName}')" class="btn btn-outline" style="padding: 4px 8px; font-size: 11px; height: auto; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #475569; border-color: #cbd5e1; background: #ffffff;">
+                <i data-lucide="rotate-ccw" style="width:11px; height:11px;"></i> Reset Order
+              </button>
+              <span style="font-size:11px; color:#64748b; background:#f1f5f9; padding:2px 8px; border-radius:4px; display:inline-flex; align-items:center; gap:4px;">
+                <i data-lucide="grip-vertical" style="width:12px; height:12px;"></i> Drag to reorder
+              </span>
+            </div>
           </div>
           <div id="draggable-sections-list">
             ${checklistHtml}
