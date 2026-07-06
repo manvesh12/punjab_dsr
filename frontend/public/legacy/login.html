@@ -1808,7 +1808,7 @@
             <span>Developed by IIT Ropar.</span>
           </p>
           <div class="dash-hero-btn-row">
-            <button onclick="showView('generate', null)" class="dash-btn-hero-outline">
+            <button onclick="window.open('https://sensrs.com/policy/', '_blank', 'noopener')" class="dash-btn-hero-outline">
               <i data-lucide="file-text" style="width: 15px; height: 15px;"></i> View Guidelines
             </button>
             <button onclick="document.getElementById('dash-contact-section')?.scrollIntoView({behavior:'smooth', block:'start'})" class="dash-btn-hero-outline">
@@ -1862,7 +1862,7 @@
           replenishment, environmental safeguards, transport routes, and compliance requirements before sand mining activities are reviewed.
         </p>
         <div class="dash-about-dsr-actions">
-          <button class="dash-map-action" onclick="showView('generate', null)">
+          <button class="dash-map-action" onclick="window.open('https://sensrs.com/policy/', '_blank', 'noopener')">
             <i data-lucide="file-text" style="width:15px;height:15px;"></i> Guidelines
           </button>
           <button class="dash-map-action dash-map-action-light" onclick="showView('workflow', null)">
@@ -5414,6 +5414,14 @@
               This text will scroll horizontally at the top of all portal views.
             </div>
           </div>
+          <div class="form-group" style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 13px; color: var(--text);">Homepage Notices & Announcements</label>
+            <textarea id="settings-announcements-json" class="inp" rows="8" style="width: 100%; resize: vertical; padding: 12px; font-family: Consolas, Monaco, monospace; font-size: 12px; background: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.1);" placeholder='[{"date":"18 JUN 2026","title":"Notice title","url":"login.html"}]'></textarea>
+            <div style="font-size: 11px; color: var(--text-soft); margin-top: 8px; display: flex; align-items: center; gap: 4px;">
+              <i data-lucide="info" style="width: 12px; height: 12px;"></i>
+              Use JSON rows with date, title, and optional url. These appear in the public dashboard notice section.
+            </div>
+          </div>
           <button class="btn btn-saffron" id="settings-notice-save-btn" onclick="saveNoticeSettings()" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; height: 38px; padding: 0 20px;">
             <i data-lucide="save" style="width: 14px; height: 14px;"></i>
             Save Changes
@@ -5507,6 +5515,12 @@
       if (textEl) textEl.value = localNotice;
       updateNoticeUI(localNotice);
     }
+    const localAnnouncements = localStorage.getItem('publicAnnouncements');
+    if (localAnnouncements) {
+      const announcementsEl = document.getElementById('settings-announcements-json');
+      if (announcementsEl) announcementsEl.value = formatAnnouncementSettings(localAnnouncements);
+      updatePublicAnnouncementsUI(localAnnouncements);
+    }
 
     try {
       const res = await fetch('/api/settings/noticeText');
@@ -5516,6 +5530,16 @@
           const textEl = document.getElementById('settings-notice-text');
           if (textEl) textEl.value = data.value;
           updateNoticeUI(data.value);
+        }
+      }
+
+      const announcementsRes = await fetch('/api/settings/publicAnnouncements');
+      if (announcementsRes.ok) {
+        const data = await announcementsRes.json();
+        if (data && data.value) {
+          const announcementsEl = document.getElementById('settings-announcements-json');
+          if (announcementsEl) announcementsEl.value = formatAnnouncementSettings(data.value);
+          updatePublicAnnouncementsUI(data.value);
         }
       }
     } catch (e) {
@@ -5533,6 +5557,34 @@
     });
   }
   window.updateNoticeUI = updateNoticeUI;
+
+  function formatAnnouncementSettings(value) {
+    try {
+      return JSON.stringify(JSON.parse(value), null, 2);
+    } catch {
+      return String(value || '');
+    }
+  }
+
+  function normalizeAnnouncementSettings(value) {
+    const announcements = JSON.parse(value);
+    if (!Array.isArray(announcements)) {
+      throw new Error('Announcements must be a JSON array.');
+    }
+    return JSON.stringify(announcements.map((item) => ({
+      date: String(item.date || '').trim(),
+      title: String(item.title || '').trim(),
+      url: String(item.url || 'login.html').trim() || 'login.html'
+    })).filter((item) => item.date && item.title));
+  }
+
+  function updatePublicAnnouncementsUI(value) {
+    const rawValue = typeof value === 'string' ? value : JSON.stringify(value || []);
+    if (typeof window.renderPublicAnnouncements === 'function') {
+      window.renderPublicAnnouncements(rawValue);
+    }
+  }
+  window.updatePublicAnnouncementsUI = updatePublicAnnouncementsUI;
 
   function installNoticeLanguagePatch() {
     const originalApplyPortalLanguage = window.applyPortalLanguage;
@@ -5570,6 +5622,21 @@
 
   async function saveNoticeSettings() {
     const text = document.getElementById('settings-notice-text').value;
+    const announcementsEl = document.getElementById('settings-announcements-json');
+    let announcementsValue = '';
+    if (announcementsEl && announcementsEl.value.trim()) {
+      try {
+        announcementsValue = normalizeAnnouncementSettings(announcementsEl.value);
+        announcementsEl.value = formatAnnouncementSettings(announcementsValue);
+      } catch (e) {
+        if (typeof toast === 'function') {
+          toast(e.message || 'Invalid announcements JSON.', 'error');
+        } else {
+          alert(e.message || 'Invalid announcements JSON.');
+        }
+        return;
+      }
+    }
     const btn = document.getElementById('settings-notice-save-btn');
     btn.disabled = true;
     btn.innerText = 'Saving...';
@@ -5584,6 +5651,14 @@
           updateNoticeUI(text);
         }
         localStorage.setItem('portalNoticeText', text);
+        if (announcementsValue) {
+          await apiFetch('/settings/publicAnnouncements', {
+            method: 'PUT',
+            body: JSON.stringify({ value: announcementsValue })
+          });
+          localStorage.setItem('publicAnnouncements', announcementsValue);
+          updatePublicAnnouncementsUI(announcementsValue);
+        }
       } else {
         const res = await fetch('/api/settings/noticeText', {
           method: 'PUT',
@@ -5599,15 +5674,29 @@
             updateNoticeUI(text);
           }
           localStorage.setItem('portalNoticeText', text);
+          if (announcementsValue) {
+            await fetch('/api/settings/publicAnnouncements', {
+              method: 'PUT',
+              headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('dsr_token')}`
+              },
+              body: JSON.stringify({ value: announcementsValue })
+            });
+            localStorage.setItem('publicAnnouncements', announcementsValue);
+            updatePublicAnnouncementsUI(announcementsValue);
+          }
         } else {
           alert('Failed to update notice.');
         }
       }
     } catch (e) {
       localStorage.setItem('portalNoticeText', text);
+      if (announcementsValue) localStorage.setItem('publicAnnouncements', announcementsValue);
       if (typeof updateNoticeUI === 'function') {
         updateNoticeUI(text);
       }
+      if (announcementsValue) updatePublicAnnouncementsUI(announcementsValue);
       if (typeof toast === 'function') {
         toast('Notice updated locally. Server save is unavailable: ' + (e.message || e), 'info');
       } else {
