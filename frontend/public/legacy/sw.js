@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smart-dsr-cache-v28-login-fix';
+const CACHE_NAME = 'smart-dsr-cache-v29-login-global-bind';
 const urlsToCache = [
   './login.html',
   './css/styles.css',

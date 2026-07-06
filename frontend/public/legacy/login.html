@@ -135,7 +135,7 @@
           <div class="form-err" id="login-error" style="display:none; color:red; font-size:12px; margin-bottom:10px;">
           </div>
 
-          <button class="btn-primary" onclick="doLogin()">
+          <button class="btn-primary" type="button" onclick="window.doLogin && window.doLogin()">
             Login to Portal ->
           </button>
 
@@ -174,7 +174,7 @@
 
           <div class="form-err" id="auth-error" style="display:none;"></div>
 
-          <button class="btn-primary" onclick="doAuthorityVerify()" style="margin-top: 10px;">
+          <button class="btn-primary" type="button" onclick="window.doAuthorityVerify && window.doAuthorityVerify()" style="margin-top: 10px;">
             Verify & Login ->
           </button>
         </div>
@@ -209,7 +209,8 @@
           <div class="form-err" id="signup-success" style="display:none; color:green; font-size:12px; margin-bottom:10px;"></div>
 
           <button class="btn-primary"
-            onclick="doSignup()"
+            type="button"
+            onclick="window.doSignup && window.doSignup()"
             style="margin-top: 10px;">
             Register ->
           </button>
@@ -5935,9 +5936,9 @@
 
   <div class="toast" id="toast"></div>
 
-<script defer src="js/portal.bundle.js?v=repl-model-dsr-backend-20260707-v6"></script>
-<script defer src="js/model-dsr-module.js?v=12"></script>
-<script defer src="js/replenishment-module.js?v=24"></script>
+<script defer src="js/portal.bundle.js?v=repl-model-dsr-backend-20260707-v7"></script>
+<script defer src="js/model-dsr-module.js?v=13"></script>
+<script defer src="js/replenishment-module.js?v=25"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     if(document.getElementById('dash-interactive-map')) {
@@ -6008,7 +6009,7 @@ document.addEventListener("DOMContentLoaded", function() {
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=login-fix-v28')
+        navigator.serviceWorker.register('./sw.js?v=login-global-bind-v29')
           .then(registration => {
             registration.update();
             console.log('ServiceWorker registration successful with scope: ', registration.scope);

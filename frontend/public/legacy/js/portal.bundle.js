@@ -2849,7 +2849,20 @@ function doLogout() {
   if (typeof updateDarkModeIcon === 'function') {
     updateDarkModeIcon();
   }
-}async function showAppScreen() {
+}
+Object.assign(window, {
+  switchAuthMode,
+  toggleSignUp,
+  fillDemoLogin,
+  doLogin,
+  doAuthorityVerify,
+  doAuthorityQuickLogin,
+  togglePinReveal,
+  doSignup,
+  doVerifySignupOtp,
+  doLogout
+});
+async function showAppScreen() {
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-app').classList.add('active');
   if (typeof initThemeFromStorage === 'function') {

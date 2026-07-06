@@ -110,7 +110,7 @@ if (window.location.hash === '#model-dsr' || window.currentViewId === 'model-dsr
 // Sync sidebar visibility
 const annexureNav = document.getElementById('annexure-nav');
 const replenishmentNav = document.getElementById('replenishment-nav');
-if (annexureNav && replenishmentNav) {
+if (annexureNav instanceof Node && replenishmentNav instanceof HTMLElement) {
   replenishmentNav.style.display = annexureNav.style.display;
   new MutationObserver(() => {
     replenishmentNav.style.display = annexureNav.style.display;
