@@ -4895,3 +4895,255 @@ body:not(.view-dashboard-active):not(.view-projects-active) #sidebar .sb-nav[sty
   padding-bottom: 96px !important;
   overscroll-behavior: contain !important;
 }
+
+/* Project editor layout alignment.
+   Keeps the fixed sidebar, stacked header, notice ticker, editor, and PDF preview from overlapping. */
+@media (min-width: 1024px) {
+  body:not(.view-dashboard-active):not(.view-projects-active) {
+    --project-topbar-h: 292px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .topbar.dash-global-topbar {
+    display: grid !important;
+    grid-template-rows: 44px 38px 118px 42px 44px !important;
+    align-content: stretch !important;
+    gap: 0 !important;
+    height: var(--project-topbar-h) !important;
+    min-height: var(--project-topbar-h) !important;
+    max-height: var(--project-topbar-h) !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-bottom: 0 !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-switcher-bar,
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-gov-utility-strip,
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-gov-brand-row,
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-gov-menu-bar,
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-gov-notice-ticker {
+    position: relative !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-switcher-bar,
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-gov-utility-strip {
+    padding-left: calc(var(--sidebar-w) + 24px) !important;
+    padding-right: 24px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-switcher-bar {
+    height: 44px !important;
+    min-height: 44px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-gov-utility-strip {
+    height: 38px !important;
+    min-height: 38px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-gov-brand-row {
+    height: 118px !important;
+    min-height: 118px !important;
+    padding: 14px 24px 14px calc(var(--sidebar-w) + 24px) !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-brand-left {
+    min-width: 0 !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-brand-left img {
+    width: 76px !important;
+    height: 76px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-brand-title {
+    font-size: clamp(24px, 1.8vw, 34px) !important;
+    line-height: 1.15 !important;
+    white-space: normal !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-brand-bilingual,
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-brand-subtitle {
+    white-space: normal !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-brand-right {
+    flex-wrap: nowrap !important;
+    min-width: 0 !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-gov-menu-bar {
+    height: 42px !important;
+    min-height: 42px !important;
+    padding-left: calc(var(--sidebar-w) + 24px) !important;
+    padding-right: 24px !important;
+    overflow: visible !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-menu-links {
+    min-width: 0 !important;
+    overflow: hidden !important;
+    flex-wrap: nowrap !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-menu-link-item {
+    flex: 0 0 auto !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-menu-link-item button {
+    min-height: 34px !important;
+    padding: 0 8px !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-menu-search {
+    width: clamp(190px, 15vw, 280px) !important;
+    flex: 0 0 auto !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-gov-notice-ticker {
+    height: 44px !important;
+    min-height: 44px !important;
+    padding-left: calc(var(--sidebar-w) + 24px) !important;
+    padding-right: 24px !important;
+    z-index: 3 !important;
+  }
+
+  body.sidebar-hidden:not(.view-dashboard-active):not(.view-projects-active) .dash-switcher-bar,
+  body.sidebar-hidden:not(.view-dashboard-active):not(.view-projects-active) .dash-gov-utility-strip,
+  body.sidebar-hidden:not(.view-dashboard-active):not(.view-projects-active) .dash-gov-brand-row,
+  body.sidebar-hidden:not(.view-dashboard-active):not(.view-projects-active) .dash-gov-menu-bar,
+  body.sidebar-hidden:not(.view-dashboard-active):not(.view-projects-active) .dash-gov-notice-ticker {
+    padding-left: 24px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) #sidebar,
+  body:not(.view-dashboard-active):not(.view-projects-active) #sidebar[style] {
+    top: 0 !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-height: 100vh !important;
+    max-height: 100dvh !important;
+    z-index: 650 !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) #sidebar .sb-head,
+  body:not(.view-dashboard-active):not(.view-projects-active) #sidebar .sb-head[style] {
+    flex: 0 0 auto !important;
+    padding: 14px 16px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) #sidebar .sb-nav,
+  body:not(.view-dashboard-active):not(.view-projects-active) #sidebar .sb-nav[style] {
+    padding: 14px 12px 18px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) #sidebar .sb-bottom-container,
+  body:not(.view-dashboard-active):not(.view-projects-active) #sidebar .sb-bottom-container[style] {
+    flex: 0 0 auto !important;
+    padding: 12px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .app-workspace,
+  body.preview-open:not(.view-dashboard-active):not(.view-projects-active) .app-workspace,
+  body:not(.view-dashboard-active):not(.view-projects-active) .app-workspace.preview-open {
+    margin-left: var(--sidebar-w) !important;
+    padding-top: var(--project-topbar-h) !important;
+    min-height: calc(100vh - var(--project-topbar-h)) !important;
+    grid-template-columns: minmax(0, 1fr) clamp(520px, 32vw, 720px) !important;
+    align-items: start !important;
+  }
+
+  body.sidebar-hidden:not(.view-dashboard-active):not(.view-projects-active) .app-workspace,
+  body.sidebar-hidden.preview-open:not(.view-dashboard-active):not(.view-projects-active) .app-workspace {
+    margin-left: 0 !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .main-content {
+    min-width: 0 !important;
+    min-height: calc(100vh - var(--project-topbar-h)) !important;
+    overflow: visible !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .page-body {
+    padding: 22px 24px 36px !important;
+  }
+
+  body.preview-open:not(.view-dashboard-active):not(.view-projects-active) .page-body {
+    padding-right: 18px !important;
+  }
+
+  body.preview-open:not(.view-dashboard-active):not(.view-projects-active) .pdf-preview-panel.open,
+  body:not(.view-dashboard-active):not(.view-projects-active) .app-workspace.preview-open > .pdf-preview-panel.open {
+    position: sticky !important;
+    top: calc(var(--project-topbar-h) + 12px) !important;
+    height: calc(100vh - var(--project-topbar-h) - 24px) !important;
+    max-height: calc(100vh - var(--project-topbar-h) - 24px) !important;
+    min-height: 440px !important;
+    align-self: start !important;
+    margin: 12px 18px 18px 0 !important;
+    z-index: 2 !important;
+  }
+
+  body.preview-open:not(.view-dashboard-active):not(.view-projects-active) .pdf-preview-actions {
+    flex-wrap: nowrap !important;
+    overflow: hidden !important;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1500px) {
+  body:not(.view-dashboard-active):not(.view-projects-active) {
+    --project-topbar-h: 274px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .topbar.dash-global-topbar {
+    grid-template-rows: 36px 34px 108px 40px 42px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-switcher-bar {
+    height: 36px !important;
+    min-height: 36px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-gov-utility-strip {
+    height: 34px !important;
+    min-height: 34px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-gov-brand-row {
+    height: 108px !important;
+    min-height: 108px !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-gov-menu-bar {
+    height: 40px !important;
+    min-height: 40px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-gov-notice-ticker {
+    height: 42px !important;
+    min-height: 42px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-brand-left img {
+    width: 68px !important;
+    height: 68px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-gov-badge,
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-btn-new-project,
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-btn-logout {
+    min-height: 34px !important;
+    padding: 0 12px !important;
+    font-size: 12px !important;
+  }
+}
