@@ -506,7 +506,7 @@
 </section>
 </main>
 <!-- Footer Component -->
-<footer class="bg-[#F5F1E9] border-t border-outline-variant/30 full-width" id="footer">
+<footer class="bg-[#F5F1E9] border-t border-outline-variant/30 full-width" id="footer-legacy-hidden" style="display:none">
 <div class="grid grid-cols-1 md:grid-cols-4 gap-md py-xl px-base md:px-lg max-w-container-max mx-auto"><div class="md:col-span-2 flex flex-col gap-8">
 <div class="flex items-center gap-6"><img alt="IIT Ropar Logo" class="h-16 w-auto object-contain mix-blend-multiply contrast-125" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFj63L8N_VdnfPM7gRHwDnnYKU7v1UKjD3gUyxbqa42kqCIIvl_zSu0VxnYu9LN6toV6P-zdUFTZuFs1ITkOzs9RbSuKgzm5HR7gMsp1h44tKTL3pU14IttD_xUKz3Ynr-lD9TH6lS4b6vi-_CfU6Ci9ymfJRnPhMl9oeLqVffqSwa36oCDP9HJbZ7ZpWL_iBR9jrbr7aFsdW8hzp6KzD_7ySF75wtUReyVAa4rD6TcWDi1vBrh8keAzlojEeJ-JlnroZgB0sCnMg"/><img alt="Punjab Govt Logo" class="h-16 w-auto object-contain mix-blend-multiply contrast-125" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA53LCR-u4obwOTZLGyltFxEGh6AB_1A8_pnqrsI5JBjB65RvbOosT909rUgchh9B2ot55qH116oW_sKVoJmI9iTM339KkIRzbFZD7Pyz0rFTxL7nMAGK5V3Ml6M2edKqgb7wX4zdWiM7ICybjbDWEztndYxcW1MSGiL5il7Ge-NLp9Oyz6HxQR3PIKnVvLHkCpQghp568QuyKvxaH2kjXH7UB3hqD-AJZphix5DGZvw1cez5pqbMe6Ijm905gkduyPMsQ5Lfv9hX8"/><img alt="SEnSRS Circular Logo" class="h-16 w-auto object-contain mix-blend-multiply contrast-125" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4kX_D4QEVJFycE3r0Z4XfHjAU7R8Fr4_zGs_PpPcqHt6O0bELCrbH1MQIF0N_CLymZlu3IjCHFMeFU0I3udZvrBQXESOYk-yOpQ5n5VND-Y30btfo70sJ1wqhy36wQbyV_YWkcdHi91HO1kJF5YV4wuLWcBBCDeh0kxknitPuE_obycDhlMfTWZY9797BiUc40oolaoXclR6TV-IYO2CdfFVZPZPm8USfX_9msrloeOWfRYo70ywaX0PYhH9jS221wJslb3ae8DU"/></div>
 <img alt="SEnSRS Logo" class="h-16 w-auto self-start object-contain mix-blend-multiply contrast-125" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgydF8VFd1ToJcgOyid1qmqsL6k9k15RDELu5_HUD-ELqrC3fk7RUBgzYBUjirPMK3aKKmO9ncHJ2XPsPiH3p5cWKl0iPcutPM_MlpKjneM-qDogZZFuaxdTVyhs8hakZ8EVwFeyfDuTbGssp7Pha86oaAV6JseWuxnj5pTN4gjK0grfJe70F5YDy3vG8OiD8jiFXxShbyD2DZeOtVShsgR40uG4Kot6No6eTC8eaLQ-PyyVVyxWK3J3VcEW954AnxcNu4nWCfiw4"/>
@@ -537,6 +537,155 @@
 <div class="border-t border-outline-variant/30 dark:border-outline/30 py-8 px-base md:px-lg bg-surface-container-lowest">
 <div class="max-w-container-max mx-auto flex flex-col md:flex-row justify-between items-center gap-2 text-[12px] text-on-surface-variant dark:text-surface-variant"><p class="text-body-md font-medium text-center w-full">© 2026 Department of Mines &amp; Geology, Government of Punjab. <span class="mx-2">|</span> Technical Support, Design &amp; Development by IIT Ropar</p></div>
 </div>
+</footer>
+<style>
+  .sensrs-footer-clean {
+    background: #f5f1e9;
+    color: #4b4037;
+    border-top: 1px solid rgba(115, 119, 126, 0.24);
+  }
+  .sensrs-footer-clean a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .sensrs-footer-clean a:hover {
+    color: #1e293b;
+  }
+  .sensrs-footer-grid {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 38px 24px 54px;
+    display: grid;
+    grid-template-columns: 1fr 0.9fr 1.45fr;
+    gap: 64px;
+  }
+  .sensrs-footer-title {
+    margin: 0 0 22px;
+    color: #7b5939;
+    font-size: 15px;
+    line-height: 20px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .sensrs-footer-list {
+    display: grid;
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .sensrs-footer-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 18px;
+    line-height: 24px;
+  }
+  .sensrs-footer-link .material-symbols-outlined {
+    color: #936941;
+    font-size: 21px;
+  }
+  .sensrs-contact-row {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    gap: 14px;
+    align-items: start;
+    margin-bottom: 18px;
+    font-size: 18px;
+    line-height: 27px;
+  }
+  .sensrs-contact-row .material-symbols-outlined {
+    color: #936941;
+    font-size: 22px;
+    margin-top: 2px;
+  }
+  .sensrs-socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 28px;
+  }
+  .sensrs-social-btn {
+    width: 45px;
+    height: 45px;
+    border-radius: 999px;
+    background: #936941;
+    color: #ffffff !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+    line-height: 1;
+    font-weight: 800;
+    transition: transform 0.18s ease, background 0.18s ease;
+  }
+  .sensrs-social-btn:hover {
+    background: #1e293b;
+    transform: translateY(-2px);
+  }
+  .sensrs-footer-bottom {
+    border-top: 1px solid rgba(115, 119, 126, 0.22);
+    background: rgba(255, 255, 255, 0.38);
+    padding: 18px 24px;
+    text-align: center;
+    color: #6b625a;
+    font-size: 14px;
+  }
+  @media (max-width: 900px) {
+    .sensrs-footer-grid {
+      grid-template-columns: 1fr;
+      gap: 34px;
+    }
+  }
+</style>
+<footer class="sensrs-footer-clean" id="footer">
+  <div class="sensrs-footer-grid">
+    <section>
+      <h4 class="sensrs-footer-title">Institute Links</h4>
+      <ul class="sensrs-footer-list">
+        <li><a class="sensrs-footer-link" href="https://www.iitrpr.ac.in/guest-house" target="_blank" rel="noopener noreferrer"><span class="material-symbols-outlined">open_in_new</span>Guest House</a></li>
+        <li><a class="sensrs-footer-link" href="https://www.iitrpr.ac.in/" target="_blank" rel="noopener noreferrer"><span class="material-symbols-outlined">open_in_new</span>IIT Ropar</a></li>
+        <li><a class="sensrs-footer-link" href="https://www.iitrpr.ac.in/institute-bus-facility" target="_blank" rel="noopener noreferrer"><span class="material-symbols-outlined">open_in_new</span>Institute Bus Facility</a></li>
+        <li><a class="sensrs-footer-link" href="https://iitrpr.ac.in/medical-center/" target="_blank" rel="noopener noreferrer"><span class="material-symbols-outlined">open_in_new</span>Medical Center</a></li>
+        <li><a class="sensrs-footer-link" href="https://www.iitrpr.ac.in/RnD/download-form.php" target="_blank" rel="noopener noreferrer"><span class="material-symbols-outlined">open_in_new</span>Download Forms</a></li>
+        <li><a class="sensrs-footer-link" href="https://www.iitrpr.ac.in/list-holidays" target="_blank" rel="noopener noreferrer"><span class="material-symbols-outlined">open_in_new</span>List of Holidays</a></li>
+      </ul>
+    </section>
+    <section>
+      <h4 class="sensrs-footer-title">Quick Links</h4>
+      <ul class="sensrs-footer-list">
+        <li><a class="sensrs-footer-link" href="https://sensrs.com/publications/" target="_blank" rel="noopener noreferrer">Publications</a></li>
+        <li><a class="sensrs-footer-link" href="https://sensrs.com/opportunities/" target="_blank" rel="noopener noreferrer">Careers</a></li>
+        <li><a class="sensrs-footer-link" href="https://sensrs.com/events/" target="_blank" rel="noopener noreferrer">Events</a></li>
+        <li><a class="sensrs-footer-link" href="https://sensrs.com/gallery/" target="_blank" rel="noopener noreferrer">Gallery</a></li>
+      </ul>
+    </section>
+    <section>
+      <h4 class="sensrs-footer-title">Contact Info</h4>
+      <a class="sensrs-contact-row" href="https://maps.google.com/?q=Indian+Institute+of+Technology+Ropar,+Punjab,+India" target="_blank" rel="noopener noreferrer">
+        <span class="material-symbols-outlined">location_on</span>
+        <span>Indian Institute of Technology Ropar,<br/>Punjab, India</span>
+      </a>
+      <a class="sensrs-contact-row" href="mailto:coe@sensrs.com">
+        <span class="material-symbols-outlined">mail</span>
+        <span>coe@sensrs.com</span>
+      </a>
+      <a class="sensrs-contact-row" href="tel:+01881232632">
+        <span class="material-symbols-outlined">call</span>
+        <span>+01881-232632</span>
+      </a>
+      <div class="sensrs-socials" aria-label="Social links">
+        <a class="sensrs-social-btn" href="https://www.facebook.com/coesensrs/" target="_blank" rel="noopener noreferrer" aria-label="Facebook">f</a>
+        <a class="sensrs-social-btn" href="https://www.instagram.com/coesensrs/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">◎</a>
+        <a class="sensrs-social-btn" href="https://www.linkedin.com/authwall?trk=bf&amp;trkInfo=AQE9A718IjL9JgAAAZ8kF2XIL3aGbT6IwBDam3KhThdQ-_8zL4QWsxSNR1K5G1Bcn8cQWEs3aRU5Bjc_6vSmMZxleNJyRIUlHLCG5AYp9E5BQ2kkjzd_5N_PYDOddbmI9S43cTw=&amp;original_referer=&amp;sessionRedirect=https%3A%2F%2Fwww.linkedin.com%2Fcompany%2Fcoesensrs%2F" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">in</a>
+        <a class="sensrs-social-btn" href="https://x.com/coesensrs" target="_blank" rel="noopener noreferrer" aria-label="X">X</a>
+        <a class="sensrs-social-btn" href="https://youtube.com/@coe.sensrs?si=fMohfceQB8dcfBms" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><span class="material-symbols-outlined">smart_display</span></a>
+        <a class="sensrs-social-btn" href="https://play.google.com/store/apps/developer?id=SEnSRS" target="_blank" rel="noopener noreferrer" aria-label="Play Store"><span class="material-symbols-outlined">play_arrow</span></a>
+      </div>
+    </section>
+  </div>
+  <div class="sensrs-footer-bottom">© 2026 SEnSRS. All rights reserved.</div>
 </footer>
 <script>
   document.querySelectorAll("[data-font-size]").forEach((button) => {
@@ -871,6 +1020,29 @@
     };
 
     const cards = {
+      about: {
+        title: 'About DSR',
+        kicker: 'District Survey Report Portal',
+        html: `
+          <p class="dsr-action-help">The District Survey Report Portal supports the Department of Mining and Geology, Government of Punjab, in preparing, reviewing, tracking, and publishing district survey reports through a secure digital workflow.</p>
+          <div class="dsr-card-grid" style="margin-top:18px;">
+            <div class="dsr-service-card">
+              <span class="dsr-card-index">01</span>
+              <h4>Transparent reporting</h4>
+              <p>Public-facing access for district report status, notices, and approved records.</p>
+            </div>
+            <div class="dsr-service-card">
+              <span class="dsr-card-index">02</span>
+              <h4>Department workflow</h4>
+              <p>Role-based preparation, review, remarks, approvals, and audit history for officers.</p>
+            </div>
+            <div class="dsr-service-card">
+              <span class="dsr-card-index">03</span>
+              <h4>IIT Ropar support</h4>
+              <p>Technical support and implementation assistance from IIT Ropar and SEnSRS.</p>
+            </div>
+          </div>`
+      },
       services: {
         title: 'Services Portal',
         kicker: 'Citizen & department services',
@@ -1006,6 +1178,18 @@
             <button class="dsr-action-btn" type="submit">Search</button>
           </form>
           <div class="dsr-search-results" id="dsr-results-box"></div>`
+      },
+      language: {
+        title: 'Language',
+        kicker: 'Accessibility',
+        html: `
+          <p class="dsr-action-help">Choose a preferred language for the public portal interface.</p>
+          <div class="dsr-card-grid" style="margin-top:18px;">
+            <button class="dsr-action-btn" data-dsr-language="en">English</button>
+            <button class="dsr-action-btn" data-dsr-language="hi">Hindi</button>
+            <button class="dsr-action-btn" data-dsr-close>Continue</button>
+          </div>
+          <div class="dsr-search-results" id="dsr-language-result"></div>`
       }
     };
 
@@ -1056,6 +1240,19 @@
         event.preventDefault();
         event.stopImmediatePropagation();
         showLoginForm(loginRole);
+        return;
+      }
+
+      const language = target.getAttribute('data-dsr-language');
+      if (language) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        document.documentElement.lang = language;
+        localStorage.setItem('dsr_public_language', language);
+        const result = document.getElementById('dsr-language-result');
+        if (result) {
+          result.innerHTML = `<div class="dsr-metric"><strong>${language === 'hi' ? 'Hindi' : 'English'}</strong><span>Language preference saved for this browser.</span></div>`;
+        }
         return;
       }
 
