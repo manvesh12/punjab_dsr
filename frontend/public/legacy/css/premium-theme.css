@@ -5785,9 +5785,11 @@ body.view-projects-active .topbar.dash-global-topbar {
   body.view-dashboard-active .topbar.dash-global-topbar,
   body.view-projects-active .topbar.dash-global-topbar,
   body:not(.view-dashboard-active):not(.view-projects-active) .topbar.dash-global-topbar {
-    width: calc(100vw / 0.83) !important;
-    max-width: none !important;
-    right: auto !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
   }
 
   body.view-dashboard-active .dash-global-topbar .dash-switcher-bar,
