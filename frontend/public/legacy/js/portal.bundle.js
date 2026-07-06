@@ -1892,6 +1892,14 @@ function repairMainContentStructure() {
   mainContent.scrollLeft = 0;
 }
 function showView(id, btn, push = true) {
+  if (id === 'history') {
+    id = 'dashboard';
+    btn = null;
+    push = false;
+    if (window.location.hash === '#history') {
+      history.replaceState({ viewId: 'dashboard' }, '', '#dashboard');
+    }
+  }
   repairMainContentStructure();
   if (window.matchMedia && window.matchMedia('(max-width: 1280px)').matches) {
     const sidebar = document.getElementById('sidebar');
@@ -1993,7 +2001,7 @@ function showView(id, btn, push = true) {
     'annexure-h': 'Annexure H', 'annexure-i': 'Annexure I', 'annexure-j': 'Annexure J',
     'annexure-k': 'Annexure K', 'demand-table': 'Projected Demand Table',
     'auction-table': 'Auctioned Sites', 'summary-table': 'Source Summary Table', 'benchmark-table': 'Bench Mark & CORS',
-    'esign': 'E-Signature Panel', 'generate': 'Generate Final PDF', 'history': 'Report History', 'users': 'User Management', 'settings': 'Settings',
+    'esign': 'E-Signature Panel', 'generate': 'Generate Final PDF', 'users': 'User Management', 'settings': 'Settings',
     'audit-logs': 'System Audit Logs'
   };
   const titleEl = document.getElementById('topbar-title');

@@ -14,8 +14,8 @@
   <link
     href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=site-zoom-20260706-topbar-lift-v2">
-  <link rel="stylesheet" href="css/premium-theme.css?v=site-zoom-20260706-topbar-lift-v2">
+  <link rel="stylesheet" href="css/styles.css?v=site-zoom-20260706-history-remove-v1">
+  <link rel="stylesheet" href="css/premium-theme.css?v=site-zoom-20260706-history-remove-v1">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script defer src="https://cdn.jsdelivr.net/npm/lucide@0.363.0/dist/umd/lucide.min.js"></script>
@@ -395,7 +395,6 @@
         <div class="sb-section" id="finalize-nav" style="display:none">
           <div class="sb-section-lbl" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 800; color: var(--p-accent); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; padding: 0 4px;">Finalize</div>
           <button class="btn sb-item" onclick="showView('generate',this)"><span class="sb-ico"><i data-lucide="download"></i></span>Generate PDF</button>
-          <button class="sb-item" onclick="showView('history',this)"><span class="sb-ico"><i data-lucide="history"></i></span>Report History</button>
           <button class="sb-item" id="nav-users" onclick="showView('settings',this)" style="display:none"><span class="sb-ico"><i data-lucide="settings"></i></span>Settings</button>
           <button class="sb-item" id="nav-audit-logs" onclick="showView('audit-logs',this)"><span class="sb-ico"><i data-lucide="clipboard-list"></i></span>Audit Logs</button>
         </div>
@@ -1947,7 +1946,6 @@
           <span class="dash-panel-title">
             <i data-lucide="bell" style="width: 20px; height: 20px; color: #F2A123;"></i> Latest Updates
           </span>
-          <span onclick="showView('history', null)" class="dash-panel-link-all">View All</span>
         </div>
         <ul class="dash-updates-list">
           <li class="dash-update-item">
@@ -5407,67 +5405,6 @@
           </div>
         </div>
 
-              <div id="view-history" class="view">
-          <div class="header-row">
-            <div>
-              <div class="page-title">Report History</div>
-              <div class="page-sub">All previous DSR versions, approved reports, and revision history</div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-bd">
-              <div class="tbl-wrap">
-                <table class="tbl">
-                  <thead>
-                    <tr>
-                      <th>Report Title</th>
-                      <th>District</th>
-                      <th>Year</th>
-                      <th>Version</th>
-                      <th>Generated On</th>
-                      <th>Status</th>
-                      <th>Signatures</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>DSR - Jalandhar Sand Mining</td>
-                      <td>Jalandhar</td>
-                      <td>2024-25</td>
-                      <td>v3.0 Final</td>
-                      <td>Mar 15, 2025</td>
-                      <td><span class="badge badge-green">Approved</span></td>
-                      <td>5/5</td>
-                      <td><button class="btn btn-xs btn-outline">Download Download</button></td>
-                    </tr>
-                    <tr>
-                      <td>DSR - Jalandhar Sand Mining</td>
-                      <td>Jalandhar</td>
-                      <td>2024-25</td>
-                      <td>v2.1 Draft</td>
-                      <td>Feb 20, 2025</td>
-                      <td><span class="badge badge-amber">Rejected</span></td>
-                      <td>2/5</td>
-                      <td><button class="btn btn-xs btn-outline">Preview View</button></td>
-                    </tr>
-                    <tr>
-                      <td>DSR - Ludhiana Mining Survey</td>
-                      <td>Ludhiana</td>
-                      <td>2023-24</td>
-                      <td>v1.0 Final</td>
-                      <td>Jun 5, 2024</td>
-                      <td><span class="badge badge-green">Approved</span></td>
-                      <td>5/5</td>
-                      <td><button class="btn btn-xs btn-outline">Download Download</button></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-
       <div id="view-settings" class="view" style="padding: 20px 24px 36px;">
   <!-- Title Header Row -->
   <div class="header-row" style="margin-bottom: 24px;">
@@ -6373,7 +6310,7 @@
 
   <div class="toast" id="toast"></div>
 
-<script defer src="js/portal.bundle.js?v=site-zoom-20260706-topbar-lift-v2-v3"></script>
+<script defer src="js/portal.bundle.js?v=site-zoom-20260706-history-remove-v1-v3"></script>
 <script defer src="js/model-dsr-module.js?v=2"></script>
 <script defer src="js/replenishment-module.js?v=7"></script>
 <script>
