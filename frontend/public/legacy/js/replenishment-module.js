@@ -138,6 +138,10 @@ window.downloadCustomReportPDF = downloadCustomReportPDF;
 window.initDragAndDrop = initDragAndDrop;
 window.saveNewSectionOrder = saveNewSectionOrder;
 window.resetSectionOrder = resetSectionOrder;
+window.addCustomSection = addCustomSection;
+window.handleCustomSectionPdfUpload = handleCustomSectionPdfUpload;
+window.removeCustomSectionPdf = removeCustomSectionPdf;
+window.deleteCustomSection = deleteCustomSection;
 
 function showReplenishmentOptions(container) {
   container.innerHTML = `
@@ -468,6 +472,137 @@ function resetSectionOrder(reportId, reportName) {
   }
 }
 
+function addCustomSection(reportId, reportName) {
+  const name = prompt("Enter a title for the new custom PDF section:");
+  if (!name || !name.trim()) return;
+  
+  const reports = loadLocalReports();
+  const report = reports.find(r => r.id === reportId);
+  if (report) {
+    if (!report.customSections) report.customSections = [];
+    const newSecId = 'custom-pdf-' + Date.now();
+    const newSec = { id: newSecId, name: name.trim(), type: 'Custom PDF', isCustom: true };
+    
+    report.customSections.push(newSec);
+    if (!report.sectionOrder) report.sectionOrder = [];
+    report.sectionOrder.push(newSecId);
+    
+    saveLocalReports(reports);
+    
+    const editorContainer = document.getElementById('repl-editor-container');
+    if (editorContainer) {
+      renderCustomReportGenerator(editorContainer, report);
+    }
+    toast("Custom PDF section added successfully!", "success");
+  }
+}
+
+function handleCustomSectionPdfUpload(input, reportId, sectionId, reportName) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.type !== 'application/pdf') {
+    toast("Please upload a PDF file", "error");
+    return;
+  }
+  
+  toast("Processing PDF... Please wait", "info");
+  
+  if (typeof renderPdfToImages === 'function') {
+    renderPdfToImages(file, (err, imgs) => {
+      if (err) {
+        console.error(err);
+        toast("Failed to process PDF pages", "error");
+        return;
+      }
+      
+      if (!S.uploadedPDFs) S.uploadedPDFs = {};
+      S.uploadedPDFs[sectionId] = imgs;
+      
+      if (window.debouncedSaveState) window.debouncedSaveState();
+      
+      const reports = loadLocalReports();
+      const report = reports.find(r => r.id === reportId);
+      if (report) {
+        if (!report.customPdfs) report.customPdfs = {};
+        report.customPdfs[sectionId] = imgs;
+        saveLocalReports(reports);
+        
+        const editorContainer = document.getElementById('repl-editor-container');
+        if (editorContainer) {
+          renderCustomReportGenerator(editorContainer, report);
+        }
+      }
+      toast("PDF uploaded and processed successfully!", "success");
+    });
+  } else {
+    const url = URL.createObjectURL(file);
+    if (!S.uploadedPDFs) S.uploadedPDFs = {};
+    S.uploadedPDFs[sectionId] = [url];
+    
+    const reports = loadLocalReports();
+    const report = reports.find(r => r.id === reportId);
+    if (report) {
+      if (!report.customPdfs) report.customPdfs = {};
+      report.customPdfs[sectionId] = [url];
+      saveLocalReports(reports);
+      
+      const editorContainer = document.getElementById('repl-editor-container');
+      if (editorContainer) {
+        renderCustomReportGenerator(editorContainer, report);
+      }
+    }
+    toast("PDF uploaded successfully", "success");
+  }
+}
+
+function removeCustomSectionPdf(reportId, sectionId, reportName) {
+  if (!confirm("Are you sure you want to remove the uploaded PDF?")) return;
+  const reports = loadLocalReports();
+  const report = reports.find(r => r.id === reportId);
+  if (report) {
+    if (report.customPdfs) {
+      delete report.customPdfs[sectionId];
+    }
+    if (S.uploadedPDFs) {
+      delete S.uploadedPDFs[sectionId];
+    }
+    saveLocalReports(reports);
+    
+    const editorContainer = document.getElementById('repl-editor-container');
+    if (editorContainer) {
+      renderCustomReportGenerator(editorContainer, report);
+    }
+    toast("PDF removed successfully!", "success");
+  }
+}
+
+function deleteCustomSection(reportId, sectionId, reportName) {
+  if (!confirm("Are you sure you want to delete this custom section?")) return;
+  const reports = loadLocalReports();
+  const report = reports.find(r => r.id === reportId);
+  if (report) {
+    if (report.customSections) {
+      report.customSections = report.customSections.filter(cs => cs.id !== sectionId);
+    }
+    if (report.sectionOrder) {
+      report.sectionOrder = report.sectionOrder.filter(id => id !== sectionId);
+    }
+    if (report.customPdfs) {
+      delete report.customPdfs[sectionId];
+    }
+    if (S.uploadedPDFs) {
+      delete S.uploadedPDFs[sectionId];
+    }
+    saveLocalReports(reports);
+    
+    const editorContainer = document.getElementById('repl-editor-container');
+    if (editorContainer) {
+      renderCustomReportGenerator(editorContainer, report);
+    }
+    toast("Custom section deleted successfully!", "success");
+  }
+}
+
 function hydrateCheckboxStates(checkedIds) {
   if (!checkedIds) return;
   
@@ -582,6 +717,26 @@ function renderCustomReportGenerator(container, report) {
     { id: 'annexure-k', name: 'Annexure K', type: 'More Annexures' }
   ];
 
+  // Restore custom PDF pages into S.uploadedPDFs
+  if (report.customPdfs) {
+    if (!S.uploadedPDFs) S.uploadedPDFs = {};
+    Object.keys(report.customPdfs).forEach(secId => {
+      S.uploadedPDFs[secId] = report.customPdfs[secId];
+    });
+  }
+
+  // Load and append custom PDF sections
+  if (report.customSections && Array.isArray(report.customSections)) {
+    report.customSections.forEach(cs => {
+      sections.push({
+        id: cs.id,
+        name: cs.name,
+        type: cs.type || 'Custom PDF',
+        isCustom: true
+      });
+    });
+  }
+
   // Ensure report has a valid and complete sectionOrder
   const allSectionIds = sections.map(s => s.id);
   if (!report.sectionOrder || !Array.isArray(report.sectionOrder)) {
@@ -616,7 +771,53 @@ function renderCustomReportGenerator(container, report) {
   let checklistHtml = '';
   sections.forEach(s => {
     const escapedReportName = reportName.replace(/'/g, "\\'");
-    if (s.hasSubsections) {
+    if (s.isCustom) {
+      const pages = S.uploadedPDFs && S.uploadedPDFs[s.id];
+      const hasPages = pages && pages.length > 0;
+      
+      checklistHtml += `
+        <div class="draggable-section-item" data-section-id="${s.id}" style="margin-bottom:12px; padding:12px; background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0; position:relative; transition: all 0.2s ease;">
+          <div style="display:flex; align-items:center; justify-content:space-between; width:100%; margin-bottom:8px;">
+            <div style="display:flex; align-items:center; gap:10px; flex:1;">
+              <span class="drag-handle" style="cursor: grab; color: #94a3b8; display: flex; align-items: center; padding: 4px 2px;">
+                <i data-lucide="grip-vertical" style="width: 14px; height: 14px;"></i>
+              </span>
+              <input type="checkbox" id="chk-${s.id}" value="${s.id}" onchange="window.updateCustomReportPreview('${escapedReportName}', '${report.id}')" style="width:16px; height:16px; cursor:pointer;">
+              <label for="chk-${s.id}" style="font-size:13px; font-weight:700; cursor:pointer; color:#1e293b; display:flex; align-items:center; gap:6px; margin:0; width:100%;">
+                <span style="font-size:9px; padding:2px 6px; background:#fef3c7; border-radius:10px; text-transform:uppercase; color:#d97706; font-weight:700;">${s.type}</span>
+                <span>${s.name}</span>
+              </label>
+            </div>
+            <div>
+              <button onclick="window.deleteCustomSection('${report.id}', '${s.id}', '${escapedReportName}')" title="Delete custom section" style="background:none; border:none; color:#ef4444; cursor:pointer; padding:4px; display:inline-flex; align-items:center; justify-content:center;">
+                <i data-lucide="trash-2" style="width:14px; height:14px;"></i>
+              </button>
+            </div>
+          </div>
+          
+          <!-- PDF Upload Area -->
+          <div style="padding-left:36px; margin-top:8px;">
+            ${hasPages ? `
+              <div style="display:flex; align-items:center; justify-content:space-between; background:#fff; padding:6px 10px; border-radius:6px; border:1px solid #e2e8f0; font-size:12px;">
+                <div style="display:flex; align-items:center; gap:6px; color:#1e293b; font-weight:600;">
+                  <i data-lucide="file-text" style="width:14px; height:14px; color:#2563eb;"></i>
+                  <span>PDF Uploaded (${pages.length} pages)</span>
+                </div>
+                <button onclick="window.removeCustomSectionPdf('${report.id}', '${s.id}', '${escapedReportName}')" style="background:none; border:none; color:#dc2626; cursor:pointer; font-size:11px; padding:2px 6px; border-radius:4px; font-weight:600; display:inline-block;">Remove</button>
+              </div>
+            ` : `
+              <div style="border: 1px dashed #cbd5e1; border-radius:6px; background:#fff; padding:8px; text-align:center; font-size:12px; color:#64748b; cursor:pointer; position:relative;" onclick="document.getElementById('file-upload-${s.id}').click()">
+                <span style="display:flex; align-items:center; justify-content:center; gap:6px;">
+                  <i data-lucide="upload-cloud" style="width:14px; height:14px; color:#64748b;"></i>
+                  <span>Upload PDF document</span>
+                </span>
+                <input type="file" id="file-upload-${s.id}" accept="application/pdf" style="display:none;" onchange="window.handleCustomSectionPdfUpload(this, '${report.id}', '${s.id}', '${escapedReportName}')">
+              </div>
+            `}
+          </div>
+        </div>
+      `;
+    } else if (s.hasSubsections) {
       let subHtml = '';
       s.subsections.forEach(sub => {
         subHtml += `
@@ -685,6 +886,9 @@ function renderCustomReportGenerator(container, report) {
             <div style="display:flex; align-items:center; gap:8px;">
               <button onclick="window.resetSectionOrder('${report.id}', '${escapedReportName}')" class="btn btn-outline" style="padding: 4px 8px; font-size: 11px; height: auto; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #475569; border-color: #cbd5e1; background: #ffffff;">
                 <i data-lucide="rotate-ccw" style="width:11px; height:11px;"></i> Reset Order
+              </button>
+              <button onclick="window.addCustomSection('${report.id}', '${escapedReportName}')" class="btn btn-outline" style="padding: 4px 8px; font-size: 11px; height: auto; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #2563eb; border-color: #bfdbfe; background: #eff6ff;">
+                <i data-lucide="file-plus" style="width:11px; height:11px;"></i> Add Custom PDF
               </button>
               <span style="font-size:11px; color:#64748b; background:#f1f5f9; padding:2px 8px; border-radius:4px; display:inline-flex; align-items:center; gap:4px;">
                 <i data-lucide="grip-vertical" style="width:12px; height:12px;"></i> Drag to reorder
@@ -1158,6 +1362,28 @@ function compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds, repor
               ${graphsRows || '<tr><td colspan="7" style="text-align:center;">No elevation graph data available.</td></tr>'}
             </tbody>
           </table>
+        </div>
+      `;
+      combinedContent += sectionHtml;
+    }
+    else if (item.id.startsWith('custom-pdf-')) {
+      const reports = loadLocalReports();
+      const report = reports.find(r => r.id === reportId);
+      const customSec = report && report.customSections && report.customSections.find(cs => cs.id === item.id);
+      const titleText = customSec ? customSec.name : 'Custom PDF Section';
+      
+      const pages = S.uploadedPDFs && S.uploadedPDFs[item.id];
+      let pagesHtml = '';
+      if (pages && pages.length > 0) {
+        pagesHtml = pages.map(src => `<img src="${src}" style="max-width:100%; height:auto; border:1px solid #cbd5e1; border-radius:4px; display:block; margin:0 auto 10px;">`).join('');
+      } else {
+        pagesHtml = `<p class="empty" style="color:#64748b; font-style:italic;">No PDF document uploaded for this section yet.</p>`;
+      }
+      
+      sectionHtml = `
+        <div class="section-block" data-custom-section-id="${item.id}">
+          <h2 class="section-title">${escapeHtml(titleText)}</h2>
+          ${pagesHtml}
         </div>
       `;
       combinedContent += sectionHtml;
