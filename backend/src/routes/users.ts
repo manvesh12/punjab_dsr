@@ -166,8 +166,16 @@ usersRouter.post("/invite/bulk", upload.single("file"), async (req, res) => {
 
   try {
     const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
+    if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+      res.status(400).json({ error: "Uploaded file contains no sheets." });
+      return;
+    }
     const firstSheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[firstSheetName];
+    if (!worksheet) {
+      res.status(400).json({ error: "First sheet of the uploaded file is empty." });
+      return;
+    }
     const rows = xlsx.utils.sheet_to_json(worksheet) as any[];
 
     let successCount = 0;
@@ -176,10 +184,47 @@ usersRouter.post("/invite/bulk", upload.single("file"), async (req, res) => {
 
     const validRoles = Object.values(Role);
 
+    // Helper function to find a key in the row object case-insensitively and ignore non-alphanumeric chars
+    const getRowValue = (row: any, targetKey: string): string => {
+      if (!row || typeof row !== "object") return "";
+      const cleanTarget = targetKey.toLowerCase().replace(/[^a-z0-9]/g, "");
+      for (const k of Object.keys(row)) {
+        const cleanK = k.toLowerCase().replace(/[^a-z0-9]/g, "");
+        if (cleanK === cleanTarget) {
+          return String(row[k] || "").trim();
+        }
+      }
+      // Fallback to substring matching if exact match not found
+      for (const k of Object.keys(row)) {
+        const cleanK = k.toLowerCase().replace(/[^a-z0-9]/g, "");
+        if (cleanK.includes(cleanTarget)) {
+          return String(row[k] || "").trim();
+        }
+      }
+      return "";
+    };
+
+    // Helper to map variations of role name (e.g. "State Admin", "District Owner") to valid Role enum
+    const normalizeRoleName = (rawRole: string): string => {
+      const clean = rawRole.toUpperCase().trim().replace(/[\s_-]+/g, "");
+      for (const role of validRoles) {
+        const cleanRole = role.replace(/_/g, "");
+        if (clean === cleanRole) {
+          return role;
+        }
+      }
+      return rawRole;
+    };
+
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
-      const email = String(row.email || row.Email || "").trim().toLowerCase();
-      const rawRole = String(row.role || row.Role || "").toUpperCase();
+      const email = getRowValue(row, "email").toLowerCase();
+      const rawRole = getRowValue(row, "role");
+
+      // Skip completely empty rows
+      if (!email && !rawRole) {
+        continue;
+      }
 
       if (!email) {
         failedCount++;
@@ -194,7 +239,8 @@ usersRouter.post("/invite/bulk", upload.single("file"), async (req, res) => {
         continue;
       }
 
-      if (!validRoles.includes(rawRole as Role)) {
+      const normalizedRole = normalizeRoleName(rawRole);
+      if (!validRoles.includes(normalizedRole as Role)) {
         failedCount++;
         errors.push({ row: i + 2, email, reason: `Invalid role: ${rawRole}` });
         continue;
@@ -209,7 +255,7 @@ usersRouter.post("/invite/bulk", upload.single("file"), async (req, res) => {
 
       const token = crypto.randomBytes(32).toString("hex");
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-      const role = rawRole as Role;
+      const role = normalizedRole as Role;
 
       try {
         await prisma.invitation.upsert({

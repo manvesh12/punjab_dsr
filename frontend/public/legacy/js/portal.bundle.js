@@ -5503,7 +5503,7 @@ async function doBulkInvite() {
   
   try {
     const token = localStorage.getItem('dsr_token');
-    const res = await fetch('/api/users/invite/bulk', {
+    const res = await fetch(`${API_BASE_URL}/users/invite/bulk`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`
