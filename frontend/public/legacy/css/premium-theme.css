@@ -4866,7 +4866,34 @@ html.dark .reviewer-notes-footer {
     right: 12px;
     bottom: 12px;
   }
+}
+
 /* Generate PDF screen: remove the decorative live-preview box and keep options full-width. */
 .final-pdf-layout > div:nth-child(2) {
   display: none !important;
+}
+
+/* Sidebar scroll fix: keep the menu viewport-bound so bottom items remain reachable. */
+body:not(.view-dashboard-active):not(.view-projects-active) #sidebar,
+body:not(.view-dashboard-active):not(.view-projects-active) #sidebar[style],
+body:not(.sidebar-hidden):not(.view-dashboard-active):not(.view-projects-active) .sidebar,
+body:not(.sidebar-hidden):not(.view-dashboard-active):not(.view-projects-active) .sidebar[style] {
+  top: 0 !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  max-height: 100vh !important;
+  max-height: 100dvh !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+body:not(.view-dashboard-active):not(.view-projects-active) #sidebar .sb-nav,
+body:not(.view-dashboard-active):not(.view-projects-active) #sidebar .sb-nav[style] {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding-bottom: 96px !important;
+  overscroll-behavior: contain !important;
 }
