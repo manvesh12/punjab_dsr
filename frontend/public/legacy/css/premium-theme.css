@@ -5033,10 +5033,9 @@ body:not(.view-dashboard-active):not(.view-projects-active) #sidebar .sb-nav[sty
   body:not(.view-dashboard-active):not(.view-projects-active) #sidebar,
   body:not(.view-dashboard-active):not(.view-projects-active) #sidebar[style] {
     top: var(--project-topbar-h) !important;
-    height: calc(100vh - var(--project-topbar-h)) !important;
-    height: calc(100dvh - var(--project-topbar-h)) !important;
-    max-height: calc(100vh - var(--project-topbar-h)) !important;
-    max-height: calc(100dvh - var(--project-topbar-h)) !important;
+    bottom: 0 !important;
+    height: auto !important;
+    max-height: none !important;
     z-index: 650 !important;
   }
 
@@ -5101,6 +5100,17 @@ body:not(.view-dashboard-active):not(.view-projects-active) #sidebar .sb-nav[sty
   body.preview-open:not(.view-dashboard-active):not(.view-projects-active) .pdf-preview-actions {
     flex-wrap: nowrap !important;
     overflow: hidden !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar .dash-switcher-bar,
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar .dash-gov-utility-strip,
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar .dash-gov-brand-row,
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar .dash-gov-menu-bar,
+  body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar .dash-gov-notice-ticker {
+    width: 100% !important;
+    margin-left: 0 !important;
+    padding-left: 24px !important;
+    padding-right: 24px !important;
   }
 }
 
