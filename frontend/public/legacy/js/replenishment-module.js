@@ -509,7 +509,6 @@ function resetSectionOrder(reportId, reportName) {
       'front-matter',
       'chapters',
       'plates',
-      'graphs',
       'anx1', 'anx2', 'anx3', 'anx4', 'anx5', 'anx6', 'anx7',
       'annexure-b', 'annexure-c', 'annexure-d', 'annexure-e', 'annexure-f', 'annexure-g', 'annexure-h', 'annexure-i', 'annexure-j', 'annexure-k'
     ];
@@ -782,7 +781,6 @@ function renderCustomReportGenerator(container, report) {
       hasSubsections: true,
       subsections: (S.plates || []).map(pl => ({ id: `plate-${pl.id}`, name: pl.name }))
     },
-    { id: 'graphs', name: 'Cross Section Graphs (Distance/Elevation table)', type: 'DSR' },
     { id: 'anx1', name: 'Annexure I - Sources', type: 'Annexure' },
     { id: 'anx2', name: 'Annexure II - Leases', type: 'Annexure' },
     { id: 'anx3', name: 'Annexure III - Clusters', type: 'Annexure' },
@@ -1095,8 +1093,10 @@ async function realUpdateCustomReportPreview(reportName, reportId) {
         try { URL.revokeObjectURL(window.activeReplenishmentPdfBlobUrl); } catch (_) {}
       }
       window.activeReplenishmentPdfBlobUrl = URL.createObjectURL(blob);
-      iframe.removeAttribute('srcdoc');
-      iframe.src = `${window.activeReplenishmentPdfBlobUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`;
+      const newIframe = iframe.cloneNode(true);
+      newIframe.removeAttribute('srcdoc');
+      newIframe.src = `${window.activeReplenishmentPdfBlobUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`;
+      iframe.parentNode.replaceChild(newIframe, iframe);
     }
   } catch (err) {
     console.error('Failed to render live report preview:', err);
@@ -1182,7 +1182,6 @@ function compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds, repor
     'front-matter',
     'chapters',
     'plates',
-    'graphs',
     'anx1', 'anx2', 'anx3', 'anx4', 'anx5', 'anx6', 'anx7',
     'annexure-b', 'annexure-c', 'annexure-d', 'annexure-e', 'annexure-f', 'annexure-g', 'annexure-h', 'annexure-i', 'annexure-j', 'annexure-k'
   ];
@@ -1214,10 +1213,7 @@ function compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds, repor
       if (checkedPlates.length > 0) {
         orderedIds.push({ id: 'plates', subIds: checkedPlates.map(pl => `plate-${pl.id}`) });
       }
-    } else if (secId === 'graphs') {
-      if (checkedIds.includes('graphs')) {
-        orderedIds.push({ id: 'graphs' });
-      }
+    
     } else {
       if (checkedIds.includes(secId)) {
         orderedIds.push({ id: secId });
@@ -1466,42 +1462,6 @@ function compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds, repor
           </div>
         `;
       });
-      combinedContent += sectionHtml;
-    }
-    else if (item.id === 'graphs') {
-      const graphsRows = (S.graphs || []).map(g => `
-        <tr>
-          <td><strong>${g.name}</strong></td>
-          <td>${g.dist}</td>
-          <td>${g.post}</td>
-          <td>${g.red}</td>
-          <td>${g.thal}</td>
-          <td>${g.area}</td>
-          <td>${g.bulk}</td>
-        </tr>
-      `).join('');
-      
-      sectionHtml = `
-        <div class="section-block">
-          <h2 class="section-title">Cross Section Elevation Data</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>Section Name</th>
-                <th>Distance (m)</th>
-                <th>Elevation (Post-Monsoon)</th>
-                <th>Reduced Level</th>
-                <th>Thalweg Level</th>
-                <th>Cross Section Area</th>
-                <th>Bulk Density</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${graphsRows || '<tr><td colspan="7" style="text-align:center;">No elevation graph data available.</td></tr>'}
-            </tbody>
-          </table>
-        </div>
-      `;
       combinedContent += sectionHtml;
     }
     else if (item.id.startsWith('custom-pdf-')) {
@@ -2343,7 +2303,6 @@ async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
     'front-matter',
     'chapters',
     'plates',
-    'graphs',
     'anx1', 'anx2', 'anx3', 'anx4', 'anx5', 'anx6', 'anx7',
     'annexure-b', 'annexure-c', 'annexure-d', 'annexure-e', 'annexure-f', 'annexure-g', 'annexure-h', 'annexure-i', 'annexure-j', 'annexure-k'
   ];
@@ -2373,10 +2332,6 @@ async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
       const checkedPlates = (S.plates || []).filter(pl => checkedIds.includes(`plate-${pl.id}`));
       if (checkedPlates.length > 0) {
         orderedItems.push({ id: 'plates', subIds: checkedPlates.map(pl => `plate-${pl.id}`) });
-      }
-    } else if (secId === 'graphs') {
-      if (checkedIds.includes('graphs')) {
-        orderedItems.push({ id: 'graphs' });
       }
     } else if (secId.startsWith('custom-pdf-')) {
       if (checkedIds.includes(secId)) {
@@ -2458,8 +2413,9 @@ async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
       } 
       else if (item.id === 'chapters') {
         for (const subId of item.subIds) {
-          const ch = (S.chapters || []).find(c => `chapter-${c.id}` === subId) || {};
-          const chNum = ch.id;
+          const chIdx = (S.chapters || []).findIndex(c => `chapter-${c.id}` === subId);
+          const chNum = chIdx !== -1 ? chIdx + 1 : 1;
+          const ch = (S.chapters || [])[chNum - 1] || {};
           const chapterTitle = safe(ch.name, `Chapter ${chNum}`);
           const chPages = window.pdfPreview ? window.pdfPreview.getChapterPages().filter(p => new RegExp('^Chapter ' + chNum + '\\b', 'i').test(p.label)) : [];
           if (chPages.length > 0) {
@@ -2476,8 +2432,9 @@ async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
       } 
       else if (item.id === 'plates') {
         for (const subId of item.subIds) {
-          const pl = (S.plates || []).find(p => `plate-${p.id}` === subId) || {};
-          const plateNo = pl.id;
+          const plIdx = (S.plates || []).findIndex(p => `plate-${p.id}` === subId);
+          const plateNo = plIdx !== -1 ? plIdx + 1 : 1;
+          const pl = (S.plates || [])[plateNo - 1] || {};
           const plateTitle = safe(pl.name, `Plate ${plateNo}`);
           const platePages = window.pdfPreview ? window.pdfPreview.getPlatePages().filter(p => new RegExp('^Plate P' + plateNo + '\\b|^Plate ' + plateNo + '\\b', 'i').test(p.label)) : [];
           if (platePages.length > 0) {
@@ -2491,43 +2448,6 @@ async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
             }
           }
         }
-      } 
-      else if (item.id === 'graphs') {
-        addTitlePage('CROSS SECTION GRAPHS');
-        S.graphs.forEach((g, index) => {
-          doc.addPage();
-          let y = 25;
-          y = writeParagraph(`${index + 1}. ${safe(g.name || g.subName, 'Cross Section')}`, y, { bold: true, size: 12, color: [0, 0, 0] });
-          const calc = typeof calcGraph === 'function' ? calcGraph(g) : null;
-          doc.autoTable({
-            startY: y,
-            margin: { left: pad, right: pad },
-            tableWidth,
-            head: [['Metric', 'Value']],
-            body: [
-              ['Distance Points', safe(g.dist)],
-              ['Post Monsoon Levels', safe(g.post)],
-              ['Reduced Level', safe(g.red)],
-              ['Thalweg Level', safe(g.thal)],
-              ['Area', safe(g.area)],
-              ['Bulk Density', safe(g.bulk)],
-              ['Mining Percentage', safe(g.pct) + '%'],
-              ['Estimated Volume', calc ? localFmtN(calc.volume, 0) : '-']
-            ],
-            styles: { fontSize: 8, cellPadding: 2, lineColor: [0, 0, 0], lineWidth: 0.2, textColor: [0, 0, 0] },
-            headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold', lineColor: [0, 0, 0], lineWidth: 0.2 },
-            theme: 'grid'
-          });
-          y = doc.lastAutoTable.finalY + 8;
-          const canvas = document.getElementById(`canvas-${g.id}-post`) || document.getElementById(`canvas-${g.id}`);
-          if (canvas) {
-            try {
-              doc.addImage(canvas.toDataURL('image/png', 1), 'PNG', pad, y, tableWidth, 65);
-            } catch (err) {
-              console.warn('Cross-section canvas capture failed:', err);
-            }
-          }
-        });
       } 
       else if (item.id.startsWith('custom-pdf-')) {
         const reports = loadLocalReports();
