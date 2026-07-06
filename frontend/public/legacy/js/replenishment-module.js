@@ -525,71 +525,29 @@ function resetSectionOrder(reportId, reportName) {
 }
 
 function addCustomSection(reportId, reportName) {
-  closeCustomPdfModal();
-  
-  const escapedReportName = reportName.replace(/'/g, "\\'");
-  
-  if (!document.getElementById('custom-pdf-modal-styles')) {
-    const style = document.createElement('style');
-    style.id = 'custom-pdf-modal-styles';
-    style.innerHTML = `
-      @keyframes customPdfFadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-      }
-      @keyframes customPdfSlideUp {
-        from { transform: translateY(10px); opacity: 0; }
-        to { transform: translateY(30px); opacity: 1; }
-      }
-    `;
-    document.head.appendChild(style);
+  const confirmBtn = document.getElementById('custom-pdf-modal-confirm-btn');
+  const input = document.getElementById('custom-pdf-title-input');
+  if (input) {
+    input.value = '';
+  }
+  if (confirmBtn) {
+    const escapedReportName = reportName.replace(/'/g, "\\'");
+    confirmBtn.setAttribute('onclick', `window.confirmAddCustomSection('${reportId}', '${escapedReportName}')`);
   }
   
-  const overlay = document.createElement('div');
-  overlay.id = 'custom-pdf-modal-overlay';
-  overlay.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(15, 23, 42, 0.4);
-    backdrop-filter: blur(4px);
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    z-index: 10000;
-    animation: customPdfFadeIn 0.2s ease forwards;
-  `;
-  
-  overlay.innerHTML = `
-    <div style="background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); width: 100%; max-width: 420px; padding: 24px; text-align: left; animation: customPdfSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; display: flex; flex-direction: column; gap: 16px; margin-top: 15vh;">
-      <div>
-        <h3 style="margin: 0 0 6px 0; color: #1e293b; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 800;">Add Custom PDF Section</h3>
-        <p style="margin: 0; color: #64748b; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; line-height: 1.5;">Enter a title for the new custom PDF section in your report.</p>
-      </div>
-      <div style="display: flex; flex-direction: column; gap: 6px;">
-        <label for="custom-pdf-title-input" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">Section Title</label>
-        <input type="text" id="custom-pdf-title-input" placeholder="e.g. Geological Mapping Report" style="padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 13.5px; outline: none; transition: border-color 0.2s;" onkeydown="if(event.key==='Enter') document.getElementById('custom-pdf-modal-confirm-btn').click()">
-      </div>
-      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 4px;">
-        <button onclick="window.closeCustomPdfModal()" class="btn btn-outline" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer; height: auto;">Cancel</button>
-        <button id="custom-pdf-modal-confirm-btn" onclick="window.confirmAddCustomSection('${reportId}', '${escapedReportName}')" class="btn btn-primary" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px; height: auto;">Add Section</button>
-      </div>
-    </div>
-  `;
-  
-  document.body.appendChild(overlay);
+  if (typeof window.openModal === 'function') {
+    window.openModal('modal-custom-pdf');
+  }
   
   setTimeout(() => {
-    const input = document.getElementById('custom-pdf-title-input');
     if (input) input.focus();
   }, 100);
 }
 
 function closeCustomPdfModal() {
-  const overlay = document.getElementById('custom-pdf-modal-overlay');
-  if (overlay) overlay.remove();
+  if (typeof window.closeModal === 'function') {
+    window.closeModal('modal-custom-pdf');
+  }
 }
 
 function confirmAddCustomSection(reportId, reportName) {

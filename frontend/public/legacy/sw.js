@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smart-dsr-cache-v7-annex-fjk-reorder-autoscroll-modal';
+const CACHE_NAME = 'smart-dsr-cache-v8-annex-fjk-reorder-autoscroll-modal-integrated';
 const urlsToCache = [
   './login.html',
   './css/styles.css',
