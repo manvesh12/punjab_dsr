@@ -5995,7 +5995,7 @@ document.addEventListener("DOMContentLoaded", function() {
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=topbar-v30')
+        navigator.serviceWorker.register('./sw.js?v=network-first-v31')
           .then(registration => {
             registration.update();
             console.log('ServiceWorker registration successful with scope: ', registration.scope);

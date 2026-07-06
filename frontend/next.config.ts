@@ -11,6 +11,21 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        source: "/legacy/:path*",
+        headers: [
+          { key: "Cache-Control", value: "no-store, no-cache, must-revalidate, proxy-revalidate" },
+          { key: "Pragma", value: "no-cache" },
+          { key: "Expires", value: "0" }
+        ]
+      },
+      {
+        source: "/legacy/sw.js",
+        headers: [
+          { key: "Cache-Control", value: "no-store, no-cache, must-revalidate, proxy-revalidate" },
+          { key: "Service-Worker-Allowed", value: "/legacy/" }
+        ]
+      },
+      {
         source: "/:path*",
         headers: [
           { key: "X-Content-Type-Options", value: "nosniff" },
