@@ -1959,12 +1959,11 @@ body.view-dashboard-active .sidebar,
 }
 body.view-dashboard-active .topbar,
 #screen-app:has(#view-dashboard.active) .topbar {
-  display: none !important;
+  /* display: none !important; */
 }
 body.view-dashboard-active .app-workspace,
 #screen-app:has(#view-dashboard.active) .app-workspace {
   margin-left: 0 !important;
-  padding: 0 !important;
 }
 body.view-dashboard-active .main-content,
 #screen-app:has(#view-dashboard.active) .main-content {
@@ -1986,12 +1985,11 @@ body.view-projects-active .sidebar,
 }
 body.view-projects-active .topbar,
 #screen-app:has(#view-projects.active) .topbar {
-  display: none !important;
+  /* display: none !important; */
 }
 body.view-projects-active .app-workspace,
 #screen-app:has(#view-projects.active) .app-workspace {
   margin-left: 0 !important;
-  padding: 0 !important;
 }
 body.view-projects-active .main-content,
 #screen-app:has(#view-projects.active) .main-content {
