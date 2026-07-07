@@ -17903,3 +17903,41 @@ document.addEventListener('DOMContentLoaded', function() {
     .then(function(data) { if (data && data.value) { localStorage.setItem('publicAnnouncements', data.value); renderDashboardLatestUpdates(data.value); } })
     .catch(function() {});
 });
+
+
+/* ─── Dashboard Contact & Demo Support (dynamic from portalContactInfo) ─── */
+function renderDashboardContactInfo(jsonString) {
+  var _keyMap = [
+    { titleId: 'ci-nodal-title',    contentId: 'ci-nodal-content' },
+    { titleId: 'ci-email-title',    contentId: 'ci-email-content' },
+    { titleId: 'ci-helpline-title', contentId: 'ci-helpline-content' },
+    { titleId: 'ci-hours-title',    contentId: 'ci-hours-content' }
+  ];
+  var items = [];
+  try { items = JSON.parse(jsonString); } catch(e) { return; }
+  if (!Array.isArray(items)) return;
+  items.forEach(function(item, idx) {
+    var map = _keyMap[idx];
+    if (!map) return;
+    var titleEl = document.getElementById(map.titleId);
+    var contentEl = document.getElementById(map.contentId);
+    if (titleEl && item.title) titleEl.textContent = item.title;
+    if (contentEl && item.content) contentEl.textContent = item.content;
+  });
+}
+window.renderDashboardContactInfo = renderDashboardContactInfo;
+
+/* Auto-load contact info on DOMContentLoaded */
+document.addEventListener('DOMContentLoaded', function() {
+  var stored = localStorage.getItem('portalContactInfo');
+  if (stored) renderDashboardContactInfo(stored);
+  fetch('/api/settings/contactInfo')
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(data) {
+      if (data && data.value) {
+        localStorage.setItem('portalContactInfo', data.value);
+        renderDashboardContactInfo(data.value);
+      }
+    })
+    .catch(function() {});
+});

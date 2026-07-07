@@ -1981,7 +1981,7 @@
       <div class="dash-panel-card">
         <div class="dash-panel-header">
           <span class="dash-panel-title">
-            <i data-lucide="phone" style="width: 20px; height: 20px; color: #C49A58;"></i> Contact & Demo Support
+            <i data-lucide="phone" style="width: 20px; height: 20px; color: #C49A58;"></i> Contact &amp; Demo Support
           </span>
           <span class="dash-panel-link-all" onclick="document.getElementById('dash-contact-section')?.scrollIntoView({behavior:'smooth', block:'start'})">Open Help Desk</span>
         </div>
@@ -1989,34 +1989,35 @@
           <div class="dash-quick-access-btn">
             <div class="dash-quick-icon-box" style="color:#3B82F6;"><i data-lucide="building-2" style="width:20px;height:20px;"></i></div>
             <div class="dash-quick-text-box">
-              <span class="dash-quick-title">Nodal Office</span>
-              <span class="dash-quick-subtitle">Punjab DSR Cell, Chandigarh</span>
+              <span class="dash-quick-title" id="ci-nodal-title">Nodal Office</span>
+              <span class="dash-quick-subtitle" id="ci-nodal-content">Punjab DSR Cell, Chandigarh</span>
             </div>
           </div>
           <div class="dash-quick-access-btn">
             <div class="dash-quick-icon-box" style="color:#10B981;"><i data-lucide="mail" style="width:20px;height:20px;"></i></div>
             <div class="dash-quick-text-box">
-              <span class="dash-quick-title">Email</span>
-              <span class="dash-quick-subtitle">support.dsr@punjab.gov.in</span>
+              <span class="dash-quick-title" id="ci-email-title">Email</span>
+              <span class="dash-quick-subtitle" id="ci-email-content">support.dsr@punjab.gov.in</span>
             </div>
           </div>
           <div class="dash-quick-access-btn">
             <div class="dash-quick-icon-box" style="color:#F2A123;"><i data-lucide="phone-call" style="width:20px;height:20px;"></i></div>
             <div class="dash-quick-text-box">
-              <span class="dash-quick-title">Helpline</span>
-              <span class="dash-quick-subtitle">0172-274-Demo</span>
+              <span class="dash-quick-title" id="ci-helpline-title">Helpline</span>
+              <span class="dash-quick-subtitle" id="ci-helpline-content">0172-274-Demo</span>
             </div>
           </div>
           <div class="dash-quick-access-btn">
             <div class="dash-quick-icon-box" style="color:#3B82F6;"><i data-lucide="clock-3" style="width:20px;height:20px;"></i></div>
             <div class="dash-quick-text-box">
-              <span class="dash-quick-title">Demo Hours</span>
-              <span class="dash-quick-subtitle">Mon-Fri, 10:00 AM-5:00 PM</span>
+              <span class="dash-quick-title" id="ci-hours-title">Demo Hours</span>
+              <span class="dash-quick-subtitle" id="ci-hours-content">Mon-Fri, 10:00 AM-5:00 PM</span>
             </div>
           </div>
         </div>
       </div>
     </section>
+
     <footer style="margin-top: 32px; border-top: 1.5px solid var(--border); padding: 32px 0 0 0; background: transparent;">
       <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 32px; padding-bottom: 24px;">
         <div>
@@ -5146,41 +5147,40 @@
         </div>
       </div>
 
-      <!-- Portal Status Card -->
+      <!-- Contact & Demo Support Card (editable) -->
       <div class="card" style="box-shadow: 0 8px 32px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.01);">
-        <div class="card-hd" style="display: flex; align-items: center; gap: 8px;">
-          <i data-lucide="info" style="width: 16px; height: 16px; color: var(--p-accent-gold);"></i>
-          <span class="card-title">Portal Status</span>
-        </div>
-        <div class="card-bd" style="padding: 20px; font-size: 12.5px;">
-          <div style="display: flex; flex-direction: column; gap: 14px;">
-            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
-              <span style="color: var(--text-soft);">Compliance Standard</span>
-              <span style="font-weight: 700; color: #10B981; display: inline-flex; align-items: center; gap: 4px;">
-                <span style="width: 6px; height: 6px; border-radius: 50%; background: #10B981;"></span>
-                EMGSM 2020
-              </span>
-            </div>
-            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
-              <span style="color: var(--text-soft);">Assisting Body</span>
-              <span style="font-weight: 600; color: var(--text);">IIT Ropar Cell</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
-              <span style="color: var(--text-soft);">Database Status</span>
-              <span style="font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 4px;">
-                <i data-lucide="database" style="width: 12px; height: 12px; color: var(--p-accent-gold);"></i>
-                Connected
-              </span>
-            </div>
-            <div style="display: flex; justify-content: space-between;">
-              <span style="color: var(--text-soft);">State Level Notices</span>
-              <span style="font-weight: 600; color: var(--text);">Active</span>
-            </div>
+        <div class="card-hd" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="phone" style="width: 16px; height: 16px; color: var(--p-accent-gold);"></i>
+            <span class="card-title">Contact &amp; Demo Support</span>
           </div>
+        </div>
+        <div class="card-bd" style="padding: 20px;">
+          <div style="font-size: 11px; color: var(--text-soft); margin-bottom: 14px; display: flex; align-items: center; gap: 5px; background: rgba(242,161,35,0.07); padding: 9px 12px; border-radius: 6px; border-left: 3px solid var(--p-accent-gold);">
+            <i data-lucide="info" style="width: 12px; height: 12px; flex-shrink:0;"></i>
+            Edit the title and content shown in the Contact &amp; Demo Support panel on the dashboard.
+          </div>
+          <table style="width:100%; border-collapse: collapse;" id="contact-info-table">
+            <thead>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.07);">
+                <th style="padding: 8px 10px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-soft); width: 32px;"></th>
+                <th style="padding: 8px 10px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-soft);">Title</th>
+                <th style="padding: 8px 10px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-soft);">Content</th>
+              </tr>
+            </thead>
+            <tbody id="contact-info-tbody">
+              <!-- rows injected by JS -->
+            </tbody>
+          </table>
+          <button class="btn btn-saffron" id="contact-info-save-btn" onclick="saveContactInfo()" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; height: 36px; padding: 0 18px; margin-top: 16px;">
+            <i data-lucide="save" style="width: 14px; height: 14px;"></i>
+            Save Contact Info
+          </button>
         </div>
       </div>
     </div>
   </div>
+
 
   <!-- Users Settings Tab Content -->
   <div id="settings-tab-users" class="settings-tab-content" style="display:none;">
@@ -5304,6 +5304,79 @@
     renderAnnouncementsEditor();
   }
 
+
+  // ─── Contact Info Editor ───────────────────────────────────────────────────
+  var _contactInfoDefaults = [
+    { key: 'nodal',   icon: 'building-2',  iconColor: '#3B82F6', title: 'Nodal Office', content: 'Punjab DSR Cell, Chandigarh' },
+    { key: 'email',   icon: 'mail',        iconColor: '#10B981', title: 'Email',        content: 'support.dsr@punjab.gov.in' },
+    { key: 'helpline',icon: 'phone-call',  iconColor: '#F2A123', title: 'Helpline',     content: '0172-274-Demo' },
+    { key: 'hours',   icon: 'clock-3',     iconColor: '#3B82F6', title: 'Demo Hours',  content: 'Mon-Fri, 10:00 AM-5:00 PM' }
+  ];
+  var _contactInfoRows = JSON.parse(JSON.stringify(_contactInfoDefaults));
+
+  function renderContactInfoEditor() {
+    var tbody = document.getElementById('contact-info-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = _contactInfoRows.map(function(row, idx) {
+      var icons = { 'building-2': '🏢', 'mail': '📧', 'phone-call': '📞', 'clock-3': '🕙' };
+      return '<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">' +
+        '<td style="padding:10px 10px;font-size:18px;text-align:center;">' + (icons[row.icon] || '📌') + '</td>' +
+        '<td style="padding:10px 8px;">' +
+          '<input type="text" value="' + (row.title||'').replace(/"/g,'&quot;') + '" ' +
+          'oninput="_contactInfoRows[' + idx + '].title=this.value" ' +
+          'style="width:100%;padding:6px 10px;font-size:12px;border-radius:4px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.2);color:var(--text);font-family:inherit;">' +
+        '</td>' +
+        '<td style="padding:10px 8px;">' +
+          '<input type="text" value="' + (row.content||'').replace(/"/g,'&quot;') + '" ' +
+          'oninput="_contactInfoRows[' + idx + '].content=this.value" ' +
+          'style="width:100%;padding:6px 10px;font-size:12px;border-radius:4px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.2);color:var(--text);font-family:inherit;">' +
+        '</td>' +
+        '</tr>';
+    }).join('');
+    if (window.initLucide) initLucide();
+  }
+
+  function loadContactInfoFromStorage() {
+    var stored = localStorage.getItem('portalContactInfo');
+    if (stored) {
+      try {
+        var arr = JSON.parse(stored);
+        if (Array.isArray(arr) && arr.length === _contactInfoDefaults.length) {
+          _contactInfoRows = arr;
+        }
+      } catch(e) {}
+    }
+    renderContactInfoEditor();
+  }
+
+  async function saveContactInfo() {
+    // Sync from DOM inputs first
+    var rows = document.querySelectorAll('#contact-info-tbody tr');
+    rows.forEach(function(tr, idx) {
+      var inputs = tr.querySelectorAll('input');
+      if (_contactInfoRows[idx]) {
+        _contactInfoRows[idx].title = inputs[0] ? inputs[0].value : _contactInfoRows[idx].title;
+        _contactInfoRows[idx].content = inputs[1] ? inputs[1].value : _contactInfoRows[idx].content;
+      }
+    });
+    var jsonValue = JSON.stringify(_contactInfoRows);
+    var btn = document.getElementById('contact-info-save-btn');
+    btn.disabled = true; btn.innerText = 'Saving...';
+    try {
+      await apiFetch('/settings/contactInfo', { method: 'PUT', body: JSON.stringify({ value: jsonValue }) });
+      localStorage.setItem('portalContactInfo', jsonValue);
+      if (typeof window.renderDashboardContactInfo === 'function') window.renderDashboardContactInfo(jsonValue);
+      toast('Contact info saved!', 'success');
+    } catch(e) {
+      localStorage.setItem('portalContactInfo', jsonValue);
+      if (typeof window.renderDashboardContactInfo === 'function') window.renderDashboardContactInfo(jsonValue);
+      toast('Saved locally (server unavailable).', 'info');
+    }
+    btn.disabled = false; btn.innerText = 'Save Contact Info';
+    if (window.initLucide) initLucide();
+  }
+  window.saveContactInfo = saveContactInfo;
+
   // ─── Load Settings ──────────────────────────────────────────────────────────
   async function loadGeneralSettings() {
     const localNotice = localStorage.getItem('portalNoticeText');
@@ -5319,6 +5392,23 @@
     } else {
       renderAnnouncementsEditor();
     }
+    // Load contact info
+    loadContactInfoFromStorage();
+    try {
+      var contactRes = await fetch('/api/settings/contactInfo');
+      if (contactRes.ok) {
+        var contactData = await contactRes.json();
+        if (contactData && contactData.value) {
+          var arr = JSON.parse(contactData.value);
+          if (Array.isArray(arr)) {
+            _contactInfoRows = arr;
+            localStorage.setItem('portalContactInfo', contactData.value);
+            renderContactInfoEditor();
+            if (typeof window.renderDashboardContactInfo === 'function') window.renderDashboardContactInfo(contactData.value);
+          }
+        }
+      }
+    } catch(e) {}
     try {
       const res = await fetch('/api/settings/noticeText');
       if (res.ok) {
