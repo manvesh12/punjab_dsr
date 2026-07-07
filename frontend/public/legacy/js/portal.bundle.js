@@ -5702,7 +5702,7 @@ async function doInvitedRegister() {
   try {
     const btn = document.getElementById('invited-btn-submit');
     const oldText = btn.innerHTML;
-    btn.innerHTML = 'Sending OTP...';
+    btn.innerHTML = 'Registering...';
 
     const res = await fetch('/api/auth/register-invited', {
       method: 'POST',
