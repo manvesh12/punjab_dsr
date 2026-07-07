@@ -6052,6 +6052,17 @@ body,
   overflow-y: visible !important;
   height: auto !important;
   min-height: 100vh !important;
+  scrollbar-width: none !important; /* Hide scrollbar for Firefox */
+  -ms-overflow-style: none !important;  /* Hide scrollbar for IE/Edge */
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+#screen-app::-webkit-scrollbar,
+.screen::-webkit-scrollbar,
+.screen.active::-webkit-scrollbar,
+.app-shell::-webkit-scrollbar,
+.app-workspace::-webkit-scrollbar {
+  display: none !important;
 }
 
 html,
