@@ -6070,3 +6070,19 @@ body {
   overflow-y: auto !important;
   height: auto !important;
 }
+
+@media (min-width: 1024px) {
+  /* Fix excessive layout gap at the top of Workflow, Audit Logs, and Settings views on desktop */
+  body:not(.view-dashboard-active):not(.view-projects-active) {
+    --topbar-h: 190px !important;
+  }
+
+  body:not(.view-dashboard-active):not(.view-projects-active) .app-workspace {
+    padding-top: 200px !important;
+  }
+
+  body.preview-open:not(.view-dashboard-active):not(.view-projects-active) .app-workspace,
+  body:not(.view-dashboard-active):not(.view-projects-active) .app-workspace.preview-open {
+    padding-top: 200px !important;
+  }
+}
