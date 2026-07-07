@@ -454,81 +454,111 @@ authRouter.post("/register-invited", async (req, res) => {
 
   const { token, fullName, mobileNumber, password } = parsed.data;
 
-  const invitation = await prisma.invitation.findUnique({
-    where: { token, status: "PENDING" }
-  });
-
-  if (!invitation || invitation.expiresAt < new Date()) {
-    res.status(400).json({ error: "Invalid or expired invitation link" });
-    return;
-  }
-
-  let user = await prisma.user.findFirst({ where: { email: invitation.email } });
-  if (!user) {
-    user = await prisma.user.create({
-      data: {
-        username: invitation.email,
-        email: invitation.email,
-        fullName,
-        mobileNumber,
-        password: await bcrypt.hash(password, 10),
-        role: invitation.role,
-        active: true
-      }
+  try {
+    const invitation = await prisma.invitation.findUnique({
+      where: { token, status: "PENDING" }
     });
-  } else {
-    user = await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        password: await bcrypt.hash(password, 10),
-        fullName,
-        mobileNumber,
-        active: true
-      }
-    });
-  }
 
-  // Mark invitation as ACCEPTED
-  await prisma.invitation.update({
-    where: { id: invitation.id },
-    data: { status: "ACCEPTED" }
-  });
-
-  // Automatically log them in
-  const sessionToken = signToken(user);
-  const refreshTokenStr = crypto.randomBytes(40).toString("hex");
-  await prisma.refreshToken.create({
-    data: {
-      token: refreshTokenStr,
-      userId: user.id,
-      expiresAt: new Date(Date.now() + refreshTokenCookieOptions.maxAge)
+    if (!invitation || invitation.expiresAt < new Date()) {
+      res.status(400).json({ error: "Invalid or expired invitation link" });
+      return;
     }
-  });
 
-  res.cookie(config.sessionCookieName, sessionToken, cookieOptions);
-  res.cookie("dsr_refresh_token", refreshTokenStr, refreshTokenCookieOptions);
+    // Check if mobile number is already in use by another user
+    const existingUserWithPhone = await prisma.user.findFirst({
+      where: {
+        mobileNumber,
+        NOT: {
+          email: invitation.email
+        }
+      }
+    });
+    if (existingUserWithPhone) {
+      res.status(400).json({ error: "Mobile number is already registered to another account" });
+      return;
+    }
 
-  recordAudit(req, "AUTH_REGISTER_INVITED_SUCCESS", { username: user.username, role: user.role }, 200);
+    let user = await prisma.user.findFirst({ where: { email: invitation.email } });
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          username: invitation.email,
+          email: invitation.email,
+          fullName,
+          mobileNumber,
+          password: await bcrypt.hash(password, 10),
+          role: invitation.role,
+          active: true
+        }
+      });
+    } else {
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          password: await bcrypt.hash(password, 10),
+          fullName,
+          mobileNumber,
+          active: true
+        }
+      });
+    }
 
-  res.json(
-    jsonSafe({
-      success: true,
-      message: "Registration completed successfully",
-      token: sessionToken,
-      username: user.username,
-      email: user.email,
-      fullName: user.fullName,
-      role: `ROLE_${user.role}`,
-      uiRole: roleToFrontend(user.role),
-      permissions: permissionsFor(user.role),
-      scope: {
-        district: user.district,
-        blockName: user.blockName,
-        sectionName: user.sectionName
-      },
-      accessLabel: user.accessScope || user.role.replaceAll("_", " ")
-    })
-  );
+    // Mark invitation as ACCEPTED
+    await prisma.invitation.update({
+      where: { id: invitation.id },
+      data: { status: "ACCEPTED" }
+    });
+
+    // Automatically log them in
+    const sessionToken = signToken(user);
+    const refreshTokenStr = crypto.randomBytes(40).toString("hex");
+    await prisma.refreshToken.create({
+      data: {
+        token: refreshTokenStr,
+        userId: user.id,
+        expiresAt: new Date(Date.now() + refreshTokenCookieOptions.maxAge)
+      }
+    });
+
+    res.cookie(config.sessionCookieName, sessionToken, cookieOptions);
+    res.cookie("dsr_refresh_token", refreshTokenStr, refreshTokenCookieOptions);
+
+    recordAudit(req, "AUTH_REGISTER_INVITED_SUCCESS", { username: user.username, role: user.role }, 200);
+
+    res.json(
+      jsonSafe({
+        success: true,
+        message: "Registration completed successfully",
+        token: sessionToken,
+        username: user.username,
+        email: user.email,
+        fullName: user.fullName,
+        role: `ROLE_${user.role}`,
+        uiRole: roleToFrontend(user.role),
+        permissions: permissionsFor(user.role),
+        scope: {
+          district: user.district,
+          blockName: user.blockName,
+          sectionName: user.sectionName
+        },
+        accessLabel: user.accessScope || user.role.replaceAll("_", " ")
+      })
+    );
+  } catch (error: any) {
+    console.error("Error during invited registration:", error);
+    if (error.code === 'P2002') {
+      const target = Array.isArray(error.meta?.target) ? error.meta.target.join(', ') : String(error.meta?.target || '');
+      if (target.includes('mobileNumber')) {
+        res.status(400).json({ error: "Mobile number is already registered" });
+      } else if (target.includes('email')) {
+        res.status(400).json({ error: "Email address is already registered" });
+      } else {
+        res.status(400).json({ error: `Unique constraint failed on field: ${target}` });
+      }
+    } else {
+      res.status(500).json({ error: error.message || "Internal server error during registration" });
+    }
+  }
 });
 
 authRouter.post("/verify-invited-otp", async (req, res) => {
