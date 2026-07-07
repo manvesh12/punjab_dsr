@@ -14,8 +14,8 @@
   <link
     href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=repl-model-dsr-backend-20260707-v1">
-  <link rel="stylesheet" href="css/premium-theme.css?v=repl-model-dsr-backend-20260707-v1">
+  <link rel="stylesheet" href="css/styles.css?v=repl-model-dsr-backend-20260707-v14">
+  <link rel="stylesheet" href="css/premium-theme.css?v=repl-model-dsr-backend-20260707-v14">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script defer src="https://cdn.jsdelivr.net/npm/lucide@0.363.0/dist/umd/lucide.min.js"></script>
@@ -1898,7 +1898,8 @@
             <i data-lucide="bell" style="width: 20px; height: 20px; color: #F2A123;"></i> Latest Updates
           </span>
         </div>
-        <ul class="dash-updates-list">
+        <ul class="dash-updates-list" id="dash-latest-updates-list">
+          <!-- dynamically populated from publicAnnouncements via renderDashboardLatestUpdates() -->
           <li class="dash-update-item">
             <div class="dash-update-dot"></div>
             <div class="dash-update-content">
@@ -1909,7 +1910,6 @@
               </div>
             </div>
           </li>
-
           <li class="dash-update-item">
             <div class="dash-update-dot"></div>
             <div class="dash-update-content">
@@ -1930,6 +1930,7 @@
           </li>
         </ul>
       </div>
+
       <div class="dash-panel-card">
         <div class="dash-panel-header">
           <span class="dash-panel-title">
@@ -5095,38 +5096,57 @@
 
   <!-- General Settings Tab Content -->
   <div id="settings-tab-general" class="settings-tab-content">
-    <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 24px; align-items: start;">
-      <!-- Announcement Notice Box -->
+    
+    <!-- Row 1: Scrolling Notice Bar (full-width) -->
+    <div class="card" style="box-shadow: 0 8px 32px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 24px;">
+      <div class="card-hd" style="display: flex; align-items: center; gap: 8px;">
+        <i data-lucide="megaphone" style="width: 16px; height: 16px; color: var(--p-accent-gold);"></i>
+        <span class="card-title">Scrolling Notice Bar</span>
+      </div>
+      <div class="card-bd" style="padding: 20px;">
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 13px; color: var(--text);">Announcement Text</label>
+          <textarea id="settings-notice-text" class="inp" rows="3" style="width: 100%; resize: vertical; padding: 12px; font-family: inherit; font-size: 13px; background: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.1);" placeholder="Enter notice text to be displayed across the portal..."></textarea>
+          <div style="font-size: 11px; color: var(--text-soft); margin-top: 6px; display: flex; align-items: center; gap: 4px;">
+            <i data-lucide="info" style="width: 12px; height: 12px;"></i>
+            This text will scroll horizontally at the top of all portal views.
+          </div>
+        </div>
+        <button class="btn btn-saffron" id="settings-notice-bar-btn" onclick="saveNoticeBarOnly()" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; height: 36px; padding: 0 18px;">
+          <i data-lucide="save" style="width: 14px; height: 14px;"></i>
+          Save Notice Bar
+        </button>
+      </div>
+    </div>
+
+    <!-- Row 2: Notices + Portal Status side by side -->
+    <div style="display: grid; grid-template-columns: 1.3fr 0.7fr; gap: 24px; align-items: start;">
+
+      <!-- Homepage Notices & Announcements Card -->
       <div class="card" style="box-shadow: 0 8px 32px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.05);">
-        <div class="card-hd" style="display: flex; align-items: center; gap: 8px;">
-          <i data-lucide="megaphone" style="width: 16px; height: 16px; color: var(--p-accent-gold);"></i>
-          <span class="card-title">Notice Bar Configuration</span>
+        <div class="card-hd" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="bell" style="width: 16px; height: 16px; color: var(--p-accent-gold);"></i>
+            <span class="card-title">Homepage Notices &amp; Announcements</span>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="addAnnouncementRow()" style="display: inline-flex; align-items: center; gap: 5px; font-size: 12px;">
+            <i data-lucide="plus" style="width: 13px; height: 13px;"></i> Add Notice
+          </button>
         </div>
         <div class="card-bd" style="padding: 20px;">
-          <div class="form-group" style="margin-bottom: 20px;">
-            <label style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 13px; color: var(--text);">Announcement Text</label>
-            <textarea id="settings-notice-text" class="inp" rows="4" style="width: 100%; resize: vertical; padding: 12px; font-family: inherit; font-size: 13px; background: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.1);" placeholder="Enter notice text to be displayed across the portal..."></textarea>
-            <div style="font-size: 11px; color: var(--text-soft); margin-top: 8px; display: flex; align-items: center; gap: 4px;">
-              <i data-lucide="info" style="width: 12px; height: 12px;"></i>
-              This text will scroll horizontally at the top of all portal views.
-            </div>
+          <div style="font-size: 11.5px; color: var(--text-soft); margin-bottom: 14px; display: flex; align-items: flex-start; gap: 6px; background: rgba(242,161,35,0.07); padding: 10px 14px; border-radius: 6px; border-left: 3px solid var(--p-accent-gold);">
+            <i data-lucide="info" style="width: 13px; height: 13px; flex-shrink:0; margin-top: 1px;"></i>
+            These notices appear in the &ldquo;Latest Updates&rdquo; panel on the dashboard and the &ldquo;Notices &amp; Announcements&rdquo; section on the public homepage. Only Administrators can edit.
           </div>
-          <div class="form-group" style="margin-bottom: 20px;">
-            <label style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 13px; color: var(--text);">Homepage Notices & Announcements</label>
-            <textarea id="settings-announcements-json" class="inp" rows="8" style="width: 100%; resize: vertical; padding: 12px; font-family: Consolas, Monaco, monospace; font-size: 12px; background: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.1);" placeholder='[{"date":"18 JUN 2026","title":"Notice title","url":"login.html"}]'></textarea>
-            <div style="font-size: 11px; color: var(--text-soft); margin-top: 8px; display: flex; align-items: center; gap: 4px;">
-              <i data-lucide="info" style="width: 12px; height: 12px;"></i>
-              Use JSON rows with date, title, and optional url. These appear in the public dashboard notice section.
-            </div>
-          </div>
-          <button class="btn btn-saffron" id="settings-notice-save-btn" onclick="saveNoticeSettings()" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; height: 38px; padding: 0 20px;">
+          <div id="announcements-editor" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; min-height: 60px;"></div>
+          <button class="btn btn-saffron" id="settings-notice-save-btn" onclick="saveAnnouncementsOnly()" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; height: 36px; padding: 0 18px;">
             <i data-lucide="save" style="width: 14px; height: 14px;"></i>
-            Save Changes
+            Save Announcements
           </button>
         </div>
       </div>
 
-      <!-- Info Meta Panel -->
+      <!-- Portal Status Card -->
       <div class="card" style="box-shadow: 0 8px 32px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.01);">
         <div class="card-hd" style="display: flex; align-items: center; gap: 8px;">
           <i data-lucide="info" style="width: 16px; height: 16px; color: var(--p-accent-gold);"></i>
@@ -5205,46 +5225,7 @@
 </div>
 
 <script>
-  async function loadGeneralSettings() {
-    const localNotice = localStorage.getItem('portalNoticeText');
-    if (localNotice) {
-      const textEl = document.getElementById('settings-notice-text');
-      if (textEl) textEl.value = localNotice;
-      updateNoticeUI(localNotice);
-    }
-    const localAnnouncements = localStorage.getItem('publicAnnouncements');
-    if (localAnnouncements) {
-      const announcementsEl = document.getElementById('settings-announcements-json');
-      if (announcementsEl) announcementsEl.value = formatAnnouncementSettings(localAnnouncements);
-      updatePublicAnnouncementsUI(localAnnouncements);
-    }
-
-    try {
-      const res = await fetch('/api/settings/noticeText');
-      if (res.ok) {
-        const data = await res.json();
-        if (data && data.value) {
-          const textEl = document.getElementById('settings-notice-text');
-          if (textEl) textEl.value = data.value;
-          updateNoticeUI(data.value);
-        }
-      }
-
-      const announcementsRes = await fetch('/api/settings/publicAnnouncements');
-      if (announcementsRes.ok) {
-        const data = await announcementsRes.json();
-        if (data && data.value) {
-          const announcementsEl = document.getElementById('settings-announcements-json');
-          if (announcementsEl) announcementsEl.value = formatAnnouncementSettings(data.value);
-          updatePublicAnnouncementsUI(data.value);
-        }
-      }
-    } catch (e) {
-      console.error('Error loading notice text in settings:', e);
-    }
-  }
-  window.loadGeneralSettings = loadGeneralSettings;
-
+  // ─── Helpers ───────────────────────────────────────────────────────────────
   function updateNoticeUI(text) {
     const nextText = String(text || '').trim();
     if (!nextText) return;
@@ -5255,33 +5236,166 @@
   }
   window.updateNoticeUI = updateNoticeUI;
 
-  function formatAnnouncementSettings(value) {
-    try {
-      return JSON.stringify(JSON.parse(value), null, 2);
-    } catch {
-      return String(value || '');
-    }
-  }
-
-  function normalizeAnnouncementSettings(value) {
-    const announcements = JSON.parse(value);
-    if (!Array.isArray(announcements)) {
-      throw new Error('Announcements must be a JSON array.');
-    }
-    return JSON.stringify(announcements.map((item) => ({
-      date: String(item.date || '').trim(),
-      title: String(item.title || '').trim(),
-      url: String(item.url || 'login.html').trim() || 'login.html'
-    })).filter((item) => item.date && item.title));
-  }
-
   function updatePublicAnnouncementsUI(value) {
     const rawValue = typeof value === 'string' ? value : JSON.stringify(value || []);
     if (typeof window.renderPublicAnnouncements === 'function') {
       window.renderPublicAnnouncements(rawValue);
     }
+    // Also refresh dashboard live updates
+    if (typeof window.renderDashboardLatestUpdates === 'function') {
+      window.renderDashboardLatestUpdates(rawValue);
+    }
   }
   window.updatePublicAnnouncementsUI = updatePublicAnnouncementsUI;
+
+  // ─── Announcements Editor (text-based row UI) ───────────────────────────────
+  let _announcementRows = [];
+
+  function renderAnnouncementsEditor() {
+    const container = document.getElementById('announcements-editor');
+    if (!container) return;
+    if (_announcementRows.length === 0) {
+      container.innerHTML = '<div style="font-size:12px;color:var(--text-soft);text-align:center;padding:16px 0;">No notices yet. Click "Add Notice" to add one.</div>';
+      return;
+    }
+    container.innerHTML = _announcementRows.map((row, idx) => `
+      <div style="display:flex;align-items:flex-start;gap:8px;background:rgba(0,0,0,0.15);border:1px solid rgba(255,255,255,0.06);border-radius:6px;padding:10px 12px;" data-row="${idx}">
+        <div style="display:flex;flex-direction:column;gap:6px;flex:1;">
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="text" placeholder="Date (e.g. 18 JUN 2026)" value="${row.date || ''}" 
+              oninput="_announcementRows[${idx}].date=this.value"
+              style="flex:0 0 150px;padding:6px 10px;font-size:12px;border-radius:4px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.2);color:var(--text);font-family:inherit;">
+            <input type="text" placeholder="Notice title / description" value="${row.title || ''}" 
+              oninput="_announcementRows[${idx}].title=this.value"
+              style="flex:1;padding:6px 10px;font-size:12px;border-radius:4px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.2);color:var(--text);font-family:inherit;">
+          </div>
+        </div>
+        <button onclick="removeAnnouncementRow(${idx})" title="Remove" style="background:none;border:none;color:#ef4444;cursor:pointer;padding:4px;display:flex;align-items:center;flex-shrink:0;">
+          <i data-lucide="x" style="width:16px;height:16px;"></i>
+        </button>
+      </div>`).join('');
+    if (window.initLucide) initLucide();
+  }
+
+  function addAnnouncementRow() {
+    const now = new Date();
+    const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    const dateStr = `${String(now.getDate()).padStart(2,'0')} ${months[now.getMonth()]} ${now.getFullYear()}`;
+    _announcementRows.unshift({ date: dateStr, title: '' });
+    renderAnnouncementsEditor();
+  }
+  window.addAnnouncementRow = addAnnouncementRow;
+
+  function removeAnnouncementRow(idx) {
+    _announcementRows.splice(idx, 1);
+    renderAnnouncementsEditor();
+  }
+  window.removeAnnouncementRow = removeAnnouncementRow;
+
+  function loadAnnouncementsIntoEditor(jsonString) {
+    try {
+      const arr = JSON.parse(jsonString);
+      if (Array.isArray(arr)) {
+        _announcementRows = arr.map(it => ({ date: it.date || '', title: it.title || '', url: it.url || 'login.html' }));
+      }
+    } catch(e) {
+      _announcementRows = [];
+    }
+    renderAnnouncementsEditor();
+  }
+
+  // ─── Load Settings ──────────────────────────────────────────────────────────
+  async function loadGeneralSettings() {
+    const localNotice = localStorage.getItem('portalNoticeText');
+    if (localNotice) {
+      const textEl = document.getElementById('settings-notice-text');
+      if (textEl) textEl.value = localNotice;
+      updateNoticeUI(localNotice);
+    }
+    const localAnnouncements = localStorage.getItem('publicAnnouncements');
+    if (localAnnouncements) {
+      loadAnnouncementsIntoEditor(localAnnouncements);
+      updatePublicAnnouncementsUI(localAnnouncements);
+    } else {
+      renderAnnouncementsEditor();
+    }
+    try {
+      const res = await fetch('/api/settings/noticeText');
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.value) {
+          const textEl = document.getElementById('settings-notice-text');
+          if (textEl) textEl.value = data.value;
+          updateNoticeUI(data.value);
+        }
+      }
+      const announcementsRes = await fetch('/api/settings/publicAnnouncements');
+      if (announcementsRes.ok) {
+        const data = await announcementsRes.json();
+        if (data && data.value) {
+          loadAnnouncementsIntoEditor(data.value);
+          updatePublicAnnouncementsUI(data.value);
+        }
+      }
+    } catch (e) {
+      console.error('Error loading settings:', e);
+    }
+  }
+  window.loadGeneralSettings = loadGeneralSettings;
+
+  // ─── Save: Notice Bar Only ──────────────────────────────────────────────────
+  async function saveNoticeBarOnly() {
+    const text = document.getElementById('settings-notice-text').value;
+    const btn = document.getElementById('settings-notice-bar-btn');
+    btn.disabled = true; btn.innerText = 'Saving...';
+    try {
+      await apiFetch('/settings/noticeText', { method: 'PUT', body: JSON.stringify({ value: text }) });
+      localStorage.setItem('portalNoticeText', text);
+      updateNoticeUI(text);
+      toast('Notice bar updated!', 'success');
+    } catch(e) {
+      localStorage.setItem('portalNoticeText', text);
+      updateNoticeUI(text);
+      toast('Saved locally (server unavailable).', 'info');
+    }
+    btn.disabled = false; btn.innerText = 'Save Notice Bar';
+    if (window.initLucide) initLucide();
+  }
+  window.saveNoticeBarOnly = saveNoticeBarOnly;
+
+  // ─── Save: Announcements Only ───────────────────────────────────────────────
+  async function saveAnnouncementsOnly() {
+    // Collect current input values from DOM (in case user typed without triggering oninput)
+    document.querySelectorAll('#announcements-editor [data-row]').forEach(rowEl => {
+      const idx = parseInt(rowEl.getAttribute('data-row'));
+      const inputs = rowEl.querySelectorAll('input');
+      if (_announcementRows[idx]) {
+        _announcementRows[idx].date = inputs[0] ? inputs[0].value : _announcementRows[idx].date;
+        _announcementRows[idx].title = inputs[1] ? inputs[1].value : _announcementRows[idx].title;
+      }
+    });
+    const valid = _announcementRows.filter(r => r.date && r.title);
+    const jsonValue = JSON.stringify(valid.map(r => ({ date: r.date, title: r.title, url: r.url || 'login.html' })));
+    const btn = document.getElementById('settings-notice-save-btn');
+    btn.disabled = true; btn.innerText = 'Saving...';
+    try {
+      await apiFetch('/settings/publicAnnouncements', { method: 'PUT', body: JSON.stringify({ value: jsonValue }) });
+      localStorage.setItem('publicAnnouncements', jsonValue);
+      updatePublicAnnouncementsUI(jsonValue);
+      toast('Announcements saved successfully!', 'success');
+    } catch(e) {
+      localStorage.setItem('publicAnnouncements', jsonValue);
+      updatePublicAnnouncementsUI(jsonValue);
+      toast('Saved locally (server unavailable).', 'info');
+    }
+    btn.disabled = false; btn.innerText = 'Save Announcements';
+    if (window.initLucide) initLucide();
+  }
+  window.saveAnnouncementsOnly = saveAnnouncementsOnly;
+
+  // Keep backward-compat alias
+  async function saveNoticeSettings() { await saveNoticeBarOnly(); await saveAnnouncementsOnly(); }
+  window.saveNoticeSettings = saveNoticeSettings;
 
   function installNoticeLanguagePatch() {
     const originalApplyPortalLanguage = window.applyPortalLanguage;
@@ -5301,7 +5415,6 @@
       el.style.background = 'transparent';
       el.style.color = 'var(--text-soft)';
     });
-    
     document.getElementById('settings-tab-' + tabName).style.display = 'block';
     const activeTabBtn = document.querySelector(`.settings-tab[onclick="switchSettingsTab('${tabName}')"]`);
     if(activeTabBtn) {
@@ -5309,7 +5422,6 @@
       activeTabBtn.style.background = 'var(--p-accent-gold)';
       activeTabBtn.style.color = '#17324D';
     }
-
     if (tabName === 'users' && typeof renderUsers === 'function') {
       renderUsers();
     } else if (tabName === 'general') {
@@ -5317,95 +5429,6 @@
     }
   }
 
-  async function saveNoticeSettings() {
-    const text = document.getElementById('settings-notice-text').value;
-    const announcementsEl = document.getElementById('settings-announcements-json');
-    let announcementsValue = '';
-    if (announcementsEl && announcementsEl.value.trim()) {
-      try {
-        announcementsValue = normalizeAnnouncementSettings(announcementsEl.value);
-        announcementsEl.value = formatAnnouncementSettings(announcementsValue);
-      } catch (e) {
-        if (typeof toast === 'function') {
-          toast(e.message || 'Invalid announcements JSON.', 'error');
-        } else {
-          alert(e.message || 'Invalid announcements JSON.');
-        }
-        return;
-      }
-    }
-    const btn = document.getElementById('settings-notice-save-btn');
-    btn.disabled = true;
-    btn.innerText = 'Saving...';
-    try {
-      if (typeof apiFetch === 'function') {
-        await apiFetch('/settings/noticeText', {
-          method: 'PUT',
-          body: JSON.stringify({ value: text })
-        });
-        toast('Notice updated successfully!', 'success');
-        if (typeof updateNoticeUI === 'function') {
-          updateNoticeUI(text);
-        }
-        localStorage.setItem('portalNoticeText', text);
-        if (announcementsValue) {
-          await apiFetch('/settings/publicAnnouncements', {
-            method: 'PUT',
-            body: JSON.stringify({ value: announcementsValue })
-          });
-          localStorage.setItem('publicAnnouncements', announcementsValue);
-          updatePublicAnnouncementsUI(announcementsValue);
-        }
-      } else {
-        const res = await fetch('/api/settings/noticeText', {
-          method: 'PUT',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('dsr_token')}`
-          },
-          body: JSON.stringify({ value: text })
-        });
-        if (res.ok) {
-          alert('Notice updated successfully!');
-          if (typeof updateNoticeUI === 'function') {
-            updateNoticeUI(text);
-          }
-          localStorage.setItem('portalNoticeText', text);
-          if (announcementsValue) {
-            await fetch('/api/settings/publicAnnouncements', {
-              method: 'PUT',
-              headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('dsr_token')}`
-              },
-              body: JSON.stringify({ value: announcementsValue })
-            });
-            localStorage.setItem('publicAnnouncements', announcementsValue);
-            updatePublicAnnouncementsUI(announcementsValue);
-          }
-        } else {
-          alert('Failed to update notice.');
-        }
-      }
-    } catch (e) {
-      localStorage.setItem('portalNoticeText', text);
-      if (announcementsValue) localStorage.setItem('publicAnnouncements', announcementsValue);
-      if (typeof updateNoticeUI === 'function') {
-        updateNoticeUI(text);
-      }
-      if (announcementsValue) updatePublicAnnouncementsUI(announcementsValue);
-      if (typeof toast === 'function') {
-        toast('Notice updated locally. Server save is unavailable: ' + (e.message || e), 'info');
-      } else {
-        alert('Notice updated locally. Server save is unavailable.');
-      }
-      console.error(e);
-    }
-    btn.disabled = false;
-    btn.innerText = 'Save Changes';
-  }
-
-  // Load notice settings immediately on template parse
   document.addEventListener('DOMContentLoaded', () => {
     loadGeneralSettings();
     setTimeout(installNoticeLanguagePatch, 0);
@@ -5925,7 +5948,7 @@
 
   <div class="toast" id="toast"></div>
 
-<script defer src="js/portal.bundle.js?v=repl-model-dsr-backend-20260707-v1-v3"></script>
+<script defer src="js/portal.bundle.js?v=repl-model-dsr-backend-20260707-v14-v3"></script>
 <script defer src="js/model-dsr-module.js?v=12"></script>
 <script defer src="js/replenishment-module.js?v=24"></script>
 <script>

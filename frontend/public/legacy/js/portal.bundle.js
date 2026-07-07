@@ -17740,34 +17740,6 @@ function calculateProjectProgress(state) {
 
 function updateLiveProgressUI(progress) {
   let bar = document.getElementById('global-live-progress');
-  if (!bar) {
-    const header = document.querySelector('header');
-    if (!header) return;
-    bar = document.createElement('div');
-    bar.id = 'global-live-progress';
-    bar.style.position = 'absolute';
-    bar.style.bottom = '0';
-    bar.style.left = '0';
-    bar.style.height = '4px';
-    bar.style.background = 'linear-gradient(90deg, var(--teal), var(--green))';
-    bar.style.transition = 'width 0.4s ease-out';
-    bar.style.width = '0%';
-    bar.style.zIndex = '101';
-    
-    const pct = document.createElement('div');
-    pct.id = 'global-live-progress-pct';
-    pct.style.position = 'absolute';
-    pct.style.right = '20px';
-    pct.style.bottom = '-20px';
-    pct.style.fontSize = '12px';
-    pct.style.fontWeight = 'bold';
-    pct.style.color = 'var(--text-soft)';
-    
-    header.appendChild(bar);
-    header.appendChild(pct);
-  }
-  document.getElementById('global-live-progress').style.width = progress + '%';
-  const pctEl = document.getElementById('global-live-progress-pct');
   if (pctEl) {
     pctEl.textContent = typeof S !== 'undefined' && S.activeProject ? 'Project Progress: ' + progress + '%' : '';
   }
@@ -17908,3 +17880,26 @@ function restoreSession() {
   }
 }
 window.addEventListener('DOMContentLoaded', restoreSession);
+
+
+/* ─── Dashboard Latest Updates (dynamic from publicAnnouncements) ─── */
+function renderDashboardLatestUpdates(jsonString) {
+  var list = document.getElementById('dash-latest-updates-list');
+  if (!list) return;
+  var items = [];
+  try { items = JSON.parse(jsonString); } catch(e) { return; }
+  if (!Array.isArray(items) || items.length === 0) return;
+  list.innerHTML = items.map(function(it, idx) {
+    return '<li class="dash-update-item"><div class="dash-update-dot"></div><div class="dash-update-content"><span class="dash-update-text">' + (it.title || '') + '</span><div class="dash-update-meta"><span>' + (it.date || '') + '</span>' + (idx === 0 ? '<span class="dash-badge-new">NEW</span>' : '') + '</div></div></li>';
+  }).join('');
+}
+window.renderDashboardLatestUpdates = renderDashboardLatestUpdates;
+
+document.addEventListener('DOMContentLoaded', function() {
+  var stored = localStorage.getItem('publicAnnouncements');
+  if (stored) renderDashboardLatestUpdates(stored);
+  fetch('/api/settings/publicAnnouncements')
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(data) { if (data && data.value) { localStorage.setItem('publicAnnouncements', data.value); renderDashboardLatestUpdates(data.value); } })
+    .catch(function() {});
+});
