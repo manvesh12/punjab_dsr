@@ -5364,6 +5364,13 @@ body.view-projects-active .topbar.dash-global-topbar {
     max-height: calc(100vh - var(--project-topbar-h) - 24px) !important;
   }
 
+  body.preview-open:not(.view-dashboard-active):not(.view-projects-active) .main-content:has(#view-front-matter.active) + .pdf-preview-panel.open {
+    margin-top: -210px !important;
+    top: calc(var(--project-topbar-h) + 4px) !important;
+    height: calc(100vh - var(--project-topbar-h) + 186px) !important;
+    max-height: calc(100vh - var(--project-topbar-h) + 186px) !important;
+  }
+
   body:not(.view-dashboard-active):not(.view-projects-active) .page-body {
     padding-top: 20px !important;
   }
