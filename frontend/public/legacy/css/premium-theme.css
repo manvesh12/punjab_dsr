@@ -6082,14 +6082,34 @@ body {
   /* Fix excessive layout gap at the top of Workflow, Audit Logs, and Settings views on desktop */
   body:not(.view-dashboard-active):not(.view-projects-active) {
     --topbar-h: 190px !important;
+    --sidebar-w: 292px !important;
   }
 
   body:not(.view-dashboard-active):not(.view-projects-active) .app-workspace {
     padding-top: 200px !important;
+    margin-left: var(--sidebar-w) !important;
+    width: calc(100% - var(--sidebar-w)) !important;
+    max-width: calc(100% - var(--sidebar-w)) !important;
+  }
+
+  body.sidebar-hidden:not(.view-dashboard-active):not(.view-projects-active) .app-workspace {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 
   body.preview-open:not(.view-dashboard-active):not(.view-projects-active) .app-workspace,
   body:not(.view-dashboard-active):not(.view-projects-active) .app-workspace.preview-open {
     padding-top: 200px !important;
+    margin-left: var(--sidebar-w) !important;
+    width: calc(100% - var(--sidebar-w)) !important;
+    max-width: calc(100% - var(--sidebar-w)) !important;
+  }
+
+  body.sidebar-hidden.preview-open:not(.view-dashboard-active):not(.view-projects-active) .app-workspace,
+  body.sidebar-hidden:not(.view-dashboard-active):not(.view-projects-active) .app-workspace.preview-open {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 }
