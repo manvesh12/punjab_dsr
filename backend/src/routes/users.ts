@@ -219,38 +219,63 @@ usersRouter.post("/invite/bulk", upload.single("file"), async (req, res) => {
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
       const email = getRowValue(row, "email").toLowerCase();
+      const phone = getRowValue(row, "phone") || getRowValue(row, "mobile") || getRowValue(row, "mobilenumber");
       const rawRole = getRowValue(row, "role");
 
       // Skip completely empty rows
-      if (!email && !rawRole) {
+      if (!email && !phone && !rawRole) {
         continue;
       }
 
-      if (!email) {
+      if (!email && !phone) {
         failedCount++;
-        errors.push({ row: i + 2, email: "", reason: "Email is required" });
+        errors.push({ row: i + 2, email: "", reason: "Email or Phone is required" });
         continue;
       }
-      
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        failedCount++;
-        errors.push({ row: i + 2, email, reason: "Invalid email format" });
-        continue;
+
+      let targetEmail = email;
+      let isPhoneInvite = false;
+      if (email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          failedCount++;
+          errors.push({ row: i + 2, email, reason: "Invalid email format" });
+          continue;
+        }
+      } else {
+        // Validate phone number
+        const cleanPhone = phone.replace(/[^0-9]/g, "");
+        if (cleanPhone.length < 10) {
+          failedCount++;
+          errors.push({ row: i + 2, email: `Phone: ${phone}`, reason: "Invalid phone format (must be at least 10 digits)" });
+          continue;
+        }
+        targetEmail = `phone-${cleanPhone}@phone.dsr.gov.in`;
+        isPhoneInvite = true;
       }
 
       const normalizedRole = normalizeRoleName(rawRole);
       if (!validRoles.includes(normalizedRole as Role)) {
         failedCount++;
-        errors.push({ row: i + 2, email, reason: `Invalid role: ${rawRole}` });
+        errors.push({ row: i + 2, email: email || phone, reason: `Invalid role: ${rawRole}` });
         continue;
       }
 
-      const existingUser = await prisma.user.findUnique({ where: { email } });
-      if (existingUser) {
-        failedCount++;
-        errors.push({ row: i + 2, email, reason: "User already exists" });
-        continue;
+      if (isPhoneInvite) {
+        const cleanPhone = phone.replace(/[^0-9]/g, "");
+        const existingUser = await prisma.user.findUnique({ where: { mobileNumber: cleanPhone } });
+        if (existingUser) {
+          failedCount++;
+          errors.push({ row: i + 2, email: phone, reason: "User with this mobile number already exists" });
+          continue;
+        }
+      } else {
+        const existingUser = await prisma.user.findUnique({ where: { email } });
+        if (existingUser) {
+          failedCount++;
+          errors.push({ row: i + 2, email, reason: "User with this email already exists" });
+          continue;
+        }
       }
 
       const token = crypto.randomBytes(32).toString("hex");
@@ -259,19 +284,24 @@ usersRouter.post("/invite/bulk", upload.single("file"), async (req, res) => {
 
       try {
         await prisma.invitation.upsert({
-          where: { email },
+          where: { email: targetEmail },
           update: { token, role, expiresAt, status: "PENDING", createdBy: req.user!.id },
-          create: { email, token, role, expiresAt, createdBy: req.user!.id }
+          create: { email: targetEmail, token, role, expiresAt, createdBy: req.user!.id }
         });
 
-        // Send email in background (fire-and-forget) to speed up API response
-        sendInvitationEmail(email, token, role).catch(err => {
-          console.error(`Background email failed for ${email}:`, err);
-        });
+        if (isPhoneInvite) {
+          const cleanPhone = phone.replace(/[^0-9]/g, "");
+          console.log(`[MOCK SMS] Invitation SMS sent to ${cleanPhone}: Use this link to register: http://localhost:8081/register.html?token=${token}`);
+        } else {
+          // Send email in background (fire-and-forget) to speed up API response
+          sendInvitationEmail(targetEmail, token, role).catch(err => {
+            console.error(`Background email failed for ${targetEmail}:`, err);
+          });
+        }
         successCount++;
       } catch (e: any) {
         failedCount++;
-        errors.push({ row: i + 2, email, reason: e.message || "Failed to create invitation" });
+        errors.push({ row: i + 2, email: email || phone, reason: e.message || "Failed to create invitation" });
       }
     }
 

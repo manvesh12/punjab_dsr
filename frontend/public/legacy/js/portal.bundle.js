@@ -5591,7 +5591,7 @@ async function doSingleInvite() {
 }
 
 function downloadBulkInviteTemplate() {
-  const csvContent = "data:text/csv;charset=utf-8,Email,Role\nexample@domain.gov.in,SDO\n";
+  const csvContent = "data:text/csv;charset=utf-8,Email,Phone,Role\nexample@domain.gov.in,,SDO\n,9999999999,JE\n";
   const encodedUri = encodeURI(csvContent);
   const link = document.createElement("a");
   link.setAttribute("href", encodedUri);
