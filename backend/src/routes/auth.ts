@@ -449,7 +449,8 @@ const registerInvitedSchema = z.object({
 authRouter.post("/register-invited", async (req, res) => {
   const parsed = registerInvitedSchema.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: "Invalid registration details" });
+    const errorMsg = parsed.error.issues.map(i => `${i.path.join('.')}: ${i.message}`).join(', ');
+    res.status(400).json({ error: `Validation error: ${errorMsg}` });
     return;
   }
 
@@ -530,13 +531,13 @@ authRouter.post("/register-invited", async (req, res) => {
 
   // Invalidate old OTPs
   await prisma.otpVerification.updateMany({
-    where: { identifier: mobileNumber, purpose: "REGISTER", used: false },
+    where: { identifier: invitation.email, purpose: "REGISTER", used: false },
     data: { used: true }
   });
 
   await prisma.otpVerification.create({
     data: {
-      identifier: mobileNumber,
+      identifier: invitation.email,
       otpHash,
       purpose: "REGISTER",
       expiresAt
@@ -614,7 +615,7 @@ authRouter.post("/verify-invited-otp", async (req, res) => {
   }
 
   const otpRecord = await prisma.otpVerification.findFirst({
-    where: { identifier: userRecord.mobileNumber, purpose: "REGISTER", used: false },
+    where: { identifier: invitation.email, purpose: "REGISTER", used: false },
     orderBy: { createdAt: 'desc' }
   });
 
