@@ -6042,3 +6042,20 @@ body,
   max-width: none !important;
   overflow-x: hidden !important;
 }
+
+/* Deactivate and hide the inner/left scrollbar, forcing scrolling on the main browser body */
+#screen-app,
+.screen,
+.screen.active,
+.app-shell,
+.app-workspace {
+  overflow-y: visible !important;
+  height: auto !important;
+  min-height: 100vh !important;
+}
+
+html,
+body {
+  overflow-y: auto !important;
+  height: auto !important;
+}
