@@ -1245,3 +1245,149 @@ body.preview-open .pdf-preview-panel,
 .app-workspace.preview-open .pdf-preview-panel {
   transform: translateY(var(--erp-live-preview-offset));
 }
+
+/* Project workspace shell and resizable live-preview split. */
+:root {
+  --editor-split: 62%;
+  --preview-split: 38%;
+  --preview-divider-w: 8px;
+}
+
+#screen-app.active .sidebar {
+  transition: transform 0.22s ease, width 0.22s ease, opacity 0.18s ease !important;
+}
+
+#screen-app.active .app-workspace {
+  transition: left 0.22s ease, grid-template-columns 0.16s ease !important;
+}
+
+body:not(.project-workspace-active) #screen-app.active .sidebar,
+body.project-workspace-inactive #screen-app.active .sidebar {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateX(-105%) !important;
+}
+
+body:not(.project-workspace-active) #screen-app.active .app-workspace,
+body.project-workspace-inactive #screen-app.active .app-workspace,
+body:not(.project-workspace-active).sidebar-hidden #screen-app.active .app-workspace,
+body.project-workspace-inactive.sidebar-hidden #screen-app.active .app-workspace {
+  left: 0 !important;
+}
+
+body.project-workspace-active:not(.sidebar-hidden) #screen-app.active .sidebar {
+  display: flex !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: none !important;
+}
+
+body.project-workspace-active:not(.sidebar-hidden) #screen-app.active .app-workspace {
+  left: var(--erp-sidebar-w) !important;
+}
+
+body.preview-open #screen-app.active .app-workspace,
+#screen-app.active .app-workspace.preview-open {
+  grid-template-columns: minmax(0, var(--editor-split)) var(--preview-divider-w) minmax(0, var(--preview-split)) !important;
+}
+
+#screen-app.active .main-content {
+  grid-column: 1 !important;
+}
+
+.pdf-preview-resizer {
+  display: none;
+  grid-column: 2;
+  grid-row: 1;
+  width: var(--preview-divider-w);
+  height: 100%;
+  cursor: col-resize;
+  background: transparent;
+  position: relative;
+  z-index: 1002;
+  touch-action: none;
+}
+
+.pdf-preview-resizer::before {
+  content: "";
+  position: absolute;
+  inset: 12px 3px;
+  border-radius: 999px;
+  background: rgba(23, 50, 77, 0.18);
+  transition: background 0.16s ease, transform 0.16s ease;
+}
+
+.pdf-preview-resizer:hover::before,
+.pdf-preview-resizer:focus-visible::before,
+body.preview-resizing .pdf-preview-resizer::before {
+  background: rgba(23, 50, 77, 0.38);
+  transform: scaleX(1.5);
+}
+
+body.preview-open .pdf-preview-resizer,
+#screen-app.active .app-workspace.preview-open .pdf-preview-resizer {
+  display: block;
+}
+
+body.preview-resizing,
+body.preview-resizing * {
+  cursor: col-resize !important;
+  user-select: none !important;
+}
+
+body.preview-resizing #screen-app.active .app-workspace {
+  transition: none !important;
+}
+
+#screen-app.active .app-workspace.preview-open > .pdf-preview-panel,
+body.preview-open #screen-app.active .app-workspace > .pdf-preview-panel {
+  grid-column: 3 !important;
+  grid-row: 1 !important;
+  position: sticky !important;
+  top: 0 !important;
+  height: 100% !important;
+  transform: none !important;
+}
+
+#screen-app.active .pdf-preview-panel,
+body.preview-open .pdf-preview-panel,
+.app-workspace.preview-open .pdf-preview-panel {
+  transform: none !important;
+}
+
+#screen-app.active .pdf-preview-card {
+  height: 100% !important;
+}
+
+@media (max-width: 1280px) {
+  body.project-workspace-active:not(.sidebar-hidden) #screen-app.active .sidebar {
+    transform: translateX(-105%) !important;
+  }
+
+  body.project-workspace-active.mobile-sidebar-open #screen-app.active .sidebar,
+  body.project-workspace-active #screen-app.active .sidebar.mobile-open {
+    transform: translateX(0) !important;
+  }
+
+  body.project-workspace-active #screen-app.active .app-workspace {
+    left: 0 !important;
+  }
+}
+
+@media (max-width: 900px) {
+  body.preview-open #screen-app.active .app-workspace,
+  #screen-app.active .app-workspace.preview-open {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  body.preview-open .pdf-preview-resizer,
+  #screen-app.active .app-workspace.preview-open .pdf-preview-resizer {
+    display: none !important;
+  }
+
+  #screen-app.active .app-workspace.preview-open > .pdf-preview-panel,
+  body.preview-open #screen-app.active .app-workspace > .pdf-preview-panel {
+    grid-column: 1 !important;
+  }
+}

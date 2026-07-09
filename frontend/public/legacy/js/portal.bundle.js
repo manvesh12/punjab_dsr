@@ -15846,8 +15846,92 @@ const pdfPreview = {
     });
     return pages;
   },
+  getFrontMatterHtmlPages() {
+    const fm = S.frontMatter || {};
+    const pdfs = S.uploadedPDFs || {};
+    const fileMeta = S.frontMatterFiles || {};
+    const pages = [];
+    const frontMatterTypes = [
+      ['cover', 'Cover Page'],
+      ['toc', 'Contents'],
+      ['pref', 'Preface'],
+      ['ack', 'Acknowledgement'],
+      ['cert', 'Certificate of Compliance']
+    ];
+    const pushUploadedPages = (type, label) => {
+      const uploaded = Array.isArray(pdfs[type]) ? pdfs[type] : [];
+      const meta = { ...(fileMeta[type] || {}), typeKey: type };
+      const htmlPages = this.getUploadedHtmlPages(uploaded, label, meta);
+      const storedUrl = meta.storedUrl || S.activeProject?.pdfData?.[type] || '';
+      if (!htmlPages.length && storedUrl) this.ensureUploadedPdfRendered(type, storedUrl, meta);
+      pages.push(...htmlPages);
+      return htmlPages.length > 0;
+    };
+    const paragraph = value => this.escapeHtml(value || '').replace(/\n/g, '<br>');
+    frontMatterTypes.forEach(([type, label]) => {
+      if (pushUploadedPages(type, label)) return;
+      if (type === 'cover') {
+        pages.push({
+          label,
+          html: `
+            <article class="html-front-page html-front-cover">
+              <div class="html-kicker">Government of Punjab</div>
+              <h1>${this.escapeHtml(fm.title || 'District Survey Report')}</h1>
+              <h2>${this.escapeHtml(fm.district || S.activeProject?.district || 'District')} District</h2>
+              <p>${this.escapeHtml(fm.state || 'Punjab')}${fm.year ? ` | ${this.escapeHtml(fm.year)}` : ''}</p>
+              <div class="html-note"><strong>Prepared by:</strong> ${this.escapeHtml(fm.preparedBy || 'Sub-Divisional Committee')}</div>
+              <div class="html-note"><strong>Assisted by:</strong> ${this.escapeHtml(fm.assistedBy || '')}</div>
+              <div class="html-note html-note-muted">${this.escapeHtml(fm.version || 'Draft')}</div>
+            </article>`
+        });
+      } else if (type === 'toc') {
+        const toc = ['Cover Page', 'Contents', 'Preface', 'Acknowledgement', 'Certificate of Compliance', 'Chapters', 'Plates', 'Annexures'];
+        pages.push({
+          label,
+          html: `
+            <article class="html-front-page">
+              <div class="html-kicker">Front Matter</div>
+              <h1>Contents</h1>
+              <table><tbody>${toc.map((item, index) => `<tr><td>${index + 1}</td><td>${this.escapeHtml(item)}</td></tr>`).join('')}</tbody></table>
+            </article>`
+        });
+      } else if (type === 'pref') {
+        pages.push({
+          label,
+          html: `
+            <article class="html-front-page">
+              <div class="html-kicker">Front Matter</div>
+              <h1>Preface</h1>
+              <p>${paragraph(fm.preface || 'Preface text will appear here as it is entered in the editor.')}</p>
+            </article>`
+        });
+      } else if (type === 'ack') {
+        pages.push({
+          label,
+          html: `
+            <article class="html-front-page">
+              <div class="html-kicker">Front Matter</div>
+              <h1>Acknowledgement</h1>
+              <p>${paragraph(fm.acknowledgement || 'Acknowledgement text will appear here as it is entered in the editor.')}</p>
+            </article>`
+        });
+      } else if (type === 'cert') {
+        pages.push({
+          label,
+          html: `
+            <article class="html-front-page">
+              <div class="html-kicker">Front Matter</div>
+              <h1>Certificate of Compliance</h1>
+              <p>This District Survey Report has been prepared for ${this.escapeHtml(fm.district || S.activeProject?.district || 'District')} District, ${this.escapeHtml(fm.state || 'Punjab')}${fm.year ? `, for ${this.escapeHtml(fm.year)}` : ''}.</p>
+              <p>The report content is maintained in the DSR Automation Portal and can be reviewed section by section before final PDF generation.</p>
+            </article>`
+        });
+      }
+    });
+    return pages;
+  },
   renderFrontMatter() {
-    this.renderPages(this.getFrontMatterPages());
+    this.renderHtmlPages(this.getFrontMatterHtmlPages(), 'Fill in front matter fields or upload front matter PDFs to see the live preview.');
   },
   renderChapters() {
     this.renderPages(this.getChapterPages());
@@ -16611,8 +16695,114 @@ window.makeAllSectionTitlesEditable = makeAllSectionTitlesEditable;
 window.getAnnexurePreviewIframe = getAnnexurePreviewIframe;
 window.setAnnexurePreviewIframeSrc = setAnnexurePreviewIframeSrc;
 window.pdfPreview = pdfPreview;
+function updateProjectWorkspaceShell() {
+  const hasProject = Boolean(window.S && S.activeProject);
+  document.body.classList.toggle('project-workspace-active', hasProject);
+  document.body.classList.toggle('project-workspace-inactive', !hasProject);
+  if (!hasProject) {
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar) sidebar.classList.remove('mobile-open');
+    document.body.classList.remove('mobile-sidebar-open');
+    document.body.classList.add('sidebar-hidden');
+  } else if (!window.matchMedia || !window.matchMedia('(max-width: 1280px)').matches) {
+    document.body.classList.remove('sidebar-hidden');
+  }
+  if (typeof updateSidebarToggleVisibility === 'function') updateSidebarToggleVisibility();
+}
+function initProjectWorkspaceShell() {
+  if (window.__projectWorkspaceShellReady) return;
+  window.__projectWorkspaceShellReady = true;
+  const originalShowView = window.showView;
+  if (typeof originalShowView === 'function') {
+    window.showView = function(id, btn, push) {
+      const result = originalShowView.apply(this, arguments);
+      setTimeout(updateProjectWorkspaceShell, 0);
+      return result;
+    };
+  }
+  const originalOpenProject = window.openProject;
+  if (typeof originalOpenProject === 'function') {
+    window.openProject = async function(id) {
+      const result = await originalOpenProject.apply(this, arguments);
+      updateProjectWorkspaceShell();
+      return result;
+    };
+  }
+  const originalClearActiveProject = window.clearActiveProject;
+  if (typeof originalClearActiveProject === 'function') {
+    window.clearActiveProject = function() {
+      const result = originalClearActiveProject.apply(this, arguments);
+      updateProjectWorkspaceShell();
+      return result;
+    };
+  }
+  window.addEventListener('resize', updateProjectWorkspaceShell);
+  updateProjectWorkspaceShell();
+}
+function initPreviewSplitResizer() {
+  if (window.__previewSplitResizerReady) return;
+  const workspace = document.querySelector('.app-workspace');
+  const resizer = document.getElementById('pdf-preview-resizer');
+  if (!workspace || !resizer) return;
+  window.__previewSplitResizerReady = true;
+  const minEditor = 55;
+  const maxEditor = 75;
+  const storageKey = 'dsr_preview_editor_split';
+  const clamp = value => Math.max(minEditor, Math.min(maxEditor, value));
+  const applySplit = value => {
+    const editor = clamp(Number(value) || 62);
+    const preview = 100 - editor;
+    workspace.style.setProperty('--editor-split', `${editor}%`);
+    workspace.style.setProperty('--preview-split', `${preview}%`);
+    document.documentElement.style.setProperty('--editor-split', `${editor}%`);
+    document.documentElement.style.setProperty('--preview-split', `${preview}%`);
+    resizer.setAttribute('aria-valuenow', String(Math.round(editor)));
+  };
+  const saved = Number(localStorage.getItem(storageKey));
+  if (!Number.isNaN(saved) && saved > 0) applySplit(saved);
+  const updateFromPointer = event => {
+    const rect = workspace.getBoundingClientRect();
+    if (!rect.width) return;
+    applySplit(((event.clientX - rect.left) / rect.width) * 100);
+  };
+  resizer.setAttribute('aria-valuemin', String(minEditor));
+  resizer.setAttribute('aria-valuemax', String(maxEditor));
+  resizer.addEventListener('pointerdown', event => {
+    if (!document.body.classList.contains('preview-open')) return;
+    event.preventDefault();
+    resizer.setPointerCapture?.(event.pointerId);
+    document.body.classList.add('preview-resizing');
+    updateFromPointer(event);
+    const onMove = moveEvent => updateFromPointer(moveEvent);
+    const onUp = upEvent => {
+      updateFromPointer(upEvent);
+      document.body.classList.remove('preview-resizing');
+      resizer.releasePointerCapture?.(event.pointerId);
+      const current = parseFloat(getComputedStyle(workspace).getPropertyValue('--editor-split'));
+      if (!Number.isNaN(current)) localStorage.setItem(storageKey, String(clamp(current)));
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onUp);
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onUp);
+  });
+  resizer.addEventListener('keydown', event => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault();
+    const current = parseFloat(getComputedStyle(workspace).getPropertyValue('--editor-split')) || 62;
+    const next = event.key === 'Home' ? minEditor
+      : event.key === 'End' ? maxEditor
+      : current + (event.key === 'ArrowRight' ? 2 : -2);
+    applySplit(next);
+    localStorage.setItem(storageKey, String(clamp(next)));
+  });
+}
 window.addEventListener('DOMContentLoaded', () => {
   pdfPreview.init();
+  initProjectWorkspaceShell();
+  initPreviewSplitResizer();
 });
 
 ;
