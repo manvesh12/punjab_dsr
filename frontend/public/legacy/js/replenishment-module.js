@@ -191,6 +191,24 @@ const REPLENISHMENT_MISSING_REQUIREMENTS = [
   }
 ];
 
+const REPLENISHMENT_REPORT_ACCORDION_SECTIONS = [
+  { id: 'cover-page', title: 'Cover Page', items: ['Cover Page', 'Project Details', 'District', 'State'] },
+  { id: 'certificates', title: 'Certificates', items: ['Statutory Guidelines', 'EMGSM Guidelines'] },
+  { id: 'index', title: 'Index', items: [] },
+  { id: 'introduction', title: 'Introduction', items: ['Project Details', 'Applicant Details', 'Lease Details', 'Mining Block Details', 'District', 'State', 'River Name', 'Village', 'Tehsil', 'Khasra Numbers', 'Lease Area', 'Mining Area', 'Boundary Coordinates', 'GPS Coordinate Tables', 'Infrastructure Details', 'Accessibility', 'Location Map', 'Google Earth Map', 'Toposheet'] },
+  { id: 'deposition-minerals', title: 'Deposition of Minerals on River Bed', items: ['River Behaviour', 'Sediment Transport Description', 'River Basin', 'River Characteristics', 'Catchment Details', 'Drainage Pattern'] },
+  { id: 'flora-fauna', title: 'Flora & Fauna', items: ['Flora', 'Fauna', 'Biodiversity'] },
+  { id: 'hydrogeology', title: 'Hydrogeology', items: ['Hydrogeology', 'Aquifer Details', 'Groundwater Details'] },
+  { id: 'reserve-calculation', title: 'Reserve Calculation', requirementId: 'reserve-calculation' },
+  { id: 'mined-area-study', title: 'Replenishment Study of Mined Area', requirementId: 'mined-area-study' },
+  { id: 'emgsm', title: 'Enforcement & Monitoring Guidelines', items: ['EMGSM Guidelines', 'Safety Measures', 'Statutory Guidelines'] },
+  { id: 'methodology-study', title: 'Methodology for Replenishment Study', requirementId: 'methodology-study' },
+  { id: 'data-processing', title: 'Data Processing', requirementId: 'data-processing' },
+  { id: 'grid-calculation', title: 'Calculation of Grid-wise Area, Elevation & Quantity of Sand', requirementId: 'grid-calculation' },
+  { id: 'conclusion', title: 'Conclusion', items: ['Mineral Description', 'Physical Properties', 'Chemical Properties', 'Mining Method', 'Mining Depth', 'Bench Formation', 'Machinery Details', 'Transportation Details'] },
+  { id: 'annexures', title: 'Annexures', requirementId: 'annexures', items: ['Mine Layout', 'Geological Map', 'Drainage Map', 'Lease Boundary Map'] }
+];
+
 function getReplenishmentSectionTitle(viewId) {
   const fallback = REPLENISHMENT_SECTION_TITLES[viewId] || String(viewId || '').toUpperCase();
   return typeof getEditableAnnexureTitle === 'function'
@@ -339,6 +357,10 @@ window.handleFrontMatterPdfUpload = handleFrontMatterPdfUpload;
 window.removeFrontMatterPdfUpload = removeFrontMatterPdfUpload;
 window.handleReplenishmentRequirementUpload = handleReplenishmentRequirementUpload;
 window.updateReplenishmentManualEntry = updateReplenishmentManualEntry;
+window.toggleReplenishmentInheritanceSection = toggleReplenishmentInheritanceSection;
+window.previewReplenishmentSourceItem = previewReplenishmentSourceItem;
+window.previewReplenishmentUploadedItem = previewReplenishmentUploadedItem;
+window.deleteReplenishmentRequirementUpload = deleteReplenishmentRequirementUpload;
 
 function showReplenishmentOptions(container) {
   container.innerHTML = `
@@ -1060,9 +1082,11 @@ function handleReplenishmentRequirementUpload(input, reportId, requirementId) {
       name: file.name,
       size: file.size,
       type: file.type || 'application/octet-stream',
+      uploadedBy: (S.currentUser && (S.currentUser.fullName || S.currentUser.email || S.currentUser.username)) || 'Officer',
       uploadedAt: new Date().toISOString()
     }
   ];
+  input.value = '';
 
   const cached = reports.find(r => r.id === report.id);
   if (cached) cached.replenishmentUploads = report.replenishmentUploads;
@@ -1085,6 +1109,30 @@ function updateReplenishmentManualEntry(textarea, reportId, requirementId) {
   if (cached) cached.manualEntries = report.manualEntries;
   window.activeReport = report;
   saveLocalReports(reports.length ? reports : [report]);
+}
+
+function deleteReplenishmentRequirementUpload(reportId, requirementId) {
+  showCustomConfirmModal({
+    title: "Delete uploaded file?",
+    message: "This officer-uploaded replacement will be removed. If the item was imported from Final DSR, the inherited source will remain available.",
+    confirmText: "Delete",
+    tone: "danger",
+    onConfirm: () => {
+      const reports = loadLocalReports();
+      const report = reports.find(r => r.id === reportId) || window.activeReport;
+      if (!report) return;
+      if (report.replenishmentUploads) {
+        delete report.replenishmentUploads[requirementId];
+      }
+      const cached = reports.find(r => r.id === report.id);
+      if (cached) cached.replenishmentUploads = report.replenishmentUploads || {};
+      window.activeReport = report;
+      saveLocalReports(reports.length ? reports : [report]);
+      const editorContainer = document.getElementById('repl-editor-container');
+      if (editorContainer) renderCustomReportGenerator(editorContainer, report);
+      toast("Uploaded file removed.", "success");
+    }
+  });
 }
 
 function handleCustomSectionPdfUpload(input, reportId, sectionId, reportName) {
@@ -1267,60 +1315,255 @@ function onSubCheckboxChange(parentId, reportName, reportId) {
   window.updateCustomReportPreview(reportName, reportId);
 }
 
+function getReplenishmentUploadKey(requirementId, itemName) {
+  return itemName ? `${requirementId}::${itemName}` : requirementId;
+}
+
+function getReplenishmentRequirementById(requirementId) {
+  return REPLENISHMENT_MISSING_REQUIREMENTS.find(group => group.id === requirementId);
+}
+
+function getReplenishmentAcceptedFormats(requirement) {
+  if (!requirement || !requirement.formats) return '';
+  return requirement.formats
+    .split(',')
+    .map(ext => ext.trim().toLowerCase())
+    .filter(Boolean)
+    .flatMap(ext => ext === 'geotiff' ? ['.tif', '.tiff'] : [`.${ext}`])
+    .join(',');
+}
+
+function isReplenishmentItemImported(scan, itemName) {
+  return Array.isArray(scan?.inherited) && scan.inherited.includes(itemName);
+}
+
+function getReplenishmentUploadedFiles(report, key) {
+  const uploads = report.replenishmentUploads || {};
+  const direct = Array.isArray(uploads[key]) ? uploads[key] : [];
+  return direct;
+}
+
+function getReplenishmentSectionItems(section) {
+  const requirement = section.requirementId ? getReplenishmentRequirementById(section.requirementId) : null;
+  const requirementItems = requirement ? requirement.items.map(item => ({
+    name: item,
+    requirementId: requirement.id,
+    formats: requirement.formats,
+    accepted: getReplenishmentAcceptedFormats(requirement)
+  })) : [];
+  const inheritedItems = (section.items || []).map(item => ({
+    name: item,
+    requirementId: section.requirementId || section.id,
+    formats: requirement?.formats || 'PDF',
+    accepted: getReplenishmentAcceptedFormats(requirement) || '.pdf'
+  }));
+  return [...inheritedItems, ...requirementItems];
+}
+
+function getReplenishmentSectionStats(report, section) {
+  const scan = report.inheritanceScan || {};
+  const items = getReplenishmentSectionItems(section);
+  let imported = 0;
+  let uploaded = 0;
+  let pending = 0;
+
+  items.forEach(item => {
+    const key = getReplenishmentUploadKey(item.requirementId, item.name);
+    const groupFiles = getReplenishmentUploadedFiles(report, item.requirementId);
+    if (isReplenishmentItemImported(scan, item.name)) imported += 1;
+    else if (getReplenishmentUploadedFiles(report, key).length || groupFiles.length) uploaded += 1;
+    else pending += 1;
+  });
+
+  if (!items.length) imported = 1;
+  const total = Math.max(items.length || 1, 1);
+  const complete = Math.min(imported + uploaded, total);
+  const percent = Math.round((complete / total) * 100);
+  return { total, imported, uploaded, pending, complete, percent };
+}
+
+function getReplenishmentSectionStatus(stats) {
+  if (stats.percent >= 100) return { label: '100% Complete', color: '#047857', bg: '#ecfdf5', border: '#bbf7d0', icon: 'check-circle' };
+  if (stats.percent > 0) return { label: `${stats.percent}% Complete`, color: '#b45309', bg: '#fffbeb', border: '#fde68a', icon: 'alert-triangle' };
+  return { label: 'Incomplete', color: '#b91c1c', bg: '#fef2f2', border: '#fecaca', icon: 'x-circle' };
+}
+
+function toggleReplenishmentInheritanceSection(reportId, sectionId) {
+  window.replenishmentOpenInheritanceSection = window.replenishmentOpenInheritanceSection === sectionId ? '' : sectionId;
+  const report = (window.activeReport && window.activeReport.id === reportId)
+    ? window.activeReport
+    : loadLocalReports().find(r => r.id === reportId);
+  const editorContainer = document.getElementById('repl-editor-container');
+  if (report && editorContainer) renderCustomReportGenerator(editorContainer, report);
+}
+
+function previewReplenishmentSourceItem(itemName) {
+  showCustomConfirmModal({
+    title: itemName,
+    message: "This item is currently inherited from the selected Final DSR. Use Change to replace it with a new officer-uploaded file.",
+    confirmText: "Close",
+    tone: "info"
+  });
+}
+
+function previewReplenishmentUploadedItem(reportId, uploadKey, itemName) {
+  const report = (window.activeReport && window.activeReport.id === reportId)
+    ? window.activeReport
+    : loadLocalReports().find(r => r.id === reportId);
+  const files = report ? getReplenishmentUploadedFiles(report, uploadKey) : [];
+  const file = files[files.length - 1];
+  if (!file) {
+    toast("No uploaded file available for preview.", "info");
+    return;
+  }
+  const uploadedDate = file.uploadedAt ? new Date(file.uploadedAt).toLocaleString() : 'Not available';
+  showCustomConfirmModal({
+    title: `Preview - ${itemName}`,
+    message: `File: ${file.name}\nType: ${file.type || 'Unknown'}\nUploaded By: ${file.uploadedBy || 'Officer'}\nUploaded On: ${uploadedDate}\n\nPreview metadata is available here. File content preview will open when persistent storage is connected.`,
+    confirmText: "Close",
+    tone: "info"
+  });
+}
+
+function renderReplenishmentItemRow(report, section, item) {
+  const scan = report.inheritanceScan || {};
+  const key = getReplenishmentUploadKey(item.requirementId, item.name);
+  const groupFiles = getReplenishmentUploadedFiles(report, item.requirementId);
+  const itemFiles = getReplenishmentUploadedFiles(report, key);
+  const files = itemFiles.length ? itemFiles : groupFiles;
+  const latestFile = files[files.length - 1];
+  const imported = isReplenishmentItemImported(scan, item.name) && !itemFiles.length;
+  const escapedItem = escapeHtml(item.name);
+  const inputId = `repl-req-upload-${section.id}-${String(item.name).toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+
+  if (imported) {
+    return `
+      <div style="border:1px solid #bbf7d0; background:#f0fdf4; border-radius:8px; padding:10px; display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center;">
+        <div>
+          <div style="font-size:12px; font-weight:800; color:#14532d; display:flex; align-items:center; gap:6px;">
+            <i data-lucide="check-circle" style="width:14px; height:14px;"></i>${escapedItem}
+          </div>
+          <div style="font-size:11px; color:#047857; margin-top:3px;">Imported from Final DSR</div>
+        </div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
+          <button type="button" onclick="window.previewReplenishmentSourceItem('${escapeHtml(item.name).replace(/&#39;/g, "\\'")}')" style="border:1px solid #bbf7d0; background:#fff; color:#047857; border-radius:6px; padding:5px 8px; font-size:11px; font-weight:800; cursor:pointer;">Preview</button>
+          <button type="button" onclick="document.getElementById('${inputId}').click()" style="border:1px solid #bfdbfe; background:#eff6ff; color:#1d4ed8; border-radius:6px; padding:5px 8px; font-size:11px; font-weight:800; cursor:pointer;">Change</button>
+          <input type="file" id="${inputId}" accept="${item.accepted}" style="display:none;" onchange="window.handleReplenishmentRequirementUpload(this, '${report.id}', '${key}')">
+        </div>
+      </div>
+    `;
+  }
+
+  if (latestFile) {
+    const uploadedDate = latestFile.uploadedAt ? new Date(latestFile.uploadedAt).toLocaleString() : 'Not available';
+    return `
+      <div style="border:1px solid #bfdbfe; background:#eff6ff; border-radius:8px; padding:10px; display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center;">
+        <div>
+          <div style="font-size:12px; font-weight:800; color:#1d4ed8; display:flex; align-items:center; gap:6px;">
+            <i data-lucide="check-circle" style="width:14px; height:14px;"></i>${escapedItem}
+          </div>
+          <div style="font-size:11px; color:#1e40af; margin-top:3px;">Uploaded Successfully - ${escapeHtml(latestFile.name)}</div>
+          <div style="font-size:10.5px; color:#475569; margin-top:2px;">Uploaded by ${escapeHtml(latestFile.uploadedBy || 'Officer')} on ${escapeHtml(uploadedDate)}</div>
+        </div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
+          <button type="button" onclick="window.previewReplenishmentUploadedItem('${report.id}', '${key}', '${escapeHtml(item.name).replace(/&#39;/g, "\\'")}')" style="border:1px solid #bfdbfe; background:#fff; color:#1d4ed8; border-radius:6px; padding:5px 8px; font-size:11px; font-weight:800; cursor:pointer;">Preview</button>
+          <button type="button" onclick="document.getElementById('${inputId}').click()" style="border:1px solid #bfdbfe; background:#fff; color:#1d4ed8; border-radius:6px; padding:5px 8px; font-size:11px; font-weight:800; cursor:pointer;">Replace</button>
+          <button type="button" onclick="window.deleteReplenishmentRequirementUpload('${report.id}', '${key}')" style="border:1px solid #fecaca; background:#fff; color:#b91c1c; border-radius:6px; padding:5px 8px; font-size:11px; font-weight:800; cursor:pointer;">Delete</button>
+          <input type="file" id="${inputId}" accept="${item.accepted}" style="display:none;" onchange="window.handleReplenishmentRequirementUpload(this, '${report.id}', '${key}')">
+        </div>
+      </div>
+    `;
+  }
+
+  return `
+    <div style="border:1px solid #fde68a; background:#fffbeb; border-radius:8px; padding:10px; display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center;">
+      <div>
+        <div style="font-size:12px; font-weight:800; color:#92400e;">${escapedItem}</div>
+        <div style="font-size:11px; color:#b45309; margin-top:3px;">Upload Required</div>
+        <div style="font-size:10.5px; color:#64748b; margin-top:2px;">Supported formats: ${escapeHtml(item.formats || 'PDF')}</div>
+      </div>
+      <div style="display:flex; gap:6px; justify-content:flex-end;">
+        <button type="button" onclick="document.getElementById('${inputId}').click()" style="border:1px solid #fdba74; background:#fff7ed; color:#c2410c; border-radius:6px; padding:5px 8px; font-size:11px; font-weight:800; cursor:pointer;">Upload</button>
+        <input type="file" id="${inputId}" accept="${item.accepted}" style="display:none;" onchange="window.handleReplenishmentRequirementUpload(this, '${report.id}', '${key}')">
+      </div>
+    </div>
+  `;
+}
+
 function renderInheritancePanel(report) {
   const scan = report.inheritanceScan;
   if (!scan || !report.finalDsrSource) return '';
-  const uploads = report.replenishmentUploads || {};
-  const manualEntries = report.manualEntries || {};
-  const inheritedPreview = (scan.inherited || []).slice(0, 10).map(field => `
-    <span style="display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:999px; background:#ecfdf5; color:#047857; font-size:10.5px; font-weight:800; border:1px solid #bbf7d0;">${escapeHtml(field)}</span>
-  `).join('');
-  const extraInherited = Math.max(0, Number(scan.inheritedCount || 0) - 10);
-  const missingGroups = REPLENISHMENT_MISSING_REQUIREMENTS
-    .filter(group => !Array.isArray(scan.missingRequirementIds) || scan.missingRequirementIds.includes(group.id));
+  const sectionStats = REPLENISHMENT_REPORT_ACCORDION_SECTIONS.map(section => ({
+    section,
+    stats: getReplenishmentSectionStats(report, section)
+  }));
+  const completedSections = sectionStats.filter(entry => entry.stats.percent >= 100).length;
+  const overallProgress = Math.round(sectionStats.reduce((sum, entry) => sum + entry.stats.percent, 0) / sectionStats.length);
+  const openSectionId = window.replenishmentOpenInheritanceSection || '';
 
-  const groupsHtml = missingGroups.map(group => {
-    const uploadedFiles = Array.isArray(uploads[group.id]) ? uploads[group.id] : [];
-    const manualValue = manualEntries[group.id] || '';
-    const accepted = group.formats.split(',').map(ext => `.${ext.trim().toLowerCase().replace('geotiff', 'tif')}`).join(',');
-    return `
-      <div style="border:1px solid #e2e8f0; border-radius:8px; background:#fff; padding:10px; display:flex; flex-direction:column; gap:8px;">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
-          <div>
-            <div style="font-size:12px; font-weight:800; color:#1e293b;">${escapeHtml(group.title)}</div>
-            <div style="font-size:10.5px; color:#64748b; margin-top:2px;">Upload: ${escapeHtml(group.items.join(', '))}</div>
+  const sectionCardsHtml = sectionStats.map(({ section, stats }) => {
+    const status = getReplenishmentSectionStatus(stats);
+    const isOpen = openSectionId === section.id;
+    const items = getReplenishmentSectionItems(section);
+    const detailsHtml = isOpen ? `
+      <div style="border-top:1px solid #e2e8f0; padding:12px; background:#ffffff;">
+        ${items.length ? `
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            ${items.map(item => renderReplenishmentItemRow(report, section, item)).join('')}
           </div>
-          <span style="font-size:9.5px; font-weight:800; color:#1d4ed8; background:#eff6ff; border:1px solid #bfdbfe; border-radius:999px; padding:2px 7px; white-space:nowrap;">${escapeHtml(group.formats)}</span>
-        </div>
-        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-          <button type="button" onclick="document.getElementById('repl-req-upload-${group.id}').click()" style="border:1px solid #bfdbfe; background:#eff6ff; color:#1d4ed8; border-radius:6px; padding:5px 9px; font-size:11px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:5px;">
-            <i data-lucide="upload" style="width:12px; height:12px;"></i> Upload Missing Data
-          </button>
-          <input type="file" id="repl-req-upload-${group.id}" accept="${accepted}" style="display:none;" onchange="window.handleReplenishmentRequirementUpload(this, '${report.id}', '${group.id}')">
-          ${uploadedFiles.length ? `<span style="font-size:10.5px; color:#047857; font-weight:800;">${uploadedFiles.length} file${uploadedFiles.length === 1 ? '' : 's'} attached</span>` : `<span style="font-size:10.5px; color:#64748b;">No upload yet</span>`}
-        </div>
-        <textarea rows="2" placeholder="Manual entry only if upload is not applicable" onblur="window.updateReplenishmentManualEntry(this, '${report.id}', '${group.id}')" style="width:100%; resize:vertical; border:1px solid #cbd5e1; border-radius:6px; padding:7px 9px; font-size:11.5px; color:#334155; font-family:'Plus Jakarta Sans', sans-serif;">${escapeHtml(manualValue)}</textarea>
+        ` : `
+          <div style="border:1px solid #bbf7d0; background:#f0fdf4; color:#047857; border-radius:8px; padding:10px; font-size:12px; font-weight:800;">
+            <i data-lucide="check-circle" style="width:14px; height:14px; vertical-align:-2px;"></i> Section structure inherited from Final DSR.
+          </div>
+        `}
+      </div>
+    ` : '';
+
+    return `
+      <div style="border:1px solid ${status.border}; border-radius:10px; background:#fff; overflow:hidden;">
+        <button type="button" onclick="window.toggleReplenishmentInheritanceSection('${report.id}', '${section.id}')" style="width:100%; border:none; background:${isOpen ? '#f8fafc' : '#ffffff'}; padding:12px; cursor:pointer; text-align:left; display:grid; grid-template-columns:auto 1fr auto; gap:10px; align-items:center;">
+          <span style="color:#64748b; display:flex; align-items:center;">
+            <i data-lucide="${isOpen ? 'chevron-down' : 'chevron-right'}" style="width:16px; height:16px;"></i>
+          </span>
+          <span>
+            <span style="display:flex; align-items:center; gap:7px; color:#0f172a; font-size:13px; font-weight:900;">
+              <i data-lucide="${status.icon}" style="width:15px; height:15px; color:${status.color};"></i>${escapeHtml(section.title)}
+            </span>
+            <span style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
+              <span style="font-size:10.5px; color:#047857; font-weight:800;">Imported ${stats.imported}</span>
+              <span style="font-size:10.5px; color:#1d4ed8; font-weight:800;">Uploaded ${stats.uploaded}</span>
+              <span style="font-size:10.5px; color:#b45309; font-weight:800;">Pending ${stats.pending}</span>
+            </span>
+          </span>
+          <span style="font-size:11px; font-weight:900; color:${status.color}; background:${status.bg}; border:1px solid ${status.border}; border-radius:999px; padding:4px 9px; white-space:nowrap;">${status.label}</span>
+        </button>
+        ${detailsHtml}
       </div>
     `;
   }).join('');
 
   return `
-    <div style="border-bottom:1px solid #e2e8f0; background:#f8fafc; padding:12px 20px;">
-      <div style="display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap;">
+    <div style="border-bottom:1px solid #e2e8f0; background:#f8fafc; padding:14px 20px;">
+      <div style="display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:12px;">
         <div style="min-width:260px; flex:1;">
-          <div style="font-size:11px; color:#64748b; font-weight:800; text-transform:uppercase; letter-spacing:.4px;">Final DSR Inheritance</div>
-          <div style="font-size:13px; font-weight:800; color:#0f172a; margin-top:2px;">${escapeHtml(getProjectDisplayLabel(report.finalDsrSource))}</div>
-          <div style="font-size:11px; color:#475569; margin-top:4px;">${scan.inheritedCount || 0} fields auto-populated; ${scan.missingCount || 0} fields require upload or manual entry if applicable.</div>
+          <div style="font-size:11px; color:#64748b; font-weight:900; text-transform:uppercase; letter-spacing:.4px;">Replenishment Report - Final DSR Inheritance</div>
+          <div style="font-size:14px; font-weight:900; color:#0f172a; margin-top:2px;">${escapeHtml(getProjectDisplayLabel(report.finalDsrSource))}</div>
+          <div style="font-size:11px; color:#475569; margin-top:4px;">Open a section to view imported data, pending uploads, preview options, and replacement controls.</div>
         </div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <span style="font-size:11px; font-weight:800; color:#047857; background:#ecfdf5; border:1px solid #bbf7d0; border-radius:999px; padding:4px 9px;">Auto populated: ${scan.inheritedCount || 0}</span>
-          <span style="font-size:11px; font-weight:800; color:#b45309; background:#fffbeb; border:1px solid #fde68a; border-radius:999px; padding:4px 9px;">Missing: ${scan.missingCount || 0}</span>
+        <div style="display:grid; grid-template-columns:repeat(2, minmax(120px, auto)); gap:8px;">
+          <div style="border:1px solid #bfdbfe; background:#eff6ff; border-radius:10px; padding:8px 10px;">
+            <div style="font-size:10px; color:#1d4ed8; font-weight:900; text-transform:uppercase;">Overall Progress</div>
+            <div style="font-size:20px; color:#1e3a8a; font-weight:900;">${overallProgress}%</div>
+          </div>
+          <div style="border:1px solid #bbf7d0; background:#ecfdf5; border-radius:10px; padding:8px 10px;">
+            <div style="font-size:10px; color:#047857; font-weight:900; text-transform:uppercase;">Completed Sections</div>
+            <div style="font-size:20px; color:#065f46; font-weight:900;">${completedSections}/${sectionStats.length}</div>
+          </div>
         </div>
       </div>
-      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:10px;">
-        ${inheritedPreview}${extraInherited ? `<span style="font-size:10.5px; color:#047857; font-weight:800; padding:3px 4px;">+${extraInherited} more inherited</span>` : ''}
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(310px, 1fr)); gap:10px;">
+        ${sectionCardsHtml}
       </div>
-      ${groupsHtml ? `<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:10px; margin-top:12px;">${groupsHtml}</div>` : ''}
     </div>
   `;
 }
