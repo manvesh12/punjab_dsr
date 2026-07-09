@@ -643,3 +643,491 @@ table,
     max-width: 2200px;
   }
 }
+
+/* Enterprise app shell: fixed header, fixed notice, below-chrome sidebar, independent content scroll. */
+:root {
+  --erp-header-h: 74px;
+  --erp-notice-h: 36px;
+  --erp-chrome-h: calc(var(--erp-header-h) + var(--erp-notice-h));
+  --erp-sidebar-w: 260px;
+  --erp-sidebar-collapsed-w: 80px;
+  --erp-content-pad: 28px;
+  --sidebar-w: var(--erp-sidebar-w);
+  --topbar-h: var(--erp-chrome-h);
+}
+
+body:has(#screen-app.active) {
+  overflow: hidden !important;
+}
+
+#screen-app.active {
+  display: block !important;
+  min-height: 100dvh !important;
+  height: 100dvh !important;
+  overflow: hidden !important;
+}
+
+#screen-app.active .topbar.dash-global-topbar,
+body:not(.view-dashboard-active):not(.view-projects-active) .topbar.dash-global-topbar,
+body.view-dashboard-active .topbar.dash-global-topbar,
+body.view-projects-active .topbar.dash-global-topbar {
+  position: fixed !important;
+  inset: 0 0 auto 0 !important;
+  width: 100% !important;
+  height: var(--erp-chrome-h) !important;
+  min-height: var(--erp-chrome-h) !important;
+  max-height: var(--erp-chrome-h) !important;
+  padding: 0 !important;
+  border: 0 !important;
+  overflow: visible !important;
+  z-index: 1000 !important;
+  background: #ffffff !important;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08) !important;
+}
+
+#screen-app.active .gov-enterprise-brand-row,
+body:not(.view-dashboard-active):not(.view-projects-active) .gov-enterprise-brand-row,
+body.view-dashboard-active .gov-enterprise-brand-row,
+body.view-projects-active .gov-enterprise-brand-row {
+  height: var(--erp-header-h) !important;
+  min-height: var(--erp-header-h) !important;
+  display: grid !important;
+  grid-template-columns: minmax(220px, auto) minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 20px !important;
+  padding: 0 24px !important;
+  background: #ffffff !important;
+  border-bottom: 1px solid #dbe3ec !important;
+}
+
+#screen-app.active .gov-enterprise-brand-left,
+#screen-app.active .gov-enterprise-actions {
+  min-width: 0 !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+#screen-app.active .gov-enterprise-brand {
+  min-width: 0 !important;
+}
+
+#screen-app.active .gov-logo {
+  width: 42px !important;
+  height: 42px !important;
+}
+
+#screen-app.active .gov-iit-logo {
+  width: 38px !important;
+  height: 38px !important;
+}
+
+#screen-app.active .gov-brand-title {
+  font-size: clamp(16px, 1.2vw, 19px) !important;
+  line-height: 1.15 !important;
+  color: #17324d !important;
+}
+
+#screen-app.active .gov-brand-subtitle {
+  font-size: 11px !important;
+  color: #64748b !important;
+}
+
+#screen-app.active .gov-enterprise-nav-row {
+  min-width: 0 !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+}
+
+#screen-app.active .gov-primary-nav {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: thin;
+}
+
+#screen-app.active .tb-sub-nav-btn {
+  min-height: 40px !important;
+  height: 40px !important;
+  padding: 0 12px !important;
+  border-radius: 6px !important;
+  white-space: nowrap !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+}
+
+#screen-app.active .gov-enterprise-actions {
+  justify-content: flex-end !important;
+  gap: 8px !important;
+}
+
+#screen-app.active .gov-enterprise-search input {
+  width: clamp(160px, 14vw, 240px) !important;
+  height: 38px !important;
+}
+
+#screen-app.active .gov-enterprise-notice,
+body.view-dashboard-active .gov-enterprise-notice,
+body.view-projects-active .gov-enterprise-notice {
+  display: flex !important;
+  height: var(--erp-notice-h) !important;
+  min-height: var(--erp-notice-h) !important;
+  max-height: var(--erp-notice-h) !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 0 24px !important;
+  background: #17324d !important;
+  border-top: 0 !important;
+  border-bottom: 3px solid #c49a58 !important;
+  color: #ffffff !important;
+  overflow: hidden !important;
+}
+
+#screen-app.active .dash-notice-label {
+  flex: 0 0 auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+}
+
+#screen-app.active .dash-notice-marquee-container {
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  white-space: nowrap !important;
+  scrollbar-width: none;
+}
+
+#screen-app.active .dash-notice-marquee-container::-webkit-scrollbar {
+  display: none;
+}
+
+#screen-app.active .tb-district {
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+}
+
+#screen-app.active .sidebar,
+#screen-app:has(#view-dashboard.active) .sidebar,
+#screen-app:has(#view-projects.active) .sidebar,
+body.view-dashboard-active .sidebar,
+body.view-projects-active .sidebar {
+  display: flex !important;
+  position: fixed !important;
+  top: var(--erp-chrome-h) !important;
+  left: 0 !important;
+  width: var(--erp-sidebar-w) !important;
+  height: calc(100dvh - var(--erp-chrome-h)) !important;
+  max-height: calc(100dvh - var(--erp-chrome-h)) !important;
+  z-index: 800 !important;
+  transform: none !important;
+  overflow: hidden !important;
+  border-right: 1px solid rgba(23, 50, 77, 0.14) !important;
+  box-shadow: 8px 0 24px rgba(15, 23, 42, 0.06) !important;
+}
+
+#screen-app.active .sidebar .sb-head,
+#screen-app.active .sidebar .sb-head[style] {
+  flex: 0 0 auto !important;
+  padding: 12px 14px !important;
+}
+
+#screen-app.active .sidebar .sb-nav,
+#screen-app.active .sidebar .sb-nav[style] {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 12px !important;
+  scrollbar-width: thin;
+}
+
+#screen-app.active .sidebar .sb-section,
+#screen-app.active .sidebar #sidebar-new-project-section {
+  margin-bottom: 12px !important;
+}
+
+#screen-app.active .sidebar .sb-section-lbl,
+#screen-app.active .sidebar .sb-section-lbl[style] {
+  margin: 0 0 8px !important;
+  padding: 0 4px !important;
+  font-size: 10px !important;
+  line-height: 1.2 !important;
+}
+
+#screen-app.active .sidebar .sb-item,
+#screen-app.active .sidebar .sb-item[style] {
+  min-height: 34px !important;
+  height: auto !important;
+  padding: 7px 10px !important;
+  border-radius: 6px !important;
+  gap: 8px !important;
+  font-size: 12px !important;
+  line-height: 1.25 !important;
+}
+
+#screen-app.active .sidebar .sb-ico,
+#screen-app.active .sidebar .sb-ico[style] {
+  width: 24px !important;
+  min-width: 24px !important;
+  height: 24px !important;
+}
+
+#screen-app.active .sidebar .sb-bottom-container,
+#screen-app.active .sidebar .sb-bottom-container[style] {
+  flex: 0 0 auto !important;
+  padding: 12px !important;
+}
+
+#screen-app.active .sidebar .sb-user-card,
+#screen-app.active .sidebar .sb-user-card[style] {
+  padding: 8px !important;
+  margin-bottom: 8px !important;
+}
+
+#screen-app.active .app-workspace,
+#screen-app:has(#view-dashboard.active) .app-workspace,
+#screen-app:has(#view-projects.active) .app-workspace,
+body.view-dashboard-active .app-workspace,
+body.view-projects-active .app-workspace,
+body:not(.view-dashboard-active) .app-workspace {
+  position: fixed !important;
+  top: var(--erp-chrome-h) !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: var(--erp-sidebar-w) !important;
+  width: auto !important;
+  max-width: none !important;
+  height: calc(100dvh - var(--erp-chrome-h)) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  overflow: hidden !important;
+  background: var(--bg) !important;
+}
+
+#screen-app.active .main-content {
+  min-width: 0 !important;
+  height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  scroll-padding-top: var(--erp-content-pad);
+}
+
+#screen-app.active .page-body,
+body:not(.view-dashboard-active) .page-body,
+body.view-dashboard-active .page-body,
+body.view-projects-active .page-body {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 100% !important;
+  padding: var(--erp-content-pad) !important;
+}
+
+#screen-app.active .card,
+#screen-app.active .proj-card,
+#screen-app.active .upload-box,
+#screen-app.active .notif {
+  margin-bottom: 20px;
+}
+
+body.sidebar-hidden #screen-app.active .sidebar {
+  width: var(--erp-sidebar-collapsed-w) !important;
+}
+
+body.sidebar-hidden #screen-app.active .app-workspace {
+  left: var(--erp-sidebar-collapsed-w) !important;
+}
+
+body.sidebar-hidden #screen-app.active .sidebar .sb-head span,
+body.sidebar-hidden #screen-app.active .sidebar .sb-section-lbl,
+body.sidebar-hidden #screen-app.active .sidebar .sb-item > span:not(.sb-ico),
+body.sidebar-hidden #screen-app.active .sidebar .sb-user-card > div:not(.sb-avatar-circle),
+body.sidebar-hidden #screen-app.active .sidebar .sb-logout-btn {
+  display: none !important;
+}
+
+body.sidebar-hidden #screen-app.active .sidebar .sb-nav,
+body.sidebar-hidden #screen-app.active .sidebar .sb-nav[style],
+body.sidebar-hidden #screen-app.active .sidebar .sb-bottom-container,
+body.sidebar-hidden #screen-app.active .sidebar .sb-bottom-container[style] {
+  padding-inline: 10px !important;
+}
+
+body.sidebar-hidden #screen-app.active .sidebar .sb-item,
+body.sidebar-hidden #screen-app.active .sidebar .sb-item[style] {
+  justify-content: center !important;
+  padding-inline: 8px !important;
+}
+
+body.sidebar-hidden #screen-app.active .sidebar .sb-user-card,
+body.sidebar-hidden #screen-app.active .sidebar .sb-user-card[style] {
+  justify-content: center !important;
+}
+
+@media (max-width: 1366px) {
+  :root {
+    --erp-sidebar-w: 250px;
+    --erp-content-pad: 24px;
+  }
+
+  #screen-app.active .gov-enterprise-brand-row {
+    gap: 14px !important;
+    padding-inline: 18px !important;
+  }
+
+  #screen-app.active .gov-enterprise-actions .gov-emgsm-badge,
+  #screen-app.active .gov-enterprise-actions .gov-profile-chip span,
+  #screen-app.active .gov-enterprise-actions .dash-btn-logout span {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1180px) {
+  #screen-app.active .gov-enterprise-brand-row {
+    grid-template-columns: minmax(190px, auto) minmax(0, 1fr) auto !important;
+  }
+
+  #screen-app.active .gov-enterprise-search {
+    display: none !important;
+  }
+
+  #screen-app.active .tb-sub-nav-btn {
+    padding-inline: 10px !important;
+  }
+}
+
+@media (max-width: 1280px) {
+  :root {
+    --erp-sidebar-w: min(86vw, 300px);
+    --sidebar-w: 0px;
+  }
+
+  body.mobile-sidebar-open::before {
+    top: var(--erp-chrome-h) !important;
+    z-index: 700 !important;
+  }
+
+  #screen-app.active .sidebar,
+  #screen-app:has(#view-dashboard.active) .sidebar,
+  #screen-app:has(#view-projects.active) .sidebar,
+  body.view-dashboard-active .sidebar,
+  body.view-projects-active .sidebar {
+    top: var(--erp-chrome-h) !important;
+    width: var(--erp-sidebar-w) !important;
+    height: calc(100dvh - var(--erp-chrome-h)) !important;
+    transform: translateX(-105%) !important;
+    z-index: 800 !important;
+  }
+
+  #screen-app.active .sidebar.mobile-open,
+  #screen-app.active #sidebar.mobile-open {
+    transform: translateX(0) !important;
+  }
+
+  #screen-app.active .app-workspace,
+  #screen-app:has(#view-dashboard.active) .app-workspace,
+  #screen-app:has(#view-projects.active) .app-workspace,
+  body.view-dashboard-active .app-workspace,
+  body.view-projects-active .app-workspace,
+  body:not(.view-dashboard-active) .app-workspace {
+    left: 0 !important;
+    top: var(--erp-chrome-h) !important;
+    height: calc(100dvh - var(--erp-chrome-h)) !important;
+  }
+}
+
+@media (max-width: 900px) {
+  :root {
+    --erp-header-h: 72px;
+    --erp-notice-h: 36px;
+    --erp-content-pad: 18px;
+  }
+
+  #screen-app.active .gov-enterprise-brand-row {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    gap: 10px !important;
+    padding-inline: 12px !important;
+  }
+
+  #screen-app.active .gov-enterprise-nav-row {
+    order: 3;
+    grid-column: 1 / -1;
+    height: 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  #screen-app.active .gov-brand-subtitle,
+  #screen-app.active .gov-enterprise-actions .gov-search-icon,
+  #screen-app.active .gov-enterprise-actions .gov-actions-more,
+  #screen-app.active .gov-enterprise-actions .gov-profile-chip {
+    display: none !important;
+  }
+
+  #screen-app.active .gov-enterprise-notice {
+    padding-inline: 12px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --erp-header-h: 72px;
+    --erp-notice-h: 34px;
+    --erp-content-pad: 12px;
+  }
+
+  #screen-app.active .gov-enterprise-brand-row {
+    height: var(--erp-header-h) !important;
+    min-height: var(--erp-header-h) !important;
+  }
+
+  #screen-app.active .gov-logo {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  #screen-app.active .gov-brand-title {
+    font-size: 13px !important;
+  }
+
+  #screen-app.active .gov-enterprise-actions {
+    gap: 6px !important;
+  }
+
+  #screen-app.active .dash-action-icon-btn,
+  #screen-app.active .gov-profile-chip,
+  #screen-app.active .dash-btn-logout {
+    width: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    height: 36px !important;
+  }
+
+  #screen-app.active .dash-notice-label,
+  #screen-app.active .tb-district {
+    display: none !important;
+  }
+
+  #screen-app.active .gov-enterprise-notice {
+    display: flex !important;
+    height: var(--erp-notice-h) !important;
+    min-height: var(--erp-notice-h) !important;
+    padding-inline: 10px !important;
+  }
+}
