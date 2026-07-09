@@ -2096,10 +2096,13 @@ function hidePdfProgressToast() {
   }
 }
 
-async function generateModelDsrPdfBlob(reportName, checkedIds, reportId) {
-  if (reportId) {
+async function generateModelDsrPdfBlob(reportName, checkedIds, reportId, reportObj = null) {
+  let report = reportObj;
+  if (!report && reportId) {
     const reports = loadLocalReports();
-    const report = reports.find(r => r.id === reportId);
+    report = reports.find(r => r.id === reportId);
+  }
+  if (report) {
     restoreReportFrontMatterPdfs(report);
   }
 
@@ -2812,12 +2815,12 @@ async function generateModelDsrPdfBlob(reportName, checkedIds, reportId) {
     'annexure-b', 'annexure-c', 'annexure-d', 'annexure-e', 'annexure-f', 'annexure-g', 'annexure-h', 'annexure-i', 'annexure-j', 'annexure-k'
   ];
 
-  if (reportId) {
+  if (!report && reportId) {
     const reports = loadLocalReports();
-    const report = reports.find(r => r.id === reportId);
-    if (report && report.sectionOrder && Array.isArray(report.sectionOrder)) {
-      sectionOrder = report.sectionOrder;
-    }
+    report = reports.find(r => r.id === reportId);
+  }
+  if (report && report.sectionOrder && Array.isArray(report.sectionOrder)) {
+    sectionOrder = report.sectionOrder;
   }
 
   const orderedItems = [];
@@ -3251,4 +3254,5 @@ function showCustomPromptModal(title, defaultValue, onConfirm, buttonText = "Con
 window.showCustomConfirmModal = showCustomConfirmModal;
 window.showCustomPromptModal = showCustomPromptModal;
 
+  window.mdsrGenerateModelDsrPdfBlob = generateModelDsrPdfBlob;
 })();
