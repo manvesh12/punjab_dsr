@@ -236,7 +236,8 @@ function normalizeBackendReport(study) {
     finalDsrSource: state.finalDsrSource || null,
     inheritanceScan: state.inheritanceScan || null,
     replenishmentUploads: state.replenishmentUploads || {},
-    manualEntries: state.manualEntries || {}
+    manualEntries: state.manualEntries || {},
+    generatedPdf: state.generatedPdf || null
   };
 }
 
@@ -318,7 +319,8 @@ async function saveReportToServer(report) {
         finalDsrSource: report.finalDsrSource || null,
         inheritanceScan: report.inheritanceScan || null,
         replenishmentUploads: report.replenishmentUploads || {},
-        manualEntries: report.manualEntries || {}
+        manualEntries: report.manualEntries || {},
+        generatedPdf: report.generatedPdf || null
       }
     };
     await apiFetch(`/replenishment/${report.id}`, {
@@ -629,7 +631,7 @@ async function showExistingReportsList() {
           <td style="padding: 12px; display:flex; gap:8px; align-items:center;">
             <button class="btn btn-sm btn-primary" onclick="window.openCustomReport('${r.id}')" style="padding: 4px 8px; font-size: 11.5px; height: auto; cursor: pointer;">Open</button>
             <button class="btn btn-sm btn-outline" onclick="window.renameCustomReport('${r.id}')" style="padding: 4px 8px; font-size: 11.5px; height: auto; cursor: pointer;">Rename</button>
-            <button class="btn btn-sm btn-saffron" onclick="window.downloadCustomReportPDFDirect('${r.id}')" style="padding: 4px 8px; font-size: 11.5px; height: auto; cursor: pointer;">Download PDF</button>
+            <button class="btn btn-sm btn-saffron repl-download-pdf-btn" data-report-id="${r.id}" onclick="window.downloadCustomReportPDFDirect('${r.id}', this)" style="padding: 4px 8px; font-size: 11.5px; height: auto; cursor: pointer;">Download PDF</button>
             <button class="btn btn-sm btn-outline text-danger" onclick="window.deleteCustomReport('${r.id}')" style="padding: 4px 8px; font-size: 11.5px; height: auto; border-color:#f87171 !important; color:#ef4444 !important; cursor: pointer;">Delete</button>
           </td>
         </tr>
@@ -722,7 +724,7 @@ function deleteCustomReport(reportId) {
   });
 }
 
-async function downloadCustomReportPDFDirect(reportId) {
+async function downloadCustomReportPDFDirect(reportId, triggerButton = null) {
   try {
     const s = await apiFetch(`/replenishment/${reportId}`);
     const report = upsertLocalReport(normalizeBackendReport(s));
@@ -734,7 +736,7 @@ async function downloadCustomReportPDFDirect(reportId) {
       return;
     }
     
-    generateReplenishmentPDF(report.name, checkedIds, reportId);
+    await generateReplenishmentPDF(report.name, checkedIds, reportId, { triggerButton });
   } catch (err) {
     toast("Failed to download PDF: " + err.message, "error");
   }
@@ -1911,7 +1913,7 @@ function renderCustomReportGenerator(container, report) {
           </div>
           <div style="display:flex; gap:10px;">
             <button class="btn btn-outline" onclick="window.showExistingReportsList()" style="cursor: pointer;">Back</button>
-            <button class="btn btn-primary" onclick="window.downloadCustomReportPDF('${escapedReportName}', '${report.id}')" style="cursor: pointer;">Download PDF</button>
+            <button class="btn btn-primary repl-download-pdf-btn" data-report-id="${report.id}" onclick="window.downloadCustomReportPDF('${escapedReportName}', '${report.id}', this)" style="cursor: pointer;">Download PDF</button>
           </div>
         </div>
       </div>
@@ -2677,11 +2679,11 @@ function compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds, repor
     </html>`;
 }
 
-function downloadCustomReportPDF(reportName, reportId) {
+async function downloadCustomReportPDF(reportName, reportId, triggerButton = null) {
   const reports = loadLocalReports();
   const report = reports.find(r => r.id === reportId);
   if (reportId) {
-    saveReportSelection(reportId);
+    await saveReportSelection(reportId);
   }
   const currentCheckedIds = getCurrentSelectedReportSectionIds();
   const checkedIds = currentCheckedIds.length ? currentCheckedIds : (report ? (report.sections || []) : []);
@@ -2690,7 +2692,7 @@ function downloadCustomReportPDF(reportName, reportId) {
     checkedIds.push(...currentCheckedIds);
   }
   
-  generateReplenishmentPDF(reportName, checkedIds, reportId);
+  await generateReplenishmentPDF(reportName, checkedIds, reportId, { triggerButton });
 }
 
 function showPdfProgressToast(message) {
@@ -3675,34 +3677,224 @@ async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId) {
   }
 }
 
-async function generateReplenishmentPDF(reportName, checkedIds, reportId) {
+function getReplenishmentPdfAnnexureId(reportId) {
+  const compactId = String(reportId || '').replace(/[^a-zA-Z0-9_-]/g, '');
+  return `repl-${compactId.slice(-26)}`;
+}
+
+function getSafeReplenishmentPdfFileName(reportName) {
+  const projectName = (S.activeProject && (S.activeProject.projectName || S.activeProject.title)) || reportName || 'Project';
+  const base = String(projectName || 'Project')
+    .replace(/[^\w\s.-]/g, '')
+    .trim()
+    .replace(/\s+/g, '_') || 'Project';
+  return `${base}_Replenishment_Report.pdf`;
+}
+
+function getReplenishmentUploadCount(report) {
+  const uploads = report && report.replenishmentUploads ? report.replenishmentUploads : {};
+  return Object.values(uploads).reduce((count, files) => count + (Array.isArray(files) ? files.length : 0), 0);
+}
+
+function getReplenishmentReportSignature(report, checkedIds) {
+  const signaturePayload = {
+    projectId: S.activeProject?.id || '',
+    projectUpdatedAt: S.activeProject?.updatedAt || S.activeProject?.updated || '',
+    reportId: report?.id || '',
+    reportName: report?.name || '',
+    sections: checkedIds || report?.sections || [],
+    sectionOrder: report?.sectionOrder || [],
+    finalDsrSource: report?.finalDsrSource || null,
+    inheritanceScan: report?.inheritanceScan || null,
+    uploads: report?.replenishmentUploads || {},
+    manualEntries: report?.manualEntries || {},
+    frontMatterPdfs: report?.frontMatterPdfs || {},
+    customPdfs: report?.customPdfs || {},
+    customSections: report?.customSections || []
+  };
+  try {
+    return JSON.stringify(signaturePayload);
+  } catch (_) {
+    return `${Date.now()}`;
+  }
+}
+
+function validateReplenishmentReportForPdf(report, checkedIds) {
+  const errors = [];
+  if (!S.activeProject || !S.activeProject.id) {
+    errors.push('Select an active project before generating the replenishment report.');
+  }
+  if (!report || !report.id) {
+    errors.push('Open or select a saved replenishment report first.');
+  }
+  if (!checkedIds || !checkedIds.length) {
+    errors.push('Select at least one report section before downloading the PDF.');
+  }
+
+  const sectionSet = new Set(checkedIds || []);
+  REPLENISHMENT_REPORT_ACCORDION_SECTIONS.forEach(section => {
+    if (!section.requirementId || !sectionSet.has(section.id)) return;
+    const stats = getReplenishmentSectionStats(report, section);
+    if (stats.total > 0 && stats.completed === 0) {
+      errors.push(`${section.title}: add inherited data, edited content, or at least one valid upload.`);
+    }
+  });
+
+  const uploads = report?.replenishmentUploads || {};
+  Object.entries(uploads).forEach(([key, files]) => {
+    if (!Array.isArray(files)) return;
+    files.forEach((file, index) => {
+      if (!file || (!file.url && !file.downloadUrl)) {
+        errors.push(`Uploaded file reference is broken in ${key} (${index + 1}).`);
+      }
+    });
+  });
+
+  return errors;
+}
+
+function setReplenishmentDownloadBusy(reportId, busy, triggerButton) {
+  const buttons = Array.from(document.querySelectorAll(`.repl-download-pdf-btn[data-report-id="${reportId}"]`));
+  if (triggerButton && !buttons.includes(triggerButton)) buttons.push(triggerButton);
+  buttons.forEach(btn => {
+    if (!btn) return;
+    if (busy) {
+      btn.dataset.originalText = btn.dataset.originalText || btn.textContent || 'Download PDF';
+      btn.disabled = true;
+      btn.setAttribute('aria-busy', 'true');
+      btn.textContent = 'Generating PDF...';
+    } else {
+      btn.disabled = false;
+      btn.removeAttribute('aria-busy');
+      btn.textContent = btn.dataset.originalText || 'Download PDF';
+    }
+  });
+}
+
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || '').split(',')[1] || '');
+    reader.onerror = () => reject(reader.error || new Error('Could not read generated PDF'));
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function uploadReplenishmentPdfToStorage(report, blob, filename, signature) {
+  const base64 = await blobToBase64(blob);
+  const annexureId = getReplenishmentPdfAnnexureId(report.id);
+  await apiFetch('/upload-pdf', {
+    method: 'POST',
+    body: JSON.stringify({
+      projectId: S.activeProject.id,
+      annexureId,
+      fileName: filename,
+      pdf: base64
+    })
+  });
+
+  const previousMeta = report.generatedPdf || {};
+  const now = new Date().toISOString();
+  report.generatedPdf = {
+    annexureId,
+    fileName: filename,
+    generatedAt: now,
+    generatedBy: (S.user && (S.user.fullName || S.user.username || S.user.email)) || localStorage.getItem('dsr_user') || 'Current User',
+    version: Number(previousMeta.version || 0) + 1,
+    sizeBytes: blob.size,
+    downloadCount: Number(previousMeta.downloadCount || 0),
+    lastDownloadDate: previousMeta.lastDownloadDate || null,
+    signature,
+    uploadCount: getReplenishmentUploadCount(report)
+  };
+  upsertLocalReport(report);
+  await saveReportToServer(report);
+  return report.generatedPdf;
+}
+
+async function downloadStoredReplenishmentPdf(report, metadata) {
+  const response = await fetch(`/api/download-pdf?projectId=${encodeURIComponent(S.activeProject.id)}&annexureId=${encodeURIComponent(metadata.annexureId)}`, {
+    headers: { Authorization: `Bearer ${localStorage.getItem('dsr_token') || ''}` }
+  });
+  if (!response.ok) throw new Error(await response.text());
+  const blob = await response.blob();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = metadata.fileName || getSafeReplenishmentPdfFileName(report.name);
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2500);
+
+  report.generatedPdf = {
+    ...metadata,
+    downloadCount: Number(metadata.downloadCount || 0) + 1,
+    lastDownloadDate: new Date().toISOString()
+  };
+  upsertLocalReport(report);
+  await saveReportToServer(report);
+}
+
+async function generateReplenishmentPDF(reportName, checkedIds, reportId, options = {}) {
   if (!checkedIds || checkedIds.length === 0) {
     toast("No sections selected to download.", "error");
     return;
   }
-  
-  showPdfProgressToast('Generating Replenishment PDF report...');
+
+  const reports = loadLocalReports();
+  let report = reports.find(r => r.id === reportId);
+  if (!report && reportId) {
+    const fresh = await apiFetch(`/replenishment/${reportId}`);
+    report = upsertLocalReport(normalizeBackendReport(fresh));
+  }
+  if (!report) {
+    toast('Open or select a saved replenishment report first.', 'error');
+    return;
+  }
+
+  report.sections = checkedIds;
+  await saveReportToServer(report);
+
+  const validationErrors = validateReplenishmentReportForPdf(report, checkedIds);
+  if (validationErrors.length) {
+    toast(`Cannot generate PDF: ${validationErrors[0]}`, 'error');
+    showCustomConfirmModal({
+      title: 'Replenishment report needs attention',
+      message: validationErrors.slice(0, 5).join('\n'),
+      confirmText: 'OK',
+      tone: 'warning'
+    });
+    return;
+  }
+
+  const signature = getReplenishmentReportSignature(report, checkedIds);
+  const existingPdf = report.generatedPdf;
+  const canReuseExisting = existingPdf && existingPdf.annexureId && existingPdf.signature === signature;
+
+  setReplenishmentDownloadBusy(reportId, true, options.triggerButton);
+  showPdfProgressToast(canReuseExisting ? 'Downloading saved PDF...' : 'Generating PDF...');
   
   try {
-    const blob = await generateReplenishmentPdfBlob(reportName, checkedIds, reportId);
-    hidePdfProgressToast();
-    
-    if (blob) {
-      const filename = `${reportName.replace(/\s+/g, '_')}_Replenishment_Report.pdf`;
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      toast('Replenishment Report PDF downloaded successfully!', 'success');
+    let metadata = existingPdf;
+    if (!canReuseExisting) {
+      const blob = await generateReplenishmentPdfBlob(reportName, checkedIds, reportId);
+      if (!blob) throw new Error('PDF generation failed.');
+      showPdfProgressToast('Saving generated PDF to project...');
+      metadata = await uploadReplenishmentPdfToStorage(report, blob, getSafeReplenishmentPdfFileName(reportName), signature);
+      toast('PDF Generated Successfully', 'success');
     } else {
-      toast('PDF compilation failed.', 'error');
+      toast('No report changes detected. Downloading existing generated PDF.', 'info');
     }
+
+    showPdfProgressToast('Starting PDF download...');
+    await downloadStoredReplenishmentPdf(report, metadata);
+    toast('Replenishment Report PDF downloaded successfully!', 'success');
   } catch (err) {
     console.error('Download PDF error:', err);
+    toast(err.message || 'PDF generation failed. Please try again.', 'error');
+  } finally {
     hidePdfProgressToast();
-    toast('PDF compilation failed.', 'error');
+    setReplenishmentDownloadBusy(reportId, false, options.triggerButton);
   }
 }
 
