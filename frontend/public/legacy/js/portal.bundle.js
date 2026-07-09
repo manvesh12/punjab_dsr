@@ -16695,11 +16695,43 @@ window.makeAllSectionTitlesEditable = makeAllSectionTitlesEditable;
 window.getAnnexurePreviewIframe = getAnnexurePreviewIframe;
 window.setAnnexurePreviewIframeSrc = setAnnexurePreviewIframeSrc;
 window.pdfPreview = pdfPreview;
+const PROJECT_WORKSPACE_VIEWS = new Set([
+  'workflow',
+  'front-matter',
+  'chapters',
+  'plates',
+  'replenishment',
+  'graphs',
+  'anx1',
+  'anx2',
+  'anx3',
+  'anx4',
+  'anx5',
+  'anx6',
+  'anx7',
+  'annexure-b',
+  'annexure-c',
+  'annexure-d',
+  'annexure-e',
+  'annexure-f',
+  'annexure-g',
+  'annexure-h',
+  'annexure-i',
+  'annexure-j',
+  'annexure-k',
+  'demand-table',
+  'auction-table',
+  'summary-table',
+  'benchmark-table',
+  'generate'
+]);
 function updateProjectWorkspaceShell() {
+  const viewId = typeof currentViewId === 'string' ? currentViewId : '';
   const hasProject = Boolean(window.S && S.activeProject);
-  document.body.classList.toggle('project-workspace-active', hasProject);
-  document.body.classList.toggle('project-workspace-inactive', !hasProject);
-  if (!hasProject) {
+  const isProjectWorkspace = hasProject && PROJECT_WORKSPACE_VIEWS.has(viewId);
+  document.body.classList.toggle('project-workspace-active', isProjectWorkspace);
+  document.body.classList.toggle('project-workspace-inactive', !isProjectWorkspace);
+  if (!isProjectWorkspace) {
     const sidebar = document.getElementById('sidebar');
     if (sidebar) sidebar.classList.remove('mobile-open');
     document.body.classList.remove('mobile-sidebar-open');

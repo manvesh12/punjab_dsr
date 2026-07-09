@@ -1391,3 +1391,39 @@ body.preview-open .pdf-preview-panel,
     grid-column: 1 !important;
   }
 }
+
+/* Header chrome is global and never participates in project-sidebar layout. */
+#screen-app.active .topbar,
+#screen-app.active .topbar.dash-global-topbar,
+body:not(.view-dashboard-active) #screen-app.active .topbar,
+body.sidebar-hidden #screen-app.active .topbar,
+body.project-workspace-active #screen-app.active .topbar,
+body.project-workspace-inactive #screen-app.active .topbar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: var(--erp-chrome-h) !important;
+  min-height: var(--erp-chrome-h) !important;
+  max-height: var(--erp-chrome-h) !important;
+  margin: 0 !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+#screen-app.active .gov-enterprise-brand-row,
+#screen-app.active .gov-enterprise-nav-row,
+#screen-app.active .gov-enterprise-notice {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  transform: none !important;
+}
+
+body:not(.project-workspace-active) #screen-app.active .app-workspace,
+body.project-workspace-inactive #screen-app.active .app-workspace {
+  left: 0 !important;
+}
