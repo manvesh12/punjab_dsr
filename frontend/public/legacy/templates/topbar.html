@@ -1,20 +1,85 @@
-<div class="topbar dash-global-topbar gov-compact-topbar">
-  <div class="gov-compact-header">
-    <div class="gov-header-left">
+<div class="topbar dash-global-topbar gov-compact-topbar gov-enterprise-topbar">
+  <div class="gov-enterprise-brand-row">
+    <div class="gov-enterprise-brand-left">
       <button id="tb-sidebar-toggle" type="button" class="dash-action-icon-btn gov-menu-toggle" onclick="return toggleSidebar(event)" title="Toggle sidebar" aria-label="Toggle sidebar" aria-expanded="false">
         <i data-lucide="menu"></i>
       </button>
-      <button class="gov-brand-button" type="button" onclick="clearActiveProject(); showView('dashboard', null);" aria-label="Go to dashboard">
+      <button class="gov-brand-button gov-enterprise-brand" type="button" onclick="clearActiveProject(); showView('dashboard', null);" aria-label="Go to dashboard">
         <img src="assets/dsr-logo.png" alt="Punjab Government Smart DSR Logo" class="gov-logo gov-logo-punjab">
         <span class="gov-iit-logo" aria-label="IIT Ropar">IIT</span>
         <span class="gov-brand-copy">
-          <span class="gov-brand-title">Smart DSR Portal</span>
-          <span class="gov-brand-subtitle">District Survey Report Automation Portal</span>
+          <span class="gov-brand-title">District Survey Report Automation Portal</span>
+          <span class="gov-brand-subtitle">Sand Automation for Sand Mining</span>
         </span>
       </button>
     </div>
 
-    <nav class="gov-primary-nav" aria-label="Primary navigation">
+    <div class="gov-header-right gov-enterprise-actions">
+      <button class="dash-gov-badge dash-badge-emgsm gov-emgsm-badge" onclick="showView('workflow', null)">
+        <i data-lucide="leaf"></i><span>EMGSM</span>
+      </button>
+
+      <div class="dash-menu-search gov-compact-search gov-enterprise-search">
+        <i data-lucide="search"></i>
+        <input id="tb-portal-search" type="text" placeholder="Search portal..." data-i18n-placeholder="searchPlaceholder" onkeydown="dashRunSearch(event)" aria-label="Search portal">
+      </div>
+
+      <button class="dash-action-icon-btn gov-search-icon" onclick="dashFocusSearch()" title="Focus search" aria-label="Focus search">
+        <i data-lucide="search"></i>
+      </button>
+
+      <div class="tb-nav-dropdown gov-notification-wrap">
+        <button type="button" class="dash-action-icon-btn" onclick="toggleNotificationDropdown()" title="Notifications" aria-label="Notifications">
+          <i data-lucide="bell"></i>
+          <span id="tb-notif-dot"></span>
+        </button>
+        <div class="tb-dropdown-menu" id="tb-notif-dropdown">
+          <div class="tb-dropdown-title">Notifications</div>
+          <div id="tb-notif-list" class="tb-empty-note">No new notifications</div>
+        </div>
+      </div>
+
+      <button class="dash-action-icon-btn dash-theme-toggle tb-theme-toggle" onclick="toggleDarkMode()" title="Toggle dark mode" aria-label="Toggle dark mode" data-theme-toggle>
+        <i data-lucide="moon"></i>
+      </button>
+
+      <div class="tb-nav-dropdown gov-actions-more">
+        <button type="button" class="dash-action-icon-btn" title="More tools" aria-label="More tools">
+          <i data-lucide="ellipsis"></i>
+        </button>
+        <div class="tb-dropdown-menu">
+          <button type="button" onclick="dashPortalToast('Screen reader mode is ready. Use browser accessibility tools to continue.')">
+            <i data-lucide="eye"></i><span>Screen reader</span>
+          </button>
+          <button type="button" onclick="changeFontSize(-1)">A- Font</button>
+          <button type="button" onclick="changeFontSize(0)">A Font</button>
+          <button type="button" onclick="changeFontSize(1)">A+ Font</button>
+          <button type="button" data-lang="en" onclick="applyPortalLanguage('en')">English</button>
+          <button type="button" data-lang="hi" onclick="applyPortalLanguage('hi')">Hindi</button>
+          <button type="button" data-lang="pa" onclick="applyPortalLanguage('pa')">Punjabi</button>
+          <button type="button" onclick="clearActiveProject(); showView('dashboard', null); setTimeout(()=>document.getElementById('dash-contact-section')?.scrollIntoView({behavior:'smooth', block:'start'}), 80);">
+            <i data-lucide="help-circle"></i><span>Help</span>
+          </button>
+          <button type="button" onclick="dashSharePortal()">
+            <i data-lucide="share-2"></i><span>Copy portal link</span>
+          </button>
+          <button type="button" onclick="showView('workflow', null)">
+            <i data-lucide="git-branch"></i><span>Workflow shortcuts</span>
+          </button>
+        </div>
+      </div>
+
+      <button class="gov-profile-chip" type="button" onclick="showView('settings', null)" title="User profile" aria-label="User profile">
+        <i data-lucide="user-circle"></i><span>Profile</span>
+      </button>
+      <button onclick="doLogout()" class="dash-btn-logout gov-logout-btn">
+        <i data-lucide="log-out"></i><span>Logout</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="gov-enterprise-nav-row">
+    <nav class="gov-primary-nav gov-enterprise-nav" aria-label="Primary navigation">
       <button class="tb-sub-nav-btn" onclick="clearActiveProject(); showView('dashboard', this)">
         <i data-lucide="home"></i><span data-i18n="navHome">Home</span>
       </button>
@@ -39,73 +104,29 @@
       <button class="tb-sub-nav-btn" id="tb-nav-users" style="display:none" onclick="showView('settings', this)">
         <i data-lucide="settings"></i><span>Settings</span>
       </button>
-      <button class="tb-sub-nav-btn" onclick="openDistrictMap(this)">
+      <button class="tb-sub-nav-btn gov-nav-optional" onclick="openDistrictMap(this)">
         <i data-lucide="map-pin"></i><span data-i18n="navDistricts">Districts</span>
       </button>
-      <button class="tb-sub-nav-btn" onclick="clearActiveProject(); showView('dashboard', this); setTimeout(()=>document.getElementById('dash-contact-section')?.scrollIntoView({behavior:'smooth', block:'start'}), 80);">
+      <button class="tb-sub-nav-btn gov-nav-optional" onclick="clearActiveProject(); showView('dashboard', this); setTimeout(()=>document.getElementById('dash-contact-section')?.scrollIntoView({behavior:'smooth', block:'start'}), 80);">
         <i data-lucide="phone"></i><span data-i18n="navContact">Contact</span>
       </button>
-    </nav>
-
-    <div class="gov-header-right">
-      <button class="dash-gov-badge dash-badge-emgsm gov-emgsm-badge" onclick="showView('workflow', null)">
-        <i data-lucide="leaf"></i><span>EMGSM</span>
-      </button>
-
-      <div class="dash-menu-search gov-compact-search">
-        <i data-lucide="search"></i>
-        <input id="tb-portal-search" type="text" placeholder="Search portal..." data-i18n-placeholder="searchPlaceholder" onkeydown="dashRunSearch(event)" aria-label="Search portal">
-      </div>
-
-      <div class="tb-nav-dropdown gov-notification-wrap">
-        <button type="button" class="dash-action-icon-btn" onclick="toggleNotificationDropdown()" title="Notifications" aria-label="Notifications">
-          <i data-lucide="bell"></i>
-          <span id="tb-notif-dot"></span>
+      <div class="tb-nav-dropdown gov-nav-more">
+        <button class="tb-sub-nav-btn" type="button">
+          <i data-lucide="chevron-down"></i><span>More</span>
         </button>
-        <div class="tb-dropdown-menu" id="tb-notif-dropdown">
-          <div class="tb-dropdown-title">Notifications</div>
-          <div id="tb-notif-list" class="tb-empty-note">No new notifications</div>
+        <div class="tb-dropdown-menu">
+          <button type="button" onclick="openDistrictMap(this)">
+            <i data-lucide="map-pin"></i><span data-i18n="navDistricts">Districts</span>
+          </button>
+          <button type="button" onclick="clearActiveProject(); showView('dashboard', this); setTimeout(()=>document.getElementById('dash-contact-section')?.scrollIntoView({behavior:'smooth', block:'start'}), 80);">
+            <i data-lucide="phone"></i><span data-i18n="navContact">Contact</span>
+          </button>
         </div>
       </div>
-
-      <button class="dash-action-icon-btn gov-search-icon" onclick="dashFocusSearch()" title="Focus search" aria-label="Focus search">
-        <i data-lucide="search"></i>
-      </button>
-      <button class="dash-action-icon-btn" onclick="dashPortalToast('Screen reader mode is ready. Use browser accessibility tools to continue.')" title="Screen reader" aria-label="Screen reader">
-        <i data-lucide="eye"></i>
-      </button>
-      <div class="dash-font-btns gov-font-controls" aria-label="Font size controls">
-        <button class="dash-font-btn" onclick="changeFontSize(-1)">A-</button>
-        <button class="dash-font-btn" onclick="changeFontSize(0)">A</button>
-        <button class="dash-font-btn" onclick="changeFontSize(1)">A+</button>
-      </div>
-      <div class="gov-language-switcher" aria-label="Language selector">
-        <button class="dash-lang-btn" data-lang="en" onclick="applyPortalLanguage('en')">EN</button>
-        <button class="dash-lang-btn" data-lang="hi" onclick="applyPortalLanguage('hi')">HI</button>
-        <button class="dash-lang-btn" data-lang="pa" onclick="applyPortalLanguage('pa')">PA</button>
-      </div>
-      <button class="dash-action-icon-btn dash-theme-toggle tb-theme-toggle" onclick="toggleDarkMode()" title="Toggle dark mode" aria-label="Toggle dark mode" data-theme-toggle>
-        <i data-lucide="moon"></i>
-      </button>
-      <button class="dash-action-icon-btn" onclick="clearActiveProject(); showView('dashboard', null); setTimeout(()=>document.getElementById('dash-contact-section')?.scrollIntoView({behavior:'smooth', block:'start'}), 80);" title="Help" aria-label="Help">
-        <i data-lucide="help-circle"></i>
-      </button>
-      <button class="dash-action-icon-btn" onclick="dashSharePortal()" title="Copy portal link" aria-label="Copy portal link">
-        <i data-lucide="share-2"></i>
-      </button>
-      <button class="dash-action-icon-btn" onclick="showView('workflow', null)" title="Workflow shortcuts" aria-label="Workflow shortcuts">
-        <i data-lucide="git-branch"></i>
-      </button>
-      <button class="gov-profile-chip" type="button" onclick="showView('settings', null)" title="User profile" aria-label="User profile">
-        <i data-lucide="user-circle"></i><span>Profile</span>
-      </button>
-      <button onclick="doLogout()" class="dash-btn-logout gov-logout-btn">
-        <i data-lucide="log-out"></i><span>Logout</span>
-      </button>
-    </div>
+    </nav>
   </div>
 
-  <div class="dash-gov-notice-ticker gov-compact-notice">
+  <div class="dash-gov-notice-ticker gov-compact-notice gov-enterprise-notice">
     <div class="dash-notice-label">
       <i data-lucide="megaphone"></i><span data-i18n="noticeLabel">Notice</span>
     </div>
