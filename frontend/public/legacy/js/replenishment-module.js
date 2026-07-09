@@ -137,6 +137,60 @@ const REPLENISHMENT_SECTION_TITLES = {
   'annexure-k': 'Annexure K'
 };
 
+const REPLENISHMENT_INHERITANCE_FIELDS = [
+  'Cover Page', 'Project Details', 'Applicant Details', 'Lease Details', 'Mining Block Details',
+  'District', 'State', 'River Name', 'Village', 'Tehsil', 'Khasra Numbers', 'Lease Area',
+  'Mining Area', 'Boundary Coordinates', 'GPS Coordinate Tables', 'Infrastructure Details',
+  'Accessibility', 'Location Map', 'Google Earth Map', 'Toposheet', 'Physiography', 'Climate',
+  'Drainage Pattern', 'River Basin', 'River Characteristics', 'Catchment Details',
+  'Regional Geology', 'Local Geology', 'Stratigraphy', 'Lithology', 'Geomorphology',
+  'Geological Description', 'Hydrogeology', 'Aquifer Details', 'Groundwater Details',
+  'Mineral Description', 'Physical Properties', 'Chemical Properties', 'River Behaviour',
+  'Sediment Transport Description', 'Flora', 'Fauna', 'Biodiversity', 'Mining Method',
+  'Mining Depth', 'Bench Formation', 'Machinery Details', 'Transportation Details',
+  'Safety Measures', 'Statutory Guidelines', 'EMGSM Guidelines', 'Mine Layout',
+  'Geological Map', 'Drainage Map', 'Lease Boundary Map'
+];
+
+const REPLENISHMENT_MISSING_REQUIREMENTS = [
+  {
+    id: 'reserve-calculation',
+    title: 'Reserve Calculation',
+    formats: 'XLSX, CSV, PDF',
+    items: ['Geological Reserve', 'Blocked Reserve', 'Mineable Reserve', 'Production Programme']
+  },
+  {
+    id: 'mined-area-study',
+    title: 'Replenishment Study of Mined Area',
+    formats: 'PDF, XLSX, CSV',
+    items: ['Pre Monsoon Survey', 'Post Monsoon Survey', 'Replenishment Calculation', 'Sediment Quantity', 'Volume Analysis', 'Comparison Report']
+  },
+  {
+    id: 'methodology-study',
+    title: 'Methodology for Replenishment Study',
+    formats: 'PDF, XLSX, CSV, SHP, KML, JPG, PNG',
+    items: ['Drone Survey Report', 'DGPS Report', 'Flight Planning', 'Ground Control Points', 'Aero Triangulation', 'Ortho Generation']
+  },
+  {
+    id: 'data-processing',
+    title: 'Data Processing',
+    formats: 'TIFF, GeoTIFF, JPG, PNG, LAS, LAZ, PDF',
+    items: ['Orthomosaic', 'DEM', 'DSM', 'DTM', 'Point Cloud', 'Processing Report']
+  },
+  {
+    id: 'grid-calculation',
+    title: 'Calculation of Grid-wise Area, Elevation & Quantity of Sand',
+    formats: 'XLSX, CSV, PDF, DWG',
+    items: ['Grid Measurement Table', 'Elevation Table', 'RL Comparison Table', 'Cross Section Excel', 'Cross Section Drawings', 'Quantity Calculation', 'Volume Calculation']
+  },
+  {
+    id: 'annexures',
+    title: 'Annexures',
+    formats: 'PDF, XLSX, CSV, JPG, JPEG, PNG, TIFF, KML, SHP, DWG',
+    items: ['Environmental Clearance', 'Mining Plan', 'DGPS Report', 'Drone Survey Report', 'Water Quality Report', 'Air Quality Report', 'Soil Analysis Report', 'Noise Monitoring Report', 'Site Photographs', 'Drone Photographs', 'Survey Photographs', 'Orthomosaic Maps', 'DEM Maps', 'Contour Maps', 'Remote Pilot Certificate', 'Drone Registration Certificate', 'Previous Replenishment Report', 'Any Supporting Government Documents']
+  }
+];
+
 function getReplenishmentSectionTitle(viewId) {
   const fallback = REPLENISHMENT_SECTION_TITLES[viewId] || String(viewId || '').toUpperCase();
   return typeof getEditableAnnexureTitle === 'function'
@@ -160,7 +214,11 @@ function normalizeBackendReport(study) {
     frontMatterPdfs: state.frontMatterPdfs || {},
     customPdfs: state.customPdfs || {},
     customSections: Array.isArray(state.customSections) ? state.customSections : [],
-    sectionOrder: Array.isArray(state.sectionOrder) ? state.sectionOrder : []
+    sectionOrder: Array.isArray(state.sectionOrder) ? state.sectionOrder : [],
+    finalDsrSource: state.finalDsrSource || null,
+    inheritanceScan: state.inheritanceScan || null,
+    replenishmentUploads: state.replenishmentUploads || {},
+    manualEntries: state.manualEntries || {}
   };
 }
 
@@ -238,7 +296,11 @@ async function saveReportToServer(report) {
         frontMatterPdfs: report.frontMatterPdfs || {},
         customPdfs: report.customPdfs || {},
         customSections: report.customSections || [],
-        sectionOrder: report.sectionOrder || []
+        sectionOrder: report.sectionOrder || [],
+        finalDsrSource: report.finalDsrSource || null,
+        inheritanceScan: report.inheritanceScan || null,
+        replenishmentUploads: report.replenishmentUploads || {},
+        manualEntries: report.manualEntries || {}
       }
     };
     await apiFetch(`/replenishment/${report.id}`, {
@@ -275,6 +337,8 @@ window.closeCustomPdfModal = closeCustomPdfModal;
 window.confirmAddCustomSection = confirmAddCustomSection;
 window.handleFrontMatterPdfUpload = handleFrontMatterPdfUpload;
 window.removeFrontMatterPdfUpload = removeFrontMatterPdfUpload;
+window.handleReplenishmentRequirementUpload = handleReplenishmentRequirementUpload;
+window.updateReplenishmentManualEntry = updateReplenishmentManualEntry;
 
 function showReplenishmentOptions(container) {
   container.innerHTML = `
@@ -308,29 +372,124 @@ function showReplenishmentOptions(container) {
   if (window.lucide) lucide.createIcons();
 }
 
-function showCreateReportForm() {
+function parseProjectState(project) {
+  if (!project || !project.projectState) return {};
+  if (typeof project.projectState === 'object') return project.projectState;
+  try {
+    return JSON.parse(project.projectState);
+  } catch (_) {
+    return {};
+  }
+}
+
+function getProjectDisplayLabel(project) {
+  if (!project) return 'Selected Final DSR';
+  const title = project.title || project.projectName || `District Survey Report - ${project.district || 'Punjab'}`;
+  return `${title} (${project.year || '2025-26'})`;
+}
+
+function isApprovedFinalDsrProject(project) {
+  const status = String(project?.status || '').toLowerCase();
+  return status.includes('approved') || status.includes('completed') || Number(project?.progress || 0) >= 100 || !!project?.finalPdfName;
+}
+
+async function loadApprovedFinalDsrProjects() {
+  try {
+    const projects = await apiFetch('/projects');
+    const list = Array.isArray(projects) ? projects : [];
+    const approved = list.filter(isApprovedFinalDsrProject);
+    if (approved.length) return approved;
+    return S.activeProject ? [S.activeProject] : [];
+  } catch (err) {
+    console.warn('Failed to load Final DSR projects:', err);
+    return S.activeProject ? [S.activeProject] : [];
+  }
+}
+
+function hasFinalDsrData(project, state, label) {
+  const key = label.toLowerCase();
+  const frontMatter = state.frontMatter || {};
+  const textBlob = JSON.stringify({ project, state }).toLowerCase();
+  const directChecks = {
+    'cover page': () => !!(frontMatter.title || project.title || project.projectName),
+    'project details': () => !!(project.title || project.projectName || project.district),
+    'district': () => !!(frontMatter.district || project.district),
+    'state': () => !!(frontMatter.state || project.state),
+    'river name': () => !!(project.rivers || frontMatter.river || frontMatter.riverName),
+    'physiography': () => (state.chapters || []).some(ch => String(ch.name || '').toLowerCase().includes('physiography')),
+    'hydrogeology': () => textBlob.includes('hydrogeolog'),
+    'flora': () => textBlob.includes('flora'),
+    'fauna': () => textBlob.includes('fauna'),
+    'geomorphology': () => textBlob.includes('geomorpholog'),
+    'drainage map': () => (state.plates || []).some(pl => String(pl.name || '').toLowerCase().includes('drainage')),
+    'geological map': () => (state.plates || []).some(pl => String(pl.name || '').toLowerCase().includes('geolog')),
+    'lease boundary map': () => textBlob.includes('lease boundary')
+  };
+  if (directChecks[key]) return directChecks[key]();
+  return textBlob.includes(key) || textBlob.includes(key.replace(/\s+/g, ''));
+}
+
+function scanFinalDsrForReplenishment(project) {
+  const state = parseProjectState(project);
+  const inherited = [];
+  const missing = [];
+  REPLENISHMENT_INHERITANCE_FIELDS.forEach(field => {
+    (hasFinalDsrData(project, state, field) ? inherited : missing).push(field);
+  });
+
+  const missingRequirementIds = REPLENISHMENT_MISSING_REQUIREMENTS
+    .filter(group => group.items.some(item => missing.includes(item) || !hasFinalDsrData(project, state, item)))
+    .map(group => group.id);
+
+  return {
+    scannedAt: new Date().toISOString(),
+    inherited,
+    missing,
+    missingRequirementIds,
+    totalFields: REPLENISHMENT_INHERITANCE_FIELDS.length,
+    inheritedCount: inherited.length,
+    missingCount: missing.length
+  };
+}
+
+async function showCreateReportForm() {
   const editorContainer = document.getElementById('repl-editor-container');
   if (!editorContainer) return;
+
+  editorContainer.innerHTML = `<div style="padding:40px; text-align:center; font-weight:700; color:#1e293b;">Loading Approved Final DSR list...</div>`;
+  const finalDsrProjects = await loadApprovedFinalDsrProjects();
+  const optionsHtml = finalDsrProjects.map(project => `
+    <option value="${escapeHtml(project.id)}">${escapeHtml(getProjectDisplayLabel(project))}${isApprovedFinalDsrProject(project) ? '' : ' - draft fallback'}</option>
+  `).join('');
   
   editorContainer.innerHTML = `
-    <div class="card" style="margin-top: 40px; padding: 32px; max-width: 540px; margin: 40px auto; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.05);">
+    <div class="card" style="margin-top: 40px; padding: 32px; max-width: 680px; margin: 40px auto; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.05);">
       <div style="text-align: center; margin-bottom: 24px;">
         <div style="display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; background: #eff6ff; border-radius: 12px; margin-bottom: 16px;">
           <i data-lucide="file-plus" style="width: 28px; height: 28px; color: #2563eb;"></i>
         </div>
         <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; font-weight: 800; color: #1e293b; margin: 0 0 8px 0;">New Replenishment Report</h2>
-        <p style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; color: #64748b; margin: 0; line-height: 1.5;">Enter a name for your custom report to start selecting DSR sections and compiling the PDF.</p>
+        <p style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; color: #64748b; margin: 0; line-height: 1.5;">Select an Approved Final DSR. Common information will be inherited automatically; only missing replenishment-specific data will ask for upload or manual entry.</p>
       </div>
       
       <div style="display: flex; flex-direction: column; gap: 16px;">
         <div class="field" style="display: flex; flex-direction: column; gap: 6px; text-align: left;">
+          <label for="final-dsr-source-select" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">Approved Final DSR</label>
+          <select id="final-dsr-source-select" style="padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; background:#fff;">
+            ${optionsHtml || '<option value="">No Final DSR available</option>'}
+          </select>
+        </div>
+        <div class="field" style="display: flex; flex-direction: column; gap: 6px; text-align: left;">
           <label for="new-report-name-input" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">Report Title</label>
           <input type="text" id="new-report-name-input" placeholder="e.g. Monsoon Replenishment Report 2026" style="padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s;" onkeydown="if(event.key==='Enter') window.submitCustomReportName()">
+        </div>
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px 14px; color:#475569; font-size:12px; line-height:1.55;">
+          The existing Government Replenishment Report sequence, drag/drop order, section selection, and saved-report opening format remain unchanged.
         </div>
         <div style="display: flex; gap: 10px;">
           <button class="btn btn-outline" onclick="window.showReplenishmentOptions(document.getElementById('repl-editor-container'))" style="flex:1; height: 42px; border-radius: 8px; cursor: pointer;">Back</button>
           <button class="btn btn-primary" onclick="window.submitCustomReportName()" style="flex:2; display: flex; align-items: center; justify-content: center; height: 42px; gap: 8px; font-weight: 700; font-size: 14px; border-radius: 8px; border: none; cursor: pointer;">
-            <span>Create Report</span>
+            <span>Scan DSR & Create Report</span>
             <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
           </button>
         </div>
@@ -353,6 +512,25 @@ async function submitCustomReportName() {
     toast("Please enter a report name", "error");
     return;
   }
+
+  const sourceSelect = document.getElementById('final-dsr-source-select');
+  const sourceId = sourceSelect ? sourceSelect.value : '';
+  let sourceProject = S.activeProject;
+  if (sourceId) {
+    try {
+      sourceProject = await apiFetch(`/projects/${sourceId}`);
+    } catch (err) {
+      toast("Unable to load selected Final DSR. Using active project data.", "warning");
+    }
+  }
+  const inheritanceScan = scanFinalDsrForReplenishment(sourceProject);
+  const finalDsrSource = sourceProject ? {
+    id: sourceProject.id,
+    title: sourceProject.title || sourceProject.projectName || 'Final DSR',
+    district: sourceProject.district || '',
+    year: sourceProject.year || '',
+    status: sourceProject.status || ''
+  } : null;
   
   try {
     const res = await apiFetch(`/projects/${S.activeProject.id}/replenishment`, {
@@ -365,7 +543,11 @@ async function submitCustomReportName() {
           frontMatterPdfs: {},
           customPdfs: {},
           customSections: [],
-          sectionOrder: []
+          sectionOrder: [],
+          finalDsrSource,
+          inheritanceScan,
+          replenishmentUploads: {},
+          manualEntries: {}
         }
       })
     });
@@ -378,7 +560,11 @@ async function submitCustomReportName() {
       frontMatterPdfs: {},
       customPdfs: {},
       customSections: [],
-      sectionOrder: []
+      sectionOrder: [],
+      finalDsrSource,
+      inheritanceScan,
+      replenishmentUploads: {},
+      manualEntries: {}
     };
     
     window.activeReport = upsertLocalReport(newReport);
@@ -859,6 +1045,48 @@ function removeFrontMatterPdfUpload(reportId, sectionId, reportName) {
   });
 }
 
+function handleReplenishmentRequirementUpload(input, reportId, requirementId) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const reports = loadLocalReports();
+  const report = reports.find(r => r.id === reportId) || window.activeReport;
+  if (!report) return;
+
+  if (!report.replenishmentUploads) report.replenishmentUploads = {};
+  const existing = Array.isArray(report.replenishmentUploads[requirementId]) ? report.replenishmentUploads[requirementId] : [];
+  report.replenishmentUploads[requirementId] = [
+    ...existing,
+    {
+      name: file.name,
+      size: file.size,
+      type: file.type || 'application/octet-stream',
+      uploadedAt: new Date().toISOString()
+    }
+  ];
+
+  const cached = reports.find(r => r.id === report.id);
+  if (cached) cached.replenishmentUploads = report.replenishmentUploads;
+  window.activeReport = report;
+  saveLocalReports(reports.length ? reports : [report]);
+
+  const editorContainer = document.getElementById('repl-editor-container');
+  if (editorContainer) renderCustomReportGenerator(editorContainer, report);
+  toast("Missing-data document attached to this replenishment report.", "success");
+}
+
+function updateReplenishmentManualEntry(textarea, reportId, requirementId) {
+  const reports = loadLocalReports();
+  const report = reports.find(r => r.id === reportId) || window.activeReport;
+  if (!report) return;
+  if (!report.manualEntries) report.manualEntries = {};
+  report.manualEntries[requirementId] = textarea.value;
+
+  const cached = reports.find(r => r.id === report.id);
+  if (cached) cached.manualEntries = report.manualEntries;
+  window.activeReport = report;
+  saveLocalReports(reports.length ? reports : [report]);
+}
+
 function handleCustomSectionPdfUpload(input, reportId, sectionId, reportName) {
   const file = input.files[0];
   if (!file) return;
@@ -1037,6 +1265,64 @@ function onSubCheckboxChange(parentId, reportName, reportId) {
   
   saveReportSelection(reportId);
   window.updateCustomReportPreview(reportName, reportId);
+}
+
+function renderInheritancePanel(report) {
+  const scan = report.inheritanceScan;
+  if (!scan || !report.finalDsrSource) return '';
+  const uploads = report.replenishmentUploads || {};
+  const manualEntries = report.manualEntries || {};
+  const inheritedPreview = (scan.inherited || []).slice(0, 10).map(field => `
+    <span style="display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:999px; background:#ecfdf5; color:#047857; font-size:10.5px; font-weight:800; border:1px solid #bbf7d0;">${escapeHtml(field)}</span>
+  `).join('');
+  const extraInherited = Math.max(0, Number(scan.inheritedCount || 0) - 10);
+  const missingGroups = REPLENISHMENT_MISSING_REQUIREMENTS
+    .filter(group => !Array.isArray(scan.missingRequirementIds) || scan.missingRequirementIds.includes(group.id));
+
+  const groupsHtml = missingGroups.map(group => {
+    const uploadedFiles = Array.isArray(uploads[group.id]) ? uploads[group.id] : [];
+    const manualValue = manualEntries[group.id] || '';
+    const accepted = group.formats.split(',').map(ext => `.${ext.trim().toLowerCase().replace('geotiff', 'tif')}`).join(',');
+    return `
+      <div style="border:1px solid #e2e8f0; border-radius:8px; background:#fff; padding:10px; display:flex; flex-direction:column; gap:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+          <div>
+            <div style="font-size:12px; font-weight:800; color:#1e293b;">${escapeHtml(group.title)}</div>
+            <div style="font-size:10.5px; color:#64748b; margin-top:2px;">Upload: ${escapeHtml(group.items.join(', '))}</div>
+          </div>
+          <span style="font-size:9.5px; font-weight:800; color:#1d4ed8; background:#eff6ff; border:1px solid #bfdbfe; border-radius:999px; padding:2px 7px; white-space:nowrap;">${escapeHtml(group.formats)}</span>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <button type="button" onclick="document.getElementById('repl-req-upload-${group.id}').click()" style="border:1px solid #bfdbfe; background:#eff6ff; color:#1d4ed8; border-radius:6px; padding:5px 9px; font-size:11px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:5px;">
+            <i data-lucide="upload" style="width:12px; height:12px;"></i> Upload Missing Data
+          </button>
+          <input type="file" id="repl-req-upload-${group.id}" accept="${accepted}" style="display:none;" onchange="window.handleReplenishmentRequirementUpload(this, '${report.id}', '${group.id}')">
+          ${uploadedFiles.length ? `<span style="font-size:10.5px; color:#047857; font-weight:800;">${uploadedFiles.length} file${uploadedFiles.length === 1 ? '' : 's'} attached</span>` : `<span style="font-size:10.5px; color:#64748b;">No upload yet</span>`}
+        </div>
+        <textarea rows="2" placeholder="Manual entry only if upload is not applicable" onblur="window.updateReplenishmentManualEntry(this, '${report.id}', '${group.id}')" style="width:100%; resize:vertical; border:1px solid #cbd5e1; border-radius:6px; padding:7px 9px; font-size:11.5px; color:#334155; font-family:'Plus Jakarta Sans', sans-serif;">${escapeHtml(manualValue)}</textarea>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div style="border-bottom:1px solid #e2e8f0; background:#f8fafc; padding:12px 20px;">
+      <div style="display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap;">
+        <div style="min-width:260px; flex:1;">
+          <div style="font-size:11px; color:#64748b; font-weight:800; text-transform:uppercase; letter-spacing:.4px;">Final DSR Inheritance</div>
+          <div style="font-size:13px; font-weight:800; color:#0f172a; margin-top:2px;">${escapeHtml(getProjectDisplayLabel(report.finalDsrSource))}</div>
+          <div style="font-size:11px; color:#475569; margin-top:4px;">${scan.inheritedCount || 0} fields auto-populated; ${scan.missingCount || 0} fields require upload or manual entry if applicable.</div>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <span style="font-size:11px; font-weight:800; color:#047857; background:#ecfdf5; border:1px solid #bbf7d0; border-radius:999px; padding:4px 9px;">Auto populated: ${scan.inheritedCount || 0}</span>
+          <span style="font-size:11px; font-weight:800; color:#b45309; background:#fffbeb; border:1px solid #fde68a; border-radius:999px; padding:4px 9px;">Missing: ${scan.missingCount || 0}</span>
+        </div>
+      </div>
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:10px;">
+        ${inheritedPreview}${extraInherited ? `<span style="font-size:10.5px; color:#047857; font-weight:800; padding:3px 4px;">+${extraInherited} more inherited</span>` : ''}
+      </div>
+      ${groupsHtml ? `<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:10px; margin-top:12px;">${groupsHtml}</div>` : ''}
+    </div>
+  `;
 }
 
 function renderCustomReportGenerator(container, report) {
@@ -1258,6 +1544,7 @@ function renderCustomReportGenerator(container, report) {
   });
 
   const escapedReportName = reportName.replace(/'/g, "\\'");
+  const inheritancePanelHtml = renderInheritancePanel(report);
   container.innerHTML = `
     <div class="card" style="height: calc(100vh - 120px); display: flex; flex-direction: column; margin-top: 15px;">
       <div class="card-hd" style="padding: 16px 20px;">
@@ -1272,6 +1559,7 @@ function renderCustomReportGenerator(container, report) {
           </div>
         </div>
       </div>
+      ${inheritancePanelHtml}
       <div class="card-bd" style="flex:1; display:grid; grid-template-columns: 1fr 1.2fr; gap:20px; overflow:hidden; padding:20px;">
         <!-- LEFT COLUMN: Checklist -->
         <div id="repl-checklist-scroll-container" style="overflow-y:auto; padding-right:10px; border-right:1px solid #e2e8f0; max-height:100%;">
