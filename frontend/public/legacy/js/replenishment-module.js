@@ -1650,7 +1650,13 @@ function renderInheritancePanel(report) {
   }).join('');
 
   return `
-    <div style="border-bottom:1px solid #e2e8f0; background:#f8fafc; padding:14px 20px;">
+    <div id="repl-inheritance-scroll-panel" style="border-bottom:1px solid #e2e8f0; background:#f8fafc; padding:14px 20px; max-height:min(56vh, 560px); overflow-y:auto; overflow-x:hidden; scrollbar-gutter:stable; scrollbar-width:thin; scrollbar-color:#94a3b8 #e2e8f0;">
+      <style>
+        #repl-inheritance-scroll-panel::-webkit-scrollbar { width: 10px; }
+        #repl-inheritance-scroll-panel::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 999px; }
+        #repl-inheritance-scroll-panel::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 999px; border: 2px solid #e2e8f0; }
+        #repl-inheritance-scroll-panel::-webkit-scrollbar-thumb:hover { background: #64748b; }
+      </style>
       <div style="display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:12px;">
         <div style="min-width:260px; flex:1;">
           <div style="font-size:11px; color:#64748b; font-weight:900; text-transform:uppercase; letter-spacing:.4px;">Replenishment Report - Final DSR Inheritance</div>
