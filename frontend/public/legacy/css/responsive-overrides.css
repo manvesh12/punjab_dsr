@@ -1223,3 +1223,25 @@ body.sidebar-hidden #screen-app.active .sidebar .sb-user-card[style] {
     padding-inline: 10px !important;
   }
 }
+
+/* Narrow alignment fix: close the tiny chrome/sidebar gap and lower live preview slightly. */
+:root {
+  --erp-sidebar-gap-fix: 8px;
+  --erp-live-preview-offset: 8px;
+}
+
+#screen-app.active .sidebar,
+#screen-app:has(#view-dashboard.active) .sidebar,
+#screen-app:has(#view-projects.active) .sidebar,
+body.view-dashboard-active .sidebar,
+body.view-projects-active .sidebar {
+  top: calc(var(--erp-chrome-h) - var(--erp-sidebar-gap-fix)) !important;
+  height: calc(100dvh - var(--erp-chrome-h) + var(--erp-sidebar-gap-fix)) !important;
+  max-height: calc(100dvh - var(--erp-chrome-h) + var(--erp-sidebar-gap-fix)) !important;
+}
+
+#screen-app.active .pdf-preview-panel,
+body.preview-open .pdf-preview-panel,
+.app-workspace.preview-open .pdf-preview-panel {
+  transform: translateY(var(--erp-live-preview-offset));
+}
