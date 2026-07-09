@@ -3683,12 +3683,16 @@ function getReplenishmentPdfAnnexureId(reportId) {
 }
 
 function getSafeReplenishmentPdfFileName(reportName) {
-  const projectName = (S.activeProject && (S.activeProject.projectName || S.activeProject.title)) || reportName || 'Project';
-  const base = String(projectName || 'Project')
+  const projectName = (S.activeProject && (S.activeProject.projectName || S.activeProject.title)) || 'Project';
+  const projectBase = String(projectName)
     .replace(/[^\w\s.-]/g, '')
     .trim()
     .replace(/\s+/g, '_') || 'Project';
-  return `${base}_Replenishment_Report.pdf`;
+  const reportBase = String(reportName || 'Replenishment_Report')
+    .replace(/[^\w\s.-]/g, '')
+    .trim()
+    .replace(/\s+/g, '_') || 'Replenishment_Report';
+  return `${projectBase}_${reportBase}.pdf`;
 }
 
 function getReplenishmentUploadCount(report) {

@@ -18,7 +18,7 @@ async function streamToBuffer(stream: Readable): Promise<Buffer> {
   return Buffer.concat(chunks);
 }
 
-export async function putPdf(objectKey: string, bytes: Buffer) {
+export async function putFile(objectKey: string, bytes: Buffer, contentType = "application/octet-stream") {
   if (config.localFileStorage) {
     await fs.mkdir(uploadsDir, { recursive: true });
     await fs.writeFile(path.join(uploadsDir, objectKey.replace(/[\\/]/g, "_")), bytes);
@@ -30,14 +30,18 @@ export async function putPdf(objectKey: string, bytes: Buffer) {
       Bucket: config.s3Bucket,
       Key: objectKey,
       Body: bytes,
-      ContentType: "application/pdf"
+      ContentType: contentType
     })
   );
 }
 
+export async function putPdf(objectKey: string, bytes: Buffer) {
+  return putFile(objectKey, bytes, "application/pdf");
+}
+
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-export async function getPdf(objectKey: string) {
+export async function getFile(objectKey: string) {
   if (config.localFileStorage) {
     return fs.readFile(path.join(uploadsDir, objectKey.replace(/[\\/]/g, "_")));
   }
@@ -45,6 +49,10 @@ export async function getPdf(objectKey: string) {
   const response = await s3.send(new GetObjectCommand({ Bucket: config.s3Bucket, Key: objectKey }));
   if (!response.Body) throw new Error("Empty object");
   return streamToBuffer(response.Body as Readable);
+}
+
+export async function getPdf(objectKey: string) {
+  return getFile(objectKey);
 }
 
 export async function getSignedDownloadUrl(objectKey: string, expiresIn = 3600) {
@@ -56,11 +64,15 @@ export async function getSignedDownloadUrl(objectKey: string, expiresIn = 3600) 
   return await getSignedUrl(s3, command, { expiresIn });
 }
 
-export async function deletePdf(objectKey: string) {
+export async function deleteFile(objectKey: string) {
   if (config.localFileStorage) {
     await fs.rm(path.join(uploadsDir, objectKey.replace(/[\\/]/g, "_")), { force: true });
     return;
   }
 
   await s3.send(new DeleteObjectCommand({ Bucket: config.s3Bucket, Key: objectKey }));
+}
+
+export async function deletePdf(objectKey: string) {
+  return deleteFile(objectKey);
 }

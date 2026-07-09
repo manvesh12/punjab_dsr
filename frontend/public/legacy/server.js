@@ -1127,6 +1127,154 @@ const server = http.createServer((req, res) => {
       return;
     }
 
+    // ============================================================
+    // REPLENISHMENT STUDY CRUD ROUTES
+    // ============================================================
+    const REPLENISHMENT_STUDIES_FILE = path.join(UPLOADS_DIR, 'replenishment-studies.json');
+
+    function readReplenishmentStudies() {
+      ensureUploadsDir();
+      try {
+        if (fs.existsSync(REPLENISHMENT_STUDIES_FILE)) {
+          const parsed = JSON.parse(fs.readFileSync(REPLENISHMENT_STUDIES_FILE, 'utf8'));
+          if (Array.isArray(parsed)) return parsed;
+        }
+      } catch (err) {
+        console.error('Error reading replenishment-studies.json:', err);
+      }
+      return [];
+    }
+
+    function writeReplenishmentStudies(studies) {
+      ensureUploadsDir();
+      try {
+        fs.writeFileSync(REPLENISHMENT_STUDIES_FILE, JSON.stringify(Array.isArray(studies) ? studies : [], null, 2), 'utf8');
+      } catch (err) {
+        console.error('Error writing replenishment-studies.json:', err);
+      }
+    }
+
+    function normalizeReplenishmentStudy(study = {}) {
+      const now = new Date().toISOString();
+      return {
+        id: study.id || `repl-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        projectId: String(study.projectId || ''),
+        title: study.title || 'Untitled Report',
+        status: study.status || 'DRAFT',
+        reportState: typeof study.reportState === 'object' && study.reportState !== null ? study.reportState : {},
+        surveyData: typeof study.surveyData === 'object' && study.surveyData !== null ? study.surveyData : {},
+        createdBy: study.createdBy || null,
+        createdAt: study.createdAt || now,
+        updatedAt: now
+      };
+    }
+
+    // GET /api/projects/:projectId/replenishment — List all studies for a project
+    const replListMatch = pathname.match(/^\/api\/projects\/([^/]+)\/replenishment$/);
+    if (replListMatch && req.method === 'GET') {
+      const projectId = replListMatch[1];
+      const studies = readReplenishmentStudies().filter(s => String(s.projectId) === String(projectId));
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(studies));
+      return;
+    }
+
+    // POST /api/projects/:projectId/replenishment — Create a new study
+    const replCreateMatch = pathname.match(/^\/api\/projects\/([^/]+)\/replenishment$/);
+    if (replCreateMatch && req.method === 'POST') {
+      readRequestBody(req).then(body => {
+        try {
+          const projectId = replCreateMatch[1];
+          const payload = JSON.parse(body || '{}');
+          const studies = readReplenishmentStudies();
+          const created = normalizeReplenishmentStudy({
+            ...payload,
+            projectId,
+            id: `repl-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+          });
+          studies.unshift(created);
+          writeReplenishmentStudies(studies);
+          res.writeHead(201, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify(created));
+        } catch (e) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Invalid JSON' }));
+        }
+      }).catch(err => {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: err.message }));
+      });
+      return;
+    }
+
+    // GET /api/replenishment/:id — Get one study
+    const replGetMatch = pathname.match(/^\/api\/replenishment\/([^/]+)$/);
+    if (replGetMatch && req.method === 'GET') {
+      const id = replGetMatch[1];
+      const study = readReplenishmentStudies().find(s => s.id === id);
+      if (!study) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Replenishment study not found' }));
+        return;
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(study));
+      return;
+    }
+
+    // PUT /api/replenishment/:id — Update a study
+    const replUpdateMatch = pathname.match(/^\/api\/replenishment\/([^/]+)$/);
+    if (replUpdateMatch && req.method === 'PUT') {
+      readRequestBody(req).then(body => {
+        try {
+          const id = replUpdateMatch[1];
+          const payload = JSON.parse(body || '{}');
+          const studies = readReplenishmentStudies();
+          const index = studies.findIndex(s => s.id === id);
+          if (index === -1) {
+            res.writeHead(404, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Replenishment study not found' }));
+            return;
+          }
+          studies[index] = normalizeReplenishmentStudy({
+            ...studies[index],
+            ...payload,
+            id: studies[index].id,
+            projectId: studies[index].projectId,
+            createdAt: studies[index].createdAt
+          });
+          writeReplenishmentStudies(studies);
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify(studies[index]));
+        } catch (e) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Invalid JSON' }));
+        }
+      }).catch(err => {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: err.message }));
+      });
+      return;
+    }
+
+    // DELETE /api/replenishment/:id — Delete a study
+    const replDeleteMatch = pathname.match(/^\/api\/replenishment\/([^/]+)$/);
+    if (replDeleteMatch && req.method === 'DELETE') {
+      const id = replDeleteMatch[1];
+      const studies = readReplenishmentStudies();
+      const remaining = studies.filter(s => s.id !== id);
+      if (remaining.length === studies.length) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Replenishment study not found' }));
+        return;
+      }
+      writeReplenishmentStudies(remaining);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true }));
+      return;
+    }
+    // ============================================================
+
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Endpoint not found' }));
     return;
