@@ -226,6 +226,7 @@ function normalizeBackendReport(study) {
   const state = study && study.reportState && typeof study.reportState === 'object' ? study.reportState : {};
   return {
     id: study.id,
+    projectId: study.projectId,
     name: study.title,
     createdAt: study.createdAt,
     sections: Array.isArray(state.sections) ? state.sections : [],
@@ -307,6 +308,7 @@ async function saveReportToServer(report) {
   if (!report || !report.id) return;
   try {
     const payload = {
+      projectId: report.projectId || (S.activeProject ? S.activeProject.id : null),
       title: report.name,
       status: 'DRAFT',
       reportState: {
@@ -2857,7 +2859,7 @@ async function uploadReplenishmentPdfToStorage(report, blob, filename, signature
   await apiFetch('/upload-pdf', {
     method: 'POST',
     body: JSON.stringify({
-      projectId: S.activeProject.id,
+      projectId: report.projectId || (S.activeProject ? S.activeProject.id : null),
       annexureId,
       fileName: filename,
       pdf: base64

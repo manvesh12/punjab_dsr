@@ -119,7 +119,22 @@ replenishmentRouter.put("/replenishment/:id", requireAuth, async (req, res) => {
 
     const existing = await prisma.replenishmentStudy.findUnique({ where: { id: id as string } });
     if (!existing) {
-      res.status(404).json({ error: "Study not found" });
+      if (!body.projectId) {
+        res.status(404).json({ error: "Study not found and no projectId provided to re-create it" });
+        return;
+      }
+      const study = await prisma.replenishmentStudy.create({
+        data: {
+          id: id as string,
+          projectId: BigInt(body.projectId),
+          title: body.title !== undefined ? body.title : "Untitled",
+          status: body.status !== undefined ? body.status : "DRAFT",
+          surveyData: body.surveyData !== undefined ? body.surveyData : {},
+          reportState: body.reportState !== undefined ? body.reportState : {},
+          createdBy: req.user ? BigInt(req.user.id) : null
+        }
+      });
+      res.json(jsonSafe(study));
       return;
     }
 
