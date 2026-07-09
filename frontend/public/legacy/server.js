@@ -28,12 +28,31 @@ const MIME_TYPES = {
   '.jpeg': 'image/jpeg',
   '.gif': 'image/gif',
   '.svg': 'image/svg+xml',
-  '.ico': 'image/x-icon'
+  '.ico': 'image/x-icon',
+  '.pdf': 'application/pdf',
+  '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  '.csv': 'text/csv; charset=utf-8',
+  '.tif': 'image/tiff',
+  '.tiff': 'image/tiff',
+  '.kml': 'application/vnd.google-earth.kml+xml',
+  '.zip': 'application/zip',
+  '.dwg': 'application/octet-stream',
+  '.dxf': 'application/dxf',
+  '.shp': 'application/octet-stream',
+  '.las': 'application/octet-stream',
+  '.laz': 'application/octet-stream'
 };
 
 const PROJECTS_FILE = path.join(__dirname, 'projects.json');
 const USERS_FILE = path.join(__dirname, 'users.json');
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
+const UPLOAD_METADATA_FILE = path.join(UPLOADS_DIR, 'files.json');
+const MAX_UPLOAD_SIZE_BYTES = 200 * 1024 * 1024;
+const ALLOWED_UPLOAD_EXTENSIONS = new Set([
+  '.pdf', '.docx', '.xlsx', '.xls', '.csv', '.jpg', '.jpeg', '.png', '.tif', '.tiff',
+  '.geotiff', '.dwg', '.dxf', '.kml', '.shp', '.zip', '.las', '.laz'
+]);
 const workflowHistory = {};
 
 function cacheHeaderFor(ext) {
@@ -226,6 +245,54 @@ function deleteProjectUploads(projectId) {
   } catch (err) {
     console.warn('Could not clean uploads for deleted project:', err.message);
   }
+}
+
+function ensureUploadsDir() {
+  if (!fs.existsSync(UPLOADS_DIR)) {
+    fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+  }
+}
+
+function readUploadMetadata() {
+  ensureUploadsDir();
+  try {
+    if (fs.existsSync(UPLOAD_METADATA_FILE)) {
+      const parsed = JSON.parse(fs.readFileSync(UPLOAD_METADATA_FILE, 'utf8'));
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (err) {
+    console.error('Error reading upload metadata:', err);
+  }
+  return [];
+}
+
+function writeUploadMetadata(records) {
+  ensureUploadsDir();
+  fs.writeFileSync(UPLOAD_METADATA_FILE, JSON.stringify(Array.isArray(records) ? records : [], null, 2), 'utf8');
+}
+
+function safeUploadOriginalName(value) {
+  return path.basename(String(value || 'upload.bin')).replace(/[^\w.\- ()]+/g, '_').slice(0, 180) || 'upload.bin';
+}
+
+function createUploadRecord({ originalName, savedName, contentType, sizeBytes, projectId, module, requirementId, uploadedBy }) {
+  const now = new Date().toISOString();
+  return {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+    originalName,
+    fileName: savedName,
+    savedName,
+    contentType,
+    sizeBytes,
+    projectId: projectId || null,
+    module: module || 'general',
+    requirementId: requirementId || null,
+    uploadedBy: uploadedBy || 'Officer',
+    uploadedAt: now,
+    version: 1,
+    url: `/uploads/${encodeURIComponent(savedName)}`,
+    downloadUrl: `/api/files/${encodeURIComponent(savedName)}/download`
+  };
 }
 
 function readRequestBody(req) {
@@ -795,27 +862,59 @@ const server = http.createServer((req, res) => {
     }
 
     if (pathname === '/api/files/upload' && req.method === 'POST') {
-      if (!fs.existsSync(UPLOADS_DIR)) {
-        fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-      }
+      ensureUploadsDir();
       const contentType = req.headers['content-type'] || 'application/octet-stream';
+      const originalName = safeUploadOriginalName(queryParams.get('name') || req.headers['x-file-name'] || 'upload.bin');
+      const ext = path.extname(originalName).toLowerCase();
+      if (!ALLOWED_UPLOAD_EXTENSIONS.has(ext)) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: `Unsupported file type: ${ext || 'unknown'}` }));
+        return;
+      }
       const chunks = [];
-      req.on('data', chunk => chunks.push(chunk));
+      let totalBytes = 0;
+      req.on('data', chunk => {
+        totalBytes += chunk.length;
+        if (totalBytes > MAX_UPLOAD_SIZE_BYTES) {
+          req.destroy(new Error('File exceeds 200 MB upload limit'));
+          return;
+        }
+        chunks.push(chunk);
+      });
       req.on('end', () => {
         try {
           const raw = Buffer.concat(chunks);
-          const savedName = `${Date.now()}_upload.bin`;
+          if (!raw.length) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, error: 'Uploaded file is empty' }));
+            return;
+          }
+          const savedName = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}_${originalName}`;
           const destPath = path.join(UPLOADS_DIR, savedName);
           fs.writeFileSync(destPath, raw);
+          const records = readUploadMetadata();
+          const previousVersions = records.filter(record =>
+            String(record.projectId || '') === String(queryParams.get('projectId') || '') &&
+            String(record.module || '') === String(queryParams.get('module') || 'general') &&
+            String(record.requirementId || '') === String(queryParams.get('requirementId') || '')
+          );
+          const record = createUploadRecord({
+            originalName,
+            savedName,
+            contentType,
+            sizeBytes: raw.length,
+            projectId: queryParams.get('projectId'),
+            module: queryParams.get('module') || 'general',
+            requirementId: queryParams.get('requirementId'),
+            uploadedBy: queryParams.get('uploadedBy') || req.headers['x-uploaded-by'] || 'Officer'
+          });
+          record.version = previousVersions.length + 1;
+          records.unshift(record);
+          writeUploadMetadata(records);
           res.writeHead(201, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({
             success: true,
-            id: Date.now(),
-            fileName: savedName,
-            originalName: savedName,
-            contentType,
-            sizeBytes: raw.length,
-            url: `/uploads/${savedName}`
+            ...record
           }));
         } catch (err) {
           res.writeHead(500, { 'Content-Type': 'application/json' });
@@ -826,6 +925,40 @@ const server = http.createServer((req, res) => {
         res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, error: err.message }));
       });
+      return;
+    }
+
+    const fileDownloadMatch = pathname.match(/^\/api\/files\/([^/]+)\/download$/);
+    if (fileDownloadMatch && req.method === 'GET') {
+      const savedName = path.basename(fileDownloadMatch[1]);
+      const filePath = path.join(UPLOADS_DIR, savedName);
+      if (!filePath.startsWith(UPLOADS_DIR) || !fs.existsSync(filePath)) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'File not found' }));
+        return;
+      }
+      const records = readUploadMetadata();
+      const record = records.find(item => item.savedName === savedName || item.fileName === savedName) || {};
+      const ext = path.extname(savedName).toLowerCase();
+      res.writeHead(200, {
+        'Content-Type': record.contentType || MIME_TYPES[ext] || 'application/octet-stream',
+        'Content-Disposition': `attachment; filename="${encodeURIComponent(record.originalName || savedName)}"`
+      });
+      fs.createReadStream(filePath).pipe(res);
+      return;
+    }
+
+    const fileDeleteMatch = pathname.match(/^\/api\/files\/([^/]+)$/);
+    if (fileDeleteMatch && req.method === 'DELETE') {
+      const savedName = path.basename(fileDeleteMatch[1]);
+      const filePath = path.join(UPLOADS_DIR, savedName);
+      const records = readUploadMetadata();
+      writeUploadMetadata(records.filter(item => item.savedName !== savedName && item.fileName !== savedName));
+      if (filePath.startsWith(UPLOADS_DIR) && fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true }));
       return;
     }
 

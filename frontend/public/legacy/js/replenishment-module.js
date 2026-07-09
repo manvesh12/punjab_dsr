@@ -361,6 +361,7 @@ window.toggleReplenishmentInheritanceSection = toggleReplenishmentInheritanceSec
 window.previewReplenishmentSourceItem = previewReplenishmentSourceItem;
 window.previewReplenishmentUploadedItem = previewReplenishmentUploadedItem;
 window.deleteReplenishmentRequirementUpload = deleteReplenishmentRequirementUpload;
+window.downloadReplenishmentUploadedItem = downloadReplenishmentUploadedItem;
 
 function showReplenishmentOptions(container) {
   container.innerHTML = `
@@ -1067,35 +1068,100 @@ function removeFrontMatterPdfUpload(reportId, sectionId, reportName) {
   });
 }
 
-function handleReplenishmentRequirementUpload(input, reportId, requirementId) {
+function getCurrentOfficerName() {
+  return (S.currentUser && (S.currentUser.fullName || S.currentUser.email || S.currentUser.username)) || 'Officer';
+}
+
+async function uploadReplenishmentFileToServer(file, reportId, requirementId) {
+  const params = new URLSearchParams({
+    name: file.name,
+    module: 'replenishment',
+    requirementId,
+    uploadedBy: getCurrentOfficerName()
+  });
+  if (S.activeProject && S.activeProject.id) params.set('projectId', S.activeProject.id);
+  const token = localStorage.getItem('dsr_token');
+  const headers = {
+    'Content-Type': file.type || 'application/octet-stream',
+    'X-File-Name': file.name,
+    'X-Uploaded-By': getCurrentOfficerName()
+  };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const baseUrl = (typeof API_BASE_URL !== 'undefined' && API_BASE_URL)
+    ? API_BASE_URL
+    : (window.location && window.location.protocol === 'file:' ? 'http://localhost:8080/api' : `${window.location.origin}/api`);
+  const response = await fetch(`${baseUrl}/files/upload?${params.toString()}`, {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers,
+    body: file
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || data.success === false) {
+    throw new Error(data.error || data.message || `Upload failed (${response.status})`);
+  }
+  return data;
+}
+
+function resolveReplenishmentFileUrl(url) {
+  if (!url) return '';
+  if (/^https?:\/\//i.test(url) || /^blob:/i.test(url) || /^data:/i.test(url)) return url;
+  if (!window.location || window.location.protocol !== 'file:') return url;
+  const apiBase = (typeof API_BASE_URL !== 'undefined' && API_BASE_URL) ? API_BASE_URL : 'http://localhost:8080/api';
+  const originBase = apiBase.replace(/\/api\/?$/i, '');
+  if (url.startsWith('/api/')) return `${apiBase}${url.slice(4)}`;
+  if (url.startsWith('/uploads/')) return `${originBase}${url}`;
+  return `${originBase}/${url.replace(/^\/+/, '')}`;
+}
+
+async function handleReplenishmentRequirementUpload(input, reportId, requirementId) {
   const file = input.files && input.files[0];
   if (!file) return;
+  const maxBytes = 200 * 1024 * 1024;
+  if (file.size > maxBytes) {
+    toast("File exceeds the 200 MB upload limit.", "error");
+    input.value = '';
+    return;
+  }
   const reports = loadLocalReports();
   const report = reports.find(r => r.id === reportId) || window.activeReport;
   if (!report) return;
 
-  if (!report.replenishmentUploads) report.replenishmentUploads = {};
-  const existing = Array.isArray(report.replenishmentUploads[requirementId]) ? report.replenishmentUploads[requirementId] : [];
-  report.replenishmentUploads[requirementId] = [
-    ...existing,
-    {
-      name: file.name,
-      size: file.size,
-      type: file.type || 'application/octet-stream',
-      uploadedBy: (S.currentUser && (S.currentUser.fullName || S.currentUser.email || S.currentUser.username)) || 'Officer',
-      uploadedAt: new Date().toISOString()
-    }
-  ];
-  input.value = '';
+  try {
+    toast("Uploading file to server...", "info");
+    const uploaded = await uploadReplenishmentFileToServer(file, reportId, requirementId);
+    if (!report.replenishmentUploads) report.replenishmentUploads = {};
+    const existing = Array.isArray(report.replenishmentUploads[requirementId]) ? report.replenishmentUploads[requirementId] : [];
+    report.replenishmentUploads[requirementId] = [
+      ...existing,
+      {
+        id: uploaded.id,
+        name: uploaded.originalName || uploaded.fileName || file.name,
+        savedName: uploaded.savedName || uploaded.fileName,
+        fileName: uploaded.fileName,
+        size: uploaded.sizeBytes || file.size,
+        type: uploaded.contentType || file.type || 'application/octet-stream',
+        uploadedBy: uploaded.uploadedBy || getCurrentOfficerName(),
+        uploadedAt: uploaded.uploadedAt || new Date().toISOString(),
+        version: uploaded.version || existing.length + 1,
+        url: uploaded.url,
+        downloadUrl: uploaded.downloadUrl
+      }
+    ];
+    input.value = '';
 
-  const cached = reports.find(r => r.id === report.id);
-  if (cached) cached.replenishmentUploads = report.replenishmentUploads;
-  window.activeReport = report;
-  saveLocalReports(reports.length ? reports : [report]);
+    const cached = reports.find(r => r.id === report.id);
+    if (cached) cached.replenishmentUploads = report.replenishmentUploads;
+    window.activeReport = report;
+    saveLocalReports(reports.length ? reports : [report]);
 
-  const editorContainer = document.getElementById('repl-editor-container');
-  if (editorContainer) renderCustomReportGenerator(editorContainer, report);
-  toast("Missing-data document attached to this replenishment report.", "success");
+    const editorContainer = document.getElementById('repl-editor-container');
+    if (editorContainer) renderCustomReportGenerator(editorContainer, report);
+    toast("File uploaded and saved successfully.", "success");
+  } catch (err) {
+    input.value = '';
+    toast("Upload failed: " + err.message, "error");
+  }
 }
 
 function updateReplenishmentManualEntry(textarea, reportId, requirementId) {
@@ -1117,10 +1183,22 @@ function deleteReplenishmentRequirementUpload(reportId, requirementId) {
     message: "This officer-uploaded replacement will be removed. If the item was imported from Final DSR, the inherited source will remain available.",
     confirmText: "Delete",
     tone: "danger",
-    onConfirm: () => {
+    onConfirm: async () => {
       const reports = loadLocalReports();
       const report = reports.find(r => r.id === reportId) || window.activeReport;
       if (!report) return;
+      const files = report.replenishmentUploads && Array.isArray(report.replenishmentUploads[requirementId])
+        ? report.replenishmentUploads[requirementId]
+        : [];
+      const latestFile = files[files.length - 1];
+      if (latestFile && latestFile.savedName) {
+        try {
+          await apiFetch(`/files/${encodeURIComponent(latestFile.savedName)}`, { method: 'DELETE' });
+        } catch (err) {
+          toast("Server file delete failed: " + err.message, "error");
+          return;
+        }
+      }
       if (report.replenishmentUploads) {
         delete report.replenishmentUploads[requirementId];
       }
@@ -1416,6 +1494,10 @@ function previewReplenishmentUploadedItem(reportId, uploadKey, itemName) {
     toast("No uploaded file available for preview.", "info");
     return;
   }
+  if (file.url) {
+    window.open(resolveReplenishmentFileUrl(file.url), '_blank', 'noopener,noreferrer');
+    return;
+  }
   const uploadedDate = file.uploadedAt ? new Date(file.uploadedAt).toLocaleString() : 'Not available';
   showCustomConfirmModal({
     title: `Preview - ${itemName}`,
@@ -1425,14 +1507,38 @@ function previewReplenishmentUploadedItem(reportId, uploadKey, itemName) {
   });
 }
 
+function downloadReplenishmentUploadedItem(reportId, uploadKey) {
+  const report = (window.activeReport && window.activeReport.id === reportId)
+    ? window.activeReport
+    : loadLocalReports().find(r => r.id === reportId);
+  const files = report ? getReplenishmentUploadedFiles(report, uploadKey) : [];
+  const file = files[files.length - 1];
+  if (!file) {
+    toast("No uploaded file available for download.", "info");
+    return;
+  }
+  const downloadUrl = resolveReplenishmentFileUrl(file.downloadUrl || file.url);
+  if (!downloadUrl) {
+    toast("Download URL is not available for this file.", "error");
+    return;
+  }
+  const a = document.createElement('a');
+  a.href = downloadUrl;
+  a.download = file.name || 'replenishment-upload';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
 function renderReplenishmentItemRow(report, section, item) {
   const scan = report.inheritanceScan || {};
   const key = getReplenishmentUploadKey(item.requirementId, item.name);
   const groupFiles = getReplenishmentUploadedFiles(report, item.requirementId);
   const itemFiles = getReplenishmentUploadedFiles(report, key);
   const files = itemFiles.length ? itemFiles : groupFiles;
+  const actionKey = itemFiles.length ? key : item.requirementId;
   const latestFile = files[files.length - 1];
-  const imported = isReplenishmentItemImported(scan, item.name) && !itemFiles.length;
+  const imported = isReplenishmentItemImported(scan, item.name) && !files.length;
   const escapedItem = escapeHtml(item.name);
   const inputId = `repl-req-upload-${section.id}-${String(item.name).toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
 
@@ -1462,13 +1568,14 @@ function renderReplenishmentItemRow(report, section, item) {
           <div style="font-size:12px; font-weight:800; color:#1d4ed8; display:flex; align-items:center; gap:6px;">
             <i data-lucide="check-circle" style="width:14px; height:14px;"></i>${escapedItem}
           </div>
-          <div style="font-size:11px; color:#1e40af; margin-top:3px;">Uploaded Successfully - ${escapeHtml(latestFile.name)}</div>
+          <div style="font-size:11px; color:#1e40af; margin-top:3px;">Uploaded Successfully - ${escapeHtml(latestFile.name)}${latestFile.version ? ` (v${escapeHtml(latestFile.version)})` : ''}</div>
           <div style="font-size:10.5px; color:#475569; margin-top:2px;">Uploaded by ${escapeHtml(latestFile.uploadedBy || 'Officer')} on ${escapeHtml(uploadedDate)}</div>
         </div>
         <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
-          <button type="button" onclick="window.previewReplenishmentUploadedItem('${report.id}', '${key}', '${escapeHtml(item.name).replace(/&#39;/g, "\\'")}')" style="border:1px solid #bfdbfe; background:#fff; color:#1d4ed8; border-radius:6px; padding:5px 8px; font-size:11px; font-weight:800; cursor:pointer;">Preview</button>
+          <button type="button" onclick="window.previewReplenishmentUploadedItem('${report.id}', '${actionKey}', '${escapeHtml(item.name).replace(/&#39;/g, "\\'")}')" style="border:1px solid #bfdbfe; background:#fff; color:#1d4ed8; border-radius:6px; padding:5px 8px; font-size:11px; font-weight:800; cursor:pointer;">Preview</button>
+          <button type="button" onclick="window.downloadReplenishmentUploadedItem('${report.id}', '${actionKey}')" style="border:1px solid #bfdbfe; background:#fff; color:#1d4ed8; border-radius:6px; padding:5px 8px; font-size:11px; font-weight:800; cursor:pointer;">Download</button>
           <button type="button" onclick="document.getElementById('${inputId}').click()" style="border:1px solid #bfdbfe; background:#fff; color:#1d4ed8; border-radius:6px; padding:5px 8px; font-size:11px; font-weight:800; cursor:pointer;">Replace</button>
-          <button type="button" onclick="window.deleteReplenishmentRequirementUpload('${report.id}', '${key}')" style="border:1px solid #fecaca; background:#fff; color:#b91c1c; border-radius:6px; padding:5px 8px; font-size:11px; font-weight:800; cursor:pointer;">Delete</button>
+          <button type="button" onclick="window.deleteReplenishmentRequirementUpload('${report.id}', '${actionKey}')" style="border:1px solid #fecaca; background:#fff; color:#b91c1c; border-radius:6px; padding:5px 8px; font-size:11px; font-weight:800; cursor:pointer;">Delete</button>
           <input type="file" id="${inputId}" accept="${item.accepted}" style="display:none;" onchange="window.handleReplenishmentRequirementUpload(this, '${report.id}', '${key}')">
         </div>
       </div>
