@@ -1248,6 +1248,11 @@ function toggleSidebar(event) {
   setSidebarCollapsed(shouldCollapse);
   return false;
 }
+function closeMobileSidebar() {
+  if (window.matchMedia && window.matchMedia('(max-width: 1280px)').matches) {
+    setSidebarCollapsed(true);
+  }
+}
 function expandSidebar() {
   if (isSidebarPinned) return;
   clearTimeout(sidebarTimer);
@@ -1261,6 +1266,20 @@ window.addEventListener('resize', () => {
   if (window.matchMedia && !window.matchMedia('(max-width: 1280px)').matches) {
     if (sidebar) sidebar.classList.remove('mobile-open');
     document.body.classList.remove('mobile-sidebar-open');
+  }
+});
+document.addEventListener('click', (event) => {
+  if (!document.body.classList.contains('mobile-sidebar-open')) return;
+  const sidebar = document.getElementById('sidebar');
+  const toggleBtn = document.getElementById('tb-sidebar-toggle');
+  const target = event.target;
+  if (sidebar && sidebar.contains(target)) return;
+  if (toggleBtn && toggleBtn.contains(target)) return;
+  closeMobileSidebar();
+});
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && document.body.classList.contains('mobile-sidebar-open')) {
+    closeMobileSidebar();
   }
 });
 const initialHash = window.location.hash ? window.location.hash.slice(1).trim() : null;
