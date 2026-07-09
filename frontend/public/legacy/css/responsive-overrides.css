@@ -644,14 +644,15 @@ table,
   }
 }
 
-/* Enterprise app shell: fixed header, fixed notice, below-chrome sidebar, independent content scroll. */
+/* Enterprise app shell: fixed header, fixed navigation, fixed notice, below-chrome sidebar, independent content scroll. */
 :root {
-  --erp-header-h: 74px;
+  --erp-header-h: 76px;
+  --erp-nav-h: 48px;
   --erp-notice-h: 36px;
-  --erp-chrome-h: calc(var(--erp-header-h) + var(--erp-notice-h));
+  --erp-chrome-h: calc(var(--erp-header-h) + var(--erp-nav-h) + var(--erp-notice-h));
   --erp-sidebar-w: 260px;
   --erp-sidebar-collapsed-w: 80px;
-  --erp-content-pad: 28px;
+  --erp-content-pad: 24px;
   --sidebar-w: var(--erp-sidebar-w);
   --topbar-h: var(--erp-chrome-h);
 }
@@ -692,9 +693,9 @@ body.view-projects-active .gov-enterprise-brand-row {
   height: var(--erp-header-h) !important;
   min-height: var(--erp-header-h) !important;
   display: grid !important;
-  grid-template-columns: minmax(220px, auto) minmax(0, 1fr) auto !important;
+  grid-template-columns: minmax(340px, 1fr) auto !important;
   align-items: center !important;
-  gap: 20px !important;
+  gap: 24px !important;
   padding: 0 24px !important;
   background: #ffffff !important;
   border-bottom: 1px solid #dbe3ec !important;
@@ -723,23 +724,29 @@ body.view-projects-active .gov-enterprise-brand-row {
 }
 
 #screen-app.active .gov-brand-title {
-  font-size: clamp(16px, 1.2vw, 19px) !important;
+  font-size: clamp(18px, 1.35vw, 21px) !important;
   line-height: 1.15 !important;
   color: #17324d !important;
+  font-weight: 900 !important;
 }
 
 #screen-app.active .gov-brand-subtitle {
-  font-size: 11px !important;
+  font-size: 14px !important;
   color: #64748b !important;
 }
 
 #screen-app.active .gov-enterprise-nav-row {
   min-width: 0 !important;
-  height: 100% !important;
+  height: var(--erp-nav-h) !important;
+  min-height: var(--erp-nav-h) !important;
+  max-height: var(--erp-nav-h) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   overflow: hidden !important;
+  padding: 0 24px !important;
+  background: #17324d !important;
+  border-bottom: 1px solid rgba(196, 154, 88, 0.45) !important;
 }
 
 #screen-app.active .gov-primary-nav {
@@ -749,20 +756,31 @@ body.view-projects-active .gov-enterprise-brand-row {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 2px !important;
+  gap: 4px !important;
   overflow-x: auto !important;
   overflow-y: hidden !important;
   scrollbar-width: thin;
 }
 
 #screen-app.active .tb-sub-nav-btn {
-  min-height: 40px !important;
-  height: 40px !important;
-  padding: 0 12px !important;
+  min-height: 42px !important;
+  height: 42px !important;
+  padding: 0 16px !important;
   border-radius: 6px !important;
   white-space: nowrap !important;
-  font-size: 12px !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
   line-height: 1 !important;
+  color: rgba(255, 255, 255, 0.86) !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+}
+
+#screen-app.active .tb-sub-nav-btn:hover,
+#screen-app.active .tb-sub-nav-btn.active {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.10) !important;
+  border-color: rgba(196, 154, 88, 0.55) !important;
 }
 
 #screen-app.active .gov-enterprise-actions {
@@ -787,7 +805,7 @@ body.view-projects-active .gov-enterprise-notice {
   padding: 0 24px !important;
   background: #17324d !important;
   border-top: 0 !important;
-  border-bottom: 3px solid #c49a58 !important;
+  border-bottom: 0 !important;
   color: #ffffff !important;
   overflow: hidden !important;
 }
@@ -939,11 +957,82 @@ body.view-projects-active .page-body {
   padding: var(--erp-content-pad) !important;
 }
 
+#screen-app.active,
+#screen-app.active .app-workspace,
+#screen-app.active .main-content,
+#screen-app.active .page-body {
+  background: #f7f8fa !important;
+}
+
+#screen-app.active .page-title {
+  font-size: clamp(24px, 2vw, 30px) !important;
+  line-height: 1.18 !important;
+  font-weight: 900 !important;
+}
+
+#screen-app.active .card-title,
+#screen-app.active .section-title {
+  font-size: clamp(18px, 1.6vw, 22px) !important;
+  line-height: 1.25 !important;
+}
+
 #screen-app.active .card,
 #screen-app.active .proj-card,
 #screen-app.active .upload-box,
+#screen-app.active .modal-box,
 #screen-app.active .notif {
-  margin-bottom: 20px;
+  background: #ffffff !important;
+  border: 1px solid #dfe6ee !important;
+  border-radius: 10px !important;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06) !important;
+  margin-bottom: 20px !important;
+}
+
+#screen-app.active .card,
+#screen-app.active .proj-card,
+#screen-app.active .upload-box {
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+#screen-app.active .card:hover,
+#screen-app.active .proj-card:hover,
+#screen-app.active .upload-box:hover {
+  border-color: rgba(196, 154, 88, 0.44) !important;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08) !important;
+}
+
+#screen-app.active .btn,
+#screen-app.active button.btn,
+#screen-app.active .tb-action-pill,
+#screen-app.active .dash-btn-logout,
+#screen-app.active .gov-profile-chip {
+  min-height: 42px !important;
+  border-radius: 8px !important;
+  padding-inline: 16px !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+}
+
+#screen-app.active .tbl-wrap,
+#screen-app.active .table-wrap,
+#screen-app.active .table-responsive,
+#screen-app.active .console-table-wrap {
+  border: 1px solid #dfe6ee;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+#screen-app.active table thead th,
+#screen-app.active .tbl thead th,
+#screen-app.active .anx-tbl thead th,
+#screen-app.active .console-table thead th {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 2 !important;
+  background: #f8fafc !important;
+  color: #17324d !important;
+  font-weight: 900 !important;
+  box-shadow: inset 0 -1px 0 #dfe6ee;
 }
 
 body.sidebar-hidden #screen-app.active .sidebar {
@@ -1000,7 +1089,7 @@ body.sidebar-hidden #screen-app.active .sidebar .sb-user-card[style] {
 
 @media (max-width: 1180px) {
   #screen-app.active .gov-enterprise-brand-row {
-    grid-template-columns: minmax(190px, auto) minmax(0, 1fr) auto !important;
+    grid-template-columns: minmax(240px, 1fr) auto !important;
   }
 
   #screen-app.active .gov-enterprise-search {
@@ -1055,6 +1144,7 @@ body.sidebar-hidden #screen-app.active .sidebar .sb-user-card[style] {
 @media (max-width: 900px) {
   :root {
     --erp-header-h: 72px;
+    --erp-nav-h: 0px;
     --erp-notice-h: 36px;
     --erp-content-pad: 18px;
   }
@@ -1066,10 +1156,11 @@ body.sidebar-hidden #screen-app.active .sidebar .sb-user-card[style] {
   }
 
   #screen-app.active .gov-enterprise-nav-row {
-    order: 3;
-    grid-column: 1 / -1;
     height: 0 !important;
     min-height: 0 !important;
+    max-height: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
     overflow: hidden !important;
   }
 
@@ -1088,6 +1179,7 @@ body.sidebar-hidden #screen-app.active .sidebar .sb-user-card[style] {
 @media (max-width: 640px) {
   :root {
     --erp-header-h: 72px;
+    --erp-nav-h: 0px;
     --erp-notice-h: 34px;
     --erp-content-pad: 12px;
   }
