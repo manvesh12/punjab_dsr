@@ -2970,7 +2970,8 @@ async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId, re
 }
 
 async function downloadStoredReplenishmentPdf(report, metadata) {
-  const response = await fetch(`/api/download-pdf?projectId=${encodeURIComponent(S.activeProject.id)}&annexureId=${encodeURIComponent(metadata.annexureId)}`, {
+  const baseUrl = (typeof API_BASE_URL !== 'undefined' && API_BASE_URL) ? API_BASE_URL : '/api';
+  const response = await fetch(`${baseUrl}/download-pdf?projectId=${encodeURIComponent(S.activeProject.id)}&annexureId=${encodeURIComponent(metadata.annexureId)}`, {
     headers: { Authorization: `Bearer ${localStorage.getItem('dsr_token') || ''}` }
   });
   if (!response.ok) throw new Error(await response.text());

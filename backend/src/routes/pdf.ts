@@ -39,6 +39,15 @@ pdfRouter.post("/upload-pdf", async (req, res) => {
     return;
   }
 
+  const projectExists = await prisma.project.findUnique({
+    where: { id: projectId }
+  });
+
+  if (!projectExists) {
+    res.status(404).json({ success: false, error: "Referenced Project does not exist" });
+    return;
+  }
+
   const pdfText = String(pdf);
   if (!/^[A-Za-z0-9+/=]+$/.test(pdfText)) {
     res.status(400).json({ success: false, error: "Invalid PDF payload" });
@@ -50,15 +59,6 @@ pdfRouter.post("/upload-pdf", async (req, res) => {
     return;
   }
   await putPdf(key, bytes);
-  
-  const projectExists = await prisma.project.findUnique({
-    where: { id: projectId }
-  });
-  
-  if (!projectExists) {
-    res.status(404).json({ success: false, error: "Referenced Project does not exist" });
-    return;
-  }
 
   await prisma.dsrFile.upsert({
     where: { projectId_annexureId: { projectId, annexureId } },

@@ -91,6 +91,11 @@ filesRouter.post("/upload", upload.single("file"), async (req: any, res) => {
       res.status(400).json({ success: false, error: "Missing projectId" });
       return;
     }
+    const project = await prisma.project.findUnique({ where: { id: projectId } });
+    if (!project) {
+      res.status(404).json({ success: false, error: "Referenced Project does not exist" });
+      return;
+    }
 
     const queryName = String(req.query.name || req.headers["x-file-name"] || "");
     const originalName = safeFileName(req.file?.originalname || queryName);

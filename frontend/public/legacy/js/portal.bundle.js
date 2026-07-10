@@ -41,16 +41,27 @@ async function apiFetch(endpoint, options = {}) {
         throw error;
     }
 }
-async function apiUploadFile(file) {
+async function apiUploadFile(file, options = {}) {
     const token = localStorage.getItem('dsr_token');
     const headers = {};
     if (token) {
         headers['Authorization'] = `Bearer ${token}`;
     }
+    const projectId = options.projectId || (window.S && S.activeProject && S.activeProject.id);
+    if (!projectId) {
+        throw new Error('Please select and open a project before uploading files.');
+    }
+    const params = new URLSearchParams({
+        projectId: String(projectId),
+        name: file && file.name ? file.name : 'upload.bin',
+        module: options.module || 'general',
+        requirementId: options.requirementId || 'upload'
+    });
+    if (options.uploadedBy) params.set('uploadedBy', options.uploadedBy);
     const formData = new FormData();
     formData.append('file', file);
     try {
-        const response = await fetch(`${API_BASE_URL}/files/upload`, {
+        const response = await fetch(`${API_BASE_URL}/files/upload?${params.toString()}`, {
             method: 'POST',
             body: formData,
             credentials: 'same-origin',
@@ -90,7 +101,8 @@ function getDownloadTokenQuery() {
 }
 function projectPdfUrl(annexureId, inline = false) {
     if (!window.S || !S.activeProject || !S.activeProject.id) return '';
-    return `/api/download-pdf?projectId=${encodeURIComponent(S.activeProject.id)}&annexureId=${encodeURIComponent(annexureId)}${inline ? '&inline=true' : ''}${getDownloadTokenQuery()}`;
+    const baseUrl = (typeof API_BASE_URL !== 'undefined' && API_BASE_URL) ? API_BASE_URL : '/api';
+    return `${baseUrl}/download-pdf?projectId=${encodeURIComponent(S.activeProject.id)}&annexureId=${encodeURIComponent(annexureId)}${inline ? '&inline=true' : ''}${getDownloadTokenQuery()}`;
 }
 function setStoredProjectPdfUrl(annexureId, fileName) {
     if (!window.S || !S.activeProject || !S.activeProject.id) return '';
@@ -14734,7 +14746,9 @@ function getFinalPdfUrl(inline = true) {
   return window.projectPdfUrl ? window.projectPdfUrl('final', inline) : `/api/download-pdf?projectId=${encodeURIComponent(S.activeProject.id)}&annexureId=final${inline ? '&inline=true' : ''}`;
 }
 function canAccessFinalDsrPdf() {
-  return true;
+  if (typeof hasAdminAccess === 'function') return hasAdminAccess();
+  const role = (window.S && (S.backendRole || S.user?.backendRole || S.user?.roleCode || S.user?.role)) || '';
+  return /^(ADMIN|STATE_ADMIN)$/i.test(String(role));
 }
 function showFinalPdfAccessDenied() {
   const message = 'Access Denied - Only Administrators can download the Final DSR PDF.';
