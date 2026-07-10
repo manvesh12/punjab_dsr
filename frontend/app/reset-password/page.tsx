@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 function ResetPasswordContent() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -17,8 +18,9 @@ function ResetPasswordContent() {
 
   const calculateStrength = (pass: string) => {
     let score = 0;
-    if (pass.length > 8) score++;
+    if (pass.length >= 10) score++;
     if (/[A-Z]/.test(pass)) score++;
+    if (/[a-z]/.test(pass)) score++;
     if (/[0-9]/.test(pass)) score++;
     if (/[^A-Za-z0-9]/.test(pass)) score++;
     return score;
@@ -32,8 +34,8 @@ function ResetPasswordContent() {
       setError("Passwords do not match");
       return;
     }
-    if (strength < 2) {
-      setError("Password is too weak. Must contain letters and numbers.");
+    if (strength < 5) {
+      setError("Password must be at least 10 characters and include uppercase, lowercase, number and special character.");
       return;
     }
 
@@ -83,38 +85,45 @@ function ResetPasswordContent() {
           <div>
             <label className="block text-sm font-medium text-gray-700">New Password</label>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               required
               className="mt-1 block w-full border border-gray-300 rounded-md p-2"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
             />
             {newPassword && (
-              <div className="mt-2 flex space-x-1">
-                {[1, 2, 3, 4].map((level) => (
-                  <div
-                    key={level}
-                    className={`h-1 flex-1 rounded ${strength >= level ? (strength > 2 ? 'bg-green-500' : 'bg-yellow-500') : 'bg-gray-200'}`}
-                  ></div>
-                ))}
+              <div className="mt-2">
+                <div className="flex space-x-1">
+                  {[1, 2, 3, 4, 5].map((level) => (
+                    <div
+                      key={level}
+                      className={`h-1 flex-1 rounded ${strength >= level ? (strength >= 5 ? 'bg-green-500' : 'bg-yellow-500') : 'bg-gray-200'}`}
+                    ></div>
+                  ))}
+                </div>
+                <p className="mt-2 text-xs text-gray-600">Use 10+ characters with uppercase, lowercase, number and special character.</p>
               </div>
             )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               required
               className="mt-1 block w-full border border-gray-300 rounded-md p-2"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
           </div>
+          <label className="flex items-center gap-2 text-sm text-gray-700">
+            <input type="checkbox" checked={showPassword} onChange={(e) => setShowPassword(e.target.checked)} />
+            Show password
+          </label>
           {error && <div className="text-sm text-red-600 bg-red-50 p-2 rounded">{error}</div>}
           <button
             type="submit"
-            disabled={loading || !newPassword || newPassword !== confirmPassword}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none disabled:opacity-50"
+            disabled={loading || !newPassword || newPassword !== confirmPassword || strength < 5}
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-900 hover:bg-blue-800 focus:outline-none disabled:opacity-50"
           >
             {loading ? "Resetting..." : "Reset Password"}
           </button>

@@ -114,6 +114,75 @@ export const sendOtpEmail = async (toEmail: string, otp: string) => {
   }
 };
 
+export const sendPasswordResetOtpEmail = async (toEmail: string, fullName: string, otp: string, expiresInMinutes = 10) => {
+  const subject = 'Password Reset OTP - Punjab DSR';
+  const text = `Dear ${fullName},\n\nYour OTP for password reset is: ${otp}\n\nThis OTP is valid for ${expiresInMinutes} minutes. If you did not request this, please ignore this email and contact your portal administrator.\n\nGovernment of Punjab`;
+  const html = `
+    <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+      <div style="background-color: #1e3a8a; padding: 24px; text-align: center;">
+        <h2 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">Punjab DSR Portal</h2>
+      </div>
+      <div style="padding: 32px 24px; background-color: #ffffff;">
+        <h3 style="color: #1f2937; margin-top: 0; font-size: 20px;">Password Reset Verification</h3>
+        <p style="color: #4b5563; font-size: 16px; line-height: 1.5;">Dear ${fullName}, please use the following One-Time Password (OTP) to reset your Smart DSR Portal password:</p>
+        <div style="background-color: #f3f4f6; padding: 16px; text-align: center; border-radius: 8px; margin: 24px 0;">
+          <h1 style="color: #1e3a8a; margin: 0; font-size: 36px; letter-spacing: 4px; font-weight: 700;">${otp}</h1>
+        </div>
+        <p style="color: #ef4444; font-size: 14px; font-weight: 500;">This OTP is valid for ${expiresInMinutes} minutes. Please do not share it with anyone.</p>
+        <p style="color: #4b5563; font-size: 14px; line-height: 1.5;">If you did not request this password reset, please ignore this email and notify your portal administrator.</p>
+      </div>
+      <div style="background-color: #f9fafb; padding: 16px; text-align: center; border-top: 1px solid #e5e7eb;">
+        <p style="color: #9ca3af; font-size: 12px; margin: 0;">&copy; ${new Date().getFullYear()} Government of Punjab. All rights reserved.</p>
+      </div>
+    </div>
+  `;
+
+  try {
+    const data = await sendEmail(toEmail, subject, text, html);
+    console.log(`[EMAIL SENT] Password reset OTP sent to ${toEmail}. MessageId: ${data?.messageId}`);
+  } catch (error) {
+    console.error(`[EMAIL ERROR] Failed to send password reset OTP to ${toEmail}:`, error);
+    throw new Error('Failed to send email');
+  }
+};
+
+export const sendPasswordChangedEmail = async (
+  toEmail: string,
+  fullName: string,
+  details: { changedAt: Date; ip?: string; userAgent?: string }
+) => {
+  const changedAt = details.changedAt.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+  const subject = 'Password Changed Successfully - Punjab DSR';
+  const text = `Dear ${fullName},\n\nYour Punjab DSR Portal password was changed successfully on ${changedAt}.\n\nIP: ${details.ip || 'Not available'}\nBrowser: ${details.userAgent || 'Not available'}\n\nIf you did not make this change, contact your portal administrator immediately.\n\nGovernment of Punjab`;
+  const html = `
+    <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
+      <div style="background-color: #166534; padding: 24px; text-align: center;">
+        <h2 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">Punjab DSR Portal</h2>
+      </div>
+      <div style="padding: 32px 24px; background-color: #ffffff;">
+        <h3 style="color: #1f2937; margin-top: 0; font-size: 20px;">Password Changed Successfully</h3>
+        <p style="color: #4b5563; font-size: 16px; line-height: 1.5;">Dear ${fullName}, your Smart DSR Portal password was changed successfully.</p>
+        <div style="background-color: #f9fafb; padding: 16px; border-radius: 8px; margin: 20px 0; color: #374151; font-size: 14px;">
+          <p style="margin: 0 0 8px;"><strong>Change time:</strong> ${changedAt}</p>
+          <p style="margin: 0 0 8px;"><strong>IP:</strong> ${details.ip || 'Not available'}</p>
+          <p style="margin: 0;"><strong>Browser:</strong> ${details.userAgent || 'Not available'}</p>
+        </div>
+        <p style="color: #ef4444; font-size: 14px; font-weight: 500;">If you did not make this change, contact your portal administrator immediately.</p>
+      </div>
+      <div style="background-color: #f9fafb; padding: 16px; text-align: center; border-top: 1px solid #e5e7eb;">
+        <p style="color: #9ca3af; font-size: 12px; margin: 0;">&copy; ${new Date().getFullYear()} Government of Punjab. All rights reserved.</p>
+      </div>
+    </div>
+  `;
+
+  try {
+    const data = await sendEmail(toEmail, subject, text, html);
+    console.log(`[EMAIL SENT] Password change confirmation sent to ${toEmail}. MessageId: ${data?.messageId}`);
+  } catch (error) {
+    console.error(`[EMAIL ERROR] Failed to send password change confirmation to ${toEmail}:`, error);
+  }
+};
+
 export const sendInvitationEmail = async (toEmail: string, token: string, role: string) => {
   const host = process.env.PUBLIC_APP_URL || 'https://punjab-dsr.vercel.app/legacy';
   const inviteLink = `${host}/login.html?invite=${token}`;

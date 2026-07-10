@@ -7,7 +7,7 @@ import { recordAudit } from "../lib/audit.js";
 import { config } from "../lib/config.js";
 import { prisma } from "../lib/prisma.js";
 import { jsonSafe } from "../lib/json.js";
-import { sendOtpEmail } from "../lib/email.js";
+import { sendOtpEmail, sendPasswordChangedEmail, sendPasswordResetOtpEmail } from "../lib/email.js";
 
 const loginSchema = z.object({
   username: z.string().trim().min(3).max(254),
@@ -40,6 +40,26 @@ const refreshTokenCookieOptions = {
 export const authRouter = Router();
 
 import crypto from "crypto";
+
+const otpTtlMinutes = 10;
+const otpTtlMs = otpTtlMinutes * 60 * 1000;
+const resendCooldownMs = 60 * 1000;
+const maxResetAttempts = 5;
+const maxResetResends = 5;
+
+function generateOtp() {
+  return crypto.randomInt(100000, 1000000).toString();
+}
+
+function normalizeIdentifier(identifier: string) {
+  return identifier.trim().toLowerCase();
+}
+
+function clientIp(req: any) {
+  const forwardedFor = req.header?.("x-forwarded-for");
+  if (forwardedFor) return String(forwardedFor).split(",")[0]?.trim();
+  return req.ip || req.socket?.remoteAddress || undefined;
+}
 
 authRouter.post("/login", async (req, res) => {
   const parsed = loginSchema.safeParse(req.body);
@@ -187,9 +207,9 @@ authRouter.post("/register", async (req, res) => {
   }
 
   // Generate 6-digit OTP
-  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const otp = generateOtp();
   const otpHash = await bcrypt.hash(otp, 10);
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+  const expiresAt = new Date(Date.now() + otpTtlMs); // 10 mins
 
   // Deprecate previous unused register OTPs
   await prisma.otpVerification.updateMany({
@@ -269,7 +289,7 @@ authRouter.post("/verify-register-otp", async (req, res) => {
 });
 
 const forgotPasswordSchema = z.object({
-  identifier: z.string().min(1)
+  identifier: z.string().trim().min(1).max(254)
 });
 
 const verifyOtpSchema = z.object({
@@ -280,56 +300,99 @@ const verifyOtpSchema = z.object({
 const resetPasswordSchema = z.object({
   identifier: z.string().min(1),
   otp: z.string().length(6),
-  newPassword: z.string().min(10).max(128).regex(/[A-Za-z]/).regex(/[0-9]/)
+  newPassword: z.string().min(10).max(128).regex(/[A-Z]/).regex(/[a-z]/).regex(/[0-9]/).regex(/[^A-Za-z0-9]/)
 });
 
-// Helper for generic success message
-const genericSuccess = { success: true, message: "If account exists, verification instructions have been sent." };
-
-authRouter.post("/forgot-password", async (req, res) => {
+async function createPasswordResetOtp(req: any, res: any) {
   const parsed = forgotPasswordSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Identifier is required" });
     return;
   }
 
-  const { identifier } = parsed.data;
+  const identifier = normalizeIdentifier(parsed.data.identifier);
   const user = await prisma.user.findFirst({
     where: {
       OR: [
-        { email: identifier.toLowerCase() },
+        { email: identifier },
         { mobileNumber: identifier }
       ]
     }
   });
 
-  // Always return success to prevent user enumeration
   if (!user || !user.active) {
-    res.json(genericSuccess);
+    recordAudit(req, "PASSWORD_RESET_ACCOUNT_NOT_FOUND", { identifier }, 404);
+    res.status(404).json({ error: "No account found with this email." });
     return;
   }
 
-  // Generate 6-digit OTP
-  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const latest = await prisma.passwordResetRequest.findFirst({
+    where: { identifier: user.email, used: false },
+    orderBy: { createdAt: "desc" }
+  });
+  if (latest && latest.createdAt.getTime() > Date.now() - resendCooldownMs) {
+    res.status(429).json({ error: "Please wait 60 seconds before requesting another OTP." });
+    return;
+  }
+
+  const recentRequests = await prisma.passwordResetRequest.count({
+    where: {
+      identifier: user.email,
+      createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }
+    }
+  });
+  if (recentRequests >= maxResetResends) {
+    res.status(429).json({ error: "Resend limit exceeded. Please try again later." });
+    return;
+  }
+
+  const otp = generateOtp();
   const otpHash = await bcrypt.hash(otp, 10);
-  
-  // Set expiration to 10 minutes from now
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+  const expiresAt = new Date(Date.now() + otpTtlMs);
+
+  await prisma.passwordResetRequest.updateMany({
+    where: { userId: user.id, used: false },
+    data: { used: true }
+  });
 
   await prisma.passwordResetRequest.create({
     data: {
       userId: user.id,
-      identifier,
+      identifier: user.email,
       otpHash,
       expiresAt
     }
   });
 
-  // TODO: Dispatch Email/SMS in a real app
-  console.log(`[MOCK EMAIL/SMS] OTP for ${identifier} is ${otp}`);
-  recordAudit(req, "PASSWORD_RESET_REQUESTED", { userId: user.id, identifier }, 200);
+  try {
+    await sendPasswordResetOtpEmail(user.email, user.fullName, otp, otpTtlMinutes);
+  } catch (error) {
+    await prisma.passwordResetRequest.updateMany({
+      where: { userId: user.id, used: false },
+      data: { used: true }
+    });
+    recordAudit(req, "PASSWORD_RESET_EMAIL_FAILED", { userId: user.id, identifier: user.email }, 502);
+    res.status(502).json({ error: "Could not send OTP email. Please try again later." });
+    return;
+  }
 
-  res.json(genericSuccess);
+  recordAudit(req, "PASSWORD_RESET_REQUESTED", { userId: user.id, identifier: user.email }, 200);
+
+  res.json({
+    success: true,
+    message: "OTP sent to your registered email.",
+    identifier: user.email,
+    expiresInSeconds: otpTtlMinutes * 60,
+    resendCooldownSeconds: 60
+  });
+}
+
+authRouter.post("/forgot-password", async (req, res) => {
+  await createPasswordResetOtp(req, res);
+});
+
+authRouter.post("/forgot-password/resend", async (req, res) => {
+  await createPasswordResetOtp(req, res);
 });
 
 authRouter.post("/verify-reset-otp", async (req, res) => {
@@ -339,7 +402,8 @@ authRouter.post("/verify-reset-otp", async (req, res) => {
     return;
   }
 
-  const { identifier, otp } = parsed.data;
+  const identifier = normalizeIdentifier(parsed.data.identifier);
+  const { otp } = parsed.data;
 
   const resetReq = await prisma.passwordResetRequest.findFirst({
     where: { identifier, used: false },
@@ -356,7 +420,7 @@ authRouter.post("/verify-reset-otp", async (req, res) => {
     return;
   }
 
-  if (resetReq.attemptCount >= 5) {
+  if (resetReq.attemptCount >= maxResetAttempts) {
     res.status(429).json({ error: "Too many attempts, please request a new OTP." });
     return;
   }
@@ -371,6 +435,7 @@ authRouter.post("/verify-reset-otp", async (req, res) => {
     return;
   }
 
+  recordAudit(req, "PASSWORD_RESET_OTP_VERIFIED", { userId: resetReq.userId }, 200);
   res.json({ success: true, message: "OTP verified" });
 });
 
@@ -381,14 +446,15 @@ authRouter.post("/reset-password", async (req, res) => {
     return;
   }
 
-  const { identifier, otp, newPassword } = parsed.data;
+  const identifier = normalizeIdentifier(parsed.data.identifier);
+  const { otp, newPassword } = parsed.data;
 
   const resetReq = await prisma.passwordResetRequest.findFirst({
     where: { identifier, used: false },
     orderBy: { createdAt: 'desc' }
   });
 
-  if (!resetReq || resetReq.expiresAt < new Date() || resetReq.attemptCount >= 5) {
+  if (!resetReq || resetReq.expiresAt < new Date() || resetReq.attemptCount >= maxResetAttempts) {
     res.status(400).json({ error: "Invalid or expired session. Please request a new OTP." });
     return;
   }
@@ -399,14 +465,13 @@ authRouter.post("/reset-password", async (req, res) => {
     return;
   }
 
-  // Update password
   const newPasswordHash = await bcrypt.hash(newPassword, 10);
-  await prisma.user.update({
+  const changedAt = new Date();
+  const user = await prisma.user.update({
     where: { id: resetReq.userId },
     data: { password: newPasswordHash }
   });
 
-  // Mark as used
   await prisma.passwordResetRequest.update({
     where: { id: resetReq.id },
     data: { used: true }
@@ -419,6 +484,11 @@ authRouter.post("/reset-password", async (req, res) => {
   });
 
   recordAudit(req, "PASSWORD_RESET_SUCCESS", { userId: resetReq.userId }, 200);
+  await sendPasswordChangedEmail(user.email, user.fullName, {
+    changedAt,
+    ip: clientIp(req),
+    userAgent: req.header("user-agent") || undefined
+  });
 
   res.json({ success: true, message: "Password reset successful" });
 });

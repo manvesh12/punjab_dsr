@@ -6,8 +6,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 function VerifyOtpContent() {
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
   const [timer, setTimer] = useState(600); // 10 minutes
+  const [cooldown, setCooldown] = useState(60);
   
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -16,6 +19,7 @@ function VerifyOtpContent() {
   useEffect(() => {
     const interval = setInterval(() => {
       setTimer((t) => (t > 0 ? t - 1 : 0));
+      setCooldown((t) => (t > 0 ? t - 1 : 0));
     }, 1000);
     return () => clearInterval(interval);
   }, []);
@@ -24,6 +28,7 @@ function VerifyOtpContent() {
     e.preventDefault();
     setLoading(true);
     setError("");
+    setMessage("");
 
     try {
       const res = await fetch("/api/auth/verify-reset-otp", {
@@ -42,6 +47,31 @@ function VerifyOtpContent() {
       setError("Network error");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    setResending(true);
+    setError("");
+    setMessage("");
+    try {
+      const res = await fetch("/api/auth/forgot-password/resend", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identifier })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setTimer(data.expiresInSeconds || 600);
+        setCooldown(data.resendCooldownSeconds || 60);
+        setMessage(data.message || "Fresh OTP sent to your registered email.");
+      } else {
+        setError(data.error || "Unable to resend OTP");
+      }
+    } catch (err) {
+      setError("Network error. Please try again.");
+    } finally {
+      setResending(false);
     }
   };
 
@@ -68,6 +98,7 @@ function VerifyOtpContent() {
               placeholder="000000"
             />
           </div>
+          {message && <div className="text-sm text-green-600 bg-green-50 p-2 rounded">{message}</div>}
           {error && <div className="text-sm text-red-600 bg-red-50 p-2 rounded">{error}</div>}
           <button
             type="submit"
@@ -75,6 +106,17 @@ function VerifyOtpContent() {
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none disabled:opacity-50"
           >
             {loading ? "Verifying..." : "Verify OTP"}
+          </button>
+          <button
+            type="button"
+            disabled={resending || cooldown > 0}
+            onClick={handleResend}
+            className="w-full flex justify-center py-2 px-4 border border-blue-900 rounded-md text-sm font-medium text-blue-900 hover:bg-blue-50 disabled:opacity-50"
+          >
+            {resending ? "Sending..." : cooldown > 0 ? `Resend OTP in ${cooldown}s` : "Resend OTP"}
+          </button>
+          <button type="button" onClick={() => router.push("/legacy/login.html")} className="w-full text-sm text-blue-800 hover:underline">
+            Back to Login
           </button>
         </form>
       </div>
