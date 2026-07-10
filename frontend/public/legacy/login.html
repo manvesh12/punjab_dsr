@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="css/premium-theme.css?v=repl-model-dsr-backend-20260707-v15">
   <link rel="stylesheet" href="css/responsive-overrides.css?v=repl-model-dsr-backend-20260707-v15">
   <link rel="stylesheet" href="css/enterprise-theme-audit.css?v=repl-model-dsr-backend-20260707-v15">
+  <link rel="stylesheet" href="css/workspace-layout.css?v=repl-model-dsr-backend-20260707-v15">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script defer src="https://cdn.jsdelivr.net/npm/lucide@0.363.0/dist/umd/lucide.min.js"></script>
@@ -426,9 +427,6 @@
   <div class="topbar dash-global-topbar gov-compact-topbar gov-enterprise-topbar">
   <div class="gov-enterprise-brand-row">
     <div class="gov-enterprise-brand-left">
-      <button id="tb-sidebar-toggle" type="button" class="dash-action-icon-btn gov-menu-toggle" onclick="return toggleSidebar(event)" title="Toggle sidebar" aria-label="Toggle sidebar" aria-expanded="false">
-        <i data-lucide="menu"></i>
-      </button>
       <button class="gov-brand-button gov-enterprise-brand" type="button" onclick="clearActiveProject(); showView('dashboard', null);" aria-label="Go to dashboard">
         <img src="assets/dsr-logo.png" alt="Punjab Government Smart DSR Logo" class="gov-logo gov-logo-punjab">
         <span class="gov-iit-logo" aria-label="IIT Ropar">IIT</span>

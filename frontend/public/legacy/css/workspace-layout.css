@@ -1,0 +1,340 @@
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ *  SMART DSR PORTAL — WORKSPACE LAYOUT & AUTOMATIC SIDEBAR
+ *  workspace-layout.css
+ *
+ *  PURPOSE:
+ *    1.  Hide the sidebar toggle button permanently (sidebar is automatic).
+ *    2.  Fix vertical alignment: sidebar card top == main content card top.
+ *    3.  Sidebar starts below the fixed header, fills available workspace.
+ *    4.  Sidebar auto-appears when a project is open (project-workspace-active).
+ *    5.  Sidebar auto-hides when leaving a project (sidebar-hidden / no project).
+ *    6.  Smooth 280ms ease-in-out slide animation.
+ *    7.  Header / Nav / Notice Bar are never affected.
+ *    8.  Responsive: overlay drawer on tablet/mobile.
+ *
+ *  IMPORTANT:
+ *    - Does NOT modify any business logic, routing, or API behaviour.
+ *    - The JS in portal.bundle.js already manages body.sidebar-hidden and
+ *      body.project-workspace-active classes automatically.
+ *    - This file overrides only visual layout properties.
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION 1 — PERMANENTLY HIDE THE MANUAL TOGGLE BUTTON
+   The sidebar is now fully automatic. No manual open/close controls needed.
+────────────────────────────────────────────────────────────────────────── */
+
+#tb-sidebar-toggle,
+.gov-menu-toggle[id="tb-sidebar-toggle"] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION 2 — TOPBAR: ALWAYS FULL-WIDTH, NEVER SHIFTS
+   The header, navigation row, and notice bar are fixed at top: 0.
+   Opening or closing the sidebar must NEVER move the topbar.
+────────────────────────────────────────────────────────────────────────── */
+
+/* Enterprise topbar — always starts at left: 0, full width regardless of sidebar state */
+.topbar.dash-global-topbar.gov-enterprise-topbar,
+body.project-workspace-active .topbar.dash-global-topbar.gov-enterprise-topbar,
+body.sidebar-hidden .topbar.dash-global-topbar.gov-enterprise-topbar,
+body:not(.sidebar-hidden) .topbar.dash-global-topbar.gov-enterprise-topbar {
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+}
+
+/* Compact topbar variant — same rule */
+.topbar.dash-global-topbar.gov-compact-topbar,
+body.project-workspace-active .topbar.dash-global-topbar.gov-compact-topbar,
+body.sidebar-hidden .topbar.dash-global-topbar.gov-compact-topbar,
+body:not(.sidebar-hidden) .topbar.dash-global-topbar.gov-compact-topbar {
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+}
+
+/* Generic topbar fallback */
+.topbar.dash-global-topbar {
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION 3 — SIDEBAR: AUTOMATIC POSITION & ALIGNMENT
+   The sidebar must start at exactly the same vertical position as the main
+   content card — i.e. below the fixed topbar (top: var(--topbar-h)).
+   Height = available workspace height below the topbar.
+────────────────────────────────────────────────────────────────────────── */
+
+.sidebar#sidebar {
+  /* Vertical alignment: start exactly where main content starts */
+  top: var(--topbar-h) !important;
+
+  /* Fill available workspace height without overflowing into footer */
+  height: calc(100vh - var(--topbar-h)) !important;
+  max-height: calc(100vh - var(--topbar-h)) !important;
+  min-height: 0 !important;
+
+  /* Sidebar scrolls its own content independently */
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+
+  /* Smooth slide animation (280ms ease-in-out as specified) */
+  transition: transform 280ms ease-in-out !important;
+
+  /* Always at a high z-index, always below the topbar (topbar is z: 520) */
+  z-index: 400 !important;
+
+  /* Ensure it starts from the left edge */
+  left: 0 !important;
+}
+
+/* Scrollbar style for sidebar content */
+.sidebar#sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar#sidebar::-webkit-scrollbar-thumb {
+  background: rgba(23, 50, 77, 0.18);
+  border-radius: 4px;
+}
+html.dark .sidebar#sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION 4 — SIDEBAR VISIBILITY STATES
+   Show only inside project workspace, hide everywhere else.
+   Controlled by JS classes on <body>:
+     - body.project-workspace-active  → project is open, project view active
+     - body.sidebar-hidden            → sidebar should be hidden
+────────────────────────────────────────────────────────────────────────── */
+
+/* DEFAULT STATE: Sidebar is hidden (slides left off-screen) */
+.sidebar#sidebar {
+  transform: translateX(-100%) !important;
+}
+
+/* PROJECT WORKSPACE ACTIVE on DESKTOP (≥1025px):
+   Sidebar is visible — slides in smoothly */
+@media (min-width: 1025px) {
+  body.project-workspace-active:not(.sidebar-hidden) .sidebar#sidebar {
+    transform: translateX(0) !important;
+  }
+
+  /* When NOT in project workspace: sidebar always hidden */
+  body:not(.project-workspace-active) .sidebar#sidebar,
+  body.sidebar-hidden .sidebar#sidebar {
+    transform: translateX(-100%) !important;
+  }
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION 5 — APP WORKSPACE: ADJUST CONTENT WIDTH WHEN SIDEBAR IS VISIBLE
+   Only the main content area adjusts. Header is unaffected.
+────────────────────────────────────────────────────────────────────────── */
+
+/* ── Desktop: sidebar takes up var(--sidebar-w), content fills the rest ── */
+@media (min-width: 1025px) {
+
+  /* Inside project workspace with sidebar visible */
+  body.project-workspace-active:not(.sidebar-hidden) .app-workspace {
+    margin-left: var(--sidebar-w) !important;
+    width: calc(100% - var(--sidebar-w)) !important;
+    max-width: calc(100% - var(--sidebar-w)) !important;
+    transition: margin-left 280ms ease-in-out, width 280ms ease-in-out !important;
+  }
+
+  /* Outside project workspace OR sidebar explicitly hidden: full width */
+  body:not(.project-workspace-active) .app-workspace,
+  body.sidebar-hidden .app-workspace,
+  body.project-workspace-inactive .app-workspace {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    transition: margin-left 280ms ease-in-out, width 280ms ease-in-out !important;
+  }
+
+  /* Preview-open state: preserve the preview split but offset from sidebar */
+  body.project-workspace-active:not(.sidebar-hidden) .app-workspace.preview-open,
+  body.project-workspace-active:not(.sidebar-hidden).preview-open .app-workspace {
+    margin-left: var(--sidebar-w) !important;
+    width: calc(100% - var(--sidebar-w)) !important;
+    max-width: calc(100% - var(--sidebar-w)) !important;
+  }
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION 6 — TABLET (769px – 1024px): SIDEBAR AS AUTO-OVERLAY
+   On tablet, the sidebar appears as an overlay drawer ONLY inside project
+   workspace. Main content does NOT shift — sidebar floats on top.
+────────────────────────────────────────────────────────────────────────── */
+
+@media (min-width: 769px) and (max-width: 1024px) {
+
+  /* Sidebar is always an overlay on tablet — never shifts content */
+  .sidebar#sidebar {
+    position: fixed !important;
+    top: var(--topbar-h) !important;
+    left: 0 !important;
+    width: min(80vw, 300px) !important;
+    height: calc(100vh - var(--topbar-h)) !important;
+    z-index: 450 !important;
+    transform: translateX(-105%) !important;
+    box-shadow: 6px 0 32px rgba(0, 0, 0, 0.22) !important;
+  }
+
+  /* Show as overlay when project workspace is active and not hidden */
+  body.project-workspace-active:not(.sidebar-hidden) .sidebar#sidebar {
+    transform: translateX(0) !important;
+  }
+
+  /* Content always full-width on tablet (sidebar is overlay) */
+  .app-workspace,
+  body.project-workspace-active .app-workspace,
+  body.sidebar-hidden .app-workspace {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Dimmed backdrop when sidebar is open as overlay */
+  body.project-workspace-active:not(.sidebar-hidden)::before {
+    content: "";
+    position: fixed;
+    inset: var(--topbar-h) 0 0 0;
+    z-index: 440;
+    background: rgba(15, 23, 42, 0.38);
+    pointer-events: auto;
+    animation: ws-backdrop-fade-in 200ms ease-in-out forwards;
+  }
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION 7 — MOBILE (≤768px): SIDEBAR AS SLIDE-IN DRAWER
+   On mobile, the sidebar appears as a full-height drawer ONLY inside a
+   project workspace. Activated automatically by the JS shell logic.
+────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+
+  /* Sidebar is always a drawer on mobile */
+  .sidebar#sidebar {
+    position: fixed !important;
+    top: var(--topbar-h) !important;
+    left: 0 !important;
+    width: min(86vw, 320px) !important;
+    height: calc(100vh - var(--topbar-h)) !important;
+    z-index: 450 !important;
+    transform: translateX(-105%) !important;
+    box-shadow: 8px 0 40px rgba(0, 0, 0, 0.28) !important;
+  }
+
+  /* Show when project workspace active and mobile-open class present */
+  body.project-workspace-active .sidebar#sidebar.mobile-open,
+  body.project-workspace-active:not(.sidebar-hidden) .sidebar#sidebar {
+    transform: translateX(0) !important;
+  }
+
+  /* Hide when NOT in project workspace regardless of mobile-open */
+  body:not(.project-workspace-active) .sidebar#sidebar {
+    transform: translateX(-105%) !important;
+  }
+
+  /* Content always full-width on mobile */
+  .app-workspace,
+  body.project-workspace-active .app-workspace {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Dimmed backdrop when sidebar drawer is open */
+  body.project-workspace-active:not(.sidebar-hidden) .sidebar#sidebar.mobile-open ~ * {
+    /* backdrop handled by existing body.mobile-sidebar-open::before in styles.css */
+  }
+
+  body.project-workspace-active:not(.sidebar-hidden):not(.mobile-sidebar-open)::before {
+    content: "";
+    position: fixed;
+    inset: var(--topbar-h) 0 0 0;
+    z-index: 440;
+    background: rgba(15, 23, 42, 0.38);
+    pointer-events: auto;
+    animation: ws-backdrop-fade-in 200ms ease-in-out forwards;
+  }
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION 8 — VERTICAL ALIGNMENT REFINEMENT
+   The sidebar's visual "card" area (sb-nav / sb-section) should start at
+   the same Y position as the main content card. We adjust internal padding
+   so the first nav item aligns with the page-body padding-top of the content.
+────────────────────────────────────────────────────────────────────────── */
+
+/* Remove any extra top padding that would push sidebar content down */
+.sidebar#sidebar .sb-head {
+  flex-shrink: 0;
+}
+
+/* Ensure the sidebar is a proper flex column so the nav fills naturally */
+.sidebar#sidebar {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Sidebar nav: scrolls independently, takes remaining height */
+.sidebar#sidebar .sb-nav {
+  flex: 1 1 auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  min-height: 0 !important;
+}
+
+/* Sidebar bottom user card: always at the bottom, never scrolls away */
+.sidebar#sidebar .sb-bottom-container {
+  flex-shrink: 0 !important;
+  margin-top: auto !important;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION 9 — ANIMATION KEYFRAMES
+────────────────────────────────────────────────────────────────────────── */
+
+@keyframes ws-backdrop-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION 10 — PDF PREVIEW MOBILE TABS POSITION FIX
+   These tabs must account for the topbar height correctly.
+────────────────────────────────────────────────────────────────────────── */
+
+.pdf-preview-mobile-tabs {
+  /* Tabs always start below the topbar, no sidebar offset needed */
+  left: 0 !important;
+  top: var(--topbar-h) !important;
+}
