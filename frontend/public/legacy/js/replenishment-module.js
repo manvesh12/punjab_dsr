@@ -1,6 +1,6 @@
 (function() {
 // Replenishment Study Module
-// Handles the UI, compilation, and custom PDF generation for Replenishment Studies
+// Handles the UI, compilation, and PDF generation for Replenishment reports.
 
 function injectDraggableStyles() {
   if (document.getElementById('draggable-styles')) return;
@@ -462,29 +462,27 @@ window.uploadReplAnnexureFile = uploadReplAnnexureFile;
 
 function showReplenishmentOptions(container) {
   container.innerHTML = `
-    <div style="max-width: 800px; margin: 40px auto; padding: 0 20px;">
+    <div style="max-width: 980px; margin: 32px auto; padding: 0 20px;">
       <div style="text-align: center; margin-bottom: 40px;">
-        <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 24px; font-weight: 800; color: #1e293b; margin: 0 0 10px 0;">Replenishment Studies</h2>
-        <p style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; color: #64748b; margin: 0;">Create and compile custom reports for replenishment studies by selecting specific DSR sections.</p>
+        <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 24px; font-weight: 800; color: #1e293b; margin: 0 0 10px 0;">Government Replenishment Report Builder</h2>
+        <p style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; color: #64748b; margin: 0;">Use the official upload-driven report builder with Final DSR auto-copy, live preview, validation and PDF generation.</p>
       </div>
       
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
-        <!-- Card 1: Create New Report -->
         <div class="card" onclick="window.showCreateReportForm()" style="padding: 32px; text-align: center; cursor: pointer; border: 1.5px solid #e2e8f0; border-radius: 12px; transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; background: #ffffff; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center;">
           <div style="display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; background: #eff6ff; border-radius: 12px; margin-bottom: 20px;">
             <i data-lucide="file-plus" style="width: 28px; height: 28px; color: #2563eb;"></i>
           </div>
-          <h3 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px; font-weight: 700; color: #1e293b; margin: 0 0 8px 0;">Create New Report</h3>
-          <p style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; color: #64748b; margin: 0; line-height: 1.5;">Define a report name, choose custom sections, and generate a printable PDF.</p>
+          <h3 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px; font-weight: 700; color: #1e293b; margin: 0 0 8px 0;">Create Official Report</h3>
+          <p style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; color: #64748b; margin: 0; line-height: 1.5;">Start the latest Government Replenishment Report workflow with auto-copy and live builder modules.</p>
         </div>
         
-        <!-- Card 2: Open Existing Report -->
         <div class="card" onclick="window.showExistingReportsList()" style="padding: 32px; text-align: center; cursor: pointer; border: 1.5px solid #e2e8f0; border-radius: 12px; transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; background: #ffffff; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center;">
           <div style="display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; background: #f0fdf4; border-radius: 12px; margin-bottom: 20px;">
             <i data-lucide="folder-open" style="width: 28px; height: 28px; color: #16a34a;"></i>
           </div>
-          <h3 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px; font-weight: 700; color: #1e293b; margin: 0 0 8px 0;">Open Existing Report</h3>
-          <p style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; color: #64748b; margin: 0; line-height: 1.5;">Open, edit, rename, delete or download previously compiled reports.</p>
+          <h3 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px; font-weight: 700; color: #1e293b; margin: 0 0 8px 0;">Open Saved Reports</h3>
+          <p style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; color: #64748b; margin: 0; line-height: 1.5;">Open historical and current reports in the latest live builder viewer.</p>
         </div>
       </div>
     </div>
@@ -739,7 +737,7 @@ async function showExistingReportsList() {
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <div>
           <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px; font-weight: 800; color: #1e293b; margin:0 0 4px 0;">Saved Replenishment Reports</h2>
-          <p style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; color: #64748b; margin:0;">Saved reports for DSR project: ${S.activeProject.projectName || S.activeProject.district}</p>
+          <p style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; color: #64748b; margin:0;">All saved reports open in the latest Government Report Builder.</p>
         </div>
         <button class="btn btn-outline" onclick="window.showReplenishmentOptions(document.getElementById('repl-editor-container'))" style="cursor: pointer;">Back</button>
       </div>
@@ -2193,7 +2191,7 @@ function renderCustomReportGenerator(container, report) {
         <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
           <div>
             <div class="card-title" id="custom-report-title-display" style="font-size:16px; font-weight:800; color:#0f172a;">${reportName}</div>
-            <div class="card-sub" style="font-size:12px; color:#64748b;">Select DSR sections & annexures to compile into a Replenishment Studies report</div>
+            <div class="card-sub" style="font-size:12px; color:#64748b;">Official Replenishment Report Builder with upload modules, auto-copy, live preview and PDF generation</div>
           </div>
           <div style="display:flex; gap:10px;">
             <button class="btn btn-outline" onclick="window.showExistingReportsList()" style="cursor: pointer;">Back</button>
@@ -2212,9 +2210,6 @@ function renderCustomReportGenerator(container, report) {
               <button onclick="window.resetSectionOrder('${report.id}', '${escapedReportName}')" class="btn btn-outline" style="padding: 4px 8px; font-size: 11px; height: auto; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #475569; border-color: #cbd5e1; background: #ffffff;">
                 <i data-lucide="rotate-ccw" style="width:11px; height:11px;"></i> Reset Order
               </button>
-              <button onclick="window.addCustomSection('${report.id}', '${escapedReportName}')" class="btn btn-outline" style="padding: 4px 8px; font-size: 11px; height: auto; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #2563eb; border-color: #bfdbfe; background: #eff6ff;">
-                <i data-lucide="file-plus" style="width:11px; height:11px;"></i> Add Custom PDF
-              </button>
               <span style="font-size:11px; color:#64748b; background:#f1f5f9; padding:2px 8px; border-radius:4px; display:inline-flex; align-items:center; gap:4px;">
                 <i data-lucide="grip-vertical" style="width:12px; height:12px;"></i> Drag to reorder
               </span>
@@ -2228,7 +2223,7 @@ function renderCustomReportGenerator(container, report) {
         <!-- RIGHT COLUMN: Preview -->
         <div style="display:flex; flex-direction:column; overflow:hidden; height:100%; background:#f1f5f9; border-radius:8px; border:1px solid #cbd5e1; position:relative;">
           <div style="padding:10px 15px; background:#e2e8f0; border-bottom:1px solid #cbd5e1; display:flex; justify-content:space-between; align-items:center;">
-            <span style="font-weight:700; font-size:12px; color:#334155;">Replenishment Studies Preview</span>
+            <span style="font-weight:700; font-size:12px; color:#334155;">Replenishment Report Preview</span>
             <span id="preview-sections-count" style="font-size:11px; background:#64748b; color:#fff; padding:2px 8px; border-radius:10px;">0 selected</span>
           </div>
           <div style="flex:1; padding:0; background:#fff; overflow:hidden;">
