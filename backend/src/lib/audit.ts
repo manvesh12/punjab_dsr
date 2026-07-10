@@ -8,8 +8,14 @@ function clientIp(req: Request) {
   return req.ip || req.socket.remoteAddress || undefined;
 }
 
+function auditJsonValue(value: unknown) {
+  return JSON.parse(
+    JSON.stringify(value, (_key, item) => (typeof item === "bigint" ? item.toString() : item))
+  ) as Prisma.InputJsonValue;
+}
+
 export function recordAudit(req: Request, action: string, metadata?: Record<string, unknown>, status?: number) {
-  const safeMetadata = metadata ? (JSON.parse(JSON.stringify(metadata)) as Prisma.InputJsonValue) : undefined;
+  const safeMetadata = metadata ? auditJsonValue(metadata) : undefined;
   prisma.auditLog
     .create({
       data: {
