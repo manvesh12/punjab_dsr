@@ -18,7 +18,6 @@
   <link rel="stylesheet" href="css/premium-theme.css?v=repl-model-dsr-backend-20260707-v15">
   <link rel="stylesheet" href="css/responsive-overrides.css?v=repl-model-dsr-backend-20260707-v15">
   <link rel="stylesheet" href="css/enterprise-theme-audit.css?v=repl-model-dsr-backend-20260707-v15">
-  <link rel="stylesheet" href="css/workspace-layout.css?v=repl-model-dsr-backend-20260707-v15">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script defer src="https://cdn.jsdelivr.net/npm/lucide@0.363.0/dist/umd/lucide.min.js"></script>
@@ -1001,20 +1000,22 @@
       pointer-events: none;
     }
     .dash-hero-container {
-      max-width: none;
+      max-width: 1000px;
       min-height: 450px;
       margin: 0 auto;
-      display: grid;
-      grid-template-columns: minmax(560px, 0.82fr) minmax(620px, 1.18fr);
-      gap: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
       align-items: center;
+      justify-content: center;
+      text-align: center;
     }
     .dash-hero-content {
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
+      align-items: center;
       max-width: 700px;
-      padding-left: clamp(24px, 4.8vw, 88px);
+      padding-left: 0;
     }
     .dash-hero-eyebrow {
       color: #f6df45;
@@ -1170,13 +1171,14 @@
     }
     /* Bottom Grid (Updates & Quick Access) */
     .dash-bottom-layout-grid {
-      width: min(98%, 1560px);
-      max-width: 1560px;
+      width: min(98%, 1200px);
+      max-width: 1200px;
       margin: 16px auto 24px;
       padding: 0;
       display: grid;
       grid-template-columns: minmax(0, 1.35fr) minmax(390px, 1fr);
       gap: 16px;
+      justify-content: center;
     }
     .dash-panel-card {
       background: #ffffff;

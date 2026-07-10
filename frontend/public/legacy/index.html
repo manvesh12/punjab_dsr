@@ -262,6 +262,23 @@
         }
       </style>
 <link href="css/responsive-overrides.css?v=repl-model-dsr-backend-20260707-v15" rel="stylesheet"/>
+<link href="css/enterprise-theme-audit.css?v=repl-model-dsr-backend-20260707-v15" rel="stylesheet"/>
+<script>
+  (function () {
+    try {
+      var theme = localStorage.getItem('theme');
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    } catch (e) {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  })();
+</script>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1e293b">
   <link rel="apple-touch-icon" href="assets/dsr-logo.png">
