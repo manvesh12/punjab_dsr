@@ -1427,3 +1427,609 @@ body:not(.project-workspace-active) #screen-app.active .app-workspace,
 body.project-workspace-inactive #screen-app.active .app-workspace {
   left: 0 !important;
 }
+
+/* ==========================================================================
+   Enterprise Government UI Polish
+   Visual-only modernization layer. Preserves existing markup, workflows,
+   handlers, modules, routing, and backend/API behavior.
+   ========================================================================== */
+
+:root {
+  --gov-ui-bg: #f7f8f4;
+  --gov-ui-surface: #ffffff;
+  --gov-ui-surface-muted: #f3f6f1;
+  --gov-ui-border: #d9dfd3;
+  --gov-ui-border-strong: #c6cfbd;
+  --gov-ui-navy: #14304f;
+  --gov-ui-navy-2: #0d223b;
+  --gov-ui-green: #0f6f52;
+  --gov-ui-gold: #b98b3b;
+  --gov-ui-slate: #475569;
+  --gov-ui-soft: #64748b;
+  --gov-ui-success: #138a58;
+  --gov-ui-warning: #b7791f;
+  --gov-ui-danger: #b42318;
+  --gov-ui-radius: 8px;
+  --gov-ui-shadow: 0 10px 28px rgba(15, 23, 42, 0.07);
+  --gov-ui-shadow-soft: 0 4px 16px rgba(15, 23, 42, 0.05);
+  --erp-chrome-h: 104px;
+  --erp-sidebar-w: 252px;
+  --sidebar-w: 252px;
+}
+
+html.dark {
+  --gov-ui-bg: #0f172a;
+  --gov-ui-surface: #111827;
+  --gov-ui-surface-muted: #172033;
+  --gov-ui-border: #273348;
+  --gov-ui-border-strong: #334155;
+  --gov-ui-navy: #dbeafe;
+  --gov-ui-navy-2: #eff6ff;
+  --gov-ui-green: #5eead4;
+  --gov-ui-gold: #f1c46b;
+  --gov-ui-slate: #cbd5e1;
+  --gov-ui-soft: #94a3b8;
+  --gov-ui-shadow: 0 14px 32px rgba(0, 0, 0, 0.35);
+  --gov-ui-shadow-soft: 0 6px 18px rgba(0, 0, 0, 0.28);
+}
+
+body {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(247, 248, 244, 0.94)),
+    var(--gov-ui-bg) !important;
+  color: var(--text) !important;
+  letter-spacing: 0 !important;
+}
+
+#screen-app.active .topbar.dash-global-topbar.gov-enterprise-topbar,
+body:not(.view-dashboard-active):not(.view-projects-active) #screen-app.active .topbar.dash-global-topbar.gov-enterprise-topbar {
+  height: var(--erp-chrome-h) !important;
+  min-height: var(--erp-chrome-h) !important;
+  max-height: var(--erp-chrome-h) !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-bottom: 1px solid var(--gov-ui-border) !important;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06) !important;
+  backdrop-filter: saturate(130%) blur(16px) !important;
+}
+
+html.dark #screen-app.active .topbar.dash-global-topbar.gov-enterprise-topbar {
+  background: rgba(17, 24, 39, 0.94) !important;
+}
+
+#screen-app.active .gov-enterprise-brand-row {
+  height: 58px !important;
+  min-height: 58px !important;
+  padding: 8px 18px !important;
+  gap: 14px !important;
+}
+
+#screen-app.active .gov-enterprise-nav-row {
+  height: 32px !important;
+  min-height: 32px !important;
+  padding: 0 18px !important;
+  border-top: 1px solid rgba(217, 223, 211, 0.68) !important;
+}
+
+#screen-app.active .gov-enterprise-notice {
+  height: 14px !important;
+  min-height: 14px !important;
+  padding: 0 18px !important;
+  border-top: 0 !important;
+  background: transparent !important;
+}
+
+#screen-app.active .gov-enterprise-brand {
+  min-height: 42px !important;
+  gap: 10px !important;
+}
+
+#screen-app.active .gov-logo {
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+}
+
+#screen-app.active .gov-iit-logo {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 8px !important;
+  background: #eef4ec !important;
+  color: var(--gov-ui-navy) !important;
+  border: 1px solid var(--gov-ui-border) !important;
+}
+
+#screen-app.active .gov-brand-title {
+  font-size: 14px !important;
+  line-height: 1.2 !important;
+  font-weight: 800 !important;
+  color: var(--gov-ui-navy) !important;
+}
+
+#screen-app.active .gov-brand-subtitle {
+  font-size: 11px !important;
+  line-height: 1.2 !important;
+  color: var(--gov-ui-soft) !important;
+  font-weight: 650 !important;
+}
+
+#screen-app.active .gov-enterprise-actions {
+  gap: 8px !important;
+}
+
+#screen-app.active .gov-enterprise-search {
+  height: 36px !important;
+  min-width: 260px !important;
+  border: 1px solid var(--gov-ui-border) !important;
+  border-radius: var(--gov-ui-radius) !important;
+  background: var(--gov-ui-surface-muted) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75) !important;
+}
+
+#screen-app.active .gov-enterprise-search input {
+  font-size: 12.5px !important;
+  color: var(--text) !important;
+}
+
+#screen-app.active .dash-action-icon-btn,
+#screen-app.active .gov-profile-chip,
+#screen-app.active .gov-logout-btn,
+#screen-app.active .dash-gov-badge {
+  min-height: 34px !important;
+  height: 34px !important;
+  border-radius: var(--gov-ui-radius) !important;
+  border: 1px solid var(--gov-ui-border) !important;
+  background: var(--gov-ui-surface) !important;
+  color: var(--gov-ui-slate) !important;
+  box-shadow: none !important;
+  transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.16s ease !important;
+}
+
+#screen-app.active .dash-action-icon-btn:hover,
+#screen-app.active .gov-profile-chip:hover,
+#screen-app.active .dash-gov-badge:hover {
+  background: #eef4ec !important;
+  border-color: var(--gov-ui-border-strong) !important;
+  color: var(--gov-ui-navy) !important;
+  transform: translateY(-1px) !important;
+}
+
+#screen-app.active .gov-logout-btn {
+  color: var(--gov-ui-danger) !important;
+}
+
+#screen-app.active .tb-sub-nav-btn {
+  height: 28px !important;
+  padding: 0 10px !important;
+  border-radius: 7px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: var(--gov-ui-slate) !important;
+}
+
+#screen-app.active .tb-sub-nav-btn:hover,
+#screen-app.active .tb-sub-nav-btn.active {
+  background: #eef4ec !important;
+  color: var(--gov-ui-navy) !important;
+}
+
+#screen-app.active .sidebar,
+#screen-app:has(#view-dashboard.active) .sidebar,
+#screen-app:has(#view-projects.active) .sidebar,
+body.view-dashboard-active .sidebar,
+body.view-projects-active .sidebar {
+  width: var(--erp-sidebar-w) !important;
+  background: rgba(255, 255, 255, 0.98) !important;
+  border-right: 1px solid var(--gov-ui-border) !important;
+  box-shadow: 12px 0 32px rgba(15, 23, 42, 0.06) !important;
+}
+
+html.dark #screen-app.active .sidebar {
+  background: rgba(17, 24, 39, 0.98) !important;
+}
+
+#screen-app.active .sidebar .sb-head,
+#screen-app.active .sidebar .sb-head[style] {
+  height: 54px !important;
+  padding: 14px 16px !important;
+  background: var(--gov-ui-navy) !important;
+  border-bottom: 2px solid var(--gov-ui-gold) !important;
+}
+
+#screen-app.active .sidebar .sb-nav,
+#screen-app.active .sidebar .sb-nav[style] {
+  padding: 14px 12px !important;
+  background: transparent !important;
+}
+
+#screen-app.active .sidebar .sb-section {
+  margin-bottom: 14px !important;
+}
+
+#screen-app.active .sidebar .sb-section-lbl,
+#screen-app.active .sidebar .sb-section-lbl[style] {
+  margin: 8px 4px 7px !important;
+  color: var(--gov-ui-soft) !important;
+  font-size: 10px !important;
+  letter-spacing: 0.08em !important;
+}
+
+#screen-app.active .sidebar .sb-item,
+#screen-app.active .sidebar .sb-item[style] {
+  min-height: 34px !important;
+  padding: 7px 9px !important;
+  border-radius: 7px !important;
+  border: 1px solid transparent !important;
+  color: var(--gov-ui-slate) !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  background: transparent !important;
+  gap: 8px !important;
+  transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.16s ease !important;
+}
+
+#screen-app.active .sidebar .sb-item:hover,
+#screen-app.active .sidebar .sb-item.active {
+  background: #eef4ec !important;
+  border-color: #dbe5d5 !important;
+  color: var(--gov-ui-navy) !important;
+  transform: translateX(2px) !important;
+}
+
+#screen-app.active .sidebar .sb-ico,
+#screen-app.active .sidebar .sb-ico[style] {
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 7px !important;
+  background: var(--gov-ui-surface-muted) !important;
+  color: var(--gov-ui-green) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 28px !important;
+  font-size: 12px !important;
+}
+
+#screen-app.active .sidebar .sb-item.active .sb-ico,
+#screen-app.active .sidebar .sb-item:hover .sb-ico {
+  background: var(--gov-ui-navy) !important;
+  color: #ffffff !important;
+}
+
+#screen-app.active .sidebar .sb-bottom-container,
+#screen-app.active .sidebar .sb-bottom-container[style] {
+  padding: 12px !important;
+  background: #f7f8f4 !important;
+  border-top: 1px solid var(--gov-ui-border) !important;
+}
+
+#screen-app.active .sidebar .sb-user-card,
+#screen-app.active .sidebar .sb-user-card[style] {
+  border-radius: var(--gov-ui-radius) !important;
+  border: 1px solid var(--gov-ui-border) !important;
+  background: #ffffff !important;
+}
+
+#screen-app.active .app-workspace {
+  top: var(--erp-chrome-h) !important;
+  background: var(--gov-ui-bg) !important;
+}
+
+#screen-app.active .main-content {
+  padding: 18px !important;
+}
+
+#screen-app.active .page-body {
+  display: block !important;
+}
+
+#screen-app.active .view {
+  padding: 0 !important;
+}
+
+#screen-app.active .card,
+#screen-app.active .table-wrap,
+#screen-app.active .console-table-wrap,
+#screen-app.active .data-table-wrap {
+  border-radius: var(--gov-ui-radius) !important;
+  border: 1px solid var(--gov-ui-border) !important;
+  background: var(--gov-ui-surface) !important;
+  box-shadow: var(--gov-ui-shadow-soft) !important;
+  overflow: hidden !important;
+}
+
+#screen-app.active .card:hover {
+  transform: none !important;
+  box-shadow: var(--gov-ui-shadow) !important;
+}
+
+#screen-app.active .card-hd,
+#screen-app.active .card-hd[style] {
+  padding: 14px 16px !important;
+  min-height: 54px !important;
+  border-bottom: 1px solid var(--gov-ui-border) !important;
+  background: linear-gradient(180deg, #ffffff, #fbfcfa) !important;
+}
+
+html.dark #screen-app.active .card-hd {
+  background: linear-gradient(180deg, #111827, #172033) !important;
+}
+
+#screen-app.active .card-title {
+  font-size: 16px !important;
+  line-height: 1.25 !important;
+  font-weight: 800 !important;
+  color: var(--gov-ui-navy) !important;
+}
+
+#screen-app.active .card-sub {
+  font-size: 12.5px !important;
+  line-height: 1.45 !important;
+  color: var(--gov-ui-soft) !important;
+}
+
+#screen-app.active .card-bd,
+#screen-app.active .card-bd[style] {
+  padding: 16px !important;
+}
+
+#screen-app.active .btn,
+#screen-app.active button.btn {
+  min-height: 34px !important;
+  padding: 7px 13px !important;
+  border-radius: 7px !important;
+  font-size: 12.5px !important;
+  font-weight: 750 !important;
+  box-shadow: none !important;
+  transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.16s ease !important;
+}
+
+#screen-app.active .btn:hover,
+#screen-app.active button.btn:hover {
+  transform: translateY(-1px) !important;
+}
+
+#screen-app.active .btn-primary,
+#screen-app.active .btn-saffron {
+  background: var(--gov-ui-navy) !important;
+  border-color: var(--gov-ui-navy) !important;
+  color: #ffffff !important;
+}
+
+#screen-app.active .btn-navy {
+  background: var(--gov-ui-navy-2) !important;
+  border-color: var(--gov-ui-navy-2) !important;
+}
+
+#screen-app.active .btn-green,
+#screen-app.active .btn-teal {
+  background: var(--gov-ui-green) !important;
+  border-color: var(--gov-ui-green) !important;
+}
+
+#screen-app.active .btn-outline {
+  background: #ffffff !important;
+  border-color: var(--gov-ui-border) !important;
+  color: var(--gov-ui-slate) !important;
+}
+
+#screen-app.active .btn-outline:hover {
+  background: #eef4ec !important;
+  border-color: var(--gov-ui-border-strong) !important;
+  color: var(--gov-ui-navy) !important;
+}
+
+#screen-app.active .btn-danger {
+  background: #fff5f4 !important;
+  border-color: #f3c8c3 !important;
+  color: var(--gov-ui-danger) !important;
+}
+
+#screen-app.active input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+#screen-app.active textarea,
+#screen-app.active select {
+  border: 1px solid var(--gov-ui-border) !important;
+  border-radius: 7px !important;
+  background: #ffffff !important;
+  color: var(--text) !important;
+  min-height: 36px !important;
+  box-shadow: inset 0 1px 0 rgba(15, 23, 42, 0.03) !important;
+}
+
+#screen-app.active input:focus,
+#screen-app.active textarea:focus,
+#screen-app.active select:focus {
+  border-color: var(--gov-ui-gold) !important;
+  box-shadow: 0 0 0 3px rgba(185, 139, 59, 0.14) !important;
+}
+
+#screen-app.active label {
+  color: var(--gov-ui-slate) !important;
+  font-weight: 700 !important;
+}
+
+#screen-app.active .upload-zone,
+#screen-app.active .upload-zone[style],
+#screen-app.active [class*="upload"][style*="dashed"] {
+  border: 1px dashed var(--gov-ui-border-strong) !important;
+  border-radius: var(--gov-ui-radius) !important;
+  background: linear-gradient(180deg, #ffffff, #f8faf7) !important;
+  box-shadow: none !important;
+}
+
+#screen-app.active .upload-zone:hover,
+#screen-app.active .upload-zone.dragover {
+  border-color: var(--gov-ui-green) !important;
+  background: #eef8f2 !important;
+}
+
+#screen-app.active .file-item,
+#screen-app.active .file-row,
+#screen-app.active .attachment-item,
+#screen-app.active [class*="file-card"] {
+  border-radius: var(--gov-ui-radius) !important;
+  border: 1px solid var(--gov-ui-border) !important;
+  background: #ffffff !important;
+}
+
+#screen-app.active .tbl,
+#screen-app.active .console-table,
+#screen-app.active .data-table,
+#screen-app.active table {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  border: 1px solid var(--gov-ui-border) !important;
+  border-radius: var(--gov-ui-radius) !important;
+  overflow: hidden !important;
+  background: #ffffff !important;
+}
+
+#screen-app.active .tbl th,
+#screen-app.active .console-table th,
+#screen-app.active .data-table th,
+#screen-app.active table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #eef4ec !important;
+  color: var(--gov-ui-navy) !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+  border-bottom: 1px solid var(--gov-ui-border-strong) !important;
+}
+
+#screen-app.active .tbl td,
+#screen-app.active .console-table td,
+#screen-app.active .data-table td,
+#screen-app.active table td {
+  border-color: var(--gov-ui-border) !important;
+  color: var(--text) !important;
+}
+
+#screen-app.active .tbl tr:hover td,
+#screen-app.active .console-table tr:hover td,
+#screen-app.active .data-table tr:hover td {
+  background: #fbfcfa !important;
+}
+
+#screen-app.active .status,
+#screen-app.active .badge,
+#screen-app.active .chip,
+#screen-app.active [class*="status-chip"],
+#screen-app.active [class*="status-badge"],
+#screen-app.active [class*="pill"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  min-height: 22px !important;
+  padding: 3px 8px !important;
+  border-radius: 999px !important;
+  border: 1px solid var(--gov-ui-border) !important;
+  background: #f8faf7 !important;
+  color: var(--gov-ui-slate) !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+}
+
+#screen-app.active .status-dot {
+  background: var(--gov-ui-success) !important;
+  box-shadow: 0 0 0 3px rgba(19, 138, 88, 0.12) !important;
+}
+
+#screen-app.active .empty,
+#screen-app.active .empty-state,
+#screen-app.active .tb-empty-note {
+  border-radius: var(--gov-ui-radius) !important;
+  border: 1px dashed var(--gov-ui-border-strong) !important;
+  background: #fbfcfa !important;
+  color: var(--gov-ui-soft) !important;
+}
+
+body.sidebar-hidden #screen-app.active .sidebar {
+  width: 72px !important;
+  transform: none !important;
+}
+
+body.sidebar-hidden #screen-app.active .app-workspace {
+  left: 72px !important;
+}
+
+body.sidebar-hidden #screen-app.active .sidebar .sb-head span,
+body.sidebar-hidden #screen-app.active .sidebar .sb-section-lbl,
+body.sidebar-hidden #screen-app.active .sidebar .sb-item > span:not(.sb-ico),
+body.sidebar-hidden #screen-app.active .sidebar .sb-user-card > div:not(.sb-avatar-circle),
+body.sidebar-hidden #screen-app.active .sidebar .sb-logout-btn {
+  opacity: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
+}
+
+body.sidebar-hidden #screen-app.active .sidebar .sb-item,
+body.sidebar-hidden #screen-app.active .sidebar .sb-item[style] {
+  justify-content: center !important;
+  padding: 6px !important;
+}
+
+body.sidebar-hidden #screen-app.active .sidebar .sb-ico,
+body.sidebar-hidden #screen-app.active .sidebar .sb-ico[style] {
+  margin: 0 !important;
+}
+
+@media (max-width: 1100px) {
+  :root {
+    --erp-chrome-h: 92px;
+  }
+
+  #screen-app.active .gov-enterprise-search {
+    min-width: 210px !important;
+  }
+
+  #screen-app.active .gov-enterprise-nav-row {
+    overflow-x: auto !important;
+  }
+}
+
+@media (max-width: 760px) {
+  :root {
+    --erp-chrome-h: 76px;
+  }
+
+  #screen-app.active .gov-enterprise-brand-row {
+    height: 48px !important;
+    padding: 6px 10px !important;
+  }
+
+  #screen-app.active .gov-enterprise-nav-row,
+  #screen-app.active .gov-enterprise-notice {
+    display: none !important;
+  }
+
+  #screen-app.active .gov-logo,
+  #screen-app.active .gov-iit-logo {
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  #screen-app.active .gov-brand-title {
+    font-size: 12px !important;
+  }
+
+  #screen-app.active .gov-brand-subtitle,
+  #screen-app.active .gov-enterprise-search,
+  #screen-app.active .gov-emgsm-badge,
+  #screen-app.active .gov-profile-chip span,
+  #screen-app.active .dash-btn-logout span {
+    display: none !important;
+  }
+
+  #screen-app.active .main-content {
+    padding: 10px !important;
+  }
+
+  #screen-app.active .card-bd,
+  #screen-app.active .card-bd[style] {
+    padding: 12px !important;
+  }
+}
