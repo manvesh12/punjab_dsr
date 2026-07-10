@@ -77,6 +77,10 @@ model User {
 
   refreshTokens RefreshToken[]
   passwordResetRequests PasswordResetRequest[]
+
+  @@index([role, active])
+  @@index([district, role])
+  @@index([createdAt])
 }
 
 model RefreshToken {
@@ -87,6 +91,9 @@ model RefreshToken {
   revoked   Boolean  @default(false)
   expiresAt DateTime
   createdAt DateTime @default(now())
+
+  @@index([userId, revoked, expiresAt])
+  @@index([expiresAt])
 }
 
 model Project {
@@ -121,6 +128,9 @@ model Project {
 
   @@index([parentPhaseId])
   @@index([district, phaseNo])
+  @@index([status, createdAt])
+  @@index([createdBy, createdAt])
+  @@index([district, status, createdAt])
 }
 
 model Report {
@@ -136,6 +146,10 @@ model Report {
   approvedBy   BigInt?
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
+
+  @@index([projectId, status])
+  @@index([status, createdAt])
+  @@index([submittedBy, createdAt])
 }
 
 model WorkflowHistory {
@@ -145,6 +159,10 @@ model WorkflowHistory {
   remarks     String?
   performedBy BigInt?
   performedAt DateTime @default(now())
+
+  @@index([reportId, performedAt])
+  @@index([performedBy, performedAt])
+  @@index([action, performedAt])
 }
 
 model AuditLog {
@@ -158,6 +176,11 @@ model AuditLog {
   status    Int?
   metadata  Json?
   createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
+  @@index([method, path, createdAt])
+  @@index([status, createdAt])
 }
 
 model DsrFile {
@@ -172,6 +195,9 @@ model DsrFile {
   project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@unique([projectId, annexureId])
+  @@index([projectId, createdAt])
+  @@index([annexureId])
+  @@index([objectKey])
 }
 
 model ModelDsr {
@@ -199,6 +225,11 @@ model ModelDsr {
   previewCache ModelPreviewCache?
   
   generated   GeneratedDsr[]
+
+  @@index([status, createdAt])
+  @@index([district, status])
+  @@index([createdBy, createdAt])
+  @@index([category, status])
 }
 
 model ModelDsrSection {
@@ -214,6 +245,8 @@ model ModelDsrSection {
   model         ModelDsr           @relation(fields: [modelId], references: [id], onDelete: Cascade)
 
   @@unique([modelId, sequence])
+  @@index([modelId, isIncluded])
+  @@index([contentType])
 }
 
 model ModelDsrFile {
@@ -227,6 +260,9 @@ model ModelDsrFile {
   createdAt   DateTime @default(now())
   
   model       ModelDsr @relation(fields: [modelId], references: [id], onDelete: Cascade)
+
+  @@index([modelId, createdAt])
+  @@index([fileType])
 }
 
 model ModelDsrVersion {
@@ -239,6 +275,8 @@ model ModelDsrVersion {
   remarks       String?
 
   model         ModelDsr @relation(fields: [modelId], references: [id], onDelete: Cascade)
+
+  @@index([modelId, createdAt])
 }
 
 model ModelDsrTag {
@@ -260,6 +298,7 @@ model ModelDsrPermission {
   model     ModelDsr @relation(fields: [modelId], references: [id], onDelete: Cascade)
 
   @@unique([modelId, userId])
+  @@index([userId, accessLevel])
 }
 
 model ModelImportHistory {
@@ -273,6 +312,10 @@ model ModelImportHistory {
   
   model       ModelDsr @relation(fields: [modelId], references: [id], onDelete: Cascade)
   project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([modelId, importedAt])
+  @@index([projectId, importedAt])
+  @@index([importedBy, importedAt])
 }
 
 model ModelPreviewCache {
@@ -301,6 +344,9 @@ model GeneratedDsr {
   model       ModelDsr            @relation(fields: [modelId], references: [id], onDelete: Restrict)
   project     Project?            @relation(fields: [projectId], references: [id], onDelete: SetNull)
   versions    GeneratedDsrVersion[]
+
+  @@index([modelId, status, createdAt])
+  @@index([projectId, status, createdAt])
 }
 
 model GeneratedDsrVersion {
@@ -311,6 +357,8 @@ model GeneratedDsrVersion {
   createdAt      DateTime      @default(now())
 
   generatedDsr   GeneratedDsr  @relation(fields: [generatedDsrId], references: [id], onDelete: Cascade)
+
+  @@index([generatedDsrId, createdAt])
 }
 
 model PasswordResetRequest {
@@ -324,6 +372,10 @@ model PasswordResetRequest {
   createdAt     DateTime @default(now())
 
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([identifier, used, createdAt])
+  @@index([userId, used, createdAt])
+  @@index([expiresAt])
 }
 
 model OtpVerification {
@@ -335,6 +387,9 @@ model OtpVerification {
   attemptCount  Int      @default(0)
   used          Boolean  @default(false)
   createdAt     DateTime @default(now())
+
+  @@index([identifier, purpose, used, createdAt])
+  @@index([expiresAt])
 }
 
 model Invitation {
@@ -346,6 +401,9 @@ model Invitation {
   expiresAt DateTime
   createdBy BigInt
   createdAt DateTime @default(now())
+
+  @@index([status, expiresAt])
+  @@index([createdBy, createdAt])
 }
 
 model ReplenishmentStudy {
@@ -365,12 +423,18 @@ model ReplenishmentStudy {
   updatedAt       DateTime @updatedAt
 
   project         Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, createdAt])
+  @@index([status, createdAt])
+  @@index([createdBy, createdAt])
 }
 
 model SystemSetting {
   key       String   @id
   value     String
   updatedAt DateTime @updatedAt
+
+  @@index([updatedAt])
 }
 
 model DsrReportChunk {
@@ -382,4 +446,7 @@ model DsrReportChunk {
   createdAt DateTime @default(now())
 
   project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, section])
+  @@index([createdAt])
 }
