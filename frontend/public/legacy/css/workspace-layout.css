@@ -134,10 +134,12 @@ html.dark .sidebar#sidebar::-webkit-scrollbar-thumb {
 }
 
 /* PROJECT WORKSPACE ACTIVE on DESKTOP (≥1025px): Sidebar is visible */
-@media (min-width: 1025px) {
+@media (min-width: 1024px) {
   body.project-workspace-active:not(.sidebar-hidden) .sidebar#sidebar {
     transform: translateX(0) !important;
     opacity: 1;
+    width: var(--sidebar-w, 292px) !important;
+    max-width: var(--sidebar-w, 292px) !important;
   }
 
   body:not(.project-workspace-active) .sidebar#sidebar,
@@ -145,6 +147,7 @@ html.dark .sidebar#sidebar::-webkit-scrollbar-thumb {
     transform: translateX(-120%) !important;
     opacity: 0;
     pointer-events: none;
+    width: var(--sidebar-w, 292px) !important;
   }
 }
 
@@ -154,7 +157,7 @@ html.dark .sidebar#sidebar::-webkit-scrollbar-thumb {
 ────────────────────────────────────────────────────────────────────────── */
 
 /* ── Desktop Workspace Layout ── */
-@media (min-width: 1025px) {
+@media (min-width: 1024px) {
 
   /* Inside project workspace: the main content sits exactly next to sidebar */
   body.project-workspace-active:not(.sidebar-hidden) .app-workspace {
@@ -213,7 +216,7 @@ html.dark .sidebar#sidebar::-webkit-scrollbar-thumb {
    SECTION 6 — TABLET & MOBILE (OVERLAY & DRAWER)
 ────────────────────────────────────────────────────────────────────────── */
 
-@media (max-width: 1024px) {
+@media (max-width: 1023px) {
   .sidebar#sidebar {
     position: fixed !important;
     top: var(--topbar-h) !important;
@@ -257,7 +260,7 @@ html.dark .sidebar#sidebar::-webkit-scrollbar-thumb {
   }
 }
 
-@media (min-width: 769px) and (max-width: 1024px) {
+@media (min-width: 769px) and (max-width: 1023px) {
   .sidebar#sidebar {
     width: min(80vw, 300px) !important;
   }
