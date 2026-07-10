@@ -2131,7 +2131,7 @@ async function realUpdateCustomReportPreview(reportName, reportId) {
   try {
     const reports = loadLocalReports();
     const report = reports.find(r => r.id === reportId);
-    const blob = await window.mdsrGenerateModelDsrPdfBlob(reportName, checkedIds, reportId, report);
+    const blob = await generateReplenishmentPdfBlob(reportName, checkedIds, reportId, report);
     if (blob) {
       if (renderToken !== previewRenderToken) return;
       if (window.activeReplenishmentPdfBlobUrl) {
@@ -2761,7 +2761,8 @@ function getSafeReplenishmentPdfFileName(reportName) {
     .replace(/[^\w\s.-]/g, '')
     .trim()
     .replace(/\s+/g, '_') || 'Replenishment_Report';
-  return `${projectBase}_${reportBase}.pdf`;
+  const suffix = /_?Replenishment_?Report$/i.test(reportBase) ? '' : '_Replenishment_Report';
+  return `${projectBase}_${reportBase}${suffix}.pdf`;
 }
 
 function getReplenishmentUploadCount(report) {
@@ -2885,6 +2886,89 @@ async function uploadReplenishmentPdfToStorage(report, blob, filename, signature
   return report.generatedPdf;
 }
 
+async function refreshReplenishmentInheritanceFromSource(report) {
+  const sourceId = report && report.finalDsrSource && report.finalDsrSource.id;
+  if (!sourceId) return report;
+  try {
+    const sourceProject = await apiFetch(`/projects/${sourceId}`);
+    report.finalDsrSource = {
+      id: sourceProject.id,
+      title: sourceProject.title || sourceProject.projectName || 'Final DSR',
+      district: sourceProject.district || '',
+      year: sourceProject.year || '',
+      status: sourceProject.status || ''
+    };
+    report.inheritanceScan = scanFinalDsrForReplenishment(sourceProject);
+  } catch (err) {
+    console.warn('Could not refresh inherited Final DSR data before PDF generation:', err);
+  }
+  return report;
+}
+
+async function generateReplenishmentPdfBlob(reportName, checkedIds, reportId, reportObj = null) {
+  const report = reportObj || (reportId ? loadLocalReports().find(r => r.id === reportId) : null);
+  if (report) restoreReportFrontMatterPdfs(report);
+
+  const allActiveIds = [...(checkedIds || [])];
+  if (allActiveIds.some(id => String(id).startsWith('fm-')) && !allActiveIds.includes('front-matter')) {
+    allActiveIds.push('front-matter');
+  }
+  if (allActiveIds.some(id => String(id).startsWith('chapter-')) && !allActiveIds.includes('chapters')) {
+    allActiveIds.push('chapters');
+  }
+  if (allActiveIds.some(id => String(id).startsWith('plate-')) && !allActiveIds.includes('plates')) {
+    allActiveIds.push('plates');
+  }
+
+  if (!checkedIds || !checkedIds.length) return null;
+  if (typeof ensurePortalVendors === 'function') {
+    await ensurePortalVendors(['html2pdf']);
+  }
+  if (typeof html2pdf === 'undefined') {
+    throw new Error('PDF export tools are still loading. Please try again.');
+  }
+
+  const html = compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds, reportId);
+  const iframe = document.createElement('iframe');
+  iframe.style.position = 'fixed';
+  iframe.style.left = '-10000px';
+  iframe.style.top = '0';
+  iframe.style.width = '1040px';
+  iframe.style.height = '1400px';
+  iframe.style.border = '0';
+  iframe.style.pointerEvents = 'none';
+  iframe.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(iframe);
+
+  try {
+    iframe.srcdoc = html;
+    await new Promise(resolve => {
+      iframe.onload = () => resolve();
+      setTimeout(resolve, 350);
+    });
+    const body = iframe.contentDocument && iframe.contentDocument.body;
+    const target = body && (body.querySelector('.sheet') || body);
+    if (!target) throw new Error('Could not assemble Replenishment Report content for PDF generation.');
+    iframe.style.height = `${Math.max(1400, body.scrollHeight + 120)}px`;
+
+    return await html2pdf()
+      .set({
+        margin: 0,
+        filename: getSafeReplenishmentPdfFileName(reportName),
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, windowWidth: target.scrollWidth || 1040 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', 'h4'] }
+      })
+      .from(target)
+      .toPdf()
+      .get('pdf')
+      .then(pdf => pdf.output('blob'));
+  } finally {
+    iframe.remove();
+  }
+}
+
 async function downloadStoredReplenishmentPdf(report, metadata) {
   const response = await fetch(`/api/download-pdf?projectId=${encodeURIComponent(S.activeProject.id)}&annexureId=${encodeURIComponent(metadata.annexureId)}`, {
     headers: { Authorization: `Bearer ${localStorage.getItem('dsr_token') || ''}` }
@@ -2914,18 +2998,23 @@ async function generateReplenishmentPDF(reportName, checkedIds, reportId, option
     return;
   }
 
-  const reports = loadLocalReports();
-  let report = reports.find(r => r.id === reportId);
-  if (!report && reportId) {
+  let report = null;
+  if (reportId) {
     const fresh = await apiFetch(`/replenishment/${reportId}`);
     report = upsertLocalReport(normalizeBackendReport(fresh));
+  }
+  if (!report) {
+    const reports = loadLocalReports();
+    report = reports.find(r => r.id === reportId);
   }
   if (!report) {
     toast('Open or select a saved replenishment report first.', 'error');
     return;
   }
 
+  reportName = report.name || reportName;
   report.sections = checkedIds;
+  await refreshReplenishmentInheritanceFromSource(report);
   await saveReportToServer(report);
 
   const validationErrors = validateReplenishmentReportForPdf(report, checkedIds);
@@ -2941,23 +3030,16 @@ async function generateReplenishmentPDF(reportName, checkedIds, reportId, option
   }
 
   const signature = getReplenishmentReportSignature(report, checkedIds);
-  const existingPdf = report.generatedPdf;
-  const canReuseExisting = existingPdf && existingPdf.annexureId && existingPdf.signature === signature;
 
   setReplenishmentDownloadBusy(reportId, true, options.triggerButton);
-  showPdfProgressToast(canReuseExisting ? 'Downloading saved PDF...' : 'Generating PDF...');
+  showPdfProgressToast('Generating PDF...');
   
   try {
-    let metadata = existingPdf;
-    if (!canReuseExisting) {
-      const blob = await window.mdsrGenerateModelDsrPdfBlob(reportName, checkedIds, reportId, report);
-      if (!blob) throw new Error('PDF generation failed.');
-      showPdfProgressToast('Saving generated PDF to project...');
-      metadata = await uploadReplenishmentPdfToStorage(report, blob, getSafeReplenishmentPdfFileName(reportName), signature);
-      toast('PDF Generated Successfully', 'success');
-    } else {
-      toast('No report changes detected. Downloading existing generated PDF.', 'info');
-    }
+    const blob = await generateReplenishmentPdfBlob(reportName, checkedIds, reportId, report);
+    if (!blob) throw new Error('PDF generation failed.');
+    showPdfProgressToast('Saving generated PDF to project...');
+    const metadata = await uploadReplenishmentPdfToStorage(report, blob, getSafeReplenishmentPdfFileName(reportName), signature);
+    toast('PDF Generated Successfully', 'success');
 
     showPdfProgressToast('Starting PDF download...');
     await downloadStoredReplenishmentPdf(report, metadata);
