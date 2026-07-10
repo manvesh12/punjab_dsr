@@ -130,25 +130,70 @@ usersRouter.post("/invite", async (req, res) => {
     return;
   }
   const role = normalizeRole(req.body?.role);
+  const fullName = String(req.body?.fullName || "").trim() || null;
+  const department = String(req.body?.department || "").trim() || null;
+  const designation = String(req.body?.designation || "").trim() || null;
+  const state = String(req.body?.state || "Punjab").trim() || "Punjab";
+  const district = String(req.body?.district || "").trim() || null;
+  const mobileNumber = String(req.body?.mobileNumber || "").trim() || null;
 
   const existingUser = await prisma.user.findUnique({ where: { email } });
   if (existingUser) {
     res.status(400).json({ error: "User with this email already exists" });
     return;
   }
+  const existingInvitation = await prisma.invitation.findUnique({ where: { email } });
+  if (
+    existingInvitation &&
+    !["CANCELLED", "EXPIRED", "REGISTERED"].includes(existingInvitation.status) &&
+    existingInvitation.expiresAt >= new Date()
+  ) {
+    res.status(409).json({ error: "An active invitation already exists for this email" });
+    return;
+  }
 
   const token = crypto.randomBytes(32).toString("hex");
-  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
-  // Upsert invitation
-  await prisma.invitation.upsert({
+  const invitation = await prisma.invitation.upsert({
     where: { email },
-    update: { token, role, expiresAt, status: "PENDING", createdBy: req.user!.id },
-    create: { email, token, role, expiresAt, createdBy: req.user!.id }
+    update: {
+      token,
+      role,
+      fullName,
+      department,
+      designation,
+      state,
+      district,
+      mobileNumber,
+      expiresAt,
+      status: "INVITED",
+      createdBy: req.user!.id,
+      pendingProfile: undefined,
+      pendingPasswordHash: null,
+      otpResendCount: 0,
+      otpLastSentAt: null,
+      registeredAt: null
+    },
+    create: {
+      email,
+      token,
+      role,
+      fullName,
+      department,
+      designation,
+      state,
+      district,
+      mobileNumber,
+      expiresAt,
+      status: "INVITED",
+      createdBy: req.user!.id
+    }
   });
 
   try {
     await sendInvitationEmail(email, token, role);
+    await prisma.invitation.update({ where: { id: invitation.id }, data: { status: "EMAIL_SENT" } });
   } catch (e: any) {
     console.error("Failed to send invitation email", e);
     res.status(500).json({ error: "Failed to send email: " + (e.message || "Unknown error") });
@@ -279,14 +324,25 @@ usersRouter.post("/invite/bulk", upload.single("file"), async (req, res) => {
       }
 
       const token = crypto.randomBytes(32).toString("hex");
-      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
       const role = normalizedRole as Role;
 
       try {
-        await prisma.invitation.upsert({
+        const activeInvitation = await prisma.invitation.findUnique({ where: { email: targetEmail } });
+        if (
+          activeInvitation &&
+          !["CANCELLED", "EXPIRED", "REGISTERED"].includes(activeInvitation.status) &&
+          activeInvitation.expiresAt >= new Date()
+        ) {
+          failedCount++;
+          errors.push({ row: i + 2, email: email || phone, reason: "Active invitation already exists" });
+          continue;
+        }
+
+        const invitation = await prisma.invitation.upsert({
           where: { email: targetEmail },
-          update: { token, role, expiresAt, status: "PENDING", createdBy: req.user!.id },
-          create: { email: targetEmail, token, role, expiresAt, createdBy: req.user!.id }
+          update: { token, role, expiresAt, status: "INVITED", createdBy: req.user!.id, otpResendCount: 0, otpLastSentAt: null, registeredAt: null },
+          create: { email: targetEmail, token, role, expiresAt, status: "INVITED", createdBy: req.user!.id }
         });
 
         if (isPhoneInvite) {
@@ -294,7 +350,9 @@ usersRouter.post("/invite/bulk", upload.single("file"), async (req, res) => {
           console.log(`[MOCK SMS] Invitation SMS sent to ${cleanPhone}: Use this link to register: http://localhost:8081/register.html?token=${token}`);
         } else {
           // Send email in background (fire-and-forget) to speed up API response
-          sendInvitationEmail(targetEmail, token, role).catch(err => {
+          sendInvitationEmail(targetEmail, token, role).then(() => {
+            return prisma.invitation.update({ where: { id: invitation.id }, data: { status: "EMAIL_SENT" } });
+          }).catch(err => {
             console.error(`Background email failed for ${targetEmail}:`, err);
           });
         }

@@ -190,7 +190,7 @@ export const sendInvitationEmail = async (toEmail: string, token: string, role: 
   const roleDisplay = role.replace(/_/g, ' ').replace(/\w\S*/g, (w) => (w.replace(/^\w/, (c) => c.toUpperCase())));
 
   const subject = 'Registration Link - Punjab DSR Portal';
-  const text = `Your registration on the Punjab DSR Portal has been initiated as a ${roleDisplay}.\n\nPlease click the link below to complete your registration:\n${inviteLink}\n\nThis link is valid for 24 hours.`;
+  const text = `Your registration on the Punjab DSR Portal has been initiated as a ${roleDisplay}.\n\nPlease click the link below to complete your registration:\n${inviteLink}\n\nThis link is valid for 7 days.`;
   const html = `
     <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
       <div style="background-color: #1e3a8a; padding: 24px; text-align: center;">
@@ -205,7 +205,7 @@ export const sendInvitationEmail = async (toEmail: string, token: string, role: 
         </div>
         <p style="color: #6b7280; font-size: 14px; margin-bottom: 8px;">If the button doesn't work, copy and paste this link into your browser:</p>
         <p style="word-break: break-all; color: #2563eb; font-size: 14px; margin-top: 0; background-color: #eff6ff; padding: 12px; border-radius: 6px;">${inviteLink}</p>
-        <p style="color: #ef4444; font-size: 14px; font-weight: 500; margin-top: 24px;">Note: This registration link is valid for 24 hours.</p>
+        <p style="color: #ef4444; font-size: 14px; font-weight: 500; margin-top: 24px;">Note: This registration link is valid for 7 days and can only be used by this invited email address.</p>
       </div>
       <div style="background-color: #f9fafb; padding: 16px; text-align: center; border-top: 1px solid #e5e7eb;">
         <p style="color: #9ca3af; font-size: 12px; margin: 0;">&copy; ${new Date().getFullYear()} Government of Punjab. All rights reserved.</p>
@@ -220,4 +220,49 @@ export const sendInvitationEmail = async (toEmail: string, token: string, role: 
     console.error(`[EMAIL ERROR] Failed to send Invitation to ${toEmail}:`, error);
     throw new Error('Failed to send email');
   }
+};
+
+export const sendInvitationOtpEmail = async (toEmail: string, fullName: string, otp: string) => {
+  const subject = 'Registration OTP - Punjab DSR Portal';
+  const text = `Dear ${fullName},\n\nYour OTP for completing invite-only registration is: ${otp}\n\nThis OTP is valid for 10 minutes. Do not share it with anyone.`;
+  const html = `
+    <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
+      <div style="background-color: #1e3a8a; padding: 24px; text-align: center;">
+        <h2 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">Punjab DSR Portal</h2>
+      </div>
+      <div style="padding: 32px 24px; background-color: #ffffff;">
+        <h3 style="color: #1f2937; margin-top: 0; font-size: 20px;">Registration OTP Verification</h3>
+        <p style="color: #4b5563; font-size: 16px; line-height: 1.5;">Dear ${fullName}, use this OTP to complete your invite-only Smart DSR Portal registration:</p>
+        <div style="background-color: #f3f4f6; padding: 16px; text-align: center; border-radius: 8px; margin: 24px 0;">
+          <h1 style="color: #1e3a8a; margin: 0; font-size: 36px; letter-spacing: 4px; font-weight: 700;">${otp}</h1>
+        </div>
+        <p style="color: #ef4444; font-size: 14px; font-weight: 500;">This OTP is valid for 10 minutes. Please do not share it with anyone.</p>
+      </div>
+      <div style="background-color: #f9fafb; padding: 16px; text-align: center; border-top: 1px solid #e5e7eb;">
+        <p style="color: #9ca3af; font-size: 12px; margin: 0;">&copy; ${new Date().getFullYear()} Government of Punjab. All rights reserved.</p>
+      </div>
+    </div>
+  `;
+  await sendEmail(toEmail, subject, text, html);
+};
+
+export const sendWelcomeEmail = async (toEmail: string, fullName: string) => {
+  const subject = 'Welcome to Punjab DSR Portal';
+  const text = `Dear ${fullName},\n\nYour Smart DSR Portal account has been created successfully. You can now log in using your registered email address.`;
+  const html = `
+    <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
+      <div style="background-color: #166534; padding: 24px; text-align: center;">
+        <h2 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">Punjab DSR Portal</h2>
+      </div>
+      <div style="padding: 32px 24px; background-color: #ffffff;">
+        <h3 style="color: #1f2937; margin-top: 0; font-size: 20px;">Registration Successful</h3>
+        <p style="color: #4b5563; font-size: 16px; line-height: 1.5;">Dear ${fullName}, your Smart DSR Portal account has been created successfully.</p>
+        <p style="color: #4b5563; font-size: 16px; line-height: 1.5;">You may now sign in with your registered email address.</p>
+      </div>
+      <div style="background-color: #f9fafb; padding: 16px; text-align: center; border-top: 1px solid #e5e7eb;">
+        <p style="color: #9ca3af; font-size: 12px; margin: 0;">&copy; ${new Date().getFullYear()} Government of Punjab. All rights reserved.</p>
+      </div>
+    </div>
+  `;
+  await sendEmail(toEmail, subject, text, html);
 };
