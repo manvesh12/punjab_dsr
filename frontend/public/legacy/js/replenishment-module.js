@@ -209,6 +209,85 @@ const REPLENISHMENT_REPORT_ACCORDION_SECTIONS = [
   { id: 'annexures', title: 'Annexures', requirementId: 'annexures', items: ['Mine Layout', 'Geological Map', 'Drainage Map', 'Lease Boundary Map'] }
 ];
 
+const REPLENISHMENT_INTRO_SUBSECTIONS = [
+  'Introduction', 'Physiography', 'Drainage', 'Climate', 'Regional Geology', 'Local Geology',
+  'Description of Mineral', 'Physical & Chemical Characteristics', 'Origin of Mineralisation',
+  'Deposition of Minerals', 'Flora & Fauna', 'Hydrogeology', 'Reserve Calculation',
+  'Production Programme', 'Replenishment Study', 'Enforcement & Monitoring Guidelines',
+  'Methodology', 'Drone Survey', 'Data Processing', 'Cross Sections', 'Grid Calculations', 'Conclusion'
+];
+
+const REPLENISHMENT_EXCEL_MODULES = [
+  ['project-details', 'Project Details', ['Project Name', 'District', 'State', 'Village', 'Block', 'River', 'Mineral', 'Applicant', 'Lease Area']],
+  ['gps-coordinates', 'GPS Coordinates', ['Point ID', 'Latitude', 'Longitude', 'RL', 'Remarks']],
+  ['regional-stratigraphic-sequence', 'Regional Stratigraphic Sequence', ['Age', 'Formation', 'Lithology', 'Thickness', 'Remarks']],
+  ['infrastructure', 'Infrastructure', ['Item', 'Distance', 'Condition', 'Remarks']],
+  ['drainage-basin', 'Drainage Basin', ['River', 'Basin', 'Catchment Area', 'Drainage Pattern', 'Remarks']],
+  ['geological-reserve', 'Geological Reserve', ['Block', 'Area', 'Average Depth', 'Bulk Density', 'Reserve']],
+  ['unfc-reserve', 'UNFC Reserve', ['UNFC Code', 'Measured', 'Indicated', 'Inferred', 'Total']],
+  ['production-programme', 'Production Programme', ['Year', 'Proposed Production', 'Working Days', 'Daily Production', 'Remarks']],
+  ['drone-details', 'Drone Details', ['Drone Model', 'UIN', 'Pilot', 'Flight Date', 'Altitude']],
+  ['instrument-details', 'Instrument Details', ['Instrument', 'Make', 'Model', 'Serial Number', 'Calibration Date']],
+  ['gcp-details', 'GCP Details', ['GCP ID', 'Latitude', 'Longitude', 'RL', 'Observation']],
+  ['dgps-details', 'DGPS Details', ['Station', 'Latitude', 'Longitude', 'RL', 'Instrument']],
+  ['rl-grid-tables', 'RL Grid Tables', ['Grid ID', 'Pre Monsoon RL', 'Post Monsoon RL', 'Difference', 'Area']],
+  ['cross-sections', 'Cross Sections', ['Section ID', 'Chainage', 'Pre RL', 'Post RL', 'Difference']],
+  ['volume-calculation', 'Volume Calculation', ['Section/Grid', 'Area', 'Depth', 'Volume', 'Remarks']],
+  ['replenishment-calculation', 'Replenishment Calculation', ['Reach', 'Pre Volume', 'Post Volume', 'Replenishment', 'Percentage']],
+  ['rainfall-data', 'Rainfall Data', ['Month', 'Rainfall (mm)', 'Normal Rainfall', 'Deviation', 'Source']],
+  ['sediment-sample', 'Sediment Sample', ['Sample ID', 'Location', 'Sand %', 'Silt %', 'Clay %']],
+  ['photo-register', 'Photo Register', ['Photo No', 'Description', 'Location', 'Date', 'Remarks']],
+  ['compliance-checklist', 'Compliance Checklist', ['Condition', 'Compliance Status', 'Evidence', 'Remarks']],
+  ['annexure-index', 'Annexure Index', ['Annexure No', 'Title', 'Description', 'Page Ref']]
+];
+
+const REPLENISHMENT_COVER_ASSETS = [
+  ['governmentLogo', 'Government Logo'],
+  ['companyLogo', 'Company Logo'],
+  ['projectPhoto', 'Project Photograph'],
+  ['minePhoto', 'Mine Photograph'],
+  ['satelliteImage', 'Satellite Image'],
+  ['riverImage', 'River Image']
+];
+
+function defaultEnterpriseBuilder() {
+  return {
+    coverAssets: {},
+    certificates: [],
+    introSubsections: REPLENISHMENT_INTRO_SUBSECTIONS.map((title, index) => ({
+      id: `intro-${index + 1}`,
+      title,
+      enabled: true,
+      text: '',
+      files: []
+    })),
+    excelModules: Object.fromEntries(REPLENISHMENT_EXCEL_MODULES.map(([id, title, columns]) => [id, { id, title, columns, rows: [], files: [] }])),
+    annexures: [],
+    order: ['cover', 'certificates', 'index', ...REPLENISHMENT_INTRO_SUBSECTIONS.map((_, index) => `intro-${index + 1}`), ...REPLENISHMENT_EXCEL_MODULES.map(([id]) => `table-${id}`), 'annexures']
+  };
+}
+
+function ensureEnterpriseBuilder(report) {
+  if (!report.enterpriseBuilder || typeof report.enterpriseBuilder !== 'object') {
+    report.enterpriseBuilder = defaultEnterpriseBuilder();
+  }
+  const defaults = defaultEnterpriseBuilder();
+  report.enterpriseBuilder.coverAssets = report.enterpriseBuilder.coverAssets || {};
+  report.enterpriseBuilder.certificates = Array.isArray(report.enterpriseBuilder.certificates) ? report.enterpriseBuilder.certificates : [];
+  report.enterpriseBuilder.annexures = Array.isArray(report.enterpriseBuilder.annexures) ? report.enterpriseBuilder.annexures : [];
+  report.enterpriseBuilder.introSubsections = Array.isArray(report.enterpriseBuilder.introSubsections) && report.enterpriseBuilder.introSubsections.length
+    ? report.enterpriseBuilder.introSubsections
+    : defaults.introSubsections;
+  report.enterpriseBuilder.excelModules = report.enterpriseBuilder.excelModules || defaults.excelModules;
+  Object.entries(defaults.excelModules).forEach(([id, module]) => {
+    if (!report.enterpriseBuilder.excelModules[id]) report.enterpriseBuilder.excelModules[id] = module;
+  });
+  report.enterpriseBuilder.order = Array.isArray(report.enterpriseBuilder.order) && report.enterpriseBuilder.order.length
+    ? report.enterpriseBuilder.order
+    : defaults.order;
+  return report.enterpriseBuilder;
+}
+
 function getReplenishmentSectionTitle(viewId) {
   const fallback = REPLENISHMENT_SECTION_TITLES[viewId] || String(viewId || '').toUpperCase();
   return typeof getEditableAnnexureTitle === 'function'
@@ -238,7 +317,8 @@ function normalizeBackendReport(study) {
     inheritanceScan: state.inheritanceScan || null,
     replenishmentUploads: state.replenishmentUploads || {},
     manualEntries: state.manualEntries || {},
-    generatedPdf: state.generatedPdf || null
+    generatedPdf: state.generatedPdf || null,
+    enterpriseBuilder: state.enterpriseBuilder || null
   };
 }
 
@@ -322,7 +402,8 @@ async function saveReportToServer(report) {
         inheritanceScan: report.inheritanceScan || null,
         replenishmentUploads: report.replenishmentUploads || {},
         manualEntries: report.manualEntries || {},
-        generatedPdf: report.generatedPdf || null
+        generatedPdf: report.generatedPdf || null,
+        enterpriseBuilder: report.enterpriseBuilder || null
       }
     };
     await apiFetch(`/replenishment/${report.id}`, {
@@ -366,6 +447,18 @@ window.previewReplenishmentSourceItem = previewReplenishmentSourceItem;
 window.previewReplenishmentUploadedItem = previewReplenishmentUploadedItem;
 window.deleteReplenishmentRequirementUpload = deleteReplenishmentRequirementUpload;
 window.downloadReplenishmentUploadedItem = downloadReplenishmentUploadedItem;
+window.handleReplBuilderAssetUpload = handleReplBuilderAssetUpload;
+window.addReplCertificate = addReplCertificate;
+window.updateReplCertificate = updateReplCertificate;
+window.uploadReplCertificateFile = uploadReplCertificateFile;
+window.deleteReplBuilderItem = deleteReplBuilderItem;
+window.updateReplIntro = updateReplIntro;
+window.uploadReplIntroFile = uploadReplIntroFile;
+window.downloadReplExcelTemplate = downloadReplExcelTemplate;
+window.uploadReplExcelModule = uploadReplExcelModule;
+window.addReplAnnexure = addReplAnnexure;
+window.updateReplAnnexure = updateReplAnnexure;
+window.uploadReplAnnexureFile = uploadReplAnnexureFile;
 
 function showReplenishmentOptions(container) {
   container.innerHTML = `
@@ -1685,7 +1778,196 @@ function renderInheritancePanel(report) {
   `;
 }
 
+function replReadFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject(reader.error || new Error('Could not read file'));
+    reader.readAsDataURL(file);
+  });
+}
+
+function replEscapeAttr(value) {
+  return String(value || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+async function saveEnterpriseBuilder(reportId, render = false) {
+  const report = (window.activeReport && window.activeReport.id === reportId) ? window.activeReport : loadLocalReports().find(r => r.id === reportId);
+  if (!report) return;
+  ensureEnterpriseBuilder(report);
+  upsertLocalReport(report);
+  await saveReportToServer(report);
+  if (render) {
+    const editorContainer = document.getElementById('repl-editor-container');
+    if (editorContainer) renderCustomReportGenerator(editorContainer, report);
+  } else {
+    updateCustomReportPreview(report.name || 'Replenishment Report', report.id);
+  }
+}
+
+async function handleReplBuilderAssetUpload(input, reportId, key) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const report = (window.activeReport && window.activeReport.id === reportId) ? window.activeReport : loadLocalReports().find(r => r.id === reportId);
+  if (!report) return;
+  const builder = ensureEnterpriseBuilder(report);
+  builder.coverAssets[key] = { name: file.name, type: file.type, dataUrl: await replReadFileAsDataUrl(file) };
+  await saveEnterpriseBuilder(reportId, true);
+}
+
+async function addReplCertificate(reportId) {
+  const report = (window.activeReport && window.activeReport.id === reportId) ? window.activeReport : loadLocalReports().find(r => r.id === reportId);
+  if (!report) return;
+  ensureEnterpriseBuilder(report).certificates.push({ id: `cert-${Date.now()}`, title: 'Environmental Clearance', number: '', issuedBy: '', issueDate: '', expiryDate: '', remarks: '', files: [] });
+  await saveEnterpriseBuilder(reportId, true);
+}
+
+async function updateReplCertificate(reportId, certId, field, value) {
+  const report = (window.activeReport && window.activeReport.id === reportId) ? window.activeReport : loadLocalReports().find(r => r.id === reportId);
+  const cert = report && ensureEnterpriseBuilder(report).certificates.find(item => item.id === certId);
+  if (!cert) return;
+  cert[field] = value;
+  await saveEnterpriseBuilder(reportId);
+}
+
+async function uploadReplCertificateFile(input, reportId, certId) {
+  const file = input.files && input.files[0];
+  const report = (window.activeReport && window.activeReport.id === reportId) ? window.activeReport : loadLocalReports().find(r => r.id === reportId);
+  const cert = report && ensureEnterpriseBuilder(report).certificates.find(item => item.id === certId);
+  if (!file || !cert) return;
+  cert.files = [{ name: file.name, type: file.type, dataUrl: await replReadFileAsDataUrl(file) }];
+  await saveEnterpriseBuilder(reportId, true);
+}
+
+async function deleteReplBuilderItem(reportId, collection, itemId) {
+  const report = (window.activeReport && window.activeReport.id === reportId) ? window.activeReport : loadLocalReports().find(r => r.id === reportId);
+  if (!report) return;
+  const builder = ensureEnterpriseBuilder(report);
+  if (collection === 'certificates') builder.certificates = builder.certificates.filter(item => item.id !== itemId);
+  if (collection === 'annexures') builder.annexures = builder.annexures.filter(item => item.id !== itemId);
+  await saveEnterpriseBuilder(reportId, true);
+}
+
+async function updateReplIntro(reportId, sectionId, field, value) {
+  const report = (window.activeReport && window.activeReport.id === reportId) ? window.activeReport : loadLocalReports().find(r => r.id === reportId);
+  const section = report && ensureEnterpriseBuilder(report).introSubsections.find(item => item.id === sectionId);
+  if (!section) return;
+  section[field] = field === 'enabled' ? Boolean(value) : value;
+  await saveEnterpriseBuilder(reportId);
+}
+
+async function uploadReplIntroFile(input, reportId, sectionId) {
+  const file = input.files && input.files[0];
+  const report = (window.activeReport && window.activeReport.id === reportId) ? window.activeReport : loadLocalReports().find(r => r.id === reportId);
+  const section = report && ensureEnterpriseBuilder(report).introSubsections.find(item => item.id === sectionId);
+  if (!file || !section) return;
+  section.files = [{ name: file.name, type: file.type, dataUrl: await replReadFileAsDataUrl(file) }];
+  await saveEnterpriseBuilder(reportId, true);
+}
+
+function downloadReplExcelTemplate(moduleId) {
+  const module = REPLENISHMENT_EXCEL_MODULES.find(([id]) => id === moduleId);
+  if (!module) return;
+  const csv = `${module[2].join(',')}\n`;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = `${moduleId}-template.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+async function uploadReplExcelModule(input, reportId, moduleId) {
+  const file = input.files && input.files[0];
+  const report = (window.activeReport && window.activeReport.id === reportId) ? window.activeReport : loadLocalReports().find(r => r.id === reportId);
+  const module = report && ensureEnterpriseBuilder(report).excelModules[moduleId];
+  if (!file || !module) return;
+  module.files = [{ name: file.name, type: file.type, dataUrl: await replReadFileAsDataUrl(file) }];
+  module.rows = [];
+  try {
+    if (window.XLSX && /\.(xlsx|xls|csv)$/i.test(file.name)) {
+      const bytes = await file.arrayBuffer();
+      const workbook = window.XLSX.read(bytes, { type: 'array' });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      module.rows = window.XLSX.utils.sheet_to_json(sheet, { defval: '' });
+    }
+  } catch (error) {
+    console.warn('Could not parse uploaded Excel file for preview:', error);
+  }
+  await saveEnterpriseBuilder(reportId, true);
+}
+
+async function addReplAnnexure(reportId) {
+  const report = (window.activeReport && window.activeReport.id === reportId) ? window.activeReport : loadLocalReports().find(r => r.id === reportId);
+  if (!report) return;
+  ensureEnterpriseBuilder(report).annexures.push({ id: `annx-${Date.now()}`, title: 'New Annexure', description: '', files: [] });
+  await saveEnterpriseBuilder(reportId, true);
+}
+
+async function updateReplAnnexure(reportId, annexureId, field, value) {
+  const report = (window.activeReport && window.activeReport.id === reportId) ? window.activeReport : loadLocalReports().find(r => r.id === reportId);
+  const annexure = report && ensureEnterpriseBuilder(report).annexures.find(item => item.id === annexureId);
+  if (!annexure) return;
+  annexure[field] = value;
+  await saveEnterpriseBuilder(reportId);
+}
+
+async function uploadReplAnnexureFile(input, reportId, annexureId) {
+  const file = input.files && input.files[0];
+  const report = (window.activeReport && window.activeReport.id === reportId) ? window.activeReport : loadLocalReports().find(r => r.id === reportId);
+  const annexure = report && ensureEnterpriseBuilder(report).annexures.find(item => item.id === annexureId);
+  if (!file || !annexure) return;
+  annexure.files = [{ name: file.name, type: file.type, dataUrl: await replReadFileAsDataUrl(file) }];
+  await saveEnterpriseBuilder(reportId, true);
+}
+
+function renderEnterpriseBuilderPanel(report) {
+  const builder = ensureEnterpriseBuilder(report);
+  const rid = replEscapeAttr(report.id);
+  const assetDone = Object.values(builder.coverAssets).filter(Boolean).length;
+  const introDone = builder.introSubsections.filter(item => item.enabled && (item.text || item.files?.length)).length;
+  const tableDone = Object.values(builder.excelModules).filter(module => module.files?.length || module.rows?.length).length;
+  const assetHtml = REPLENISHMENT_COVER_ASSETS.map(([key, label]) => {
+    const asset = builder.coverAssets[key];
+    return `<div class="repl-builder-tile"><div><strong>${label}</strong><span>${asset ? replEscapeAttr(asset.name) : 'Missing upload'}</span></div><button type="button" onclick="document.getElementById('repl-asset-${key}').click()">Upload</button><input id="repl-asset-${key}" type="file" accept="image/*,application/pdf" style="display:none" onchange="window.handleReplBuilderAssetUpload(this, '${rid}', '${key}')"></div>`;
+  }).join('');
+  const certHtml = builder.certificates.map(cert => `<div class="repl-builder-row"><input value="${replEscapeAttr(cert.title)}" oninput="window.updateReplCertificate('${rid}','${cert.id}','title',this.value)" placeholder="Certificate Title"><input value="${replEscapeAttr(cert.number)}" oninput="window.updateReplCertificate('${rid}','${cert.id}','number',this.value)" placeholder="Certificate No."><input value="${replEscapeAttr(cert.issuedBy)}" oninput="window.updateReplCertificate('${rid}','${cert.id}','issuedBy',this.value)" placeholder="Issued By"><input type="date" value="${replEscapeAttr(cert.issueDate)}" oninput="window.updateReplCertificate('${rid}','${cert.id}','issueDate',this.value)"><input type="date" value="${replEscapeAttr(cert.expiryDate)}" oninput="window.updateReplCertificate('${rid}','${cert.id}','expiryDate',this.value)"><button type="button" onclick="document.getElementById('repl-cert-${cert.id}').click()">${cert.files?.length ? 'Replace' : 'Upload'}</button><button type="button" onclick="window.deleteReplBuilderItem('${rid}','certificates','${cert.id}')">Delete</button><input id="repl-cert-${cert.id}" type="file" accept="application/pdf,image/*" style="display:none" onchange="window.uploadReplCertificateFile(this, '${rid}', '${cert.id}')"></div>`).join('');
+  const introHtml = builder.introSubsections.map(section => `<details class="repl-builder-detail"><summary><label><input type="checkbox" ${section.enabled ? 'checked' : ''} onchange="window.updateReplIntro('${rid}','${section.id}','enabled',this.checked)"> ${section.title}</label><span>${section.files?.length ? 'Uploaded' : (section.text ? 'Text' : 'Pending')}</span></summary><textarea oninput="window.updateReplIntro('${rid}','${section.id}','text',this.value)" placeholder="Write content for ${replEscapeAttr(section.title)}">${replEscapeAttr(section.text)}</textarea><button type="button" onclick="document.getElementById('repl-intro-${section.id}').click()">${section.files?.length ? 'Replace File' : 'Upload PDF/DOCX/Image'}</button><input id="repl-intro-${section.id}" type="file" accept=".pdf,.doc,.docx,image/*" style="display:none" onchange="window.uploadReplIntroFile(this, '${rid}', '${section.id}')"></details>`).join('');
+  const excelHtml = Object.values(builder.excelModules).map(module => `<div class="repl-builder-tile"><div><strong>${module.title}</strong><span>${module.files?.length ? replEscapeAttr(module.files[0].name) : `${module.columns.length} template columns`}</span></div><button type="button" onclick="window.downloadReplExcelTemplate('${module.id}')">Template</button><button type="button" onclick="document.getElementById('repl-table-${module.id}').click()">${module.files?.length ? 'Replace' : 'Upload'}</button><input id="repl-table-${module.id}" type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="window.uploadReplExcelModule(this, '${rid}', '${module.id}')"></div>`).join('');
+  const annexureHtml = builder.annexures.map(item => `<div class="repl-builder-row"><input value="${replEscapeAttr(item.title)}" oninput="window.updateReplAnnexure('${rid}','${item.id}','title',this.value)" placeholder="Annexure Title"><input value="${replEscapeAttr(item.description)}" oninput="window.updateReplAnnexure('${rid}','${item.id}','description',this.value)" placeholder="Description"><button type="button" onclick="document.getElementById('repl-annex-${item.id}').click()">${item.files?.length ? 'Replace' : 'Upload'}</button><button type="button" onclick="window.deleteReplBuilderItem('${rid}','annexures','${item.id}')">Delete</button><input id="repl-annex-${item.id}" type="file" accept=".pdf,.doc,.docx,.xlsx,.xls,.csv,image/*" style="display:none" onchange="window.uploadReplAnnexureFile(this, '${rid}', '${item.id}')"></div>`).join('');
+  return `
+    <style>
+      .repl-builder-band{border-top:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;background:#f8fafc;padding:14px 20px}
+      .repl-builder-tabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;max-height:360px;overflow:auto}
+      .repl-builder-module{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:12px}
+      .repl-builder-module h4{margin:0 0 8px;color:#0f172a;font-size:13px}
+      .repl-builder-tile,.repl-builder-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;border:1px solid #e5e7eb;border-radius:6px;padding:8px;margin-bottom:7px;background:#fff}
+      .repl-builder-row{grid-template-columns:repeat(auto-fit,minmax(120px,1fr));}
+      .repl-builder-tile span{display:block;font-size:11px;color:#64748b;margin-top:2px}
+      .repl-builder-module button{border:1px solid #bfdbfe;background:#eff6ff;color:#1d4ed8;border-radius:5px;padding:5px 8px;font-size:11px;font-weight:800;cursor:pointer}
+      .repl-builder-row input,.repl-builder-detail textarea{border:1px solid #cbd5e1;border-radius:5px;padding:7px;font-size:12px;width:100%;box-sizing:border-box}
+      .repl-builder-detail{border:1px solid #e5e7eb;border-radius:6px;padding:8px;margin-bottom:7px;background:#fff}
+      .repl-builder-detail summary{font-size:12px;font-weight:800;color:#1e293b;cursor:pointer;display:flex;justify-content:space-between;gap:10px}
+      .repl-builder-detail textarea{margin-top:8px;min-height:70px;resize:vertical}
+      .repl-status-strip{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+      .repl-status-strip span{font-size:11px;border-radius:999px;padding:3px 8px;background:#ecfdf5;color:#047857;font-weight:800}
+    </style>
+    <div class="repl-builder-band">
+      <div class="repl-status-strip"><span>Cover Assets ${assetDone}/${REPLENISHMENT_COVER_ASSETS.length}</span><span>Certificates ${builder.certificates.length}</span><span>Intro ${introDone}/${builder.introSubsections.length}</span><span>Tables ${tableDone}/${Object.keys(builder.excelModules).length}</span><span>Annexures ${builder.annexures.length}</span></div>
+      <div class="repl-builder-tabs">
+        <div class="repl-builder-module"><h4>Cover Page Assets</h4>${assetHtml}</div>
+        <div class="repl-builder-module"><h4>Certificates <button type="button" onclick="window.addReplCertificate('${rid}')">Add</button></h4>${certHtml || '<p style="font-size:12px;color:#64748b;">No certificates added yet.</p>'}</div>
+        <div class="repl-builder-module"><h4>Introduction Subsections</h4>${introHtml}</div>
+        <div class="repl-builder-module"><h4>Excel Template Modules</h4>${excelHtml}</div>
+        <div class="repl-builder-module"><h4>Annexure Manager <button type="button" onclick="window.addReplAnnexure('${rid}')">Add</button></h4>${annexureHtml || '<p style="font-size:12px;color:#64748b;">No annexures added yet.</p>'}</div>
+      </div>
+    </div>
+  `;
+}
+
 function renderCustomReportGenerator(container, report) {
+  ensureEnterpriseBuilder(report);
   const reportName = report.name;
   const sections = [
     { 
@@ -1919,6 +2201,7 @@ function renderCustomReportGenerator(container, report) {
           </div>
         </div>
       </div>
+      ${renderEnterpriseBuilderPanel(report)}
       ${inheritancePanelHtml}
       <div class="card-bd" style="flex:1; display:grid; grid-template-columns: 1fr 1.2fr; gap:20px; overflow:hidden; padding:20px;">
         <!-- LEFT COLUMN: Checklist -->
@@ -2214,9 +2497,11 @@ function getLivePreviewAnnexureSectionHtml(viewId) {
 }
 
 function compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds, reportId) {
+  let activeEnterpriseReport = null;
   if (reportId) {
     const reports = loadLocalReports();
     const report = reports.find(r => r.id === reportId);
+    activeEnterpriseReport = report || null;
     restoreReportFrontMatterPdfs(report);
   }
 
@@ -2275,6 +2560,84 @@ function compileSelectedSectionsHtml(reportName, checkedIds, allActiveIds, repor
   });
 
   let combinedContent = '';
+
+  if (activeEnterpriseReport) {
+    const builder = ensureEnterpriseBuilder(activeEnterpriseReport);
+    const coverAssets = Object.entries(builder.coverAssets || {}).filter(([, asset]) => asset && asset.dataUrl);
+    if (coverAssets.length) {
+      combinedContent += `
+        <div class="section-block" style="page-break-after:always;">
+          <h2 class="section-title">Cover Page Attachments</h2>
+          <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:12px;">
+            ${coverAssets.map(([key, asset]) => `<figure style="margin:0; border:1px solid #cbd5e1; padding:8px;"><img src="${asset.dataUrl}" style="max-width:100%; height:auto; display:block; margin:0 auto;"><figcaption style="font-size:11px; color:#64748b; margin-top:6px;">${REPLENISHMENT_COVER_ASSETS.find(item => item[0] === key)?.[1] || key}</figcaption></figure>`).join('')}
+          </div>
+        </div>
+      `;
+    }
+    if (builder.certificates?.length) {
+      combinedContent += `<div class="section-block"><h2 class="section-title">Certificates</h2>`;
+      builder.certificates.forEach((cert, index) => {
+        combinedContent += `
+          <div style="page-break-after:always; border:1px solid #cbd5e1; padding:18px; margin-bottom:16px;">
+            <h3 style="margin-top:0;color:#17324d;">${index + 1}. ${cert.title || 'Certificate'}</h3>
+            <table style="width:100%; border-collapse:collapse; font-size:12px; margin-bottom:12px;">
+              <tr><td><strong>Certificate No.</strong></td><td>${cert.number || '-'}</td><td><strong>Issued By</strong></td><td>${cert.issuedBy || '-'}</td></tr>
+              <tr><td><strong>Issue Date</strong></td><td>${cert.issueDate || '-'}</td><td><strong>Expiry Date</strong></td><td>${cert.expiryDate || '-'}</td></tr>
+              <tr><td><strong>Remarks</strong></td><td colspan="3">${cert.remarks || '-'}</td></tr>
+            </table>
+            ${(cert.files || []).map(file => file.dataUrl && file.type?.startsWith('image/') ? `<img src="${file.dataUrl}" style="max-width:100%; display:block; margin:8px auto;">` : `<p style="font-size:12px;color:#334155;">Attached file: ${file.name || 'Certificate document'}</p>`).join('')}
+          </div>
+        `;
+      });
+      combinedContent += `</div>`;
+    }
+    const tocItems = [
+      'Cover Page',
+      ...(builder.certificates || []).map(cert => cert.title || 'Certificate'),
+      ...builder.introSubsections.filter(section => section.enabled && (section.text || section.files?.length)).map(section => section.title),
+      ...Object.values(builder.excelModules).filter(module => module.files?.length || module.rows?.length).map(module => module.title),
+      ...builder.annexures.map(item => item.title || 'Annexure')
+    ];
+    combinedContent += `
+      <div class="section-block" style="page-break-after:always;">
+        <h2 class="section-title">Auto Generated Index</h2>
+        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+          <tbody>${tocItems.map((item, index) => `<tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:8px;">${index + 1}</td><td style="padding:8px;">${item}</td><td style="padding:8px;text-align:right;">Auto</td></tr>`).join('')}</tbody>
+        </table>
+      </div>
+    `;
+    builder.introSubsections.filter(section => section.enabled && (section.text || section.files?.length)).forEach(section => {
+      combinedContent += `
+        <div class="section-block">
+          <h2 class="section-title">${section.title}</h2>
+          ${section.text ? `<p style="font-size:13.5px;line-height:1.7;white-space:pre-wrap;color:#334155;">${section.text}</p>` : ''}
+          ${(section.files || []).map(file => file.dataUrl && file.type?.startsWith('image/') ? `<img src="${file.dataUrl}" style="max-width:100%; display:block; margin:8px auto;">` : `<p style="font-size:12px;color:#334155;">Uploaded file: ${file.name}</p>`).join('')}
+        </div>
+      `;
+    });
+    Object.values(builder.excelModules).filter(module => module.files?.length || module.rows?.length).forEach(module => {
+      const rows = Array.isArray(module.rows) ? module.rows.slice(0, 30) : [];
+      combinedContent += `
+        <div class="section-block">
+          <h2 class="section-title">${module.title}</h2>
+          ${rows.length ? `<table style="width:100%;border-collapse:collapse;font-size:11px;"><thead><tr>${module.columns.map(col => `<th style="border:1px solid #cbd5e1;padding:6px;background:#f8fafc;">${col}</th>`).join('')}</tr></thead><tbody>${rows.map(row => `<tr>${module.columns.map(col => `<td style="border:1px solid #e2e8f0;padding:5px;">${row[col] ?? ''}</td>`).join('')}</tr>`).join('')}</tbody></table>` : `<p style="font-size:12px;color:#334155;">Uploaded table file: ${module.files?.[0]?.name || 'Template data'}</p>`}
+        </div>
+      `;
+    });
+    if (builder.annexures?.length) {
+      combinedContent += `<div class="section-block"><h2 class="section-title">Annexures</h2>`;
+      builder.annexures.forEach((annexure, index) => {
+        combinedContent += `
+          <div style="page-break-after:always; border:1px solid #cbd5e1; padding:18px; margin-bottom:16px;">
+            <h3 style="margin-top:0;color:#17324d;">Annexure ${index + 1}: ${annexure.title || 'Untitled Annexure'}</h3>
+            <p style="font-size:13px;color:#334155;">${annexure.description || ''}</p>
+            ${(annexure.files || []).map(file => file.dataUrl && file.type?.startsWith('image/') ? `<img src="${file.dataUrl}" style="max-width:100%; display:block; margin:8px auto;">` : `<p style="font-size:12px;color:#334155;">Attached file: ${file.name || 'Annexure document'}</p>`).join('')}
+          </div>
+        `;
+      });
+      combinedContent += `</div>`;
+    }
+  }
 
   orderedIds.forEach(item => {
     let sectionHtml = '';
