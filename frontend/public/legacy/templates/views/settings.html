@@ -157,14 +157,21 @@
     const nextText = String(text || '').trim();
     if (!nextText) return;
     window.portalNoticeText = nextText;
-    document.querySelectorAll('[data-i18n="noticeText"]').forEach((el) => {
-      el.textContent = nextText;
-    });
+    if (typeof window.renderNoticeBar === 'function') {
+      window.renderNoticeBar([{ title: nextText, category: 'Information', active: true }]);
+    } else {
+      document.querySelectorAll('[data-i18n="noticeText"]').forEach((el) => {
+        el.textContent = nextText;
+      });
+    }
   }
   window.updateNoticeUI = updateNoticeUI;
 
   function updatePublicAnnouncementsUI(value) {
     const rawValue = typeof value === 'string' ? value : JSON.stringify(value || []);
+    if (typeof window.renderNoticeBar === 'function') {
+      window.renderNoticeBar(rawValue);
+    }
     if (typeof window.renderPublicAnnouncements === 'function') {
       window.renderPublicAnnouncements(rawValue);
     }
@@ -196,6 +203,24 @@
               oninput="_announcementRows[${idx}].title=this.value"
               style="flex:1;padding:6px 10px;font-size:12px;border-radius:4px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.2);color:var(--text);font-family:inherit;">
           </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <select onchange="_announcementRows[${idx}].category=this.value"
+              style="flex:0 0 150px;padding:6px 10px;font-size:12px;border-radius:4px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.2);color:var(--text);font-family:inherit;">
+              ${['Information','Success','Warning','Emergency','Government Circular','Tender','Maintenance'].map(type => `<option value="${type}" ${String(row.category || row.type || 'Information') === type ? 'selected' : ''}>${type}</option>`).join('')}
+            </select>
+            <input type="text" placeholder="Priority (optional)" value="${row.priority || ''}"
+              oninput="_announcementRows[${idx}].priority=this.value"
+              style="flex:0 0 130px;padding:6px 10px;font-size:12px;border-radius:4px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.2);color:var(--text);font-family:inherit;">
+            <input type="text" placeholder="PDF, document, external or internal link" value="${row.url || row.link || row.attachmentUrl || ''}"
+              oninput="_announcementRows[${idx}].url=this.value"
+              style="flex:1;min-width:220px;padding:6px 10px;font-size:12px;border-radius:4px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.2);color:var(--text);font-family:inherit;">
+            <input type="text" placeholder="Expiry (optional)" value="${row.expiryDate || row.expiresAt || ''}"
+              oninput="_announcementRows[${idx}].expiryDate=this.value"
+              style="flex:0 0 150px;padding:6px 10px;font-size:12px;border-radius:4px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.2);color:var(--text);font-family:inherit;">
+            <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-soft);">
+              <input type="checkbox" ${row.active === false || row.disabled === true ? '' : 'checked'} onchange="_announcementRows[${idx}].active=this.checked"> Active
+            </label>
+          </div>
         </div>
         <button onclick="removeAnnouncementRow(${idx})" title="Remove" style="background:none;border:none;color:#ef4444;cursor:pointer;padding:4px;display:flex;align-items:center;flex-shrink:0;">
           <i data-lucide="x" style="width:16px;height:16px;"></i>
@@ -208,7 +233,7 @@
     const now = new Date();
     const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
     const dateStr = `${String(now.getDate()).padStart(2,'0')} ${months[now.getMonth()]} ${now.getFullYear()}`;
-    _announcementRows.unshift({ date: dateStr, title: '' });
+    _announcementRows.unshift({ date: dateStr, title: '', category: 'Information', active: true });
     renderAnnouncementsEditor();
   }
   window.addAnnouncementRow = addAnnouncementRow;
@@ -223,7 +248,16 @@
     try {
       const arr = JSON.parse(jsonString);
       if (Array.isArray(arr)) {
-        _announcementRows = arr.map(it => ({ date: it.date || '', title: it.title || '', url: it.url || 'login.html' }));
+        _announcementRows = arr.map(it => ({
+          date: it.date || it.publishedDate || '',
+          title: it.title || it.heading || '',
+          description: it.description || '',
+          category: it.category || it.type || 'Information',
+          priority: it.priority || '',
+          url: it.url || it.link || it.attachmentUrl || it.pdfUrl || it.documentUrl || '',
+          expiryDate: it.expiryDate || it.expiresAt || it.validUntil || '',
+          active: it.active === false || it.disabled === true ? false : true
+        }));
       }
     } catch(e) {
       _announcementRows = [];
@@ -389,6 +423,10 @@
       if (_announcementRows[idx]) {
         _announcementRows[idx].date = inputs[0] ? inputs[0].value : _announcementRows[idx].date;
         _announcementRows[idx].title = inputs[1] ? inputs[1].value : _announcementRows[idx].title;
+        _announcementRows[idx].priority = inputs[2] ? inputs[2].value : _announcementRows[idx].priority;
+        _announcementRows[idx].url = inputs[3] ? inputs[3].value : _announcementRows[idx].url;
+        _announcementRows[idx].expiryDate = inputs[4] ? inputs[4].value : _announcementRows[idx].expiryDate;
+        _announcementRows[idx].active = inputs[5] ? inputs[5].checked : _announcementRows[idx].active !== false;
       }
     });
     const valid = _announcementRows.filter(r => r.date && r.title);

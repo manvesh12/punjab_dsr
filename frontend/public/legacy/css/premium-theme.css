@@ -6475,12 +6475,63 @@ body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar 
   white-space: nowrap !important;
   font-size: 11px !important;
   font-weight: 800 !important;
-  animation: govNoticeMarquee 22s linear infinite !important;
+  animation: none !important;
+}
+
+.notice-marquee-track {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 42px !important;
+  width: max-content !important;
+  min-width: 200% !important;
+  animation: govNoticeMarquee 38s linear infinite !important;
+  will-change: transform !important;
+}
+
+.dash-notice-marquee-container:hover .notice-marquee-track,
+.dash-notice-marquee-text:hover .notice-marquee-track {
+  animation-play-state: paused !important;
+}
+
+.dash-notice-item {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  color: inherit !important;
+  text-decoration: none !important;
+  white-space: nowrap !important;
+}
+
+.dash-notice-item strong {
+  font-weight: 900 !important;
+}
+
+.dash-notice-item .notice-date,
+.dash-notice-item .notice-priority {
+  opacity: 0.84 !important;
+  font-size: 10px !important;
+  text-transform: uppercase !important;
+}
+
+.dash-notice-item .notice-priority {
+  padding: 1px 6px !important;
+  border-radius: 999px !important;
+  background: rgba(255,255,255,0.16) !important;
+}
+
+.dash-notice-item .notice-attachment {
+  font-family: 'Material Symbols Outlined', sans-serif !important;
+  font-size: 14px !important;
+  line-height: 1 !important;
+}
+
+.dash-notice-marquee-text.notice-empty {
+  animation: none !important;
 }
 
 @keyframes govNoticeMarquee {
-  0% { transform: translateX(100%); }
-  100% { transform: translateX(-100%); }
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
 .gov-compact-notice #tb-district-badge {
@@ -7019,7 +7070,7 @@ body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar 
   color: #ffffff !important;
   font-size: 13px !important;
   font-weight: 700 !important;
-  animation: dashNoticeMarquee 24s linear infinite !important;
+  animation: none !important;
 }
 
 .gov-enterprise-notice .tb-district {

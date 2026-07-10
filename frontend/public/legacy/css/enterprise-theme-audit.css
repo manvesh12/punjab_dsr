@@ -1,0 +1,577 @@
+/* Enterprise theme audit layer.
+   Loaded last so legacy hard-coded colors inherit a consistent light/dark palette. */
+:root {
+  color-scheme: light;
+  --theme-bg: #f6f8fb;
+  --theme-bg-subtle: #eef3f8;
+  --theme-surface: #ffffff;
+  --theme-surface-2: #f8fafc;
+  --theme-surface-3: #eef4fb;
+  --theme-text: #0f172a;
+  --theme-text-muted: #475569;
+  --theme-text-faint: #64748b;
+  --theme-border: #d8e3ef;
+  --theme-border-strong: #b9c8d8;
+  --theme-primary: #17324d;
+  --theme-primary-hover: #0f4c81;
+  --theme-primary-soft: #e8f1fb;
+  --theme-accent: #c49a58;
+  --theme-accent-soft: #fff4df;
+  --theme-focus: #2563eb;
+  --theme-success: #15803d;
+  --theme-success-soft: #dcfce7;
+  --theme-warning: #b45309;
+  --theme-warning-soft: #fef3c7;
+  --theme-danger: #b91c1c;
+  --theme-danger-soft: #fee2e2;
+  --theme-info: #0369a1;
+  --theme-info-soft: #e0f2fe;
+  --theme-disabled: #94a3b8;
+  --theme-shadow: 0 12px 28px rgba(15, 23, 42, 0.10);
+
+  --bg: var(--theme-bg);
+  --off: var(--theme-surface-2);
+  --card: var(--theme-surface);
+  --white: var(--theme-surface);
+  --border: var(--theme-border);
+  --border-2: var(--theme-border-strong);
+  --text: var(--theme-text);
+  --text-mid: var(--theme-text-muted);
+  --text-soft: var(--theme-text-faint);
+  --text-faint: #8290a3;
+  --primary: #2563eb;
+  --primary-2: #1d4ed8;
+  --primary-lt: var(--theme-primary-soft);
+  --saffron: var(--theme-accent);
+  --saffron-2: #a97932;
+  --saffron-lt: var(--theme-accent-soft);
+  --green: var(--theme-success);
+  --green-lt: var(--theme-success-soft);
+  --red: var(--theme-danger);
+  --red-lt: var(--theme-danger-soft);
+  --amber: var(--theme-warning);
+  --amber-lt: var(--theme-warning-soft);
+  --indigo: #4f46e5;
+  --indigo-lt: #e0e7ff;
+  --teal: #0f766e;
+  --teal-lt: #ccfbf1;
+}
+
+html.dark,
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --theme-bg: #07111f;
+  --theme-bg-subtle: #0b1524;
+  --theme-surface: #0f1b2d;
+  --theme-surface-2: #132238;
+  --theme-surface-3: #182a43;
+  --theme-text: #f4f7fb;
+  --theme-text-muted: #c8d3e1;
+  --theme-text-faint: #9aaabe;
+  --theme-border: rgba(148, 163, 184, 0.28);
+  --theme-border-strong: rgba(203, 213, 225, 0.36);
+  --theme-primary: #8fc7ff;
+  --theme-primary-hover: #b7ddff;
+  --theme-primary-soft: rgba(96, 165, 250, 0.16);
+  --theme-accent: #e5bd78;
+  --theme-accent-soft: rgba(229, 189, 120, 0.16);
+  --theme-focus: #93c5fd;
+  --theme-success: #4ade80;
+  --theme-success-soft: rgba(74, 222, 128, 0.15);
+  --theme-warning: #fbbf24;
+  --theme-warning-soft: rgba(251, 191, 36, 0.16);
+  --theme-danger: #f87171;
+  --theme-danger-soft: rgba(248, 113, 113, 0.16);
+  --theme-info: #67e8f9;
+  --theme-info-soft: rgba(103, 232, 249, 0.14);
+  --theme-disabled: #64748b;
+  --theme-shadow: 0 16px 36px rgba(0, 0, 0, 0.38);
+
+  --bg: var(--theme-bg);
+  --off: var(--theme-surface-2);
+  --card: var(--theme-surface);
+  --white: var(--theme-surface);
+  --border: var(--theme-border);
+  --border-2: var(--theme-border-strong);
+  --text: var(--theme-text);
+  --text-mid: var(--theme-text-muted);
+  --text-soft: var(--theme-text-faint);
+  --text-faint: #8090a5;
+  --primary: #8fc7ff;
+  --primary-2: #b7ddff;
+  --primary-lt: var(--theme-primary-soft);
+  --saffron: var(--theme-accent);
+  --saffron-2: #f2d39b;
+  --saffron-lt: var(--theme-accent-soft);
+  --green: var(--theme-success);
+  --green-lt: var(--theme-success-soft);
+  --red: var(--theme-danger);
+  --red-lt: var(--theme-danger-soft);
+  --amber: var(--theme-warning);
+  --amber-lt: var(--theme-warning-soft);
+  --indigo: #a5b4fc;
+  --indigo-lt: rgba(165, 180, 252, 0.16);
+  --teal: #5eead4;
+  --teal-lt: rgba(94, 234, 212, 0.15);
+}
+
+body,
+.screen,
+.app-workspace,
+.main-content,
+.dash-portal-wrapper,
+#screen-app,
+#screen-auth,
+#screen-authority,
+[id^="view-"] {
+  background-color: var(--theme-bg) !important;
+  color: var(--theme-text) !important;
+}
+
+html.dark body {
+  background:
+    radial-gradient(circle at 15% 40%, rgba(59, 130, 246, 0.06) 0%, transparent 42%),
+    radial-gradient(circle at 80% 20%, rgba(229, 189, 120, 0.05) 0%, transparent 42%),
+    var(--theme-bg) !important;
+}
+
+.card,
+.card-bd,
+.modal-box,
+.dialog,
+.panel,
+.section-card,
+.header-row,
+.proj-card,
+.projects-empty-state,
+.auth-right,
+.auth-tabs,
+.dashboard-card,
+.dash-card,
+.dash-stat-card,
+.dash-quick-card,
+.dash-district-context-card,
+.upload-zone,
+.upload-card,
+.editor-shell,
+.preview-shell,
+.pdf-preview-panel,
+.pdf-preview,
+.live-preview,
+.map-panel,
+.chart-card,
+.accordion,
+.tabs,
+.pagination,
+.tooltip,
+.toast,
+.dropdown-menu,
+.tb-dropdown-menu,
+.input-wrap,
+.f-field,
+fieldset {
+  background-color: var(--theme-surface) !important;
+  color: var(--theme-text) !important;
+  border-color: var(--theme-border) !important;
+  box-shadow: var(--theme-shadow);
+}
+
+.dash-global-topbar,
+.topbar,
+.gov-enterprise-topbar,
+.gov-enterprise-brand-row,
+.gov-enterprise-nav-row,
+.gov-compact-header,
+.gov-compact-notice,
+.dash-gov-brand-row,
+.dash-gov-notice-ticker,
+.dash-switcher-bar,
+.dash-gov-utility-strip {
+  background: var(--theme-surface) !important;
+  color: var(--theme-text) !important;
+  border-color: var(--theme-border) !important;
+}
+
+.gov-enterprise-notice,
+.dash-notice-bar,
+.dash-notice-ticker,
+.dash-gov-notice-ticker {
+  background: var(--theme-primary) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+}
+
+html.dark .gov-enterprise-notice,
+html.dark .dash-notice-bar,
+html.dark .dash-notice-ticker,
+html.dark .dash-gov-notice-ticker {
+  color: #07111f !important;
+}
+
+.sidebar,
+.sb-shell,
+.app-sidebar {
+  background: var(--theme-surface) !important;
+  color: var(--theme-text) !important;
+  border-color: var(--theme-border) !important;
+}
+
+.sb-item,
+.sidebar a,
+.sidebar button,
+.tb-sub-nav-btn,
+.dash-action-icon-btn,
+.gov-menu-toggle,
+.gov-profile-chip,
+.gov-logout-btn,
+.switcher-tab,
+.auth-tab,
+.tab,
+.tabs button,
+.accordion button {
+  color: var(--theme-text-muted) !important;
+  border-color: var(--theme-border) !important;
+}
+
+.sb-item:hover,
+.sb-item.active,
+.sidebar a:hover,
+.sidebar button:hover,
+.tb-sub-nav-btn:hover,
+.tb-sub-nav-btn.active,
+.dash-action-icon-btn:hover,
+.gov-menu-toggle:hover,
+.auth-tab.active,
+.tab.active,
+.tabs button[aria-selected="true"],
+.accordion button:hover {
+  background: var(--theme-primary-soft) !important;
+  color: var(--theme-primary-hover) !important;
+  border-color: var(--theme-primary) !important;
+}
+
+h1, h2, h3, h4, h5, h6,
+.page-title,
+.section-title,
+.card-title,
+.stat-val,
+.gov-brand-title,
+.auth-form-title,
+.dash-brand-title,
+.proj-title,
+label,
+legend,
+th {
+  color: var(--theme-text) !important;
+}
+
+p,
+span,
+small,
+.muted,
+.subtle,
+.section-subtitle,
+.card-subtitle,
+.stat-label,
+.gov-brand-subtitle,
+.auth-form-sub,
+.dash-brand-subtitle,
+.proj-meta,
+.empty-text,
+td {
+  border-color: var(--theme-border);
+}
+
+.text-muted,
+.text-soft,
+.help-text,
+.hint,
+.placeholder,
+.dash-quick-description,
+.form-help,
+caption {
+  color: var(--theme-text-faint) !important;
+}
+
+a:not(.btn):not(.button):not(.switcher-tab) {
+  color: var(--theme-primary-hover);
+}
+
+html.dark a:not(.btn):not(.button):not(.switcher-tab) {
+  color: var(--theme-primary);
+}
+
+input,
+textarea,
+select,
+.input,
+.search,
+.gov-enterprise-search,
+.gov-compact-search,
+[contenteditable="true"] {
+  background: var(--theme-surface-2) !important;
+  color: var(--theme-text) !important;
+  border: 1px solid var(--theme-border) !important;
+  box-shadow: none !important;
+}
+
+input::placeholder,
+textarea::placeholder,
+.gov-enterprise-search input::placeholder {
+  color: var(--theme-text-faint) !important;
+  opacity: 1 !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+button:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible {
+  border-color: var(--theme-focus) !important;
+  outline: 2px solid color-mix(in srgb, var(--theme-focus) 52%, transparent) !important;
+  outline-offset: 2px;
+}
+
+input:disabled,
+textarea:disabled,
+select:disabled,
+button:disabled,
+.disabled,
+[aria-disabled="true"] {
+  color: var(--theme-disabled) !important;
+  background: var(--theme-surface-3) !important;
+  border-color: var(--theme-border) !important;
+  opacity: 0.72;
+}
+
+.btn,
+button.btn,
+.btn-primary,
+.primary-btn,
+.gov-enterprise-topbar .gov-emgsm-badge {
+  background: var(--theme-primary) !important;
+  color: #ffffff !important;
+  border-color: var(--theme-primary) !important;
+}
+
+html.dark .btn,
+html.dark button.btn,
+html.dark .btn-primary,
+html.dark .primary-btn,
+html.dark .gov-enterprise-topbar .gov-emgsm-badge {
+  color: #07111f !important;
+}
+
+.btn:hover,
+button.btn:hover,
+.btn-primary:hover,
+.primary-btn:hover {
+  background: var(--theme-primary-hover) !important;
+  border-color: var(--theme-primary-hover) !important;
+}
+
+.btn-secondary,
+.secondary-btn,
+.btn-outline,
+.outline-btn,
+.ghost-btn,
+.btn-ghost {
+  background: var(--theme-surface-2) !important;
+  color: var(--theme-text) !important;
+  border-color: var(--theme-border-strong) !important;
+}
+
+.btn-secondary:hover,
+.secondary-btn:hover,
+.btn-outline:hover,
+.outline-btn:hover,
+.ghost-btn:hover,
+.btn-ghost:hover {
+  background: var(--theme-primary-soft) !important;
+  color: var(--theme-primary-hover) !important;
+}
+
+.btn-danger,
+.danger,
+.delete,
+.form-err,
+.error {
+  background: var(--theme-danger-soft) !important;
+  color: var(--theme-danger) !important;
+  border-color: color-mix(in srgb, var(--theme-danger) 45%, transparent) !important;
+}
+
+.btn-success,
+.success,
+.status-success {
+  background: var(--theme-success-soft) !important;
+  color: var(--theme-success) !important;
+  border-color: color-mix(in srgb, var(--theme-success) 45%, transparent) !important;
+}
+
+.warning,
+.status-warning,
+.badge-warning {
+  background: var(--theme-warning-soft) !important;
+  color: var(--theme-warning) !important;
+  border-color: color-mix(in srgb, var(--theme-warning) 45%, transparent) !important;
+}
+
+.info,
+.status-info,
+.badge-info {
+  background: var(--theme-info-soft) !important;
+  color: var(--theme-info) !important;
+  border-color: color-mix(in srgb, var(--theme-info) 45%, transparent) !important;
+}
+
+table,
+.table,
+.tbl,
+.anx-tbl,
+.data-table,
+.console-table {
+  background: var(--theme-surface) !important;
+  color: var(--theme-text) !important;
+  border-color: var(--theme-border) !important;
+}
+
+thead,
+thead tr,
+.tbl th,
+.anx-tbl th,
+.data-table th,
+.console-table th,
+table th {
+  background: var(--theme-surface-3) !important;
+  color: var(--theme-text) !important;
+  border-color: var(--theme-border) !important;
+}
+
+tbody tr,
+.tbl td,
+.anx-tbl td,
+.data-table td,
+.console-table td,
+table td {
+  background: transparent !important;
+  color: var(--theme-text-muted) !important;
+  border-color: var(--theme-border) !important;
+}
+
+tbody tr:hover,
+.tbl tr:hover,
+.anx-tbl tr:hover,
+.data-table tr:hover,
+.console-table tr:hover,
+tr.selected,
+.selected-row {
+  background: var(--theme-primary-soft) !important;
+  color: var(--theme-text) !important;
+}
+
+.badge,
+.chip,
+.status-chip,
+.pill,
+.tag {
+  background: var(--theme-surface-3) !important;
+  color: var(--theme-text) !important;
+  border-color: var(--theme-border) !important;
+}
+
+.progress,
+.progress-track,
+progress {
+  background: var(--theme-surface-3) !important;
+  border-color: var(--theme-border) !important;
+}
+
+.progress-bar,
+progress::-webkit-progress-value {
+  background: var(--theme-primary) !important;
+}
+
+.modal-overlay {
+  background: rgba(3, 7, 18, 0.66) !important;
+}
+
+.leaflet-container,
+.map,
+.map-container,
+#dash-interactive-map {
+  background: var(--theme-surface-2) !important;
+  color: var(--theme-text) !important;
+  border-color: var(--theme-border) !important;
+}
+
+.leaflet-control,
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: var(--theme-surface) !important;
+  color: var(--theme-text) !important;
+  border-color: var(--theme-border) !important;
+}
+
+.chartjs-tooltip,
+.chart-tooltip,
+.chart-legend,
+.chart-label,
+svg text {
+  color: var(--theme-text) !important;
+  fill: var(--theme-text) !important;
+}
+
+hr,
+.divider,
+.border,
+[class*="border-"] {
+  border-color: var(--theme-border) !important;
+}
+
+svg,
+i[data-lucide],
+.material-symbols-outlined {
+  color: currentColor;
+  stroke: currentColor;
+}
+
+/* Standalone public home page Tailwind utilities that are generated from fixed tokens. */
+html.dark body.bg-surface,
+html.dark .bg-surface,
+html.dark .bg-surface-container-lowest,
+html.dark .bg-surface-container-low,
+html.dark .bg-surface-container,
+html.dark .bg-surface-bright {
+  background-color: var(--theme-bg) !important;
+  color: var(--theme-text) !important;
+}
+
+html.dark .text-on-surface,
+html.dark .text-text-primary,
+html.dark .text-primary,
+html.dark .text-primary-container {
+  color: var(--theme-text) !important;
+}
+
+html.dark .text-on-surface-variant,
+html.dark .text-surface-variant {
+  color: var(--theme-text-muted) !important;
+}
+
+html.dark .bg-primary,
+html.dark .dark\:bg-primary-container {
+  background-color: var(--theme-primary) !important;
+}
+
+html.dark .text-on-primary,
+html.dark .dark\:text-on-primary-container\/80 {
+  color: #07111f !important;
+}
+
+html.dark .bg-secondary,
+html.dark .text-secondary {
+  background-color: var(--theme-accent) !important;
+  color: #07111f !important;
+}

@@ -214,8 +214,71 @@
         .font-large {
           font-size: 1.15em !important;
         }
+        .notice-marquee-track {
+          display: inline-flex;
+          align-items: center;
+          gap: 42px;
+          min-width: 200%;
+          width: max-content;
+          animation: publicNoticeMarquee 38s linear infinite;
+          will-change: transform;
+        }
+        .public-notice-bar:hover .notice-marquee-track {
+          animation-play-state: paused;
+        }
+        .public-notice-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          color: inherit;
+          text-decoration: none;
+          white-space: nowrap;
+        }
+        .public-notice-link strong {
+          font-weight: 800;
+          color: #1E293B;
+        }
+        .public-notice-link .notice-date,
+        .public-notice-link .notice-priority {
+          font-size: 12px;
+          font-weight: 800;
+          color: #8c4f00;
+          text-transform: uppercase;
+        }
+        .public-notice-link .notice-priority {
+          border: 1px solid rgba(140, 79, 0, 0.26);
+          border-radius: 999px;
+          padding: 2px 7px;
+          background: rgba(252, 157, 53, 0.12);
+        }
+        .public-notice-link .notice-attachment {
+          font-family: 'Material Symbols Outlined';
+          font-size: 16px;
+          line-height: 1;
+        }
+        @keyframes publicNoticeMarquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
       </style>
 <link href="css/responsive-overrides.css?v={{ASSET_VERSION}}" rel="stylesheet"/>
+<link href="css/enterprise-theme-audit.css?v={{ASSET_VERSION}}" rel="stylesheet"/>
+<script>
+  (function () {
+    try {
+      var theme = localStorage.getItem('theme');
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    } catch (e) {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  })();
+</script>
 </head>
 <body class="bg-surface text-on-surface font-body-md antialiased subpixel-antialiased selection:bg-primary-container selection:text-on-primary-container">
 <!-- Pre-header (Government Banner) -->
@@ -350,11 +413,15 @@
 </div>
 </section>
 <!-- Latest Updates Banner -->
-<div class="bg-surface border-b border-surface-container-highest py-3 px-sm md:px-gutter">
+<div class="public-notice-bar bg-surface border-b border-surface-container-highest py-3 px-sm md:px-gutter">
 <div class="max-w-container-max mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-sm text-body-md">
-<div class="flex items-center gap-3">
+<div class="flex items-center gap-3 min-w-0 flex-1">
 <span class="bg-secondary-container/20 text-secondary px-2 py-1 rounded text-[12px] font-bold uppercase tracking-wide border border-secondary-container/30">Latest Updates</span>
-<span class="text-on-surface-variant text-body-lg font-medium">District Survey Report preparation and review services are available through the portal.</span>
+<div class="text-on-surface-variant text-body-lg font-medium overflow-hidden whitespace-nowrap min-w-0 flex-1" aria-live="polite">
+<div id="homepage-notice-marquee" class="notice-marquee-track">
+<span>District Survey Report preparation and review services are available through the portal.</span>
+</div>
+</div>
 </div>
 <a class="text-primary hover:text-secondary font-medium text-label-md inline-flex items-center gap-1 transition-colors whitespace-nowrap" href="#notices">
                     View all notices <span class="material-symbols-outlined text-[16px]">arrow_right_alt</span>
@@ -678,25 +745,139 @@
     openDemoModal('Language selected', `${language} has been saved for this browser.`, 'translate');
   }
 
-  function renderPublicAnnouncements(value) {
-    const list = document.getElementById('public-announcements-list');
-    if (!list) return;
+  const NOTICE_EMPTY_TEXT = 'No announcements available.';
+  const NOTICE_REFRESH_INTERVAL_MS = 60000;
+
+  function parseNoticeDate(value) {
+    if (!value) return null;
+    const direct = new Date(value);
+    if (!Number.isNaN(direct.getTime())) return direct;
+    const match = String(value).trim().match(/^(\d{1,2})\s+([A-Za-z]{3,})\s+(\d{4})$/);
+    if (!match) return null;
+    const month = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'].indexOf(match[2].slice(0, 3).toLowerCase());
+    return month >= 0 ? new Date(Number(match[3]), month, Number(match[1])) : null;
+  }
+
+  function getNoticeResource(item) {
+    return item && (item.attachmentUrl || item.attachment || item.pdfUrl || item.documentUrl || item.fileUrl || item.externalLink || item.internalLink || item.link || item.url || '');
+  }
+
+  function isNoticeActive(item, now = new Date()) {
+    if (!item) return false;
+    const status = String(item.status || item.state || '').toLowerCase();
+    if (item.active === false || item.enabled === false || item.disabled === true || status === 'disabled' || status === 'inactive' || status === 'expired') return false;
+    const expires = parseNoticeDate(item.expiresAt || item.expiryDate || item.expireDate || item.validUntil || item.endDate);
+    if (expires && expires.getTime() < new Date(now).setHours(0, 0, 0, 0)) return false;
+    return Boolean(item.title || item.description || item.text || item.message);
+  }
+
+  function normalizeAnnouncements(value) {
     let announcements = [];
     try {
       announcements = Array.isArray(value) ? value : JSON.parse(value || '[]');
     } catch {
       announcements = [];
     }
-    if (!announcements.length) return;
+    return announcements
+      .filter((item) => isNoticeActive(item))
+      .map((item, index) => {
+        const dateValue = item.publishedAt || item.publishedDate || item.date || item.createdAt || '';
+        const parsedDate = parseNoticeDate(dateValue);
+        return {
+          raw: item,
+          index,
+          date: dateValue,
+          dateTime: parsedDate ? parsedDate.getTime() : 0,
+          title: item.title || item.heading || 'Announcement',
+          description: item.description || item.text || item.message || '',
+          category: item.category || item.type || 'Information',
+          priority: item.priority || item.priorityLabel || '',
+          resource: getNoticeResource(item)
+        };
+      })
+      .sort((a, b) => (b.dateTime - a.dateTime) || (a.index - b.index));
+  }
+
+  function createPublicNoticeNode(item, compact = false) {
+    const resource = item.resource;
+    const node = document.createElement(resource ? 'a' : 'span');
+    node.className = 'public-notice-link';
+    if (resource) {
+      node.href = resource;
+      if (/^https?:\/\//i.test(resource) || /\.(pdf|docx?|xlsx?|pptx?)(\?|#|$)/i.test(resource)) {
+        node.target = '_blank';
+        node.rel = 'noopener noreferrer';
+      }
+    }
+
+    const title = document.createElement('strong');
+    title.textContent = item.title;
+    node.appendChild(title);
+
+    if (item.description) {
+      const description = document.createElement('span');
+      description.textContent = compact ? ` - ${item.description}` : item.description;
+      node.appendChild(description);
+    }
+
+    if (item.date) {
+      const date = document.createElement('span');
+      date.className = 'notice-date';
+      date.textContent = item.date;
+      node.appendChild(date);
+    }
+
+    if (item.priority) {
+      const priority = document.createElement('span');
+      priority.className = 'notice-priority';
+      priority.textContent = item.priority;
+      node.appendChild(priority);
+    }
+
+    if (resource) {
+      const icon = document.createElement('span');
+      icon.className = 'notice-attachment';
+      icon.setAttribute('aria-hidden', 'true');
+      icon.textContent = 'attachment';
+      node.appendChild(icon);
+    }
+    return node;
+  }
+
+  function renderHomepageNoticeBar(items, failed = false) {
+    const marquee = document.getElementById('homepage-notice-marquee');
+    if (!marquee) return;
+    marquee.innerHTML = '';
+    const notices = failed ? [] : items;
+    if (!notices.length) {
+      const span = document.createElement('span');
+      span.textContent = NOTICE_EMPTY_TEXT;
+      marquee.appendChild(span);
+      return;
+    }
+    notices.forEach((item) => marquee.appendChild(createPublicNoticeNode(item, true)));
+    notices.forEach((item) => marquee.appendChild(createPublicNoticeNode(item, true)));
+  }
+
+  function renderPublicAnnouncements(value, failed = false) {
+    const list = document.getElementById('public-announcements-list');
+    const announcements = failed ? [] : normalizeAnnouncements(value);
+    renderHomepageNoticeBar(announcements, failed);
+    if (!list) return;
+    if (!announcements.length) {
+      list.innerHTML = '<div class="py-4 px-2 text-body-md text-on-surface-variant">No announcements available.</div>';
+      return;
+    }
     list.innerHTML = '';
     announcements.slice(0, 6).forEach((item) => {
-      const link = document.createElement('a');
+      const link = document.createElement(item.resource ? 'a' : 'div');
       link.className = 'py-4 border-b border-surface-container-highest hover:bg-surface-bright transition-colors group flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-6 px-2';
-      const url = item.url || 'login.html';
-      link.href = url;
-      if (/^https?:\/\//i.test(url)) {
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
+      if (item.resource) {
+        link.href = item.resource;
+        if (/^https?:\/\//i.test(item.resource) || /\.(pdf|docx?|xlsx?|pptx?)(\?|#|$)/i.test(item.resource)) {
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+        }
       }
 
       const date = document.createElement('span');
@@ -705,33 +886,44 @@
 
       const title = document.createElement('span');
       title.className = 'text-body-md text-primary group-hover:text-primary-container transition-colors text-body-lg';
-      title.textContent = item.title || '';
+      title.textContent = [item.title, item.description].filter(Boolean).join(' - ');
 
       link.append(date, title);
+      if (item.priority) {
+        const priority = document.createElement('span');
+        priority.className = 'notice-priority w-fit';
+        priority.textContent = item.priority;
+        link.appendChild(priority);
+      }
       list.appendChild(link);
     });
   }
   window.renderPublicAnnouncements = renderPublicAnnouncements;
+  window.normalizeAnnouncements = normalizeAnnouncements;
 
   async function fetchPublicAnnouncements() {
     const localAnnouncements = localStorage.getItem('publicAnnouncements');
     if (localAnnouncements) renderPublicAnnouncements(localAnnouncements);
     try {
-      const res = await fetch('/api/settings/publicAnnouncements');
-      if (!res.ok) return;
+      const res = await fetch('/api/settings/publicAnnouncements', { cache: 'no-store' });
+      if (!res.ok) throw new Error('Failed to fetch announcements');
       const data = await res.json();
       if (data && data.value) {
         localStorage.setItem('publicAnnouncements', data.value);
         renderPublicAnnouncements(data.value);
+      } else {
+        renderPublicAnnouncements([], true);
       }
     } catch (e) {
       console.error('Error fetching public announcements:', e);
+      if (!localAnnouncements) renderPublicAnnouncements([], true);
     }
   }
 
   // Intercept all links to login.html that shouldn't go to login
   document.addEventListener('DOMContentLoaded', () => {
     fetchPublicAnnouncements();
+    setInterval(fetchPublicAnnouncements, NOTICE_REFRESH_INTERVAL_MS);
     const links = document.querySelectorAll('a[href="login.html"]');
     links.forEach(link => {
       // Get readable text, removing icons

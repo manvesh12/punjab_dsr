@@ -18141,10 +18141,15 @@ function renderDashboardLatestUpdates(jsonString) {
   var list = document.getElementById('dash-latest-updates-list');
   if (!list) return;
   var items = [];
-  try { items = JSON.parse(jsonString); } catch(e) { return; }
+  if (typeof window.normalizeAnnouncements === 'function') {
+    items = window.normalizeAnnouncements(jsonString);
+  } else {
+    try { items = JSON.parse(jsonString); } catch(e) { return; }
+  }
   if (!Array.isArray(items) || items.length === 0) return;
   list.innerHTML = items.map(function(it, idx) {
-    return '<li class="dash-update-item"><div class="dash-update-dot"></div><div class="dash-update-content"><span class="dash-update-text">' + (it.title || '') + '</span><div class="dash-update-meta"><span>' + (it.date || '') + '</span>' + (idx === 0 ? '<span class="dash-badge-new">NEW</span>' : '') + '</div></div></li>';
+    var title = [it.title || '', it.description || ''].filter(Boolean).join(' - ');
+    return '<li class="dash-update-item"><div class="dash-update-dot"></div><div class="dash-update-content"><span class="dash-update-text">' + title + '</span><div class="dash-update-meta"><span>' + (it.date || '') + '</span>' + (idx === 0 ? '<span class="dash-badge-new">NEW</span>' : '') + '</div></div></li>';
   }).join('');
 }
 window.renderDashboardLatestUpdates = renderDashboardLatestUpdates;
