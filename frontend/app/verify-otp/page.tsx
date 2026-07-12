@@ -2,6 +2,8 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { AuthHeader, AuthPage, Alert, Field } from "@/components/auth/auth-card";
+import { Button } from "@/components/ui/button";
 
 function VerifyOtpContent() {
   const [otp, setOtp] = useState("");
@@ -79,55 +81,54 @@ function VerifyOtpContent() {
   const seconds = timer % 60;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full bg-white p-8 rounded shadow-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">Verify OTP</h2>
-        <p className="text-sm text-gray-600 mb-4 text-center">
-          Code sent to <strong>{identifier}</strong>. Expires in {minutes}:{seconds < 10 ? `0${seconds}` : seconds}.
-        </p>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">6-Digit OTP</label>
-            <input
-              type="text"
-              required
-              maxLength={6}
-              className="mt-1 block w-full border border-gray-300 rounded-md p-2 text-center text-lg tracking-widest"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-              placeholder="000000"
-            />
-          </div>
-          {message && <div className="text-sm text-green-600 bg-green-50 p-2 rounded">{message}</div>}
-          {error && <div className="text-sm text-red-600 bg-red-50 p-2 rounded">{error}</div>}
-          <button
-            type="submit"
-            disabled={loading || otp.length !== 6 || timer === 0}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none disabled:opacity-50"
-          >
-            {loading ? "Verifying..." : "Verify OTP"}
-          </button>
-          <button
-            type="button"
-            disabled={resending || cooldown > 0}
-            onClick={handleResend}
-            className="w-full flex justify-center py-2 px-4 border border-blue-900 rounded-md text-sm font-medium text-blue-900 hover:bg-blue-50 disabled:opacity-50"
-          >
-            {resending ? "Sending..." : cooldown > 0 ? `Resend OTP in ${cooldown}s` : "Resend OTP"}
-          </button>
-          <button type="button" onClick={() => router.push("/legacy/login.html")} className="w-full text-sm text-blue-800 hover:underline">
-            Back to Login
-          </button>
-        </form>
-      </div>
-    </div>
+    <AuthPage>
+      <AuthHeader
+        title="Verify OTP"
+        description={
+          identifier
+            ? `Code sent to ${identifier}. Expires in ${minutes}:${seconds < 10 ? `0${seconds}` : seconds}.`
+            : `Code expires in ${minutes}:${seconds < 10 ? `0${seconds}` : seconds}.`
+        }
+      />
+      <form onSubmit={handleSubmit} className="grid gap-4">
+        <Field label="6-Digit OTP">
+          <input
+            type="text"
+            required
+            maxLength={6}
+            className="text-center text-lg tracking-widest"
+            value={otp}
+            onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+            placeholder="000000"
+          />
+        </Field>
+        {message && <Alert tone="success">{message}</Alert>}
+        {error && <Alert tone="error">{error}</Alert>}
+        <Button className="w-full" type="submit" disabled={loading || otp.length !== 6 || timer === 0}>
+          {loading ? "Verifying..." : "Verify OTP"}
+        </Button>
+        <Button className="w-full" type="button" variant="outline" disabled={resending || cooldown > 0} onClick={handleResend}>
+          {resending ? "Sending..." : cooldown > 0 ? `Resend OTP in ${cooldown}s` : "Resend OTP"}
+        </Button>
+        <Button className="w-full" type="button" variant="ghost" onClick={() => router.push("/legacy/login.html")}>
+          Back to Login
+        </Button>
+      </form>
+    </AuthPage>
   );
 }
 
 export default function VerifyOtp() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-50">Loading...</div>}>
+    <Suspense
+      fallback={
+        <AuthPage>
+          <AuthHeader title="Loading..." />
+        </AuthPage>
+      }
+    >
       <VerifyOtpContent />
     </Suspense>
   );
 }
+

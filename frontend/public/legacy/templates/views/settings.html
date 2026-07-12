@@ -1,5 +1,5 @@
 <div id="view-settings" class="view" style="padding: 20px 24px 36px;">
-  <!-- Title Header Row -->
+  
   <div class="header-row" style="margin-bottom: 24px;">
     <div>
       <div class="page-title" style="display: flex; align-items: center; gap: 10px;">
@@ -10,7 +10,7 @@
     </div>
   </div>
 
-  <!-- Modern Pill Tabs Navigation -->
+  
   <div class="settings-tabs" style="display: flex; gap: 6px; margin-bottom: 28px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 4px; border-radius: 8px; max-width: fit-content; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
     <button class="settings-tab active" onclick="switchSettingsTab('general')" style="display: flex; align-items: center; gap: 8px; padding: 10px 20px; border: none; background: var(--p-accent-gold); color: #17324D; font-weight: 700; font-size: 13px; cursor: pointer; border-radius: 6px; transition: all 0.2s;">
       <i data-lucide="sliders" style="width: 14px; height: 14px;"></i>
@@ -22,10 +22,10 @@
     </button>
   </div>
 
-  <!-- General Settings Tab Content -->
+  
   <div id="settings-tab-general" class="settings-tab-content">
     
-    <!-- Row 1: Scrolling Notice Bar (full-width) -->
+    
     <div class="card" style="box-shadow: 0 8px 32px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 24px;">
       <div class="card-hd" style="display: flex; align-items: center; gap: 8px;">
         <i data-lucide="megaphone" style="width: 16px; height: 16px; color: var(--p-accent-gold);"></i>
@@ -47,10 +47,10 @@
       </div>
     </div>
 
-    <!-- Row 2: Notices + Portal Status side by side -->
+    
     <div style="display: grid; grid-template-columns: 1.3fr 0.7fr; gap: 24px; align-items: start;">
 
-      <!-- Homepage Notices & Announcements Card -->
+      
       <div class="card" style="box-shadow: 0 8px 32px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.05);">
         <div class="card-hd" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
           <div style="display: flex; align-items: center; gap: 8px;">
@@ -74,7 +74,7 @@
         </div>
       </div>
 
-      <!-- Contact & Demo Support Card (editable) -->
+      
       <div class="card" style="box-shadow: 0 8px 32px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.01);">
         <div class="card-hd" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
           <div style="display: flex; align-items: center; gap: 8px;">
@@ -96,7 +96,7 @@
               </tr>
             </thead>
             <tbody id="contact-info-tbody">
-              <!-- rows injected by JS -->
+              
             </tbody>
           </table>
           <button class="btn btn-saffron" id="contact-info-save-btn" onclick="saveContactInfo()" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; height: 36px; padding: 0 18px; margin-top: 16px;">
@@ -109,7 +109,7 @@
   </div>
 
 
-  <!-- Users Settings Tab Content -->
+  
   <div id="settings-tab-users" class="settings-tab-content" style="display:none;">
     <div class="header-row" style="margin-bottom: 20px; align-items: center; justify-content: space-between;">
       <div>

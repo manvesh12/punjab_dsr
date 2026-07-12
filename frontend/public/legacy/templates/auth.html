@@ -1,288 +1,222 @@
 <body class="sidebar-hidden premium-body">
-
-  <!-- Interactive Live Grid Background -->
-  <div class="interactive-grid-bg"></div>
-
-  <!-- Ambient Gradient Glow Orbs -->
-  <div class="ambient-glow">
-    <div class="glow-orb glow-orb-1"></div>
-    <div class="glow-orb glow-orb-2"></div>
-    <div class="glow-orb glow-orb-3"></div>
-  </div>
-
-  <!-- UNIVERSAL TRANSLUCENT BACKGROUND WATERMARK -->
-  <img class="global-watermark" src="assets/dsr-logo.png" alt="Watermark" loading="lazy" decoding="async">
-
-  <!-- ═══════════════════════════════════════════════════════════════
-     SCREEN 1 - AUTH
- ═══════════════════════════════════════════════════════════════ -->
-
-  <div id="screen-auth" class="screen active" style="position:relative;">
-
-    <!-- Fixed Top Switcher Bar -->
-    <div class="top-switcher-bar" style="display: flex; justify-content: space-between; align-items: center; background: #0F1C2A; padding: 6px 24px; height: 38px; font-size: 12px; z-index: 10000; position: fixed; top: 0; left: 0; width: 100%; border-bottom: 1px solid #1a2a3a; color: #ffffff; font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box;">
-      <div class="switcher-tabs" style="display: flex; gap: 8px;">
-        <a href="home.html" class="switcher-tab inactive" style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 14px; border-radius: 4px; text-decoration: none; font-weight: 700; font-size: 11px; transition: all 0.2s; background: #233549; color: #ffffff;">
-          <i data-lucide="home" style="width: 12px; height: 12px; stroke-width: 2.5;"></i> Home Page
+  <div id="screen-auth" class="screen active">
+    <div class="top-switcher-bar">
+      <div class="switcher-tabs">
+        <a href="home.html" class="switcher-tab inactive">
+          <i data-lucide="home"></i>
+          <span>Home Page</span>
         </a>
-        <a href="login.html" class="switcher-tab active" style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 14px; border-radius: 4px; text-decoration: none; font-weight: 700; font-size: 11px; transition: all 0.2s; background: #F2A123; color: #17324D;">
-          <i data-lucide="lock" style="width: 12px; height: 12px; stroke-width: 2.5;"></i> Login Page
+        <a href="login.html" class="switcher-tab active">
+          <i data-lucide="lock"></i>
+          <span>Login Page</span>
         </a>
       </div>
-      <div class="switcher-info" style="color: #a0aec0; font-size: 11px; display: flex; align-items: center; gap: 4px;">
-        <i data-lucide="info" style="width: 12px; height: 12px;"></i> Click tabs to switch...
+      <div class="switcher-info">
+        <i data-lucide="info"></i>
+        <span>Use the tabs to switch public and official views</span>
       </div>
     </div>
 
-    <!-- Theme Toggle Switch (Moved inside header nav) -->
-
-    <!-- Top Branding -->
-    <header
-      style="display:flex; justify-content:space-between; align-items:center; padding:25px 60px; background:var(--card); position:absolute; top:38px; left:0; width:100%; z-index:100; border-bottom:1px solid var(--border); box-shadow:0 4px 12px rgba(0,0,0,0.05); box-sizing:border-box;">
-      <div class="logo"
-        style="display:flex; align-items:center; gap:15px; font-size:52px; font-weight:800; color:var(--text);">
-        <img src="assets/dsr-logo.png" alt="DSR Logo" decoding="async" fetchpriority="high"
-          style="width:85px; height:85px; object-fit:contain;   ">
-        <span>DSR REPORT</span>
+    <header class="auth-header">
+      <div class="auth-brand">
+        <img src="assets/dsr-logo.png" alt="DSR Logo" decoding="async" fetchpriority="high">
+        <div>
+          <div class="auth-brand-title">DSR Report</div>
+          <div class="gov-brand-subtitle">District Survey Report Automation Portal</div>
+        </div>
       </div>
-      <nav style="display:flex; align-items:center; gap:12px;">
-        <a href="home.html"
-          style="text-decoration:none; color:var(--text); padding:10px 18px; border:1px solid var(--border); border-radius:10px; background:var(--card); font-size:16px; font-weight:500; transition:all 0.2s;"
-          onmouseover="this.style.background='var(--off)'" onmouseout="this.style.background='var(--card)'">Home</a>
-        <a href="#"
-          style="text-decoration:none; color:var(--text); padding:10px 18px; border:1px solid var(--border); border-radius:10px; background:var(--card); font-size:16px; font-weight:500; transition:all 0.2s;"
-          onmouseover="this.style.background='var(--off)'" onmouseout="this.style.background='var(--card)'">Contact</a>
-        <button class="btn-premium-toggle" type="button" onclick="toggleDarkMode()" aria-label="Toggle theme" data-theme-toggle>
+      <nav class="auth-nav" aria-label="Login page navigation">
+        <a href="home.html" class="btn btn-outline">Home</a>
+        <button class="dash-action-icon-btn" type="button" onclick="toggleDarkMode()" aria-label="Toggle theme" data-theme-toggle>
           <i data-lucide="moon"></i>
         </button>
       </nav>
     </header>
 
-    <!-- Background (Moved to body level) -->
-
-    <!-- Main Container -->
-    <div class="auth-wrap"
-      style="position:relative; z-index:10; justify-content: center; align-items: center; background: transparent; box-shadow: none; padding-top: 170px !important;">
-
-      <!-- CENTERED LOGIN CARD -->
-      <div class="auth-right"
-        style="width: 100%; max-width: 440px; margin: 0 auto; animation: fadeInUp 0.6s ease-out forwards; opacity: 0;">
-
+    <main class="auth-wrap">
+      <section class="auth-right" aria-label="Official login">
         <div class="auth-tabs">
-          <div id="tab-btn-faculty" class="auth-tab active" onclick="switchAuthMode('faculty')">
+          <button id="tab-btn-faculty" class="auth-tab active" type="button" onclick="switchAuthMode('faculty')">
             Faculty / Staff
-          </div>
-          <div id="tab-btn-authority" class="auth-tab" onclick="switchAuthMode('authority')">
+          </button>
+          <button id="tab-btn-authority" class="auth-tab" type="button" onclick="switchAuthMode('authority')">
             Govt. Authority
-          </div>
+          </button>
         </div>
 
-        <!-- Staff Login -->
         <div id="auth-form-faculty" class="auth-form active">
-
-          <div class="auth-form-title">
-            Staff Portal
-          </div>
-
-          <div class="auth-form-sub">
-            Sign in to your DSR Coordinator / Reviewer account
-          </div>
+          <div class="auth-form-title">Staff Portal</div>
+          <div class="auth-form-sub">Sign in to your DSR Coordinator / Reviewer account</div>
 
           <div class="f-field">
-            <label>Email Address</label>
+            <label for="login-email">Email Address</label>
             <div class="input-wrap">
               <input type="email" id="login-email" value="" placeholder="name@domain.gov.in">
             </div>
           </div>
 
           <div class="f-field">
-            <label style="display:flex; justify-content:space-between; width:100%;">
+            <label for="login-pass" class="split-label">
               <span>Password</span>
-              <a href="/forgot-password"
-                style="font-size: 12px; color: #2563eb; text-decoration: none; font-weight: 600;">Forgot?</a>
+              <a href="/forgot-password">Forgot?</a>
             </label>
             <div class="input-wrap">
               <input type="password" id="login-pass" value="" placeholder="********">
             </div>
           </div>
 
+          <div class="form-err" id="login-error" style="display:none;"></div>
 
-          <div class="form-err" id="login-error" style="display:none; color:red; font-size:12px; margin-bottom:10px;">
-          </div>
+          <button class="btn-primary" onclick="doLogin()">Login to Portal</button>
 
-          <button class="btn-primary" onclick="doLogin()">
-            Login to Portal ->
-          </button>
-
-          <div style="text-align:center; margin-top: 24px; font-size: 14px; color: var(--text-soft);">
-            Don't have an account? <a href="#" onclick="toggleSignUp(true); return false;"
-              style="color: #2563eb; font-weight: 700; text-decoration: none;">Sign Up</a>
-          </div>
+          <p class="auth-helper">
+            Don't have an account?
+            <a href="#" onclick="toggleSignUp(true); return false;">Sign Up</a>
+          </p>
         </div>
 
-        <!-- Authority Login -->
         <div id="auth-form-authority" class="auth-form">
           <div class="auth-form-title">Govt. Portal</div>
           <div class="auth-form-sub">Sign in with your NIC credentials</div>
 
           <div class="f-field">
-            <label>NIC ID</label>
+            <label for="auth-nic-id">NIC ID</label>
             <div class="input-wrap">
               <input type="text" id="auth-nic-id" value="" placeholder="Enter NIC ID">
             </div>
           </div>
 
           <div class="f-field">
-            <label style="display:flex; justify-content:space-between; width:100%;">
+            <label for="auth-security-pin" class="split-label">
               <span>Security PIN</span>
-              <a href="#" onclick="alert('Please contact NIC Admin for PIN reset.'); return false;"
-                style="font-size: 12px; color: #2563eb; text-decoration: none; font-weight: 600;">Forgot PIN?</a>
+              <a href="#" onclick="alert('Please contact NIC Admin for PIN reset.'); return false;">Forgot PIN?</a>
             </label>
-            <div class="input-wrap">
+            <div class="input-wrap input-with-action">
               <input type="password" id="auth-security-pin" value="" placeholder="******">
-              <button type="button" class="btn-reveal" onclick="togglePinReveal()"
-                style="position:absolute; right:16px; top:12px; background:none; border:none; color:var(--text-soft); cursor:pointer;">
-                <i data-lucide="eye" style="width:18px;height:18px;"></i>
+              <button type="button" class="field-icon-btn" onclick="togglePinReveal()" aria-label="Reveal PIN">
+                <i data-lucide="eye"></i>
               </button>
             </div>
           </div>
 
           <div class="form-err" id="auth-error" style="display:none;"></div>
 
-          <button class="btn-primary" onclick="doAuthorityVerify()" style="margin-top: 10px;">
-            Verify & Login ->
-          </button>
+          <button class="btn-primary" onclick="doAuthorityVerify()">Verify & Login</button>
         </div>
 
-        <!-- Sign Up Form -->
         <div id="auth-form-signup" class="auth-form" style="display:none;">
           <div class="auth-form-title">Create Account</div>
           <div class="auth-form-sub">Register as a new Coordinator / Staff</div>
 
           <div class="f-field">
-            <label>Full Name</label>
+            <label for="signup-name">Full Name</label>
             <div class="input-wrap">
               <input type="text" id="signup-name" placeholder="Enter your full name">
             </div>
           </div>
 
           <div class="f-field">
-            <label>Email Address</label>
+            <label for="signup-email">Email Address</label>
             <div class="input-wrap">
               <input type="email" id="signup-email" placeholder="name@domain.gov.in">
             </div>
           </div>
 
           <div class="f-field">
-            <label>Create Password</label>
+            <label for="signup-pass">Create Password</label>
             <div class="input-wrap">
               <input type="password" id="signup-pass" placeholder="********">
             </div>
           </div>
 
-          <div class="form-err" id="signup-error" style="display:none; color:red; font-size:12px; margin-bottom:10px;"></div>
-          <div class="form-err" id="signup-success" style="display:none; color:green; font-size:12px; margin-bottom:10px;"></div>
+          <div class="form-err" id="signup-error" style="display:none;"></div>
+          <div class="form-err notif-info" id="signup-success" style="display:none;"></div>
 
-          <button class="btn-primary"
-            onclick="doSignup()"
-            style="margin-top: 10px;">
-            Register ->
-          </button>
+          <button class="btn-primary" onclick="doSignup()">Register</button>
 
-          <div style="text-align:center; margin-top: 24px; font-size: 14px; color: var(--text-soft);">
-            Already have an account? <a href="#" onclick="toggleSignUp(false); return false;"
-              style="color: #2563eb; font-weight: 700; text-decoration: none;">Login</a>
-          </div>
+          <p class="auth-helper">
+            Already have an account?
+            <a href="#" onclick="toggleSignUp(false); return false;">Login</a>
+          </p>
         </div>
 
-        <!-- Invited User Registration Form -->
         <div id="auth-form-invited" class="auth-form" style="display:none;">
           <div class="auth-form-title">Complete Registration</div>
           <div class="auth-form-sub" id="invited-subtext">You have been invited to join the portal.</div>
 
           <div class="f-field">
-            <label>Email Address</label>
+            <label for="invited-email">Email Address</label>
             <div class="input-wrap">
-              <input type="email" id="invited-email" readonly style="background-color: var(--bg); cursor: not-allowed; color: var(--text-soft);">
+              <input type="email" id="invited-email" readonly>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="f-field">
+              <label for="invited-name">Full Name</label>
+              <div class="input-wrap">
+                <input type="text" id="invited-name" placeholder="Enter your full name">
+              </div>
+            </div>
+            <div class="f-field">
+              <label for="invited-mobile">Mobile Number</label>
+              <div class="input-wrap">
+                <input type="text" id="invited-mobile" placeholder="10-digit mobile number">
+              </div>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="f-field">
+              <label for="invited-employee-id">Employee ID</label>
+              <div class="input-wrap">
+                <input type="text" id="invited-employee-id" placeholder="Employee / official ID">
+              </div>
+            </div>
+            <div class="f-field">
+              <label for="invited-gender">Gender</label>
+              <div class="input-wrap">
+                <select id="invited-gender">
+                  <option value="">Select gender</option>
+                  <option value="Female">Female</option>
+                  <option value="Male">Male</option>
+                  <option value="Other">Other</option>
+                  <option value="Prefer not to say">Prefer not to say</option>
+                </select>
+              </div>
             </div>
           </div>
 
           <div class="f-field">
-            <label>Full Name</label>
-            <div class="input-wrap">
-              <input type="text" id="invited-name" placeholder="Enter your full name">
-            </div>
-          </div>
-
-          <div class="f-field">
-            <label>Mobile Number</label>
-            <div class="input-wrap">
-              <input type="text" id="invited-mobile" placeholder="10-digit mobile number">
-            </div>
-          </div>
-
-          <div class="f-field">
-            <label>Employee ID</label>
-            <div class="input-wrap">
-              <input type="text" id="invited-employee-id" placeholder="Employee / official ID">
-            </div>
-          </div>
-
-          <div class="f-field">
-            <label>Gender</label>
-            <div class="input-wrap">
-              <select id="invited-gender" style="width:100%; border:0; outline:0; background:transparent; color:inherit;">
-                <option value="">Select gender</option>
-                <option value="Female">Female</option>
-                <option value="Male">Male</option>
-                <option value="Other">Other</option>
-                <option value="Prefer not to say">Prefer not to say</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="f-field">
-            <label>Create Password</label>
+            <label for="invited-pass">Create Password</label>
             <div class="input-wrap">
               <input type="password" id="invited-pass" placeholder="********">
             </div>
-            <div style="font-size:11px; color:var(--text-soft); margin-top:6px;">Minimum 12 characters with uppercase, lowercase, number and special character.</div>
+            <div class="field-note">Minimum 12 characters with uppercase, lowercase, number and special character.</div>
           </div>
 
-          <label style="display:flex; gap:8px; align-items:flex-start; font-size:12px; color:var(--text-soft); line-height:1.4;">
-            <input type="checkbox" id="invited-terms" style="margin-top:2px;">
+          <label class="check-row">
+            <input type="checkbox" id="invited-terms">
             <span>I accept the Smart DSR Portal terms and confirm this account is being registered by the invited email owner.</span>
           </label>
 
-          <div class="form-err" id="invited-error" style="display:none; color:red; font-size:12px; margin-bottom:10px;"></div>
-          <div class="form-err" id="invited-success" style="display:none; color:green; font-size:12px; margin-bottom:10px;"></div>
+          <div class="form-err" id="invited-error" style="display:none;"></div>
+          <div class="form-err notif-info" id="invited-success" style="display:none;"></div>
 
-          <button class="btn-primary"
-            onclick="doInvitedRegister()"
-            id="invited-btn-submit"
-            style="margin-top: 10px;">
-            Continue ->
-          </button>
+          <button class="btn-primary" onclick="doInvitedRegister()" id="invited-btn-submit">Continue</button>
 
-          <div id="invited-otp-section" style="display:none; margin-top:15px;">
+          <div id="invited-otp-section" class="otp-section" style="display:none;">
             <div class="f-field">
-              <label>Enter 6-digit OTP sent to your invited email address</label>
+              <label for="invited-otp">Enter 6-digit OTP sent to your invited email address</label>
               <div class="input-wrap">
                 <input type="text" id="invited-otp" placeholder="------" maxlength="6">
               </div>
             </div>
-            <div id="invited-otp-meta" style="font-size:12px; color:var(--text-soft); margin-bottom:10px;">OTP expires in 10:00</div>
-            <button class="btn-primary" style="background:#10b981;" onclick="doVerifyInvitedOtp()">
-              Complete Registration ->
-            </button>
-            <button class="btn-primary" id="invited-resend-btn" style="background:#2563eb; margin-top:8px;" onclick="doResendInvitedOtp()">
-              Resend OTP
-            </button>
+            <div id="invited-otp-meta" class="field-note">OTP expires in 10:00</div>
+            <button class="btn-primary btn-green" onclick="doVerifyInvitedOtp()">Complete Registration</button>
+            <button class="btn-primary secondary-action" id="invited-resend-btn" onclick="doResendInvitedOtp()">Resend OTP</button>
           </div>
         </div>
-
-      </div>
-
-    </div>
-
+      </section>
+    </main>
   </div>

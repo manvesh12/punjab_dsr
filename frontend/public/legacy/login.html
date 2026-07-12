@@ -11,13 +11,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap"
-    rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=repl-model-dsr-backend-20260707-v15">
-  <link rel="stylesheet" href="css/premium-theme.css?v=repl-model-dsr-backend-20260707-v15">
-  <link rel="stylesheet" href="css/responsive-overrides.css?v=repl-model-dsr-backend-20260707-v15">
-  <link rel="stylesheet" href="css/enterprise-theme-audit.css?v=repl-model-dsr-backend-20260707-v15">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/ui-system.css?v=repl-model-dsr-backend-20260707-v15">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script defer src="https://cdn.jsdelivr.net/npm/lucide@0.363.0/dist/umd/lucide.min.js"></script>
@@ -26,351 +21,283 @@
   <link rel="apple-touch-icon" href="assets/dsr-logo.png">
 </head>
 <body class="sidebar-hidden premium-body">
-
-  <!-- Interactive Live Grid Background -->
-  <div class="interactive-grid-bg"></div>
-
-  <!-- Ambient Gradient Glow Orbs -->
-  <div class="ambient-glow">
-    <div class="glow-orb glow-orb-1"></div>
-    <div class="glow-orb glow-orb-2"></div>
-    <div class="glow-orb glow-orb-3"></div>
-  </div>
-
-  <!-- UNIVERSAL TRANSLUCENT BACKGROUND WATERMARK -->
-  <img class="global-watermark" src="assets/dsr-logo.png" alt="Watermark" loading="lazy" decoding="async">
-
-  <!-- ═══════════════════════════════════════════════════════════════
-     SCREEN 1 - AUTH
- ═══════════════════════════════════════════════════════════════ -->
-
-  <div id="screen-auth" class="screen active" style="position:relative;">
-
-    <!-- Fixed Top Switcher Bar -->
-    <div class="top-switcher-bar" style="display: flex; justify-content: space-between; align-items: center; background: #0F1C2A; padding: 6px 24px; height: 38px; font-size: 12px; z-index: 10000; position: fixed; top: 0; left: 0; width: 100%; border-bottom: 1px solid #1a2a3a; color: #ffffff; font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box;">
-      <div class="switcher-tabs" style="display: flex; gap: 8px;">
-        <a href="home.html" class="switcher-tab inactive" style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 14px; border-radius: 4px; text-decoration: none; font-weight: 700; font-size: 11px; transition: all 0.2s; background: #233549; color: #ffffff;">
-          <i data-lucide="home" style="width: 12px; height: 12px; stroke-width: 2.5;"></i> Home Page
+  <div id="screen-auth" class="screen active">
+    <div class="top-switcher-bar">
+      <div class="switcher-tabs">
+        <a href="home.html" class="switcher-tab inactive">
+          <i data-lucide="home"></i>
+          <span>Home Page</span>
         </a>
-        <a href="login.html" class="switcher-tab active" style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 14px; border-radius: 4px; text-decoration: none; font-weight: 700; font-size: 11px; transition: all 0.2s; background: #F2A123; color: #17324D;">
-          <i data-lucide="lock" style="width: 12px; height: 12px; stroke-width: 2.5;"></i> Login Page
+        <a href="login.html" class="switcher-tab active">
+          <i data-lucide="lock"></i>
+          <span>Login Page</span>
         </a>
       </div>
-      <div class="switcher-info" style="color: #a0aec0; font-size: 11px; display: flex; align-items: center; gap: 4px;">
-        <i data-lucide="info" style="width: 12px; height: 12px;"></i> Click tabs to switch...
+      <div class="switcher-info">
+        <i data-lucide="info"></i>
+        <span>Use the tabs to switch public and official views</span>
       </div>
     </div>
 
-    <!-- Theme Toggle Switch (Moved inside header nav) -->
-
-    <!-- Top Branding -->
-    <header
-      style="display:flex; justify-content:space-between; align-items:center; padding:25px 60px; background:var(--card); position:absolute; top:38px; left:0; width:100%; z-index:100; border-bottom:1px solid var(--border); box-shadow:0 4px 12px rgba(0,0,0,0.05); box-sizing:border-box;">
-      <div class="logo"
-        style="display:flex; align-items:center; gap:15px; font-size:52px; font-weight:800; color:var(--text);">
-        <img src="assets/dsr-logo.png" alt="DSR Logo" decoding="async" fetchpriority="high"
-          style="width:85px; height:85px; object-fit:contain;   ">
-        <span>DSR REPORT</span>
+    <header class="auth-header">
+      <div class="auth-brand">
+        <img src="assets/dsr-logo.png" alt="DSR Logo" decoding="async" fetchpriority="high">
+        <div>
+          <div class="auth-brand-title">DSR Report</div>
+          <div class="gov-brand-subtitle">District Survey Report Automation Portal</div>
+        </div>
       </div>
-      <nav style="display:flex; align-items:center; gap:12px;">
-        <a href="home.html"
-          style="text-decoration:none; color:var(--text); padding:10px 18px; border:1px solid var(--border); border-radius:10px; background:var(--card); font-size:16px; font-weight:500; transition:all 0.2s;"
-          onmouseover="this.style.background='var(--off)'" onmouseout="this.style.background='var(--card)'">Home</a>
-        <a href="#"
-          style="text-decoration:none; color:var(--text); padding:10px 18px; border:1px solid var(--border); border-radius:10px; background:var(--card); font-size:16px; font-weight:500; transition:all 0.2s;"
-          onmouseover="this.style.background='var(--off)'" onmouseout="this.style.background='var(--card)'">Contact</a>
-        <button class="btn-premium-toggle" type="button" onclick="toggleDarkMode()" aria-label="Toggle theme" data-theme-toggle>
+      <nav class="auth-nav" aria-label="Login page navigation">
+        <a href="home.html" class="btn btn-outline">Home</a>
+        <button class="dash-action-icon-btn" type="button" onclick="toggleDarkMode()" aria-label="Toggle theme" data-theme-toggle>
           <i data-lucide="moon"></i>
         </button>
       </nav>
     </header>
 
-    <!-- Background (Moved to body level) -->
-
-    <!-- Main Container -->
-    <div class="auth-wrap"
-      style="position:relative; z-index:10; justify-content: center; align-items: center; background: transparent; box-shadow: none; padding-top: 170px !important;">
-
-      <!-- CENTERED LOGIN CARD -->
-      <div class="auth-right"
-        style="width: 100%; max-width: 440px; margin: 0 auto; animation: fadeInUp 0.6s ease-out forwards; opacity: 0;">
-
+    <main class="auth-wrap">
+      <section class="auth-right" aria-label="Official login">
         <div class="auth-tabs">
-          <div id="tab-btn-faculty" class="auth-tab active" onclick="switchAuthMode('faculty')">
+          <button id="tab-btn-faculty" class="auth-tab active" type="button" onclick="switchAuthMode('faculty')">
             Faculty / Staff
-          </div>
-          <div id="tab-btn-authority" class="auth-tab" onclick="switchAuthMode('authority')">
+          </button>
+          <button id="tab-btn-authority" class="auth-tab" type="button" onclick="switchAuthMode('authority')">
             Govt. Authority
-          </div>
+          </button>
         </div>
 
-        <!-- Staff Login -->
         <div id="auth-form-faculty" class="auth-form active">
-
-          <div class="auth-form-title">
-            Staff Portal
-          </div>
-
-          <div class="auth-form-sub">
-            Sign in to your DSR Coordinator / Reviewer account
-          </div>
+          <div class="auth-form-title">Staff Portal</div>
+          <div class="auth-form-sub">Sign in to your DSR Coordinator / Reviewer account</div>
 
           <div class="f-field">
-            <label>Email Address</label>
+            <label for="login-email">Email Address</label>
             <div class="input-wrap">
               <input type="email" id="login-email" value="" placeholder="name@domain.gov.in">
             </div>
           </div>
 
           <div class="f-field">
-            <label style="display:flex; justify-content:space-between; width:100%;">
+            <label for="login-pass" class="split-label">
               <span>Password</span>
-              <a href="/forgot-password"
-                style="font-size: 12px; color: #2563eb; text-decoration: none; font-weight: 600;">Forgot?</a>
+              <a href="/forgot-password">Forgot?</a>
             </label>
             <div class="input-wrap">
               <input type="password" id="login-pass" value="" placeholder="********">
             </div>
           </div>
 
+          <div class="form-err" id="login-error" style="display:none;"></div>
 
-          <div class="form-err" id="login-error" style="display:none; color:red; font-size:12px; margin-bottom:10px;">
-          </div>
+          <button class="btn-primary" onclick="doLogin()">Login to Portal</button>
 
-          <button class="btn-primary" onclick="doLogin()">
-            Login to Portal ->
-          </button>
-
-          <div style="text-align:center; margin-top: 24px; font-size: 14px; color: var(--text-soft);">
-            Don't have an account? <a href="#" onclick="toggleSignUp(true); return false;"
-              style="color: #2563eb; font-weight: 700; text-decoration: none;">Sign Up</a>
-          </div>
+          <p class="auth-helper">
+            Don't have an account?
+            <a href="#" onclick="toggleSignUp(true); return false;">Sign Up</a>
+          </p>
         </div>
 
-        <!-- Authority Login -->
         <div id="auth-form-authority" class="auth-form">
           <div class="auth-form-title">Govt. Portal</div>
           <div class="auth-form-sub">Sign in with your NIC credentials</div>
 
           <div class="f-field">
-            <label>NIC ID</label>
+            <label for="auth-nic-id">NIC ID</label>
             <div class="input-wrap">
               <input type="text" id="auth-nic-id" value="" placeholder="Enter NIC ID">
             </div>
           </div>
 
           <div class="f-field">
-            <label style="display:flex; justify-content:space-between; width:100%;">
+            <label for="auth-security-pin" class="split-label">
               <span>Security PIN</span>
-              <a href="#" onclick="alert('Please contact NIC Admin for PIN reset.'); return false;"
-                style="font-size: 12px; color: #2563eb; text-decoration: none; font-weight: 600;">Forgot PIN?</a>
+              <a href="#" onclick="alert('Please contact NIC Admin for PIN reset.'); return false;">Forgot PIN?</a>
             </label>
-            <div class="input-wrap">
+            <div class="input-wrap input-with-action">
               <input type="password" id="auth-security-pin" value="" placeholder="******">
-              <button type="button" class="btn-reveal" onclick="togglePinReveal()"
-                style="position:absolute; right:16px; top:12px; background:none; border:none; color:var(--text-soft); cursor:pointer;">
-                <i data-lucide="eye" style="width:18px;height:18px;"></i>
+              <button type="button" class="field-icon-btn" onclick="togglePinReveal()" aria-label="Reveal PIN">
+                <i data-lucide="eye"></i>
               </button>
             </div>
           </div>
 
           <div class="form-err" id="auth-error" style="display:none;"></div>
 
-          <button class="btn-primary" onclick="doAuthorityVerify()" style="margin-top: 10px;">
-            Verify & Login ->
-          </button>
+          <button class="btn-primary" onclick="doAuthorityVerify()">Verify & Login</button>
         </div>
 
-        <!-- Sign Up Form -->
         <div id="auth-form-signup" class="auth-form" style="display:none;">
           <div class="auth-form-title">Create Account</div>
           <div class="auth-form-sub">Register as a new Coordinator / Staff</div>
 
           <div class="f-field">
-            <label>Full Name</label>
+            <label for="signup-name">Full Name</label>
             <div class="input-wrap">
               <input type="text" id="signup-name" placeholder="Enter your full name">
             </div>
           </div>
 
           <div class="f-field">
-            <label>Email Address</label>
+            <label for="signup-email">Email Address</label>
             <div class="input-wrap">
               <input type="email" id="signup-email" placeholder="name@domain.gov.in">
             </div>
           </div>
 
           <div class="f-field">
-            <label>Create Password</label>
+            <label for="signup-pass">Create Password</label>
             <div class="input-wrap">
               <input type="password" id="signup-pass" placeholder="********">
             </div>
           </div>
 
-          <div class="form-err" id="signup-error" style="display:none; color:red; font-size:12px; margin-bottom:10px;"></div>
-          <div class="form-err" id="signup-success" style="display:none; color:green; font-size:12px; margin-bottom:10px;"></div>
+          <div class="form-err" id="signup-error" style="display:none;"></div>
+          <div class="form-err notif-info" id="signup-success" style="display:none;"></div>
 
-          <button class="btn-primary"
-            onclick="doSignup()"
-            style="margin-top: 10px;">
-            Register ->
-          </button>
+          <button class="btn-primary" onclick="doSignup()">Register</button>
 
-          <div style="text-align:center; margin-top: 24px; font-size: 14px; color: var(--text-soft);">
-            Already have an account? <a href="#" onclick="toggleSignUp(false); return false;"
-              style="color: #2563eb; font-weight: 700; text-decoration: none;">Login</a>
-          </div>
+          <p class="auth-helper">
+            Already have an account?
+            <a href="#" onclick="toggleSignUp(false); return false;">Login</a>
+          </p>
         </div>
 
-        <!-- Invited User Registration Form -->
         <div id="auth-form-invited" class="auth-form" style="display:none;">
           <div class="auth-form-title">Complete Registration</div>
           <div class="auth-form-sub" id="invited-subtext">You have been invited to join the portal.</div>
 
           <div class="f-field">
-            <label>Email Address</label>
+            <label for="invited-email">Email Address</label>
             <div class="input-wrap">
-              <input type="email" id="invited-email" readonly style="background-color: var(--bg); cursor: not-allowed; color: var(--text-soft);">
+              <input type="email" id="invited-email" readonly>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="f-field">
+              <label for="invited-name">Full Name</label>
+              <div class="input-wrap">
+                <input type="text" id="invited-name" placeholder="Enter your full name">
+              </div>
+            </div>
+            <div class="f-field">
+              <label for="invited-mobile">Mobile Number</label>
+              <div class="input-wrap">
+                <input type="text" id="invited-mobile" placeholder="10-digit mobile number">
+              </div>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="f-field">
+              <label for="invited-employee-id">Employee ID</label>
+              <div class="input-wrap">
+                <input type="text" id="invited-employee-id" placeholder="Employee / official ID">
+              </div>
+            </div>
+            <div class="f-field">
+              <label for="invited-gender">Gender</label>
+              <div class="input-wrap">
+                <select id="invited-gender">
+                  <option value="">Select gender</option>
+                  <option value="Female">Female</option>
+                  <option value="Male">Male</option>
+                  <option value="Other">Other</option>
+                  <option value="Prefer not to say">Prefer not to say</option>
+                </select>
+              </div>
             </div>
           </div>
 
           <div class="f-field">
-            <label>Full Name</label>
-            <div class="input-wrap">
-              <input type="text" id="invited-name" placeholder="Enter your full name">
-            </div>
-          </div>
-
-          <div class="f-field">
-            <label>Mobile Number</label>
-            <div class="input-wrap">
-              <input type="text" id="invited-mobile" placeholder="10-digit mobile number">
-            </div>
-          </div>
-
-          <div class="f-field">
-            <label>Employee ID</label>
-            <div class="input-wrap">
-              <input type="text" id="invited-employee-id" placeholder="Employee / official ID">
-            </div>
-          </div>
-
-          <div class="f-field">
-            <label>Gender</label>
-            <div class="input-wrap">
-              <select id="invited-gender" style="width:100%; border:0; outline:0; background:transparent; color:inherit;">
-                <option value="">Select gender</option>
-                <option value="Female">Female</option>
-                <option value="Male">Male</option>
-                <option value="Other">Other</option>
-                <option value="Prefer not to say">Prefer not to say</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="f-field">
-            <label>Create Password</label>
+            <label for="invited-pass">Create Password</label>
             <div class="input-wrap">
               <input type="password" id="invited-pass" placeholder="********">
             </div>
-            <div style="font-size:11px; color:var(--text-soft); margin-top:6px;">Minimum 12 characters with uppercase, lowercase, number and special character.</div>
+            <div class="field-note">Minimum 12 characters with uppercase, lowercase, number and special character.</div>
           </div>
 
-          <label style="display:flex; gap:8px; align-items:flex-start; font-size:12px; color:var(--text-soft); line-height:1.4;">
-            <input type="checkbox" id="invited-terms" style="margin-top:2px;">
+          <label class="check-row">
+            <input type="checkbox" id="invited-terms">
             <span>I accept the Smart DSR Portal terms and confirm this account is being registered by the invited email owner.</span>
           </label>
 
-          <div class="form-err" id="invited-error" style="display:none; color:red; font-size:12px; margin-bottom:10px;"></div>
-          <div class="form-err" id="invited-success" style="display:none; color:green; font-size:12px; margin-bottom:10px;"></div>
+          <div class="form-err" id="invited-error" style="display:none;"></div>
+          <div class="form-err notif-info" id="invited-success" style="display:none;"></div>
 
-          <button class="btn-primary"
-            onclick="doInvitedRegister()"
-            id="invited-btn-submit"
-            style="margin-top: 10px;">
-            Continue ->
-          </button>
+          <button class="btn-primary" onclick="doInvitedRegister()" id="invited-btn-submit">Continue</button>
 
-          <div id="invited-otp-section" style="display:none; margin-top:15px;">
+          <div id="invited-otp-section" class="otp-section" style="display:none;">
             <div class="f-field">
-              <label>Enter 6-digit OTP sent to your invited email address</label>
+              <label for="invited-otp">Enter 6-digit OTP sent to your invited email address</label>
               <div class="input-wrap">
                 <input type="text" id="invited-otp" placeholder="------" maxlength="6">
               </div>
             </div>
-            <div id="invited-otp-meta" style="font-size:12px; color:var(--text-soft); margin-bottom:10px;">OTP expires in 10:00</div>
-            <button class="btn-primary" style="background:#10b981;" onclick="doVerifyInvitedOtp()">
-              Complete Registration ->
-            </button>
-            <button class="btn-primary" id="invited-resend-btn" style="background:#2563eb; margin-top:8px;" onclick="doResendInvitedOtp()">
-              Resend OTP
-            </button>
+            <div id="invited-otp-meta" class="field-note">OTP expires in 10:00</div>
+            <button class="btn-primary btn-green" onclick="doVerifyInvitedOtp()">Complete Registration</button>
+            <button class="btn-primary secondary-action" id="invited-resend-btn" onclick="doResendInvitedOtp()">Resend OTP</button>
           </div>
         </div>
-
-      </div>
-
-    </div>
-
+      </section>
+    </main>
   </div>
-<!-- ═══════════════════════════════════════════════════════════════
-     SCREEN 2 - MAIN APP
-═══════════════════════════════════════════════════════════════ -->
+
 <div id="screen-app" class="screen">
-      <aside class="sidebar" id="sidebar" style="width: var(--sidebar-w); background: var(--sidebar-shell-bg, #f7f4ee); border-right: 1.5px solid var(--sidebar-shell-border, var(--p-accent-gold)); height: 100vh; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 300; transition: transform .3s cubic-bezier(.4,0,.2,1); box-shadow: 4px 0 24px rgba(0,0,0,0.03);">
-      <div class="sb-head" style="padding: 16px; background: #17324D; border-bottom: 2px solid var(--p-accent-gold);">
-        <div style="display: flex; align-items: center; justify-content: space-between;">
-          <span style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 800; color: #ffffff; letter-spacing: 1px; text-transform: uppercase;">Project Menu</span>
-          <i data-lucide="menu" style="width: 14px; height: 14px; color: var(--p-accent-gold);"></i>
+      <aside class="sidebar" id="sidebar">
+      <div class="sb-head">
+        <div>
+          <span>Project Menu</span>
+          <i data-lucide="menu"></i>
         </div>
       </div>
-      <nav class="sb-nav" style="padding: 16px; flex: 1; overflow-y: auto; background: var(--sidebar-shell-bg, transparent);">
-        <div class="sb-section" id="sidebar-new-project-section" style="margin-bottom: 16px;">
-          <button class="sb-item" style="background: var(--p-accent-gold) !important; color: #17324D !important; font-weight: 700; border: 1.5px solid var(--p-accent-gold) !important; border-radius: 6px; display: flex; align-items: center; justify-content: center; width: 100%; height: 36px; gap: 6px; cursor: pointer;" onclick="newProjectModal()">
-            <span class="sb-ico" style="display: flex; align-items: center; justify-content: center; width: auto; height: auto;"><i data-lucide="plus" style="width: 14px; height: 14px; color: #17324D !important;"></i></span>
+      <nav class="sb-nav">
+        <div class="sb-section" id="sidebar-new-project-section">
+          <button class="sb-item" onclick="newProjectModal()">
+            <span class="sb-ico"><i data-lucide="plus"></i></span>
             <span>New Project</span>
           </button>
         </div>
         <div class="sb-section" id="overview-nav" style="display:none;"></div>
-        <div class="sb-section" id="report-nav" style="display:none">
-          <div class="sb-section-lbl" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 800; color: var(--p-accent); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; padding: 0 4px;">DSR Sections</div>
+        <div class="sb-section" id="report-nav" style="display:none;">
+          <div class="sb-section-lbl">DSR Sections</div>
           <button class="sb-item" onclick="showView('front-matter',this)"><span class="sb-ico"><i data-lucide="file-text"></i></span>Front Matter</button>
           <button class="sb-item" onclick="showView('chapters',this)"><span class="sb-ico"><i data-lucide="book-open"></i></span>Chapters (10)</button>
           <button class="sb-item" onclick="showView('plates',this)"><span class="sb-ico"><i data-lucide="map"></i></span>Plate Section</button>
-          <button class="sb-item" onclick="showView('graphs',this)" style="padding-left: 24px; font-size: 11px;"><span class="sb-ico" style="width: 24px; height: 24px; font-size: 11px;"><i data-lucide="line-chart"></i></span>Cross Section Graphs</button>
+          <button class="sb-item" onclick="showView('graphs',this)"><span class="sb-ico"><i data-lucide="line-chart"></i></span>Cross Section Graphs</button>
         </div>
-        <div class="sb-section" id="annexure-nav" style="display:none">
-          <div class="sb-section-lbl" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 800; color: var(--p-accent); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; padding: 0 4px;">Annexures</div>
-          <div style="position: relative;">
+        <div class="sb-section" id="annexure-nav" style="display:none;">
+          <div class="sb-section-lbl">Annexures</div>
+          <div>
             <button class="sb-item" onclick="toggleSubMenu('flyout-anx1'); showView('anx1',this)"><span class="sb-ico">Ⅰ</span>Annexure I - Sources</button>
-            <div id="flyout-anx1" class="flyout-menu" style="display:none; position:absolute; left:calc(100% + 5px); top:0; background:var(--card); border:1px solid var(--border); border-radius:8px; padding:6px; box-shadow:0 4px 12px rgba(0,0,0,0.1); z-index:100; min-width:160px;">
-              <button class="sb-item" onclick="scrollToSection('anx1', 'anx1-rivers', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx1')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">a) Rivers</button>
-              <button class="sb-item" onclick="scrollToSection('anx1', 'anx1-desilt', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx1')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">b) De-Siltation</button>
-              <button class="sb-item" onclick="scrollToSection('anx1', 'anx1-patta', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx1')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">c) Patta Lands</button>
-              <button class="sb-item" onclick="scrollToSection('anx1', 'anx1-msand', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx1')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">d) M-Sand</button>
+            <div id="flyout-anx1" class="flyout-menu" style="display:none;">
+              <button class="sb-item" onclick="scrollToSection('anx1', 'anx1-rivers', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx1')">a) Rivers</button>
+              <button class="sb-item" onclick="scrollToSection('anx1', 'anx1-desilt', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx1')">b) De-Siltation</button>
+              <button class="sb-item" onclick="scrollToSection('anx1', 'anx1-patta', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx1')">c) Patta Lands</button>
+              <button class="sb-item" onclick="scrollToSection('anx1', 'anx1-msand', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx1')">d) M-Sand</button>
             </div>
           </div>
-          <div style="position: relative;">
+          <div>
             <button class="sb-item" onclick="toggleSubMenu('flyout-anx2'); showView('anx2',this)"><span class="sb-ico">Ⅱ</span>Annexure II - Leases</button>
-            <div id="flyout-anx2" class="flyout-menu" style="display:none; position:absolute; left:calc(100% + 5px); top:0; background:var(--card); border:1px solid var(--border); border-radius:8px; padding:6px; box-shadow:0 4px 12px rgba(0,0,0,0.1); z-index:100; min-width:160px;">
-              <button class="sb-item" onclick="scrollToSection('anx2', 'anx2-leases', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx2')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Details of Leases</button>
-              <button class="sb-item" onclick="scrollToSection('anx2', 'anx2-patta', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx2')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Details of Patta</button>
-              <button class="sb-item" onclick="scrollToSection('anx2', 'anx2-desilt', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx2')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Details of De-siltation</button>
-              <button class="sb-item" onclick="scrollToSection('anx2', 'anx2-msand', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx2')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Details of M-Sand</button>
+            <div id="flyout-anx2" class="flyout-menu" style="display:none;">
+              <button class="sb-item" onclick="scrollToSection('anx2', 'anx2-leases', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx2')">Details of Leases</button>
+              <button class="sb-item" onclick="scrollToSection('anx2', 'anx2-patta', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx2')">Details of Patta</button>
+              <button class="sb-item" onclick="scrollToSection('anx2', 'anx2-desilt', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx2')">Details of De-siltation</button>
+              <button class="sb-item" onclick="scrollToSection('anx2', 'anx2-msand', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx2')">Details of M-Sand</button>
             </div>
           </div>
-          <div style="position: relative;">
+          <div>
             <button class="sb-item" onclick="toggleSubMenu('flyout-anx3'); showView('anx3',this)"><span class="sb-ico">Ⅲ</span>Annexure III - Clusters</button>
-            <div id="flyout-anx3" class="flyout-menu" style="display:none; position:absolute; left:calc(100% + 5px); top:0; background:var(--card); border:1px solid var(--border); border-radius:8px; padding:6px; box-shadow:0 4px 12px rgba(0,0,0,0.1); z-index:100; min-width:160px;">
-              <button class="sb-item" onclick="scrollToSection('anx3', 'anx3-clusters', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx3')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Clusters</button>
-              <button class="sb-item" onclick="scrollToSection('anx3', 'anx3-contiguous', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx3')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Contiguous Clusters</button>
+            <div id="flyout-anx3" class="flyout-menu" style="display:none;">
+              <button class="sb-item" onclick="scrollToSection('anx3', 'anx3-clusters', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx3')">Clusters</button>
+              <button class="sb-item" onclick="scrollToSection('anx3', 'anx3-contiguous', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx3')">Contiguous Clusters</button>
             </div>
           </div>
-          <div style="position: relative;">
+          <div>
             <button class="sb-item" onclick="toggleSubMenu('flyout-anx4'); showView('anx4',this)"><span class="sb-ico">Ⅳ</span>Annexure IV - Transport</button>
-            <div id="flyout-anx4" class="flyout-menu" style="display:none; position:absolute; left:calc(100% + 5px); top:0; background:var(--card); border:1px solid var(--border); border-radius:8px; padding:6px; box-shadow:0 4px 12px rgba(0,0,0,0.1); z-index:100; min-width:160px;">
-              <button class="sb-item" onclick="scrollToSection('anx4', 'individual-routes-container', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx4')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Individual Routes</button>
-              <button class="sb-item" onclick="scrollToSection('anx4', 'cluster-routes-container', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx4')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Cluster Routes</button>
+            <div id="flyout-anx4" class="flyout-menu" style="display:none;">
+              <button class="sb-item" onclick="scrollToSection('anx4', 'individual-routes-container', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx4')">Individual Routes</button>
+              <button class="sb-item" onclick="scrollToSection('anx4', 'cluster-routes-container', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx4')">Cluster Routes</button>
             </div>
           </div>
           <button class="sb-item" onclick="showView('anx5',this)"><span class="sb-ico">Ⅴ</span>Annexure V - Bench Mark & CORS</button>
@@ -378,46 +305,46 @@
           <button class="sb-item" onclick="showView('anx7',this)"><span class="sb-ico">Ⅶ</span>Annexure VII - Transportation Routes</button>
           <div>
             <button class="sb-item" id="sb-btn-more-annexures" onclick="toggleMoreAnnexuresInline()"><span class="sb-ico"><i data-lucide="paperclip"></i></span>More Annexures</button>
-            <div id="inline-more-annexures" style="display:none; padding-left: 20px; flex-direction: column;">
-              <button class="sb-item" onclick="showView('annexure-b',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure B</button>
-              <button class="sb-item" onclick="showView('annexure-c',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure C</button>
-              <button class="sb-item" onclick="showView('annexure-d',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure D</button>
-              <button class="sb-item" onclick="showView('annexure-e',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure E</button>
-              <button class="sb-item" onclick="showView('annexure-f',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure F</button>
-              <button class="sb-item" onclick="showView('annexure-g',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure G</button>
-              <button class="sb-item" onclick="showView('annexure-h',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure H</button>
-              <button class="sb-item" onclick="showView('annexure-i',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure I</button>
-              <button class="sb-item" onclick="showView('annexure-j',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure J</button>
-              <button class="sb-item" onclick="showView('annexure-k',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure K</button>
+            <div id="inline-more-annexures" style="display:none;">
+              <button class="sb-item" onclick="showView('annexure-b',this)">Annexure B</button>
+              <button class="sb-item" onclick="showView('annexure-c',this)">Annexure C</button>
+              <button class="sb-item" onclick="showView('annexure-d',this)">Annexure D</button>
+              <button class="sb-item" onclick="showView('annexure-e',this)">Annexure E</button>
+              <button class="sb-item" onclick="showView('annexure-f',this)">Annexure F</button>
+              <button class="sb-item" onclick="showView('annexure-g',this)">Annexure G</button>
+              <button class="sb-item" onclick="showView('annexure-h',this)">Annexure H</button>
+              <button class="sb-item" onclick="showView('annexure-i',this)">Annexure I</button>
+              <button class="sb-item" onclick="showView('annexure-j',this)">Annexure J</button>
+              <button class="sb-item" onclick="showView('annexure-k',this)">Annexure K</button>
             </div>
           </div>
         </div>
-        <div class="sb-section" id="replenishment-nav" style="display:none">
-          <div class="sb-section-lbl" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 800; color: var(--p-accent); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; padding: 0 4px;">Replenishment</div>
+        <div class="sb-section" id="replenishment-nav" style="display:none;">
+          <div class="sb-section-lbl">Replenishment</div>
           <button class="sb-item" onclick="showView('replenishment',this)"><span class="sb-ico"><i data-lucide="refresh-cw"></i></span>Report Builder</button>
           <button class="sb-item" id="nav-model-dsr" onclick="showView('model-dsr',this)"><span class="sb-ico"><i data-lucide="file-cog"></i></span>Model DSR</button>
         </div>
-        <div class="sb-section" id="finalize-nav" style="display:none">
-          <div class="sb-section-lbl" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 800; color: var(--p-accent); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; padding: 0 4px;">Finalize</div>
+        <div class="sb-section" id="finalize-nav" style="display:none;">
+          <div class="sb-section-lbl">Finalize</div>
           <button class="btn sb-item" onclick="showView('generate',this)"><span class="sb-ico"><i data-lucide="download"></i></span>Generate PDF</button>
-          <button class="sb-item" id="nav-users" onclick="showView('settings',this)" style="display:none"><span class="sb-ico"><i data-lucide="settings"></i></span>Settings</button>
+          <button class="sb-item" id="nav-users" onclick="showView('settings',this)" style="display:none;"><span class="sb-ico"><i data-lucide="settings"></i></span>Settings</button>
           <button class="sb-item" id="nav-audit-logs" onclick="showView('audit-logs',this)"><span class="sb-ico"><i data-lucide="clipboard-list"></i></span>Audit Logs</button>
         </div>
       </nav>
-      <div class="sb-bottom-container" style="border-top: 1px solid var(--border); padding: 16px; background: var(--sidebar-shell-bg, #f7f4ee);">
+      <div class="sb-bottom-container">
 
-        <div class="sb-user-card" style="display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 8px; background: var(--off); border: 1px solid var(--border-2); margin-bottom: 12px;">
-          <div class="sb-avatar-circle" style="width: 34px; height: 34px; border-radius: 50%; background: #17324D; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 12.5px; font-weight: 800; font-family: 'Outfit', sans-serif; border: 1.5px solid var(--p-accent-gold);">
+        <div class="sb-user-card">
+          <div class="sb-avatar-circle">
             S
           </div>
-          <div style="display: flex; flex-direction: column; line-height: 1.2;">
-            <span class="sb-username-text" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 800; color: var(--text);">saceadust</span>
-            <span class="sb-role-text" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 10px; font-weight: 600; color: var(--text-soft);">System Admin</span>
+          <div>
+            <span class="sb-username-text">saceadust</span>
+            <span class="sb-role-text">System Admin</span>
           </div>
         </div>
-        <div style="display: flex; justify-content: flex-start; padding-left: 4px;">
-          <button class="sb-logout-btn" onclick="doLogout()" style="background: none; border: none; cursor: pointer; color: var(--text-soft); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; transition: color 0.2s;">
-            <i data-lucide="log-out" style="width: 13px; height: 13px; color: var(--text-faint);"></i>Logout
+        <div>
+          <button class="sb-logout-btn" onclick="doLogout()">
+            <i data-lucide="log-out"></i>Logout
           </button>
         </div>
       </div>
@@ -520,10 +447,10 @@
       <button class="tb-sub-nav-btn" onclick="showView('workflow', this)">
         <i data-lucide="activity"></i><span data-i18n="navWorkflow">Workflow</span>
       </button>
-      <button class="tb-sub-nav-btn" id="tb-nav-audit-logs" style="display:none" onclick="showView('audit-logs', this)">
+      <button class="tb-sub-nav-btn" id="tb-nav-audit-logs" style="display:none;" onclick="showView('audit-logs', this)">
         <i data-lucide="clipboard-list"></i><span data-i18n="navAudit">Audit Logs</span>
       </button>
-      <button class="tb-sub-nav-btn" id="tb-nav-users" style="display:none" onclick="showView('settings', this)">
+      <button class="tb-sub-nav-btn" id="tb-nav-users" style="display:none;" onclick="showView('settings', this)">
         <i data-lucide="settings"></i><span>Settings</span>
       </button>
       <button class="tb-sub-nav-btn gov-nav-optional" onclick="openDistrictMap(this)">
@@ -1911,7 +1838,7 @@
           </span>
         </div>
         <ul class="dash-updates-list" id="dash-latest-updates-list">
-          <!-- dynamically populated from publicAnnouncements via renderDashboardLatestUpdates() -->
+          
           <li class="dash-update-item">
             <div class="dash-update-dot"></div>
             <div class="dash-update-content">
@@ -4995,7 +4922,7 @@
         </div>
 
       <div id="view-settings" class="view" style="padding: 20px 24px 36px;">
-  <!-- Title Header Row -->
+  
   <div class="header-row" style="margin-bottom: 24px;">
     <div>
       <div class="page-title" style="display: flex; align-items: center; gap: 10px;">
@@ -5006,7 +4933,7 @@
     </div>
   </div>
 
-  <!-- Modern Pill Tabs Navigation -->
+  
   <div class="settings-tabs" style="display: flex; gap: 6px; margin-bottom: 28px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 4px; border-radius: 8px; max-width: fit-content; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
     <button class="settings-tab active" onclick="switchSettingsTab('general')" style="display: flex; align-items: center; gap: 8px; padding: 10px 20px; border: none; background: var(--p-accent-gold); color: #17324D; font-weight: 700; font-size: 13px; cursor: pointer; border-radius: 6px; transition: all 0.2s;">
       <i data-lucide="sliders" style="width: 14px; height: 14px;"></i>
@@ -5018,10 +4945,10 @@
     </button>
   </div>
 
-  <!-- General Settings Tab Content -->
+  
   <div id="settings-tab-general" class="settings-tab-content">
     
-    <!-- Row 1: Scrolling Notice Bar (full-width) -->
+    
     <div class="card" style="box-shadow: 0 8px 32px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 24px;">
       <div class="card-hd" style="display: flex; align-items: center; gap: 8px;">
         <i data-lucide="megaphone" style="width: 16px; height: 16px; color: var(--p-accent-gold);"></i>
@@ -5043,10 +4970,10 @@
       </div>
     </div>
 
-    <!-- Row 2: Notices + Portal Status side by side -->
+    
     <div style="display: grid; grid-template-columns: 1.3fr 0.7fr; gap: 24px; align-items: start;">
 
-      <!-- Homepage Notices & Announcements Card -->
+      
       <div class="card" style="box-shadow: 0 8px 32px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.05);">
         <div class="card-hd" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
           <div style="display: flex; align-items: center; gap: 8px;">
@@ -5070,7 +4997,7 @@
         </div>
       </div>
 
-      <!-- Contact & Demo Support Card (editable) -->
+      
       <div class="card" style="box-shadow: 0 8px 32px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.01);">
         <div class="card-hd" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
           <div style="display: flex; align-items: center; gap: 8px;">
@@ -5092,7 +5019,7 @@
               </tr>
             </thead>
             <tbody id="contact-info-tbody">
-              <!-- rows injected by JS -->
+              
             </tbody>
           </table>
           <button class="btn btn-saffron" id="contact-info-save-btn" onclick="saveContactInfo()" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; height: 36px; padding: 0 18px; margin-top: 16px;">
@@ -5105,7 +5032,7 @@
   </div>
 
 
-  <!-- Users Settings Tab Content -->
+  
   <div id="settings-tab-users" class="settings-tab-content" style="display:none;">
     <div class="header-row" style="margin-bottom: 20px; align-items: center; justify-content: space-between;">
       <div>
@@ -5624,9 +5551,7 @@
 
   </div>
 </div>
-<!-- ═══════════════════════════════════════════════════════════════
-     SCREEN 3 - AUTHORITY DASHBOARD
-═══════════════════════════════════════════════════════════════ -->
+
 <div id="screen-authority" class="screen">
   <div class="authority-topbar">
     <h1>DSR Authority Dashboard - IIT Ropar / Punjab Mining</h1>
@@ -5669,12 +5594,12 @@
   </div>
 </div>
   <div id="modal-confirm" class="modal-overlay">
-    <div class="modal-box" style="max-width:400px; max-height: max-content;">
+    <div class="modal-box">
       <div class="modal-hd">
         <h3>Confirm Action</h3><button class="modal-close" onclick="closeModal('modal-confirm')">×</button>
       </div>
       <div class="modal-bd">
-        <p id="confirm-msg" style="font-size:14px; color:var(--text); font-weight: 500;"></p>
+        <p id="confirm-msg"></p>
       </div>
       <div class="modal-ft">
         <button class="btn btn-outline" onclick="closeModal('modal-confirm')">Cancel</button>
@@ -5747,14 +5672,14 @@
         <h3>Initiate Next DSR Phase</h3><button class="modal-close" onclick="closeModal('modal-phase')">×</button>
       </div>
       <div class="modal-bd">
-        <div class="notif notif-info" style="margin-bottom:14px; display:flex; align-items:flex-start; gap:8px;">
-          <i data-lucide="lock" style="width:16px; height:16px; flex-shrink:0;"></i>
+        <div class="notif notif-info">
+          <i data-lucide="lock"></i>
           <span>The source phase will be locked for audit. A new editable phase will be created with copied data, reports, and attachments.</span>
         </div>
         <div class="field-group">
-          <div class="field"><label>Source Phase</label><div id="phase-source-title" style="padding:10px 12px; border:1px solid var(--border-2); border-radius:8px; background:var(--bg); font-weight:800; color:var(--text);"></div></div>
+          <div class="field"><label>Source Phase</label><div id="phase-source-title"></div></div>
           <div class="field-row">
-            <div class="field"><label>New Phase</label><div id="phase-next-no" style="padding:10px 12px; border:1px solid var(--border-2); border-radius:8px; background:var(--bg); font-weight:800; color:var(--text);">Phase 2</div></div>
+            <div class="field"><label>New Phase</label><div id="phase-next-no">Phase 2</div></div>
             <div class="field"><label>Highlight Color for New Uploads</label><select id="phase-upload-color"></select></div>
           </div>
           <div class="field"><label>New Phase Title</label><input id="phase-title" placeholder="District Survey Report - Phase 2"></div>
@@ -5774,11 +5699,11 @@
       </div>
       <div class="modal-bd">
         <div id="sign-modal-content"></div>
-        <div class="notif notif-warn" style="margin-top:14px; display:flex; align-items:center; gap:8px;">
-          <i data-lucide="alert-triangle" style="width:16px; height:16px; flex-shrink:0;"></i>
+        <div class="notif notif-warn">
+          <i data-lucide="alert-triangle"></i>
           <span>By signing, you certify the accuracy of the complete DSR report and EMGSM 2020 compliance.</span>
         </div>
-        <div class="field" style="margin-top:14px"><label>OTP Verification (Demo: 123456)</label><input
+        <div class="field"><label>OTP Verification (Demo: 123456)</label><input
             class="otp-input" id="sign-otp" maxlength="6" placeholder="------"
             oninput="this.value=this.value.replace(/\D/g,'')"></div>
       </div>
@@ -5795,11 +5720,11 @@
       </div>
       <div class="modal-bd">
         <div id="auth-sign-content"></div>
-        <div class="notif notif-warn" style="margin-top:14px; display:flex; align-items:center; gap:8px;">
-          <i data-lucide="alert-triangle" style="width:16px; height:16px; flex-shrink:0;"></i>
+        <div class="notif notif-warn">
+          <i data-lucide="alert-triangle"></i>
           <span>Sequential signing - your approval forwards to the next authority.</span>
         </div>
-        <div class="field" style="margin-top:14px"><label>OTP (Demo: 123456)</label><input class="otp-input"
+        <div class="field"><label>OTP (Demo: 123456)</label><input class="otp-input"
             id="auth-otp" maxlength="6" placeholder="------" oninput="this.value=this.value.replace(/\D/g,'')"></div>
       </div>
       <div class="modal-ft">
@@ -5810,36 +5735,36 @@
   </div>
   <div id="reviewer-floating-notes" class="reviewer-floating-notes" style="display:none;">
     <div class="reviewer-notes-header">
-      <div style="font-weight:700; font-size:13px; display:flex; align-items:center; gap:8px; min-width:0;">
-        <i data-lucide="edit-3" style="width:16px; height:16px;"></i> Reviewer Notes
+      <div>
+        <i data-lucide="edit-3"></i> Reviewer Notes
       </div>
       <div class="reviewer-notes-header-actions">
-        <div style="font-size:11px; opacity:0.85; font-weight:600; text-transform:uppercase; max-width:130px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" id="reviewer-notes-section-title">FRONT MATTER</div>
+        <div id="reviewer-notes-section-title">FRONT MATTER</div>
         <button type="button" class="reviewer-notes-icon-btn" id="reviewer-notes-minimize-btn" onclick="toggleReviewerNotesMinimized()" title="Minimize reviewer notes" aria-label="Minimize reviewer notes">
-          <i data-lucide="minus" style="width:14px; height:14px;"></i>
+          <i data-lucide="minus"></i>
         </button>
       </div>
     </div>
     <div id="reviewer-notes-body" class="reviewer-notes-body">
-      <label style="display:block; font-size:12px; font-weight:600; color:var(--text-mid); margin-bottom:8px;">Notes for this section:</label>
-      <textarea id="reviewer-section-note" oninput="saveReviewerNote()" style="width:100%; box-sizing:border-box; height:100px; padding:10px; border:1px solid var(--border-2); border-radius:8px; font-size:13px; font-family:inherit; resize:none;" placeholder="Write any required changes or feedback here..."></textarea>
+      <label>Notes for this section:</label>
+      <textarea id="reviewer-section-note" oninput="saveReviewerNote()" placeholder="Write any required changes or feedback here..."></textarea>
     </div>
     <div id="reviewer-notes-footer" class="reviewer-notes-footer">
-      <span style="font-size:11px; color:var(--text-soft);">Auto-saved locally</span>
+      <span>Auto-saved locally</span>
       <button class="btn btn-saffron btn-sm" onclick="openReviewModal()">Review & Return -></button>
     </div>
   </div>
   <div id="modal-review" class="modal-overlay">
-    <div class="modal-box" style="max-width:600px;">
+    <div class="modal-box">
       <div class="modal-hd">
         <h3 class="modal-title">Return Project for Modifications</h3>
         <button class="modal-close" onclick="closeModal('modal-review')">×</button>
       </div>
       <div class="modal-bd">
-        <p style="font-size:13.5px; color:var(--text-mid); margin-bottom:16px;">Review the aggregated notes below. This will be sent back to the Report Coordinator (Data Entry) for corrections.</p>
+        <p>Review the aggregated notes below. This will be sent back to the Report Coordinator (Data Entry) for corrections.</p>
         <div class="field">
           <label>Aggregated Review Notes</label>
-          <textarea id="review-aggregated-notes" rows="10" style="width:100%; box-sizing:border-box; font-family:monospace; font-size:12px; padding:12px; border:1px solid var(--border-2); border-radius:8px;"></textarea>
+          <textarea id="review-aggregated-notes" rows="10"></textarea>
         </div>
       </div>
       <div class="modal-ft">
@@ -5851,7 +5776,7 @@
   </div>
 
   <div id="modal-invite-user" class="modal-overlay">
-    <div class="modal-box" style="max-width:400px;">
+    <div class="modal-box">
       <div class="modal-hd">
         <h3>Invite Single User</h3><button class="modal-close" onclick="closeModal('modal-invite-user')">×</button>
       </div>
@@ -5886,13 +5811,13 @@
   </div>
 
   <div id="modal-bulk-invite" class="modal-overlay">
-    <div class="modal-box" style="max-width:500px;">
+    <div class="modal-box">
       <div class="modal-hd">
         <h3>Bulk Invite Users</h3><button class="modal-close" onclick="closeModal('modal-bulk-invite')">×</button>
       </div>
       <div class="modal-bd">
-        <div class="notif notif-info" style="margin-bottom:14px; display:flex; align-items:flex-start; gap:8px;">
-          <i data-lucide="info" style="width:16px; height:16px; flex-shrink:0;"></i>
+        <div class="notif notif-info">
+          <i data-lucide="info"></i>
           <span>Upload an Excel (.xlsx) or CSV file with headers: <strong>Email</strong>, <strong>Phone</strong> (or <strong>Mobile</strong>), and <strong>Role</strong>. Invitations will be sent automatically via Email or SMS.</span>
         </div>
         <div class="field-group">
@@ -5901,8 +5826,8 @@
             <input type="file" id="bulk-invite-file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
           </div>
         </div>
-        <div style="margin-top: 10px;">
-          <a href="#" onclick="downloadBulkInviteTemplate(); return false;" style="font-size: 13px; color: #2563eb; text-decoration: none; font-weight: 600;">Download Template</a>
+        <div>
+          <a href="#" onclick="downloadBulkInviteTemplate(); return false;">Download Template</a>
         </div>
       </div>
       <div class="modal-ft">
@@ -5913,31 +5838,31 @@
   </div>
 
   <div id="modal-bulk-invite-results" class="modal-overlay">
-    <div class="modal-box" style="max-width:600px;">
+    <div class="modal-box">
       <div class="modal-hd">
         <h3>Bulk Invite Results</h3><button class="modal-close" onclick="closeModal('modal-bulk-invite-results')">×</button>
       </div>
       <div class="modal-bd">
-        <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
-          <div style="padding:12px; background:#eef2ff; color:#4f46e5; border-radius:8px; font-weight:600; text-align:center; flex:1; margin-right:8px;">
-            <div style="font-size:24px;" id="bulk-res-success">0</div>
-            <div style="font-size:12px; opacity:0.8;">Invitations Sent</div>
+        <div>
+          <div>
+            <div id="bulk-res-success">0</div>
+            <div>Invitations Sent</div>
           </div>
-          <div style="padding:12px; background:#fef2f2; color:#ef4444; border-radius:8px; font-weight:600; text-align:center; flex:1; margin-left:8px;">
-            <div style="font-size:24px;" id="bulk-res-failed">0</div>
-            <div style="font-size:12px; opacity:0.8;">Failed Rows</div>
+          <div>
+            <div id="bulk-res-failed">0</div>
+            <div>Failed Rows</div>
           </div>
         </div>
         
         <div id="bulk-errors-container" style="display:none;">
-          <label style="display:block; font-size:13px; font-weight:600; margin-bottom:8px; color:var(--text);">Error Details</label>
-          <div style="max-height:200px; overflow-y:auto; border:1px solid var(--border-2); border-radius:8px;">
-            <table class="tbl" style="margin:0;">
-              <thead style="position:sticky; top:0; background:var(--bg);">
+          <label>Error Details</label>
+          <div>
+            <table class="tbl">
+              <thead>
                 <tr>
-                  <th style="padding:8px 12px; width:60px;">Row</th>
-                  <th style="padding:8px 12px;">Email</th>
-                  <th style="padding:8px 12px;">Reason</th>
+                  <th>Row</th>
+                  <th>Email</th>
+                  <th>Reason</th>
                 </tr>
               </thead>
               <tbody id="bulk-errors-body">
@@ -5953,35 +5878,35 @@
   </div>
 
   <div id="modal-edit-scope" class="modal-overlay">
-    <div class="modal-box" style="max-width:420px; background:#ffffff; color:#1e293b; border-radius:12px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);">
-      <div class="modal-hd" style="border-bottom: 1px solid #e2e8f0; padding: 16px 20px; display:flex; justify-content:space-between; align-items:center;">
-        <h3 style="color:#1e293b; font-size:16px; font-weight:700; margin:0; display:flex; align-items:center; gap:8px;">
-          <i data-lucide="shield-alert" style="width: 18px; height: 18px; color: #f59e0b;"></i>
+    <div class="modal-box">
+      <div class="modal-hd">
+        <h3>
+          <i data-lucide="shield-alert"></i>
           Edit User Scope
         </h3>
-        <button class="modal-close" onclick="closeModal('modal-edit-scope')" style="background:transparent; border:none; font-size:18px; cursor:pointer; color:#94a3b8;">×</button>
+        <button class="modal-close" onclick="closeModal('modal-edit-scope')">×</button>
       </div>
-      <div class="modal-bd" style="padding: 20px; background:#ffffff;">
+      <div class="modal-bd">
         <input type="hidden" id="edit-scope-user-id">
-        <div class="field-group" style="display:flex; flex-direction:column; gap:16px;">
+        <div class="field-group">
           <div class="field">
-            <label style="font-weight:600; font-size:12px; color:#475569; display:block; margin-bottom:6px;">Assigned District (blank = all)</label>
-            <input type="text" id="edit-scope-district" placeholder="e.g. Jalandhar" style="width:100%; box-sizing:border-box; padding:10px; border:1px solid #cbd5e1; border-radius:6px; background:#ffffff; color:#1e293b; font-size:13.5px;">
+            <label>Assigned District (blank = all)</label>
+            <input type="text" id="edit-scope-district" placeholder="e.g. Jalandhar">
           </div>
           <div class="field">
-            <label style="font-weight:600; font-size:12px; color:#475569; display:block; margin-bottom:6px;">Assigned Block (optional)</label>
-            <input type="text" id="edit-scope-block" placeholder="e.g. Block A" style="width:100%; box-sizing:border-box; padding:10px; border:1px solid #cbd5e1; border-radius:6px; background:#ffffff; color:#1e293b; font-size:13.5px;">
+            <label>Assigned Block (optional)</label>
+            <input type="text" id="edit-scope-block" placeholder="e.g. Block A">
           </div>
           <div class="field">
-            <label style="font-weight:600; font-size:12px; color:#475569; display:block; margin-bottom:6px;">Assigned Section (optional)</label>
-            <input type="text" id="edit-scope-section" placeholder="e.g. Section 1" style="width:100%; box-sizing:border-box; padding:10px; border:1px solid #cbd5e1; border-radius:6px; background:#ffffff; color:#1e293b; font-size:13.5px;">
+            <label>Assigned Section (optional)</label>
+            <input type="text" id="edit-scope-section" placeholder="e.g. Section 1">
           </div>
         </div>
       </div>
-      <div class="modal-ft" style="border-top: 1px solid #e2e8f0; padding: 14px 20px; display:flex; gap:10px; justify-content:flex-end; background:#f8fafc;">
-        <button class="btn btn-outline" onclick="closeModal('modal-edit-scope')" style="padding:8px 16px; border:1px solid #cbd5e1; background:transparent; color:#475569; font-weight:600; border-radius:6px; cursor:pointer;">Cancel</button>
-        <button class="btn btn-saffron" onclick="submitUserScope()" style="padding:8px 16px; background:#f2a123; border:none; color:#17324D; font-weight:700; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
-          <i data-lucide="check" style="width:14px; height:14px;"></i> Save Scope
+      <div class="modal-ft">
+        <button class="btn btn-outline" onclick="closeModal('modal-edit-scope')">Cancel</button>
+        <button class="btn btn-saffron" onclick="submitUserScope()">
+          <i data-lucide="check"></i> Save Scope
         </button>
       </div>
     </div>

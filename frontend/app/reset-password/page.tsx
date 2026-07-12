@@ -2,6 +2,8 @@
 
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { AuthHeader, AuthPage, Alert, Field } from "@/components/auth/auth-card";
+import { Button } from "@/components/ui/button";
 
 function ResetPasswordContent() {
   const [newPassword, setNewPassword] = useState("");
@@ -67,76 +69,70 @@ function ResetPasswordContent() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-md w-full bg-white p-8 rounded shadow-md text-center">
-          <h2 className="text-2xl font-bold mb-4 text-green-600">Success!</h2>
-          <p>Your password has been reset successfully.</p>
-          <p className="text-sm text-gray-500 mt-2">Redirecting to login...</p>
-        </div>
-      </div>
+      <AuthPage>
+        <AuthHeader title="Success!" tone="success" description="Your password has been reset successfully. Redirecting to login..." />
+      </AuthPage>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full bg-white p-8 rounded shadow-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">Set New Password</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">New Password</label>
+    <AuthPage>
+      <AuthHeader title="Set New Password" />
+      <form onSubmit={handleSubmit} className="grid gap-4">
+        <Field
+          label="New Password"
+          hint={
+            newPassword ? (
+              <>
+                <span className="password-meter" data-strong={strength >= 5}>
+                  {[1, 2, 3, 4, 5].map((level) => (
+                    <span key={level} data-active={strength >= level} />
+                  ))}
+                </span>
+                <span>Use 10+ characters with uppercase, lowercase, number and special character.</span>
+              </>
+            ) : null
+          }
+        >
             <input
               type={showPassword ? "text" : "password"}
               required
-              className="mt-1 block w-full border border-gray-300 rounded-md p-2"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
             />
-            {newPassword && (
-              <div className="mt-2">
-                <div className="flex space-x-1">
-                  {[1, 2, 3, 4, 5].map((level) => (
-                    <div
-                      key={level}
-                      className={`h-1 flex-1 rounded ${strength >= level ? (strength >= 5 ? 'bg-green-500' : 'bg-yellow-500') : 'bg-gray-200'}`}
-                    ></div>
-                  ))}
-                </div>
-                <p className="mt-2 text-xs text-gray-600">Use 10+ characters with uppercase, lowercase, number and special character.</p>
-              </div>
-            )}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
+        </Field>
+        <Field label="Confirm Password">
             <input
               type={showPassword ? "text" : "password"}
               required
-              className="mt-1 block w-full border border-gray-300 rounded-md p-2"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
-          </div>
-          <label className="flex items-center gap-2 text-sm text-gray-700">
-            <input type="checkbox" checked={showPassword} onChange={(e) => setShowPassword(e.target.checked)} />
-            Show password
-          </label>
-          {error && <div className="text-sm text-red-600 bg-red-50 p-2 rounded">{error}</div>}
-          <button
-            type="submit"
-            disabled={loading || !newPassword || newPassword !== confirmPassword || strength < 5}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-900 hover:bg-blue-800 focus:outline-none disabled:opacity-50"
-          >
-            {loading ? "Resetting..." : "Reset Password"}
-          </button>
-        </form>
-      </div>
-    </div>
+        </Field>
+        <label className="inline-check">
+          <input type="checkbox" checked={showPassword} onChange={(e) => setShowPassword(e.target.checked)} />
+          <span>Show password</span>
+        </label>
+        {error && <Alert tone="error">{error}</Alert>}
+        <Button className="w-full" type="submit" disabled={loading || !newPassword || newPassword !== confirmPassword || strength < 5}>
+          {loading ? "Resetting..." : "Reset Password"}
+        </Button>
+      </form>
+    </AuthPage>
   );
 }
 
 export default function ResetPassword() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-50">Loading...</div>}>
+    <Suspense
+      fallback={
+        <AuthPage>
+          <AuthHeader title="Loading..." />
+        </AuthPage>
+      }
+    >
       <ResetPasswordContent />
     </Suspense>
   );
 }
+
