@@ -28,7 +28,7 @@ export class ProjectsRepository {
 
   find(id: bigint) { return this.database.project.findUnique({ where: { id } }); }
 
-  findWithFiles(id: bigint) { return this.database.project.findUnique({ where: { id }, include: { files: true } }); }
+  findWithFiles(id: bigint) { return this.database.project.findUnique({ where: { id }, include: { files: true, projectDraft: true, projectSections: true } }); }
 
   update(id: bigint, data: Prisma.ProjectUncheckedUpdateInput, includeFiles = false) {
     return this.database.project.update({ where: { id }, data, ...(includeFiles ? { include: { files: true } } : {}) });

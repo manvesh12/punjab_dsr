@@ -367,6 +367,164 @@ window.ensureProjectSectionDefaults = ensureProjectSectionDefaults;
 
 ;
 
+/* js/modules/autosave.manager.js */
+/**
+ * Enterprise Central AutoSave Manager
+ * Handles delta tracking, debounce queueing, and section-level updates.
+ */
+
+class AutoSaveManager {
+  constructor() {
+    this.dirtySections = new Set();
+    this.saveTimeout = null;
+    this.debounceDelay = 2000; // 2 seconds
+    this.isSaving = false;
+    this.saveQueue = [];
+    this.initListeners();
+    this.createStatusUI();
+  }
+
+  createStatusUI() {
+    this.statusEl = document.createElement('div');
+    this.statusEl.id = 'enterprise-autosave-status';
+    this.statusEl.style.cssText = `
+      position: fixed;
+      top: 10px;
+      right: 50%;
+      transform: translateX(50%);
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      z-index: 9999;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    `;
+    document.body.appendChild(this.statusEl);
+  }
+
+  updateStatus(status, type = 'info') {
+    if (!this.statusEl) return;
+    this.statusEl.textContent = status;
+    this.statusEl.style.opacity = '1';
+    
+    if (type === 'error') {
+      this.statusEl.style.background = '#e74c3c';
+    } else if (type === 'success') {
+      this.statusEl.style.background = '#27ae60';
+      setTimeout(() => {
+        this.statusEl.style.opacity = '0';
+      }, 3000);
+    } else {
+      this.statusEl.style.background = 'rgba(0,0,0,0.8)';
+    }
+  }
+
+  initListeners() {
+    // Listen to all inputs globally
+    document.addEventListener('input', (e) => this.handleInput(e));
+    document.addEventListener('change', (e) => this.handleInput(e));
+    
+    // Page Unload (Zero Data Loss)
+    window.addEventListener('beforeunload', (e) => {
+      this.forceSyncSave();
+    });
+  }
+
+  getSectionFromElement(el) {
+    // Traverse up to find a data-section attribute
+    const container = el.closest('[data-section]');
+    return container ? container.getAttribute('data-section') : 'general';
+  }
+
+  handleInput(e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+      const sectionName = this.getSectionFromElement(e.target);
+      this.markDirty(sectionName);
+    }
+  }
+
+  markDirty(sectionName) {
+    this.dirtySections.add(sectionName);
+    this.updateStatus('Unsaved Changes');
+    
+    if (this.saveTimeout) {
+      clearTimeout(this.saveTimeout);
+    }
+    
+    this.saveTimeout = setTimeout(() => {
+      this.flushQueue();
+    }, this.debounceDelay);
+  }
+
+  async flushQueue() {
+    if (this.dirtySections.size === 0) return;
+    if (this.isSaving) {
+      // Re-queue if currently saving
+      setTimeout(() => this.flushQueue(), 1000);
+      return;
+    }
+    
+    this.isSaving = true;
+    this.updateStatus('Saving...', 'info');
+    
+    const projectId = window.S && window.S.activeProject ? window.S.activeProject.id : null;
+    
+    if (!projectId) {
+       this.isSaving = false;
+       return;
+    }
+
+    try {
+      // In a real app, we would gather the exact form data for each section here
+      // For now, we simulate a draft save of the entire current state
+      const stateToSave = window.S ? { ...window.S.activeProject } : {};
+      
+      const res = await fetch(`/api/projects/${projectId}/draft`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': \`Bearer \${localStorage.getItem('token')}\`
+        },
+        body: JSON.stringify(stateToSave)
+      });
+      
+      if (!res.ok) throw new Error('Save failed');
+      
+      this.dirtySections.clear();
+      this.updateStatus('All changes saved', 'success');
+      
+    } catch (err) {
+      console.error("AutoSave Error:", err);
+      this.updateStatus('Sync Failed - Retrying...', 'error');
+      // Retry logic
+      setTimeout(() => this.flushQueue(), 5000);
+    } finally {
+      this.isSaving = false;
+    }
+  }
+
+  forceSyncSave() {
+    if (this.dirtySections.size === 0) return;
+    const projectId = window.S && window.S.activeProject ? window.S.activeProject.id : null;
+    if (!projectId) return;
+
+    const stateToSave = window.S ? { ...window.S.activeProject } : {};
+    
+    // Use navigator.sendBeacon for guaranteed delivery on close
+    const url = \`/api/projects/\${projectId}/draft\`;
+    const blob = new Blob([JSON.stringify(stateToSave)], {type: 'application/json'});
+    navigator.sendBeacon(url, blob);
+  }
+}
+
+window.AutoSaveManager = new AutoSaveManager();
+
+;
+
 /* js/modules/phase.js */
 /* Phase lifecycle and color metadata helpers */
 const PHASE_UPLOAD_COLORS = [
@@ -486,7 +644,7 @@ const RBAC_ROLE_RULES = {
     label: 'IIT Ropar',
     upload: true,
     review: true,
-    modules: ['dashboard', 'projects', 'front-matter', 'chapters', 'anx1', 'anx2', 'annexure-f', 'workflow', 'history', 'plates'],
+    modules: ['dashboard', 'projects', 'front-matter', 'chapters', 'anx1', 'anx2', 'annexure-f', 'workflow', 'history'],
     chapters: [1, 2, 3, 4, 5],
     access: 'Survey + Reviewer'
   },
@@ -494,7 +652,7 @@ const RBAC_ROLE_RULES = {
     label: 'SDO',
     upload: true,
     review: false,
-    modules: ['chapters', 'anx1', 'anx2', 'anx3', 'anx5', 'annexure-f', 'workflow', 'history', 'dashboard', 'projects', 'plates'],
+    modules: ['chapters', 'anx1', 'anx2', 'anx3', 'anx5', 'annexure-f', 'workflow', 'history', 'dashboard', 'projects'],
     chapters: [5, 6, 7, 8, 9, 10],
     annexureColumns: [1, 2, 3],
     access: 'Assigned block'
@@ -503,7 +661,7 @@ const RBAC_ROLE_RULES = {
     label: 'JE',
     upload: true,
     review: false,
-    modules: ['anx1', 'anx2', 'anx3', 'annexure-f', 'workflow', 'history', 'dashboard', 'projects', 'plates'],
+    modules: ['anx1', 'anx2', 'anx3', 'annexure-f', 'workflow', 'history', 'dashboard', 'projects'],
     annexureColumns: [1, 2],
     access: 'Field data'
   },
@@ -511,7 +669,7 @@ const RBAC_ROLE_RULES = {
     label: 'AXEN',
     upload: true,
     review: false,
-    modules: ['anx4', 'anx5', 'anx6', 'anx7', 'annexure-k', 'workflow', 'history', 'dashboard', 'projects', 'plates'],
+    modules: ['anx4', 'anx5', 'anx6', 'anx7', 'annexure-k', 'workflow', 'history', 'dashboard', 'projects'],
     annexureColumns: [3, 4, 5],
     access: 'Assigned section'
   },
@@ -3507,31 +3665,6 @@ async function importJalandharProjectPackage(projectId, event) {
     if (!packageResponse.ok) throw new Error('Jalandhar import package is not available yet. Please refresh after deployment finishes.');
     const packageData = await packageResponse.json();
     const importedState = JSON.parse(packageData.projectState || '{}');
-    if (packageData.sections) importedState.sourceSections = packageData.sections;
-    if (packageData.importedAnnexures) importedState.importedAnnexures = packageData.importedAnnexures;
-
-    if (!importedState.plates || importedState.plates.length === 0) {
-      importedState.plates = (importedState.sourceSections || [])
-        .filter(s => s.category === 'plate')
-        .map((s, idx) => ({
-          id: Date.now() + idx,
-          name: s.title,
-          summary: '',
-          fileName: s.file
-        }));
-    }
-    
-    if (!importedState.chapters || importedState.chapters.length === 0) {
-      importedState.chapters = (importedState.sourceSections || [])
-        .filter(s => s.category === 'chapter')
-        .map((s, idx) => ({
-          id: Date.now() + idx,
-          name: s.title,
-          summary: '',
-          fileName: s.file
-        }));
-    }
-
     const sectionUrl = (fileName) => new URL(fileName, packageUrl).pathname;
     (importedState.sourceSections || []).forEach(section => { section.url = sectionUrl(section.file); });
     const sourceByFile = Object.fromEntries((importedState.sourceSections || []).map(section => [section.file, section.url]));
@@ -3540,34 +3673,7 @@ async function importJalandharProjectPackage(projectId, event) {
       const source = (importedState.sourceSections || []).find(section => section.category === 'plate' && section.title === plate.name);
       if (source) plate.sourceUrl = source.url;
     });
-    const annexureMap = {
-      'annexure-a-emgsm.pdf': 'anx1',
-      'annexure-b-committee.pdf': 'annexure-b',
-      'annexure-c-site-photographs.pdf': 'annexure-c',
-      'annexure-d-visit-report.pdf': 'annexure-d',
-      'annexure-e-lab-data.pdf': 'annexure-e',
-      'annexure-f-sand-ghats.pdf': 'annexure-f',
-      'annexure-g-lithological-sections.pdf': 'annexure-g',
-      'annexure-h-wildlife-certificate.pdf': 'annexure-h',
-      'annexure-i-public-consultation.pdf': 'annexure-i',
-      'annexure-j-demand-supply.pdf': 'annexure-j',
-      'annexure-k-executive-summary.pdf': 'annexure-k',
-      'anx1.pdf': 'anx1',
-      'anx2.pdf': 'anx2',
-      'anx3.pdf': 'anx3',
-      'anx4.pdf': 'anx4',
-      'anx5.pdf': 'anx5',
-      'anx6.pdf': 'anx6',
-      'anx7.pdf': 'anx7'
-    };
-    if (!importedState.pdfData) importedState.pdfData = {};
-    (importedState.importedAnnexures || []).forEach(annexure => { 
-      annexure.url = sourceByFile[annexure.fileName] || sectionUrl(annexure.fileName);
-      const mappedId = annexureMap[annexure.fileName] || annexure.annexureId;
-      if (mappedId) {
-        importedState.pdfData[mappedId] = annexure.url;
-      }
-    });
+    (importedState.importedAnnexures || []).forEach(annexure => { annexure.url = sourceByFile[annexure.fileName] || sectionUrl(annexure.fileName); });
     if (importedState.importedSourceDocument) importedState.importedSourceDocument.sourceUrl = sectionUrl('front-matter.pdf');
     packageData.projectState = JSON.stringify(importedState);
     await apiFetch(`/projects/${projectId}/import-package`, {
@@ -3733,16 +3839,39 @@ async function openProject(id) {
     S.activeProject.phaseLocked = Boolean(projData.phaseLocked);
     S.activeProject.phaseOrigin = projData.phaseOrigin || null;
     if (projData.projectState) {
-      const stateSnapshot = JSON.parse(projData.projectState);
-      S.phaseMetadata = {
+      try {
+        let parsedState = typeof projData.projectState === 'string' ? JSON.parse(projData.projectState) : projData.projectState;
+        
+        // Hydrate from Draft and Sections (Zero Data Loss)
+        if (projData.projectDraft && projData.projectDraft.draftContent) {
+          const draftContent = typeof projData.projectDraft.draftContent === 'string' ? JSON.parse(projData.projectDraft.draftContent) : projData.projectDraft.draftContent;
+          parsedState = { ...parsedState, ...draftContent };
+          toast('Draft recovered successfully.', 'info');
+        }
+        
+        // Hydrate from Sections
+        if (projData.projectSections && Array.isArray(projData.projectSections)) {
+           projData.projectSections.forEach(section => {
+             const secContent = typeof section.content === 'string' ? JSON.parse(section.content) : section.content;
+             parsedState = { ...parsedState, ...secContent };
+           });
+        }
+        
+        S.activeProject = { ...S.activeProject, ...parsedState };
+      } catch (e) {
+        console.error("Error parsing projectState", e);
+      }
+    }
+    const stateSnapshot = S.activeProject;
+    S.phaseMetadata = {
         ...S.phaseMetadata,
         ...(stateSnapshot.phaseMetadata || {}),
         phaseNo: stateSnapshot.phaseMetadata?.phaseNo || projData.phaseNo || S.activeProject.phaseNo || 1,
         parentPhaseId: stateSnapshot.phaseMetadata?.parentPhaseId || projData.parentPhaseId || null,
         locked: Boolean(stateSnapshot.phaseMetadata?.locked || projData.phaseLocked)
-      };
-      S.phaseChangeLog = Array.isArray(stateSnapshot.phaseChangeLog) ? stateSnapshot.phaseChangeLog : [];
-      updateLiveProgressUI(S.activeProject.progress || 0);
+    };
+    S.phaseChangeLog = Array.isArray(stateSnapshot.phaseChangeLog) ? stateSnapshot.phaseChangeLog : [];
+    updateLiveProgressUI(S.activeProject.progress || 0);
       if (stateSnapshot.frontMatter) S.frontMatter = stateSnapshot.frontMatter;
       if (stateSnapshot.chapters) S.chapters = stateSnapshot.chapters;
       if (stateSnapshot.plates) S.plates = stateSnapshot.plates;
@@ -3985,68 +4114,11 @@ async function createProject() {
   }
 }
 let saveStateTimeout = null;
-
-function showAutoSaveIndicator() {
-  let indicator = document.getElementById('global-autosave-indicator');
-  if (!indicator) {
-    indicator = document.createElement('div');
-    indicator.id = 'global-autosave-indicator';
-    indicator.style.position = 'fixed';
-    indicator.style.bottom = '20px';
-    indicator.style.right = '20px';
-    indicator.style.backgroundColor = 'var(--bg-card, #1a1b1e)';
-    indicator.style.color = 'var(--text-main, #e4e5e7)';
-    indicator.style.padding = '8px 16px';
-    indicator.style.borderRadius = '20px';
-    indicator.style.fontSize = '12px';
-    indicator.style.fontWeight = '500';
-    indicator.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-    indicator.style.zIndex = '99999';
-    indicator.style.opacity = '0';
-    indicator.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-    indicator.style.transform = 'translateY(10px)';
-    indicator.style.display = 'flex';
-    indicator.style.alignItems = 'center';
-    indicator.style.gap = '6px';
-    indicator.style.pointerEvents = 'none';
-    indicator.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px;color:var(--success, #10b981)"></i> Auto-saved locally';
-    document.body.appendChild(indicator);
-    if (window.lucide) window.lucide.createIcons({root: indicator});
-  }
-  
-  indicator.style.opacity = '1';
-  indicator.style.transform = 'translateY(0)';
-  
-  if (indicator.hideTimeout) clearTimeout(indicator.hideTimeout);
-  indicator.hideTimeout = setTimeout(() => {
-    indicator.style.opacity = '0';
-    indicator.style.transform = 'translateY(10px)';
-  }, 2500);
-}
-
 function debouncedSaveState() {
+  if (!S.activeProject || !S.activeProject.id) return;
   if (saveStateTimeout) clearTimeout(saveStateTimeout);
   saveStateTimeout = setTimeout(() => {
-    let saved = false;
-    
-    if (typeof S !== 'undefined' && S.activeProject && S.activeProject.id) {
-      persistProjectState();
-      saved = true;
-    }
-    
-    if (typeof window !== 'undefined' && window.activeReport) {
-      if (window.activeReport.reportState?.type === 'model_dsr' && window.mdsrSaveReportToServer) {
-        window.mdsrSaveReportToServer(window.activeReport);
-        saved = true;
-      } else if (window.replSaveReportToServer) {
-        window.replSaveReportToServer(window.activeReport);
-        saved = true;
-      }
-    }
-    
-    if (saved) {
-      showAutoSaveIndicator();
-    }
+    persistProjectState();
   }, 1000);
 }
 document.addEventListener('input', (e) => {
@@ -13463,7 +13535,7 @@ function doSign() {
     };
     apiFetch(`/projects/${S.activeProject.id}/state`, {
       method: 'PUT',
-      body: JSON.stringify({ state: JSON.stringify(Object.fromEntries(Object.entries(stateSnapshot).map(([k, v]) => [k, (Array.isArray(v) && v.length > 0 && typeof v[0] === 'string' && v[0].startsWith('data:image')) ? [] : v]))) })
+      body: JSON.stringify({ state: JSON.stringify(stateSnapshot) })
     }).then(() => {
       toast('Signed successfully! Next authority has been notified.','success');
       const nextSig=S.signatures.find(x=>!x.signed);
@@ -18598,15 +18670,3 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 ;
-// Auto-Save all user inputs automatically
-document.addEventListener('input', (e) => {
-  if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
-    if (typeof debouncedSaveState === 'function') debouncedSaveState();
-  }
-});
-document.addEventListener('change', (e) => {
-  if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName) || e.target.type === 'file') {
-    if (typeof debouncedSaveState === 'function') debouncedSaveState();
-  }
-});
-

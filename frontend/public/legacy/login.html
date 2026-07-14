@@ -492,6 +492,9 @@
         <span class="reviewer-notes-indicator" aria-hidden="true"></span>
       </button>
 
+      <button class="gov-profile-chip" type="button" onclick="if(typeof persistProjectState === 'function') persistProjectState(); else if(typeof debouncedSaveState === 'function') debouncedSaveState(); toast('Saving project...', 'info');" title="Save Project Manually" aria-label="Save Project">
+        <i data-lucide="save"></i><span>Save</span>
+      </button>
       <button class="gov-profile-chip" type="button" onclick="showView('settings', null)" title="User profile" aria-label="User profile">
         <i data-lucide="user-circle"></i><span>Profile</span>
       </button>
@@ -1386,19 +1389,19 @@
     .dash-quick-access-btn {
       min-height: 74px;
     }
-    :root {
+    body.view-dashboard-active {
       --erp-chrome-h: 72px !important;
       --topbar-h: 72px !important;
       --dash-sidebar-width: var(--sidebar-w, 280px);
       --dash-sidebar-collapsed-width: 80px;
     }
-    body.dash-sidebar-collapsed {
+    body.view-dashboard-active.dash-sidebar-collapsed {
       --dash-sidebar-width: var(--dash-sidebar-collapsed-width);
     }
-    body.sidebar-hidden {
+    body.view-dashboard-active.sidebar-hidden {
       --dash-sidebar-width: var(--dash-sidebar-collapsed-width);
     }
-    #screen-app.active .topbar.dash-global-topbar.gov-enterprise-topbar {
+    body.view-dashboard-active #screen-app.active .topbar.dash-global-topbar.gov-enterprise-topbar {
       left: 0 !important;
       width: 100% !important;
       height: 72px !important;
@@ -1407,25 +1410,26 @@
       overflow: visible !important;
       z-index: 1200 !important;
     }
-    #screen-app.active .gov-enterprise-brand-row {
+    body.view-dashboard-active #screen-app.active .gov-enterprise-brand-row {
       height: 72px !important;
       min-height: 72px !important;
       padding: 8px 24px !important;
       border-bottom: 1px solid rgba(196, 154, 88, 0.28) !important;
       box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08) !important;
     }
-    #screen-app.active .gov-emgsm-badge,
-    #screen-app.active .gov-iit-logo,
-    #screen-app.active .gov-brand-subtitle,
-    #screen-app.active .gov-search-icon,
-    #screen-app.active .gov-actions-more,
-    .DO_NOT_MATCH_ME {
+    body.view-dashboard-active #screen-app.active .gov-enterprise-notice,
+    body.view-dashboard-active #screen-app.active .gov-emgsm-badge,
+    body.view-dashboard-active #screen-app.active .gov-iit-logo,
+    body.view-dashboard-active #screen-app.active .gov-brand-subtitle,
+    body.view-dashboard-active #screen-app.active .gov-search-icon,
+    body.view-dashboard-active #screen-app.active .gov-actions-more,
+    body.view-dashboard-active #screen-app.active .gov-logout-btn {
       display: none !important;
     }
-    #screen-app.active > #sidebar {
+    body.view-dashboard-active #screen-app.active > #sidebar {
       display: flex !important;
     }
-    #screen-app.active .app-workspace {
+    body.view-dashboard-active #screen-app.active .app-workspace {
       margin-left: var(--dash-sidebar-width) !important;
       width: calc(100% - var(--dash-sidebar-width)) !important;
       max-width: calc(100% - var(--dash-sidebar-width)) !important;
@@ -1433,18 +1437,18 @@
       transition: margin-left 300ms ease, width 300ms ease, max-width 300ms ease !important;
       overflow-x: hidden !important;
     }
-    #screen-app.active .main-content {
+    body.view-dashboard-active #screen-app.active .main-content {
       width: 100% !important;
       max-width: 100% !important;
       padding: 0 !important;
       overflow-x: hidden !important;
     }
-    #view-dashboard {
+    body.view-dashboard-active #view-dashboard {
       overflow-x: hidden !important;
     }
-    #view-dashboard .dash-gov-utility-strip,
-    #view-dashboard .dash-gov-brand-row,
-    #view-dashboard .dash-gov-menu-bar {
+    body.view-dashboard-active #view-dashboard .dash-gov-utility-strip,
+    body.view-dashboard-active #view-dashboard .dash-gov-brand-row,
+    body.view-dashboard-active #view-dashboard .dash-gov-menu-bar {
       display: none !important;
     }
     /* Dashboard dark mode: scoped to this page so other portal screens keep their own theme */
@@ -1634,18 +1638,18 @@
       }
     }
     @media (max-width: 760px) {
-      #screen-app.active .gov-enterprise-brand-row {
+      body.view-dashboard-active #screen-app.active .gov-enterprise-brand-row {
         padding: 8px 12px !important;
       }
-      #screen-app.active .app-workspace {
+      body.view-dashboard-active #screen-app.active .app-workspace {
         margin-left: 0 !important;
         width: 100% !important;
         max-width: 100% !important;
         padding-top: 72px !important;
       }
-      #screen-app.active .gov-brand-subtitle,
-      #screen-app.active .gov-profile-chip span,
-      #screen-app.active .gov-enterprise-search {
+      body.view-dashboard-active #screen-app.active .gov-brand-subtitle,
+      body.view-dashboard-active #screen-app.active .gov-profile-chip span,
+      body.view-dashboard-active #screen-app.active .gov-enterprise-search {
         display: none !important;
       }
       .dash-switcher-bar,

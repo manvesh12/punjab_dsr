@@ -124,6 +124,10 @@ model Project {
   modelImportHistory   ModelImportHistory[]
   replenishmentStudies ReplenishmentStudy[]
   dsrChunks            DsrReportChunk[]
+  projectSections      ProjectSection[]
+  projectDraft         ProjectDraft?
+  projectVersions      ProjectVersion[]
+  auditLogs            ProjectAuditLog[]
 
   @@index([parentPhaseId])
   @@index([district, phaseNo])
@@ -459,4 +463,61 @@ model DsrReportChunk {
 
   @@index([projectId, section])
   @@index([createdAt])
+}
+
+
+
+enum SectionStatus {
+  DRAFT
+  PENDING_REVIEW
+  RETURNED
+  REJECTED
+  APPROVED
+  PUBLISHED
+  LOCKED
+}
+
+model ProjectSection {
+  id              BigInt        @id @default(autoincrement())
+  projectId       BigInt
+  sectionName     String
+  content         Json
+  status          SectionStatus @default(DRAFT)
+  version         Int           @default(1)
+  lastEditedBy    BigInt?
+  updatedAt       DateTime      @updatedAt
+  project         Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, sectionName])
+}
+
+model ProjectDraft {
+  id              BigInt    @id @default(autoincrement())
+  projectId       BigInt    @unique
+  draftContent    Json
+  updatedAt       DateTime  @updatedAt
+  project         Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model ProjectVersion {
+  id              BigInt    @id @default(autoincrement())
+  projectId       BigInt
+  versionNumber   Int
+  snapshot        Json
+  createdAt       DateTime  @default(now())
+  project         Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, versionNumber])
+}
+
+model ProjectAuditLog {
+  id              BigInt    @id @default(autoincrement())
+  projectId       BigInt
+  userId          BigInt
+  action          String
+  oldValue        Json?
+  newValue        Json?
+  ipAddress       String?
+  createdAt       DateTime  @default(now())
+  project         Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }

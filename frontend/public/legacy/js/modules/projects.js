@@ -528,16 +528,39 @@ async function openProject(id) {
     S.activeProject.phaseLocked = Boolean(projData.phaseLocked);
     S.activeProject.phaseOrigin = projData.phaseOrigin || null;
     if (projData.projectState) {
-      const stateSnapshot = JSON.parse(projData.projectState);
-      S.phaseMetadata = {
+      try {
+        let parsedState = typeof projData.projectState === 'string' ? JSON.parse(projData.projectState) : projData.projectState;
+        
+        // Hydrate from Draft and Sections (Zero Data Loss)
+        if (projData.projectDraft && projData.projectDraft.draftContent) {
+          const draftContent = typeof projData.projectDraft.draftContent === 'string' ? JSON.parse(projData.projectDraft.draftContent) : projData.projectDraft.draftContent;
+          parsedState = { ...parsedState, ...draftContent };
+          toast('Draft recovered successfully.', 'info');
+        }
+        
+        // Hydrate from Sections
+        if (projData.projectSections && Array.isArray(projData.projectSections)) {
+           projData.projectSections.forEach(section => {
+             const secContent = typeof section.content === 'string' ? JSON.parse(section.content) : section.content;
+             parsedState = { ...parsedState, ...secContent };
+           });
+        }
+        
+        S.activeProject = { ...S.activeProject, ...parsedState };
+      } catch (e) {
+        console.error("Error parsing projectState", e);
+      }
+    }
+    const stateSnapshot = S.activeProject;
+    S.phaseMetadata = {
         ...S.phaseMetadata,
         ...(stateSnapshot.phaseMetadata || {}),
         phaseNo: stateSnapshot.phaseMetadata?.phaseNo || projData.phaseNo || S.activeProject.phaseNo || 1,
         parentPhaseId: stateSnapshot.phaseMetadata?.parentPhaseId || projData.parentPhaseId || null,
         locked: Boolean(stateSnapshot.phaseMetadata?.locked || projData.phaseLocked)
-      };
-      S.phaseChangeLog = Array.isArray(stateSnapshot.phaseChangeLog) ? stateSnapshot.phaseChangeLog : [];
-      updateLiveProgressUI(S.activeProject.progress || 0);
+    };
+    S.phaseChangeLog = Array.isArray(stateSnapshot.phaseChangeLog) ? stateSnapshot.phaseChangeLog : [];
+    updateLiveProgressUI(S.activeProject.progress || 0);
       if (stateSnapshot.frontMatter) S.frontMatter = stateSnapshot.frontMatter;
       if (stateSnapshot.chapters) S.chapters = stateSnapshot.chapters;
       if (stateSnapshot.plates) S.plates = stateSnapshot.plates;
