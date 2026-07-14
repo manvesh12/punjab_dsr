@@ -26,15 +26,15 @@ export class ProjectsSectionsService {
     if (existing) {
       // Role-Based Validation
       if (existing.status === 'LOCKED' && user?.role !== 'ADMIN') {
-        throw new ApiError(403, "Forbidden: This section is locked and can only be edited by an Admin.");
+        throw new ApiError(403, "FORBIDDEN", "Forbidden: This section is locked and can only be edited by an Admin.");
       }
       if (existing.status === 'APPROVED' && user?.role === 'OFFICER') {
-        throw new ApiError(403, "Forbidden: Approved sections cannot be edited by Officers.");
+        throw new ApiError(403, "FORBIDDEN", "Forbidden: Approved sections cannot be edited by Officers.");
       }
 
       // Optimistic Locking check
       if (version !== undefined && existing.version > version) {
-        throw new ApiError(409, "Conflict: A newer version of this section has been saved by someone else.");
+        throw new ApiError(409, "CONFLICT", "Conflict: A newer version of this section has been saved by someone else.");
       }
     }
 
@@ -62,8 +62,8 @@ export class ProjectsSectionsService {
           projectId,
           userId: user.id,
           action: `UPDATE_SECTION_${sectionName.toUpperCase()}`,
-          oldValue: existing ? existing.content : null,
-          newValue: content
+          oldValue: existing ? (existing.content as any) : undefined,
+          newValue: content as any
         }
       });
     }
