@@ -403,7 +403,13 @@ class AutoSaveManager {
       transition: opacity 0.3s;
       pointer-events: none;
     `;
-    document.body.appendChild(this.statusEl);
+    if (document.body) {
+      document.body.appendChild(this.statusEl);
+    } else {
+      document.addEventListener('DOMContentLoaded', () => {
+        document.body.appendChild(this.statusEl);
+      });
+    }
   }
 
   updateStatus(status, type = 'info') {
