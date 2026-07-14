@@ -1,0 +1,8 @@
+{
+  "name": "punjab_dsr_monorepo",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ]
+}

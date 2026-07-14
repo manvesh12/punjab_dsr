@@ -1,0 +1,132 @@
+<div class="topbar dash-global-topbar gov-compact-topbar gov-enterprise-topbar">
+  <div class="gov-enterprise-brand-row">
+    <div class="gov-enterprise-brand-left">
+      <button id="tb-sidebar-toggle" class="dashboard-sidebar-toggle" type="button" onclick="return toggleSidebar(event)" aria-label="Open navigation menu" aria-controls="sidebar" aria-expanded="false" title="Open or close navigation">
+        <i data-lucide="panel-left"></i>
+      </button>
+      <button class="gov-brand-button gov-enterprise-brand" type="button" onclick="clearActiveProject(); showView('dashboard', null);" aria-label="Go to dashboard">
+        <img src="assets/dsr-logo.png" alt="Punjab Government Smart DSR Logo" class="gov-logo gov-logo-punjab">
+        <span class="gov-iit-logo" aria-label="IIT Ropar">IIT</span>
+        <span class="gov-brand-copy">
+          <span class="gov-brand-title">District Survey Report Automation Portal</span>
+          <span class="gov-brand-subtitle">Sand Automation for Sand Mining</span>
+        </span>
+      </button>
+    </div>
+
+    <div class="gov-header-right gov-enterprise-actions">
+      <div class="dash-menu-search gov-compact-search gov-enterprise-search">
+        <i data-lucide="search"></i>
+        <input id="tb-portal-search" type="text" placeholder="Search portal..." data-i18n-placeholder="searchPlaceholder" onkeydown="dashRunSearch(event)" aria-label="Search portal">
+      </div>
+
+      <div class="tb-nav-dropdown gov-notification-wrap">
+        <button type="button" class="dash-action-icon-btn" onclick="toggleNotificationDropdown()" title="Notifications" aria-label="Notifications">
+          <i data-lucide="bell"></i>
+          <span id="tb-notif-dot"></span>
+        </button>
+        <div class="tb-dropdown-menu" id="tb-notif-dropdown">
+          <div class="tb-dropdown-title">Notifications</div>
+          <div id="tb-notif-list" class="tb-empty-note">No new notifications</div>
+        </div>
+      </div>
+
+      <button class="dash-action-icon-btn dash-theme-toggle tb-theme-toggle" onclick="toggleDarkMode()" title="Toggle dark mode" aria-label="Toggle dark mode" data-theme-toggle>
+        <i data-lucide="moon"></i>
+      </button>
+
+      <button id="reviewer-notes-topbar-btn" class="dash-action-icon-btn reviewer-notes-topbar-btn" type="button" onclick="openReviewerNotes()" title="Open reviewer notes" aria-label="Open reviewer notes" aria-controls="reviewer-floating-notes" style="display:none;">
+        <i data-lucide="message-square-text"></i>
+        <span class="reviewer-notes-indicator" aria-hidden="true"></span>
+      </button>
+
+      <button class="gov-profile-chip" type="button" onclick="if(typeof persistProjectState === 'function') persistProjectState(); else if(typeof debouncedSaveState === 'function') debouncedSaveState(); toast('Saving project...', 'info');" title="Save Project Manually" aria-label="Save Project">
+        <i data-lucide="save"></i><span>Save</span>
+      </button>
+      <button class="gov-profile-chip" type="button" onclick="showView('settings', null)" title="User profile" aria-label="User profile">
+        <i data-lucide="user-circle"></i><span>Profile</span>
+      </button>
+      <button onclick="doLogout()" class="dash-btn-logout gov-logout-btn">
+        <i data-lucide="log-out"></i><span>Logout</span>
+      </button>
+    </div>
+  </div>
+  <nav id="project-top-nav" class="project-top-nav" aria-label="Open project sections">
+    <button class="project-nav-link" type="button" onclick="showView('front-matter', this)">Front Matter</button>
+
+    <button class="project-nav-link" type="button" onclick="showView('chapters', this)">Chapters</button>
+
+    <button class="project-nav-link" type="button" onclick="showView('plates', this)">Plate Section</button>
+    <button class="project-nav-link" type="button" onclick="showView('graphs', this)">Cross Section Graphs</button>
+
+    <div class="project-nav-dropdown">
+      <button class="project-nav-link project-nav-trigger" type="button" aria-haspopup="true" aria-expanded="false" onclick="toggleProjectNavDropdown(this)">
+        Annexures <i data-lucide="chevron-down"></i>
+      </button>
+      <div class="project-nav-menu" role="menu">
+        <button type="button" onclick="showView('anx1', this)">Annexure I - Sources</button>
+        <button type="button" onclick="showView('anx2', this)">Annexure II - Leases</button>
+        <button type="button" onclick="showView('anx3', this)">Annexure III - Clusters</button>
+        <button type="button" onclick="showView('anx4', this)">Annexure IV - Transport</button>
+        <button type="button" onclick="showView('anx5', this)">Annexure V - Bench Mark &amp; CORS</button>
+        <button type="button" onclick="showView('anx6', this)">Annexure VI - Final Cluster Details</button>
+        <button type="button" onclick="showView('anx7', this)">Annexure VII - Transportation Routes</button>
+      </div>
+    </div>
+
+    <div class="project-nav-dropdown">
+      <button class="project-nav-link project-nav-trigger" type="button" aria-haspopup="true" aria-expanded="false" onclick="toggleProjectNavDropdown(this)">
+        More Annexures <i data-lucide="chevron-down"></i>
+      </button>
+      <div class="project-nav-menu project-nav-menu-compact" role="menu">
+        <button type="button" onclick="showView('annexure-b', this)">Annexure B</button>
+        <button type="button" onclick="showView('annexure-c', this)">Annexure C</button>
+        <button type="button" onclick="showView('annexure-d', this)">Annexure D</button>
+        <button type="button" onclick="showView('annexure-e', this)">Annexure E</button>
+        <button type="button" onclick="showView('annexure-f', this)">Annexure F</button>
+        <button type="button" onclick="showView('annexure-g', this)">Annexure G</button>
+        <button type="button" onclick="showView('annexure-h', this)">Annexure H</button>
+        <button type="button" onclick="showView('annexure-i', this)">Annexure I</button>
+        <button type="button" onclick="showView('annexure-j', this)">Annexure J</button>
+        <button type="button" onclick="showView('annexure-k', this)">Annexure K</button>
+      </div>
+    </div>
+
+    <button class="project-nav-link" type="button" onclick="showView('replenishment', this)">Replenishment</button>
+    <button class="project-nav-link project-nav-settings" id="project-nav-model-dsr" type="button" onclick="showView('model-dsr', this)">Model DSR</button>
+    <button class="project-nav-link" type="button" onclick="showView('generate', this)">Generate PDF</button>
+  </nav>
+  <div class="global-site-notice gov-enterprise-notice" role="status" aria-label="Portal notices">
+    <span class="global-site-notice-label"><i data-lucide="megaphone"></i> Notice</span>
+    <div class="global-site-notice-marquee" data-notice-marquee>
+      <span data-i18n="noticeText">No announcements available.</span>
+    </div>
+  </div>
+</div>
+<script>
+  function closeProjectNavDropdowns(except) {
+    document.querySelectorAll('.project-nav-trigger[aria-expanded="true"]').forEach(function (trigger) {
+      if (trigger !== except) trigger.setAttribute('aria-expanded', 'false');
+    });
+  }
+
+  function toggleProjectNavDropdown(trigger) {
+    const willOpen = trigger.getAttribute('aria-expanded') !== 'true';
+    closeProjectNavDropdowns(trigger);
+    trigger.setAttribute('aria-expanded', String(willOpen));
+  }
+
+  function openProjectChapter(chapterNumber, item) {
+    showView('chapters', item);
+    closeProjectNavDropdowns();
+    setTimeout(function () {
+      const chapter = document.querySelectorAll('#chapter-list .chapter-item')[chapterNumber - 1];
+      if (chapter) chapter.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 80);
+  }
+
+  document.addEventListener('click', function (event) {
+    if (!event.target.closest('.project-nav-dropdown')) closeProjectNavDropdowns();
+    if (event.target.closest('.project-nav-menu button')) closeProjectNavDropdowns();
+  });
+</script>

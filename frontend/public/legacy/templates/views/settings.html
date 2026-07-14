@@ -1,0 +1,491 @@
+<div id="view-settings" class="view" style="padding: 20px 24px 36px;">
+  <!-- Title Header Row -->
+  <div class="header-row" style="margin-bottom: 24px;">
+    <div>
+      <div class="page-title" style="display: flex; align-items: center; gap: 10px;">
+        <i data-lucide="settings" style="width: 24px; height: 24px; color: var(--p-accent-gold);"></i>
+        Settings
+      </div>
+      <div class="page-sub">System configuration, global notifications, and user scope management</div>
+    </div>
+  </div>
+
+  <!-- Modern Pill Tabs Navigation -->
+  <div class="settings-tabs" style="display: flex; gap: 6px; margin-bottom: 28px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 4px; border-radius: 8px; max-width: fit-content; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+    <button class="settings-tab active" onclick="switchSettingsTab('general')" style="display: flex; align-items: center; gap: 8px; padding: 10px 20px; border: none; background: var(--p-accent-gold); color: #17324D; font-weight: 700; font-size: 13px; cursor: pointer; border-radius: 6px; transition: all 0.2s;">
+      <i data-lucide="sliders" style="width: 14px; height: 14px;"></i>
+      General Config
+    </button>
+    <button class="settings-tab" onclick="switchSettingsTab('users')" style="display: flex; align-items: center; gap: 8px; padding: 10px 20px; border: none; background: transparent; color: var(--text-soft); font-weight: 700; font-size: 13px; cursor: pointer; border-radius: 6px; transition: all 0.2s;">
+      <i data-lucide="users" style="width: 14px; height: 14px;"></i>
+      User Management
+    </button>
+  </div>
+
+  <!-- General Settings Tab Content -->
+  <div id="settings-tab-general" class="settings-tab-content">
+    
+    <!-- Row 1: Scrolling Notice Bar (full-width) -->
+    <div class="card" style="box-shadow: 0 8px 32px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 24px;">
+      <div class="card-hd" style="display: flex; align-items: center; gap: 8px;">
+        <i data-lucide="megaphone" style="width: 16px; height: 16px; color: var(--p-accent-gold);"></i>
+        <span class="card-title">Scrolling Notice Bar</span>
+      </div>
+      <div class="card-bd" style="padding: 20px;">
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 13px; color: var(--text);">Announcement Text</label>
+          <textarea id="settings-notice-text" class="inp" rows="3" style="width: 100%; resize: vertical; padding: 12px; font-family: inherit; font-size: 13px; background: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.1);" placeholder="Enter notice text to be displayed across the portal..."></textarea>
+          <div style="font-size: 11px; color: var(--text-soft); margin-top: 6px; display: flex; align-items: center; gap: 4px;">
+            <i data-lucide="info" style="width: 12px; height: 12px;"></i>
+            This text will scroll horizontally at the top of all portal views.
+          </div>
+        </div>
+        <button class="btn btn-saffron" id="settings-notice-bar-btn" onclick="saveNoticeBarOnly()" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; height: 36px; padding: 0 18px;">
+          <i data-lucide="save" style="width: 14px; height: 14px;"></i>
+          Save Notice Bar
+        </button>
+      </div>
+    </div>
+
+    <!-- Row 2: Notices + Portal Status side by side -->
+    <div style="display: grid; grid-template-columns: 1.3fr 0.7fr; gap: 24px; align-items: start;">
+
+      <!-- Homepage Notices & Announcements Card -->
+      <div class="card" style="box-shadow: 0 8px 32px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.05);">
+        <div class="card-hd" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="bell" style="width: 16px; height: 16px; color: var(--p-accent-gold);"></i>
+            <span class="card-title">Homepage Notices &amp; Announcements</span>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="addAnnouncementRow()" style="display: inline-flex; align-items: center; gap: 5px; font-size: 12px;">
+            <i data-lucide="plus" style="width: 13px; height: 13px;"></i> Add Notice
+          </button>
+        </div>
+        <div class="card-bd" style="padding: 20px;">
+          <div style="font-size: 11.5px; color: var(--text-soft); margin-bottom: 14px; display: flex; align-items: flex-start; gap: 6px; background: rgba(242,161,35,0.07); padding: 10px 14px; border-radius: 6px; border-left: 3px solid var(--p-accent-gold);">
+            <i data-lucide="info" style="width: 13px; height: 13px; flex-shrink:0; margin-top: 1px;"></i>
+            These notices appear in the &ldquo;Latest Updates&rdquo; panel on the dashboard and the &ldquo;Notices &amp; Announcements&rdquo; section on the public homepage. Only Administrators can edit.
+          </div>
+          <div id="announcements-editor" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; min-height: 60px;"></div>
+          <button class="btn btn-saffron" id="settings-notice-save-btn" onclick="saveAnnouncementsOnly()" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; height: 36px; padding: 0 18px;">
+            <i data-lucide="save" style="width: 14px; height: 14px;"></i>
+            Save Announcements
+          </button>
+        </div>
+      </div>
+
+      <!-- Contact & Demo Support Card (editable) -->
+      <div class="card" style="box-shadow: 0 8px 32px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.01);">
+        <div class="card-hd" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="phone" style="width: 16px; height: 16px; color: var(--p-accent-gold);"></i>
+            <span class="card-title">Contact &amp; Demo Support</span>
+          </div>
+        </div>
+        <div class="card-bd" style="padding: 20px;">
+          <div style="font-size: 11px; color: var(--text-soft); margin-bottom: 14px; display: flex; align-items: center; gap: 5px; background: rgba(242,161,35,0.07); padding: 9px 12px; border-radius: 6px; border-left: 3px solid var(--p-accent-gold);">
+            <i data-lucide="info" style="width: 12px; height: 12px; flex-shrink:0;"></i>
+            Edit the title and content shown in the Contact &amp; Demo Support panel on the dashboard.
+          </div>
+          <table style="width:100%; border-collapse: collapse;" id="contact-info-table">
+            <thead>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.07);">
+                <th style="padding: 8px 10px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-soft); width: 32px;"></th>
+                <th style="padding: 8px 10px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-soft);">Title</th>
+                <th style="padding: 8px 10px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-soft);">Content</th>
+              </tr>
+            </thead>
+            <tbody id="contact-info-tbody">
+              <!-- rows injected by JS -->
+            </tbody>
+          </table>
+          <button class="btn btn-saffron" id="contact-info-save-btn" onclick="saveContactInfo()" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; height: 36px; padding: 0 18px; margin-top: 16px;">
+            <i data-lucide="save" style="width: 14px; height: 14px;"></i>
+            Save Contact Info
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Users Settings Tab Content -->
+  <div id="settings-tab-users" class="settings-tab-content" style="display:none;">
+    <div class="header-row" style="margin-bottom: 20px; align-items: center; justify-content: space-between;">
+      <div>
+        <div style="font-weight: 700; font-size: 16px; color: var(--text);">Portal Users Registry</div>
+        <div class="page-sub">Manage user roles, authorization tokens, review clearances, and access scopes</div>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-outline btn-sm" onclick="openModal('modal-bulk-invite')" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 600;">
+          <i data-lucide="mail-plus" style="width: 14px; height: 14px;"></i> Bulk Invite
+        </button>
+        <button class="btn btn-saffron btn-sm" onclick="openAddUserPrompt()" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700;">
+          <i data-lucide="user-plus" style="width: 14px; height: 14px;"></i> Add User
+        </button>
+      </div>
+    </div>
+    <div class="card" style="box-shadow: 0 8px 32px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.05);">
+      <div class="card-bd" style="padding: 0;">
+        <div class="tbl-wrap" style="margin: 0; border: none; border-radius: 8px; overflow: hidden;">
+          <table class="tbl" style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border);">
+                <th style="padding: 14px 16px; text-align: left; font-weight: 600; font-size: 12px; text-transform: uppercase; color: var(--text-soft);">Email</th>
+                <th style="padding: 14px 16px; text-align: left; font-weight: 600; font-size: 12px; text-transform: uppercase; color: var(--text-soft);">Role</th>
+                <th style="padding: 14px 16px; text-align: left; font-weight: 600; font-size: 12px; text-transform: uppercase; color: var(--text-soft);">Upload</th>
+                <th style="padding: 14px 16px; text-align: left; font-weight: 600; font-size: 12px; text-transform: uppercase; color: var(--text-soft);">Review</th>
+                <th style="padding: 14px 16px; text-align: left; font-weight: 600; font-size: 12px; text-transform: uppercase; color: var(--text-soft);">Access</th>
+                <th style="padding: 14px 16px; text-align: left; font-weight: 600; font-size: 12px; text-transform: uppercase; color: var(--text-soft);">Scope</th>
+                <th style="padding: 14px 16px; text-align: left; font-weight: 600; font-size: 12px; text-transform: uppercase; color: var(--text-soft);">Status</th>
+                <th style="padding: 14px 16px; text-align: left; font-weight: 600; font-size: 12px; text-transform: uppercase; color: var(--text-soft); width: 120px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="users-table-body">
+              <tr><td colspan="8" style="text-align:center; padding: 24px; color: var(--text-soft);">Loading users registry...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ─── Helpers ───────────────────────────────────────────────────────────────
+  function updateNoticeUI(text) {
+    const nextText = String(text || '').trim();
+    if (!nextText) return;
+    window.portalNoticeText = nextText;
+    if (typeof window.renderNoticeBar === 'function') {
+      window.renderNoticeBar([{ title: nextText, category: 'Information', active: true }]);
+    } else {
+      document.querySelectorAll('[data-i18n="noticeText"]').forEach((el) => {
+        el.textContent = nextText;
+      });
+    }
+  }
+  window.updateNoticeUI = updateNoticeUI;
+
+  function updatePublicAnnouncementsUI(value) {
+    const rawValue = typeof value === 'string' ? value : JSON.stringify(value || []);
+    if (typeof window.renderNoticeBar === 'function') {
+      window.renderNoticeBar(rawValue);
+    }
+    if (typeof window.renderPublicAnnouncements === 'function') {
+      window.renderPublicAnnouncements(rawValue);
+    }
+    // Also refresh dashboard live updates
+    if (typeof window.renderDashboardLatestUpdates === 'function') {
+      window.renderDashboardLatestUpdates(rawValue);
+    }
+  }
+  window.updatePublicAnnouncementsUI = updatePublicAnnouncementsUI;
+
+  // ─── Announcements Editor (text-based row UI) ───────────────────────────────
+  let _announcementRows = [];
+
+  function renderAnnouncementsEditor() {
+    const container = document.getElementById('announcements-editor');
+    if (!container) return;
+    if (_announcementRows.length === 0) {
+      container.innerHTML = '<div style="font-size:12px;color:var(--text-soft);text-align:center;padding:16px 0;">No notices yet. Click "Add Notice" to add one.</div>';
+      return;
+    }
+    container.innerHTML = _announcementRows.map((row, idx) => `
+      <div style="display:flex;align-items:flex-start;gap:8px;background:rgba(0,0,0,0.15);border:1px solid rgba(255,255,255,0.06);border-radius:6px;padding:10px 12px;" data-row="${idx}">
+        <div style="display:flex;flex-direction:column;gap:6px;flex:1;">
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="text" placeholder="Date (e.g. 18 JUN 2026)" value="${row.date || ''}" 
+              oninput="_announcementRows[${idx}].date=this.value"
+              style="flex:0 0 150px;padding:6px 10px;font-size:12px;border-radius:4px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.2);color:var(--text);font-family:inherit;">
+            <input type="text" placeholder="Notice title / description" value="${row.title || ''}" 
+              oninput="_announcementRows[${idx}].title=this.value"
+              style="flex:1;padding:6px 10px;font-size:12px;border-radius:4px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.2);color:var(--text);font-family:inherit;">
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <select onchange="_announcementRows[${idx}].category=this.value"
+              style="flex:0 0 150px;padding:6px 10px;font-size:12px;border-radius:4px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.2);color:var(--text);font-family:inherit;">
+              ${['Information','Success','Warning','Emergency','Government Circular','Tender','Maintenance'].map(type => `<option value="${type}" ${String(row.category || row.type || 'Information') === type ? 'selected' : ''}>${type}</option>`).join('')}
+            </select>
+            <input type="text" placeholder="Priority (optional)" value="${row.priority || ''}"
+              oninput="_announcementRows[${idx}].priority=this.value"
+              style="flex:0 0 130px;padding:6px 10px;font-size:12px;border-radius:4px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.2);color:var(--text);font-family:inherit;">
+            <input type="text" placeholder="PDF, document, external or internal link" value="${row.url || row.link || row.attachmentUrl || ''}"
+              oninput="_announcementRows[${idx}].url=this.value"
+              style="flex:1;min-width:220px;padding:6px 10px;font-size:12px;border-radius:4px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.2);color:var(--text);font-family:inherit;">
+            <input type="text" placeholder="Expiry (optional)" value="${row.expiryDate || row.expiresAt || ''}"
+              oninput="_announcementRows[${idx}].expiryDate=this.value"
+              style="flex:0 0 150px;padding:6px 10px;font-size:12px;border-radius:4px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.2);color:var(--text);font-family:inherit;">
+            <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-soft);">
+              <input type="checkbox" ${row.active === false || row.disabled === true ? '' : 'checked'} onchange="_announcementRows[${idx}].active=this.checked"> Active
+            </label>
+          </div>
+        </div>
+        <button onclick="removeAnnouncementRow(${idx})" title="Remove" style="background:none;border:none;color:#ef4444;cursor:pointer;padding:4px;display:flex;align-items:center;flex-shrink:0;">
+          <i data-lucide="x" style="width:16px;height:16px;"></i>
+        </button>
+      </div>`).join('');
+    if (window.initLucide) initLucide();
+  }
+
+  function addAnnouncementRow() {
+    const now = new Date();
+    const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    const dateStr = `${String(now.getDate()).padStart(2,'0')} ${months[now.getMonth()]} ${now.getFullYear()}`;
+    _announcementRows.unshift({ date: dateStr, title: '', category: 'Information', active: true });
+    renderAnnouncementsEditor();
+  }
+  window.addAnnouncementRow = addAnnouncementRow;
+
+  function removeAnnouncementRow(idx) {
+    _announcementRows.splice(idx, 1);
+    renderAnnouncementsEditor();
+  }
+  window.removeAnnouncementRow = removeAnnouncementRow;
+
+  function loadAnnouncementsIntoEditor(jsonString) {
+    try {
+      const arr = JSON.parse(jsonString);
+      if (Array.isArray(arr)) {
+        _announcementRows = arr.map(it => ({
+          date: it.date || it.publishedDate || '',
+          title: it.title || it.heading || '',
+          description: it.description || '',
+          category: it.category || it.type || 'Information',
+          priority: it.priority || '',
+          url: it.url || it.link || it.attachmentUrl || it.pdfUrl || it.documentUrl || '',
+          expiryDate: it.expiryDate || it.expiresAt || it.validUntil || '',
+          active: it.active === false || it.disabled === true ? false : true
+        }));
+      }
+    } catch(e) {
+      _announcementRows = [];
+    }
+    renderAnnouncementsEditor();
+  }
+
+
+  // ─── Contact Info Editor ───────────────────────────────────────────────────
+  var _contactInfoDefaults = [
+    { key: 'nodal',   icon: 'building-2',  iconColor: '#3B82F6', title: 'Nodal Office', content: 'Punjab DSR Cell, Chandigarh' },
+    { key: 'email',   icon: 'mail',        iconColor: '#10B981', title: 'Email',        content: 'support.dsr@punjab.gov.in' },
+    { key: 'helpline',icon: 'phone-call',  iconColor: '#F2A123', title: 'Helpline',     content: '0172-274-Demo' },
+    { key: 'hours',   icon: 'clock-3',     iconColor: '#3B82F6', title: 'Demo Hours',  content: 'Mon-Fri, 10:00 AM-5:00 PM' }
+  ];
+  var _contactInfoRows = JSON.parse(JSON.stringify(_contactInfoDefaults));
+
+  function renderContactInfoEditor() {
+    var tbody = document.getElementById('contact-info-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = _contactInfoRows.map(function(row, idx) {
+      var icons = { 'building-2': '🏢', 'mail': '📧', 'phone-call': '📞', 'clock-3': '🕙' };
+      return '<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">' +
+        '<td style="padding:10px 10px;font-size:18px;text-align:center;">' + (icons[row.icon] || '📌') + '</td>' +
+        '<td style="padding:10px 8px;">' +
+          '<input type="text" value="' + (row.title||'').replace(/"/g,'&quot;') + '" ' +
+          'oninput="_contactInfoRows[' + idx + '].title=this.value" ' +
+          'style="width:100%;padding:6px 10px;font-size:12px;border-radius:4px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.2);color:var(--text);font-family:inherit;">' +
+        '</td>' +
+        '<td style="padding:10px 8px;">' +
+          '<input type="text" value="' + (row.content||'').replace(/"/g,'&quot;') + '" ' +
+          'oninput="_contactInfoRows[' + idx + '].content=this.value" ' +
+          'style="width:100%;padding:6px 10px;font-size:12px;border-radius:4px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.2);color:var(--text);font-family:inherit;">' +
+        '</td>' +
+        '</tr>';
+    }).join('');
+    if (window.initLucide) initLucide();
+  }
+
+  function loadContactInfoFromStorage() {
+    var stored = localStorage.getItem('portalContactInfo');
+    if (stored) {
+      try {
+        var arr = JSON.parse(stored);
+        if (Array.isArray(arr) && arr.length === _contactInfoDefaults.length) {
+          _contactInfoRows = arr;
+        }
+      } catch(e) {}
+    }
+    renderContactInfoEditor();
+  }
+
+  async function saveContactInfo() {
+    // Sync from DOM inputs first
+    var rows = document.querySelectorAll('#contact-info-tbody tr');
+    rows.forEach(function(tr, idx) {
+      var inputs = tr.querySelectorAll('input');
+      if (_contactInfoRows[idx]) {
+        _contactInfoRows[idx].title = inputs[0] ? inputs[0].value : _contactInfoRows[idx].title;
+        _contactInfoRows[idx].content = inputs[1] ? inputs[1].value : _contactInfoRows[idx].content;
+      }
+    });
+    var jsonValue = JSON.stringify(_contactInfoRows);
+    var btn = document.getElementById('contact-info-save-btn');
+    btn.disabled = true; btn.innerText = 'Saving...';
+    try {
+      await apiFetch('/settings/contactInfo', { method: 'PUT', body: JSON.stringify({ value: jsonValue }) });
+      localStorage.setItem('portalContactInfo', jsonValue);
+      if (typeof window.renderDashboardContactInfo === 'function') window.renderDashboardContactInfo(jsonValue);
+      toast('Contact info saved!', 'success');
+    } catch(e) {
+      localStorage.setItem('portalContactInfo', jsonValue);
+      if (typeof window.renderDashboardContactInfo === 'function') window.renderDashboardContactInfo(jsonValue);
+      toast('Saved locally (server unavailable).', 'info');
+    }
+    btn.disabled = false; btn.innerText = 'Save Contact Info';
+    if (window.initLucide) initLucide();
+  }
+  window.saveContactInfo = saveContactInfo;
+
+  // ─── Load Settings ──────────────────────────────────────────────────────────
+  async function loadGeneralSettings() {
+    const localNotice = localStorage.getItem('portalNoticeText');
+    if (localNotice) {
+      const textEl = document.getElementById('settings-notice-text');
+      if (textEl) textEl.value = localNotice;
+      updateNoticeUI(localNotice);
+    }
+    const localAnnouncements = localStorage.getItem('publicAnnouncements');
+    if (localAnnouncements) {
+      loadAnnouncementsIntoEditor(localAnnouncements);
+      updatePublicAnnouncementsUI(localAnnouncements);
+    } else {
+      renderAnnouncementsEditor();
+    }
+    // Load contact info
+    loadContactInfoFromStorage();
+    try {
+      var contactRes = await fetch('/api/settings/contactInfo');
+      if (contactRes.ok) {
+        var contactData = await contactRes.json();
+        if (contactData && contactData.value) {
+          var arr = JSON.parse(contactData.value);
+          if (Array.isArray(arr)) {
+            _contactInfoRows = arr;
+            localStorage.setItem('portalContactInfo', contactData.value);
+            renderContactInfoEditor();
+            if (typeof window.renderDashboardContactInfo === 'function') window.renderDashboardContactInfo(contactData.value);
+          }
+        }
+      }
+    } catch(e) {}
+    try {
+      const res = await fetch('/api/settings/noticeText');
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.value) {
+          const textEl = document.getElementById('settings-notice-text');
+          if (textEl) textEl.value = data.value;
+          updateNoticeUI(data.value);
+        }
+      }
+      const announcementsRes = await fetch('/api/settings/publicAnnouncements');
+      if (announcementsRes.ok) {
+        const data = await announcementsRes.json();
+        if (data && data.value) {
+          loadAnnouncementsIntoEditor(data.value);
+          updatePublicAnnouncementsUI(data.value);
+        }
+      }
+    } catch (e) {
+      console.error('Error loading settings:', e);
+    }
+  }
+  window.loadGeneralSettings = loadGeneralSettings;
+
+  // ─── Save: Notice Bar Only ──────────────────────────────────────────────────
+  async function saveNoticeBarOnly() {
+    const text = document.getElementById('settings-notice-text').value;
+    const btn = document.getElementById('settings-notice-bar-btn');
+    btn.disabled = true; btn.innerText = 'Saving...';
+    try {
+      await apiFetch('/settings/noticeText', { method: 'PUT', body: JSON.stringify({ value: text }) });
+      localStorage.setItem('portalNoticeText', text);
+      updateNoticeUI(text);
+      toast('Notice bar updated!', 'success');
+    } catch(e) {
+      localStorage.setItem('portalNoticeText', text);
+      updateNoticeUI(text);
+      toast('Saved locally (server unavailable).', 'info');
+    }
+    btn.disabled = false; btn.innerText = 'Save Notice Bar';
+    if (window.initLucide) initLucide();
+  }
+  window.saveNoticeBarOnly = saveNoticeBarOnly;
+
+  // ─── Save: Announcements Only ───────────────────────────────────────────────
+  async function saveAnnouncementsOnly() {
+    // Collect current input values from DOM (in case user typed without triggering oninput)
+    document.querySelectorAll('#announcements-editor [data-row]').forEach(rowEl => {
+      const idx = parseInt(rowEl.getAttribute('data-row'));
+      const inputs = rowEl.querySelectorAll('input');
+      if (_announcementRows[idx]) {
+        _announcementRows[idx].date = inputs[0] ? inputs[0].value : _announcementRows[idx].date;
+        _announcementRows[idx].title = inputs[1] ? inputs[1].value : _announcementRows[idx].title;
+        _announcementRows[idx].priority = inputs[2] ? inputs[2].value : _announcementRows[idx].priority;
+        _announcementRows[idx].url = inputs[3] ? inputs[3].value : _announcementRows[idx].url;
+        _announcementRows[idx].expiryDate = inputs[4] ? inputs[4].value : _announcementRows[idx].expiryDate;
+        _announcementRows[idx].active = inputs[5] ? inputs[5].checked : _announcementRows[idx].active !== false;
+      }
+    });
+    const valid = _announcementRows.filter(r => r.date && r.title);
+    const jsonValue = JSON.stringify(valid.map(r => ({ date: r.date, title: r.title, url: r.url || 'login.html' })));
+    const btn = document.getElementById('settings-notice-save-btn');
+    btn.disabled = true; btn.innerText = 'Saving...';
+    try {
+      await apiFetch('/settings/publicAnnouncements', { method: 'PUT', body: JSON.stringify({ value: jsonValue }) });
+      localStorage.setItem('publicAnnouncements', jsonValue);
+      updatePublicAnnouncementsUI(jsonValue);
+      toast('Announcements saved successfully!', 'success');
+    } catch(e) {
+      localStorage.setItem('publicAnnouncements', jsonValue);
+      updatePublicAnnouncementsUI(jsonValue);
+      toast('Saved locally (server unavailable).', 'info');
+    }
+    btn.disabled = false; btn.innerText = 'Save Announcements';
+    if (window.initLucide) initLucide();
+  }
+  window.saveAnnouncementsOnly = saveAnnouncementsOnly;
+
+  // Keep backward-compat alias
+  async function saveNoticeSettings() { await saveNoticeBarOnly(); await saveAnnouncementsOnly(); }
+  window.saveNoticeSettings = saveNoticeSettings;
+
+  function installNoticeLanguagePatch() {
+    const originalApplyPortalLanguage = window.applyPortalLanguage;
+    if (typeof originalApplyPortalLanguage !== 'function' || originalApplyPortalLanguage.__noticeAware) return;
+    window.applyPortalLanguage = function(...args) {
+      const result = originalApplyPortalLanguage.apply(this, args);
+      if (window.portalNoticeText) updateNoticeUI(window.portalNoticeText);
+      return result;
+    };
+    window.applyPortalLanguage.__noticeAware = true;
+  }
+
+  function switchSettingsTab(tabName) {
+    document.querySelectorAll('.settings-tab-content').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.settings-tab').forEach(el => {
+      el.classList.remove('active');
+      el.style.background = 'transparent';
+      el.style.color = 'var(--text-soft)';
+    });
+    document.getElementById('settings-tab-' + tabName).style.display = 'block';
+    const activeTabBtn = document.querySelector(`.settings-tab[onclick="switchSettingsTab('${tabName}')"]`);
+    if(activeTabBtn) {
+      activeTabBtn.classList.add('active');
+      activeTabBtn.style.background = 'var(--p-accent-gold)';
+      activeTabBtn.style.color = '#17324D';
+    }
+    if (tabName === 'users' && typeof renderUsers === 'function') {
+      renderUsers();
+    } else if (tabName === 'general') {
+      loadGeneralSettings();
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadGeneralSettings();
+    setTimeout(installNoticeLanguagePatch, 0);
+  });
+</script>

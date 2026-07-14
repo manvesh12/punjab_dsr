@@ -1,0 +1,103 @@
+import { Prisma, ReportStatus } from "@prisma/client";
+import { assertProjectDistrictAccess } from "../authorization/project-access.policy.js";
+import { ApiError } from "../common/exceptions/api-error.js";
+import { logger } from "../common/logging/logger.js";
+import type { AuthUser } from "../authentication/auth-user.js";
+import { MAX_SYNCABLE_PROJECT_STATE_BYTES } from "./replenishment.constants.js";
+import { replenishmentRepository, type ReplenishmentRepositoryContract } from "./replenishment.repository.js";
+
+export class ReplenishmentService {
+  constructor(private readonly repository: ReplenishmentRepositoryContract) {}
+
+  async list(projectId: bigint, user: AuthUser) {
+    const project = await this.repository.findProject(projectId);
+    assertProjectDistrictAccess(project, user);
+    return this.repository.list(projectId);
+  }
+
+  async create(projectId: bigint, body: any, user: AuthUser) {
+    const project = await this.repository.findProjectForSync(projectId);
+    assertProjectDistrictAccess(project, user);
+    const syncedState = this.syncedProjectState(project);
+    const incoming = body?.reportState && typeof body.reportState === "object" && !Array.isArray(body.reportState)
+      ? body.reportState as Prisma.JsonObject
+      : {};
+    return this.repository.create({
+      projectId,
+      title: body?.title || `Replenishment Study - ${project.projectName || project.title}`,
+      status: ReportStatus.DRAFT,
+      createdBy: user.id,
+      surveyData: (body?.surveyData || {}) as Prisma.InputJsonValue,
+      reportState: { ...syncedState, ...incoming } as Prisma.InputJsonObject
+    });
+  }
+
+  async get(id: string, user: AuthUser) {
+    const study = await this.repository.findByIdWithProjectDistrict(id);
+    if (!study) throw new ApiError(404, "REPLENISHMENT_NOT_FOUND", "Replenishment study not found");
+    assertProjectDistrictAccess(study.project, user);
+    return study;
+  }
+
+  async update(id: string, body: any, user: AuthUser) {
+    const existing = await this.repository.findById(id);
+    if (!existing) {
+      if (!body?.projectId) throw new ApiError(404, "REPLENISHMENT_PROJECT_REQUIRED", "Study not found and no projectId provided to re-create it");
+      const projectId = BigInt(body.projectId);
+      const project = await this.repository.findProject(projectId);
+      assertProjectDistrictAccess(project, user);
+      return this.repository.create({
+        id,
+        projectId,
+        title: body.title !== undefined ? body.title : "Untitled",
+        status: body.status !== undefined ? body.status : "DRAFT",
+        surveyData: body.surveyData !== undefined ? body.surveyData : {},
+        reportState: body.reportState !== undefined ? body.reportState : {},
+        createdBy: user.id
+      });
+    }
+    const project = await this.repository.findProject(existing.projectId);
+    assertProjectDistrictAccess(project, user);
+    return this.repository.update(id, {
+      title: body?.title !== undefined ? body.title : existing.title,
+      status: body?.status !== undefined ? body.status : existing.status,
+      surveyData: body?.surveyData !== undefined ? body.surveyData : existing.surveyData,
+      reportState: body?.reportState !== undefined ? body.reportState : existing.reportState
+    });
+  }
+
+  async delete(id: string, user: AuthUser) {
+    const existing = await this.repository.findByIdWithProject(id);
+    if (!existing) throw new ApiError(404, "REPLENISHMENT_NOT_FOUND", "Replenishment study not found");
+    assertProjectDistrictAccess(existing.project, user);
+    await this.repository.delete(id);
+    return { message: "Replenishment study deleted" };
+  }
+
+  private syncedProjectState(project: NonNullable<Awaited<ReturnType<ReplenishmentRepositoryContract["findProjectForSync"]>>>) {
+    if (!project.projectState) return {};
+    if (project.projectState.length > MAX_SYNCABLE_PROJECT_STATE_BYTES) {
+      logger.warn("replenishment_project_state_too_large", { projectId: project.id.toString(), bytes: project.projectState.length });
+      return {};
+    }
+    try {
+      const state = JSON.parse(project.projectState);
+      return {
+        district: project.district || state.district,
+        year: project.year || state.year,
+        mineral: project.mineral || state.mineral,
+        rivers: project.rivers || state.rivers,
+        demographics: state.demographics || {},
+        drainage: state.drainage || {},
+        rainfall: state.rainfall || {},
+        geology: state.geology || {},
+        miningLeases: state.miningLeases || []
+      };
+    } catch {
+      logger.warn("replenishment_project_state_invalid", { projectId: project.id.toString() });
+      return {};
+    }
+  }
+}
+
+export const replenishmentService = new ReplenishmentService(replenishmentRepository);

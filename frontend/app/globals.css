@@ -1,0 +1,182 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 210 20% 98%;
+  --foreground: 222 47% 11%;
+  --muted: 210 16% 93%;
+  --muted-foreground: 215 13% 40%;
+  --border: 214 20% 85%;
+  --input: 214 20% 85%;
+  --ring: 199 89% 48%;
+  --primary: 199 89% 32%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 154 32% 88%;
+  --secondary-foreground: 164 72% 18%;
+  --accent: 32 94% 88%;
+  --accent-foreground: 24 84% 22%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --radius: 0.5rem;
+}
+
+.dark {
+  color-scheme: dark;
+  --background: 214 63% 8%;
+  --foreground: 210 40% 96%;
+  --muted: 216 36% 17%;
+  --muted-foreground: 214 22% 72%;
+  --border: 215 22% 28%;
+  --input: 215 22% 28%;
+  --ring: 211 100% 79%;
+  --primary: 208 100% 78%;
+  --primary-foreground: 214 63% 8%;
+  --secondary: 38 65% 67%;
+  --secondary-foreground: 214 63% 8%;
+  --accent: 216 36% 17%;
+  --accent-foreground: 210 40% 96%;
+  --destructive: 0 91% 71%;
+  --destructive-foreground: 214 63% 8%;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+html,
+body {
+  height: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  letter-spacing: 0;
+}
+
+.dark .bg-gray-50,
+.dark .bg-white {
+  background-color: hsl(var(--background)) !important;
+}
+
+.dark .max-w-md.bg-white,
+.dark .shadow-md {
+  background-color: hsl(216 36% 13%) !important;
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 18px 36px rgb(0 0 0 / 0.34);
+}
+
+.dark .text-gray-500,
+.dark .text-gray-600,
+.dark .text-gray-700 {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.dark .border-gray-300,
+.dark input,
+.dark textarea,
+.dark select {
+  border-color: hsl(var(--border)) !important;
+}
+
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: hsl(216 36% 17%) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: hsl(214 18% 60%) !important;
+}
+
+.dark .bg-green-50 {
+  background-color: hsl(142 71% 45% / 0.15) !important;
+}
+
+.dark .text-green-600 {
+  color: hsl(142 76% 72%) !important;
+}
+
+.dark .bg-red-50 {
+  background-color: hsl(0 91% 71% / 0.15) !important;
+}
+
+.dark .text-red-600 {
+  color: hsl(0 91% 76%) !important;
+}
+
+.dark .bg-gray-200 {
+  background-color: hsl(var(--muted)) !important;
+}
+
+.dark .text-blue-800,
+.dark .text-blue-900,
+.dark .text-indigo-600 {
+  color: hsl(var(--primary)) !important;
+}
+
+.dark .bg-blue-900,
+.dark .bg-indigo-600 {
+  background-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+}
+
+.dark .hover\:bg-blue-50:hover {
+  background-color: hsl(var(--accent)) !important;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+img,
+svg,
+video,
+canvas,
+iframe {
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea,
+a {
+  min-width: 0;
+}
+
+input,
+select,
+textarea {
+  max-width: 100%;
+}
+
+button,
+[type="button"],
+[type="submit"] {
+  min-height: 40px;
+  touch-action: manipulation;
+}
+
+:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .min-h-screen {
+    padding: 16px;
+  }
+
+  .max-w-md {
+    max-width: 100%;
+  }
+}

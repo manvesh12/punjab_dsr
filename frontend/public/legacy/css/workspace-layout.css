@@ -1,0 +1,293 @@
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ *  SMART DSR PORTAL — WORKSPACE LAYOUT & AUTOMATIC SIDEBAR
+ *  workspace-layout.css
+ *
+ *  PURPOSE:
+ *    1.  Hide the sidebar toggle button permanently (sidebar is automatic).
+ *    2.  Fix vertical alignment: sidebar card top == main content card top.
+ *    3.  Sidebar starts below the fixed header, fills available workspace.
+ *    4.  Sidebar auto-appears when a project is open (project-workspace-active).
+ *    5.  Sidebar auto-hides when leaving a project (sidebar-hidden / no project).
+ *    6.  Smooth 280ms ease-in-out slide animation.
+ *    7.  Header / Nav / Notice Bar are never affected.
+ *    8.  Responsive: overlay drawer on tablet/mobile.
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+:root {
+  /* Unified gap between cards in the workspace */
+  --ws-gap: 20px;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION 1 — PERMANENTLY HIDE THE MANUAL TOGGLE BUTTON
+────────────────────────────────────────────────────────────────────────── */
+
+#tb-sidebar-toggle,
+.gov-menu-toggle[id="tb-sidebar-toggle"] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION 2 — TOPBAR: ALWAYS FULL-WIDTH, NEVER SHIFTS
+────────────────────────────────────────────────────────────────────────── */
+
+.topbar.dash-global-topbar.gov-enterprise-topbar,
+body.project-workspace-active .topbar.dash-global-topbar.gov-enterprise-topbar,
+body.sidebar-hidden .topbar.dash-global-topbar.gov-enterprise-topbar,
+body:not(.sidebar-hidden) .topbar.dash-global-topbar.gov-enterprise-topbar,
+.topbar.dash-global-topbar.gov-compact-topbar,
+body.project-workspace-active .topbar.dash-global-topbar.gov-compact-topbar,
+body.sidebar-hidden .topbar.dash-global-topbar.gov-compact-topbar,
+body:not(.sidebar-hidden) .topbar.dash-global-topbar.gov-compact-topbar,
+.topbar.dash-global-topbar {
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION 3 — SIDEBAR: AUTOMATIC POSITION & ALIGNMENT
+────────────────────────────────────────────────────────────────────────── */
+
+/* Sidebar acts as a floating card within the workspace */
+.sidebar#sidebar {
+  /* Offset from the fixed topbar */
+  top: calc(var(--topbar-h) + var(--ws-gap)) !important;
+  left: var(--ws-gap) !important;
+
+  /* Fill available workspace height minus top and bottom gap */
+  height: calc(100vh - var(--topbar-h) - (var(--ws-gap) * 2)) !important;
+  max-height: calc(100vh - var(--topbar-h) - (var(--ws-gap) * 2)) !important;
+  min-height: 0 !important;
+
+  /* Independent scrolling */
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+
+  /* Smooth slide animation */
+  transition: transform 280ms ease-in-out, opacity 280ms ease-in-out !important;
+
+  z-index: 400 !important;
+
+  /* Enterprise Card Aesthetics */
+  border-radius: 10px !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08) !important;
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+}
+
+/* Ensure inner nav fills naturally without pushing elements */
+.sidebar#sidebar {
+  display: flex !important;
+  flex-direction: column !important;
+}
+.sidebar#sidebar .sb-head {
+  flex-shrink: 0;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+.sidebar#sidebar .sb-nav {
+  flex: 1 1 auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  min-height: 0 !important;
+}
+.sidebar#sidebar .sb-bottom-container {
+  flex-shrink: 0 !important;
+  margin-top: auto !important;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+/* Scrollbar style */
+.sidebar#sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar#sidebar::-webkit-scrollbar-thumb {
+  background: rgba(23, 50, 77, 0.18);
+  border-radius: 4px;
+}
+html.dark .sidebar#sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION 4 — SIDEBAR VISIBILITY STATES
+────────────────────────────────────────────────────────────────────────── */
+
+/* DEFAULT STATE: Sidebar is hidden */
+.sidebar#sidebar {
+  transform: translateX(-120%) !important;
+  opacity: 0;
+}
+
+/* PROJECT WORKSPACE ACTIVE on DESKTOP (≥1025px): Sidebar is visible */
+@media (min-width: 1024px) {
+  body.project-workspace-active:not(.sidebar-hidden) .sidebar#sidebar {
+    transform: translateX(0) !important;
+    opacity: 1;
+    width: var(--sidebar-w, 292px) !important;
+    max-width: var(--sidebar-w, 292px) !important;
+  }
+
+  body:not(.project-workspace-active) .sidebar#sidebar,
+  body.sidebar-hidden .sidebar#sidebar {
+    transform: translateX(-120%) !important;
+    opacity: 0;
+    pointer-events: none;
+    width: var(--sidebar-w, 292px) !important;
+  }
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION 5 — APP WORKSPACE: GRID ALIGNMENT
+────────────────────────────────────────────────────────────────────────── */
+
+/* ── Desktop Workspace Layout ── */
+@media (min-width: 1024px) {
+
+  /* Inside project workspace: the main content sits exactly next to sidebar */
+  body.project-workspace-active:not(.sidebar-hidden) .app-workspace {
+    margin-left: calc(var(--sidebar-w) + (var(--ws-gap) * 2)) !important;
+    width: calc(100% - var(--sidebar-w) - (var(--ws-gap) * 2)) !important;
+    max-width: calc(100% - var(--sidebar-w) - (var(--ws-gap) * 2)) !important;
+    
+    /* Precise Y-alignment with the Sidebar card */
+    padding-top: calc(var(--topbar-h) + var(--ws-gap)) !important;
+    padding-right: var(--ws-gap) !important;
+    padding-bottom: var(--ws-gap) !important;
+    padding-left: 0 !important; /* Left gap is provided by margin-left */
+    
+    transition: margin-left 280ms ease-in-out, width 280ms ease-in-out !important;
+    box-sizing: border-box;
+  }
+
+  /* Strip internal excessive paddings so the Main Content CARD aligns perfectly with Sidebar CARD */
+  body.project-workspace-active .app-workspace > .view,
+  body.project-workspace-active .page-body {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+  }
+  
+  /* Prevent horizontal overlap of padding on the left/right */
+  body.project-workspace-active .page-body {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  /* Outside project workspace: NO reserved space. Full width layout. */
+  body:not(.project-workspace-active) .app-workspace,
+  body.sidebar-hidden .app-workspace,
+  body.project-workspace-inactive .app-workspace {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    transition: margin-left 280ms ease-in-out, width 280ms ease-in-out !important;
+  }
+
+  /* Preview-open state: preserve the preview split but offset from sidebar */
+  body.project-workspace-active:not(.sidebar-hidden) .app-workspace.preview-open,
+  body.project-workspace-active:not(.sidebar-hidden).preview-open .app-workspace {
+    margin-left: calc(var(--sidebar-w) + (var(--ws-gap) * 2)) !important;
+    width: calc(100% - var(--sidebar-w) - (var(--ws-gap) * 2)) !important;
+    max-width: calc(100% - var(--sidebar-w) - (var(--ws-gap) * 2)) !important;
+  }
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION 6 — TABLET & MOBILE (OVERLAY & DRAWER)
+────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 1023px) {
+  .sidebar#sidebar {
+    position: fixed !important;
+    top: var(--topbar-h) !important;
+    left: 0 !important;
+    height: calc(100vh - var(--topbar-h)) !important;
+    max-height: calc(100vh - var(--topbar-h)) !important;
+    border-radius: 0 !important; /* Edge-to-edge on mobile/tablet */
+    z-index: 450 !important;
+    transform: translateX(-105%) !important;
+    box-shadow: 8px 0 40px rgba(0, 0, 0, 0.28) !important;
+  }
+
+  body.project-workspace-active .sidebar#sidebar.mobile-open,
+  body.project-workspace-active:not(.sidebar-hidden) .sidebar#sidebar {
+    transform: translateX(0) !important;
+    opacity: 1;
+  }
+
+  body:not(.project-workspace-active) .sidebar#sidebar {
+    transform: translateX(-105%) !important;
+    opacity: 0;
+  }
+
+  /* Content always full-width on mobile/tablet */
+  .app-workspace,
+  body.project-workspace-active .app-workspace,
+  body.sidebar-hidden .app-workspace {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  body.project-workspace-active:not(.sidebar-hidden):not(.mobile-sidebar-open)::before {
+    content: "";
+    position: fixed;
+    inset: var(--topbar-h) 0 0 0;
+    z-index: 440;
+    background: rgba(15, 23, 42, 0.38);
+    pointer-events: auto;
+    animation: ws-backdrop-fade-in 200ms ease-in-out forwards;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1023px) {
+  .sidebar#sidebar {
+    width: min(80vw, 300px) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar#sidebar {
+    width: min(86vw, 320px) !important;
+  }
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION 7 — ANIMATION KEYFRAMES
+────────────────────────────────────────────────────────────────────────── */
+
+@keyframes ws-backdrop-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION 8 — PDF PREVIEW MOBILE TABS POSITION FIX
+────────────────────────────────────────────────────────────────────────── */
+
+.pdf-preview-mobile-tabs {
+  left: 0 !important;
+  top: var(--topbar-h) !important;
+}

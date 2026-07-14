@@ -1,0 +1,462 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [vector]
+}
+
+enum Role {
+  ADMIN
+  STATE_ADMIN
+  DISTRICT_OWNER
+  OFFICER
+  REVIEWER
+  IIT_ROPAR
+  SDLC
+  SDO
+  JE
+  AXEN
+  GIS
+  REVIEWER_1
+  REVIEWER_2
+}
+
+enum ProjectStatus {
+  ACTIVE
+  IN_PROGRESS
+  COMPLETED
+  ARCHIVED
+}
+
+enum ReportStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum ModelDsrStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum SectionContentType {
+  TEXT
+  TABLE
+  IMAGE
+  DYNAMIC_GRID
+}
+
+enum GeneratedDsrStatus {
+  DRAFT
+  FINAL
+}
+
+model User {
+  id           BigInt   @id @default(autoincrement())
+  fullName     String
+  username     String   @unique
+  email        String   @unique
+  mobileNumber String?  @unique
+  password     String
+  role         Role
+  district     String?
+  blockName    String?
+  sectionName  String?
+  accessScope  String?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  refreshTokens         RefreshToken[]
+  passwordResetRequests PasswordResetRequest[]
+
+  @@index([role, active])
+  @@index([district, role])
+  @@index([createdAt])
+}
+
+model RefreshToken {
+  id        BigInt   @id @default(autoincrement())
+  token     String   @unique
+  userId    BigInt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  revoked   Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId, revoked, expiresAt])
+  @@index([expiresAt])
+}
+
+model Project {
+  id                   BigInt               @id @default(autoincrement())
+  projectCode          String?              @unique
+  projectName          String
+  title                String?
+  district             String?
+  year                 String?
+  mineral              String?
+  rivers               String?
+  description          String?
+  progress             Int                  @default(0)
+  status               ProjectStatus        @default(IN_PROGRESS)
+  signatures           Int                  @default(0)
+  phaseNo              Int                  @default(1)
+  parentPhaseId        BigInt?
+  phaseLocked          Boolean              @default(false)
+  phaseOrigin          String?              @db.Text
+  createdBy            BigInt?
+  projectState         String?              @db.Text
+  lastReviewedState    String?              @db.Text
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  files                DsrFile[]
+  parentPhase          Project?             @relation("ProjectPhaseChain", fields: [parentPhaseId], references: [id])
+  childPhases          Project[]            @relation("ProjectPhaseChain")
+  generatedDsrs        GeneratedDsr[]
+  modelImportHistory   ModelImportHistory[]
+  replenishmentStudies ReplenishmentStudy[]
+  dsrChunks            DsrReportChunk[]
+
+  @@index([parentPhaseId])
+  @@index([district, phaseNo])
+  @@index([status, createdAt])
+  @@index([createdBy, createdAt])
+  @@index([district, status, createdAt])
+}
+
+model Report {
+  id           BigInt       @id @default(autoincrement())
+  reportNumber String?      @unique
+  projectId    BigInt?
+  title        String
+  description  String?
+  reportType   String?
+  status       ReportStatus @default(DRAFT)
+  submittedBy  BigInt?
+  reviewedBy   BigInt?
+  approvedBy   BigInt?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([projectId, status])
+  @@index([status, createdAt])
+  @@index([submittedBy, createdAt])
+}
+
+model WorkflowHistory {
+  id          BigInt   @id @default(autoincrement())
+  reportId    BigInt
+  action      String
+  remarks     String?
+  performedBy BigInt?
+  performedAt DateTime @default(now())
+
+  @@index([reportId, performedAt])
+  @@index([performedBy, performedAt])
+  @@index([action, performedAt])
+}
+
+model AuditLog {
+  id        BigInt   @id @default(autoincrement())
+  userId    BigInt?
+  action    String
+  method    String
+  path      String
+  ip        String?
+  userAgent String?
+  status    Int?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
+  @@index([method, path, createdAt])
+  @@index([status, createdAt])
+}
+
+model DsrFile {
+  id          BigInt   @id @default(autoincrement())
+  projectId   BigInt
+  annexureId  String
+  fileName    String
+  objectKey   String
+  contentType String   @default("application/pdf")
+  sizeBytes   Int
+  createdAt   DateTime @default(now())
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, annexureId])
+  @@index([projectId, createdAt])
+  @@index([annexureId])
+  @@index([objectKey])
+}
+
+model ModelDsr {
+  id          String         @id @default(uuid())
+  modelId     String?        @unique // e.g. MODEL-DSR-0001
+  title       String         @unique
+  description String?
+  category    String?
+  district    String?
+  mineralType String?
+  remarks     String?
+  visibility  String         @default("DEPARTMENT_ONLY") // PUBLIC, PRIVATE, DEPARTMENT_ONLY
+  status      ModelDsrStatus @default(DRAFT)
+  createdBy   BigInt?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  version     Int            @default(1)
+
+  sections      ModelDsrSection[]
+  files         ModelDsrFile[]
+  versions      ModelDsrVersion[]
+  tags          ModelDsrTag[]
+  permissions   ModelDsrPermission[]
+  importHistory ModelImportHistory[]
+  previewCache  ModelPreviewCache?
+
+  generated GeneratedDsr[]
+
+  @@index([status, createdAt])
+  @@index([district, status])
+  @@index([createdBy, createdAt])
+  @@index([category, status])
+}
+
+model ModelDsrSection {
+  id            String             @id @default(uuid())
+  modelId       String
+  sectionName   String
+  sequence      Int
+  contentType   SectionContentType @default(TEXT)
+  configuration Json               @default("{}")
+  isIncluded    Boolean            @default(true)
+  chapterType   String? // e.g. "CHAPTER", "ANNEXURE", "FRONT_MATTER"
+
+  model ModelDsr @relation(fields: [modelId], references: [id], onDelete: Cascade)
+
+  @@unique([modelId, sequence])
+  @@index([modelId, isIncluded])
+  @@index([contentType])
+}
+
+model ModelDsrFile {
+  id          String   @id @default(uuid())
+  modelId     String
+  fileName    String
+  objectKey   String
+  contentType String   @default("application/pdf") // PDF, Image, Table, Map
+  fileType    String? // PDF, MAP, IMAGE, TABLE
+  sizeBytes   Int
+  createdAt   DateTime @default(now())
+
+  model ModelDsr @relation(fields: [modelId], references: [id], onDelete: Cascade)
+
+  @@index([modelId, createdAt])
+  @@index([fileType])
+}
+
+model ModelDsrVersion {
+  id            String   @id @default(uuid())
+  modelId       String
+  versionNumber Int
+  snapshotData  Json // Full JSON snapshot of the model configuration at this version
+  createdAt     DateTime @default(now())
+  createdBy     BigInt?
+  remarks       String?
+
+  model ModelDsr @relation(fields: [modelId], references: [id], onDelete: Cascade)
+
+  @@index([modelId, createdAt])
+}
+
+model ModelDsrTag {
+  id      String @id @default(uuid())
+  modelId String
+  tag     String
+
+  model ModelDsr @relation(fields: [modelId], references: [id], onDelete: Cascade)
+
+  @@unique([modelId, tag])
+}
+
+model ModelDsrPermission {
+  id          String @id @default(uuid())
+  modelId     String
+  userId      BigInt
+  accessLevel String // ADMIN, REVIEWER, OFFICER, VIEWER
+
+  model ModelDsr @relation(fields: [modelId], references: [id], onDelete: Cascade)
+
+  @@unique([modelId, userId])
+  @@index([userId, accessLevel])
+}
+
+model ModelImportHistory {
+  id         String   @id @default(uuid())
+  modelId    String
+  projectId  BigInt
+  importedBy BigInt
+  importedAt DateTime @default(now())
+  importType String // REPLACE, MERGE, APPEND
+  dataMapped Json // Record of what data was mapped
+
+  model   ModelDsr @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  project Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([modelId, importedAt])
+  @@index([projectId, importedAt])
+  @@index([importedBy, importedAt])
+}
+
+model ModelPreviewCache {
+  id          String   @id @default(uuid())
+  modelId     String   @unique
+  pageCount   Int      @default(0)
+  imageCount  Int      @default(0)
+  tableCount  Int      @default(0)
+  mapCount    Int      @default(0)
+  previewData Json // Snippets or thumbnail URLs
+  updatedAt   DateTime @updatedAt
+
+  model ModelDsr @relation(fields: [modelId], references: [id], onDelete: Cascade)
+}
+
+model GeneratedDsr {
+  id          String             @id @default(uuid())
+  modelId     String
+  projectId   BigInt?
+  status      GeneratedDsrStatus @default(DRAFT)
+  dataPayload Json               @default("{}")
+  pdfUrl      String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  model    ModelDsr              @relation(fields: [modelId], references: [id], onDelete: Restrict)
+  project  Project?              @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  versions GeneratedDsrVersion[]
+
+  @@index([modelId, status, createdAt])
+  @@index([projectId, status, createdAt])
+}
+
+model GeneratedDsrVersion {
+  id             String   @id @default(uuid())
+  generatedDsrId String
+  dataPayload    Json
+  pdfUrl         String?
+  createdAt      DateTime @default(now())
+
+  generatedDsr GeneratedDsr @relation(fields: [generatedDsrId], references: [id], onDelete: Cascade)
+
+  @@index([generatedDsrId, createdAt])
+}
+
+model PasswordResetRequest {
+  id           BigInt   @id @default(autoincrement())
+  userId       BigInt
+  identifier   String // Email or Mobile number
+  otpHash      String
+  expiresAt    DateTime
+  attemptCount Int      @default(0)
+  used         Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([identifier, used, createdAt])
+  @@index([userId, used, createdAt])
+  @@index([expiresAt])
+}
+
+model OtpVerification {
+  id           BigInt   @id @default(autoincrement())
+  identifier   String // Email or Mobile number
+  otpHash      String
+  purpose      String // e.g. "REGISTER"
+  expiresAt    DateTime
+  attemptCount Int      @default(0)
+  used         Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  @@index([identifier, purpose, used, createdAt])
+  @@index([expiresAt])
+}
+
+model Invitation {
+  id                  String    @id @default(uuid())
+  email               String    @unique
+  fullName            String?
+  department          String?
+  designation         String?
+  state               String?
+  district            String?
+  mobileNumber        String?
+  role                Role
+  token               String    @unique
+  status              String    @default("INVITED") // INVITED, EMAIL_SENT, OTP_SENT, REGISTERED, EXPIRED, CANCELLED
+  expiresAt           DateTime
+  createdBy           BigInt
+  pendingProfile      Json?
+  pendingPasswordHash String?
+  otpResendCount      Int       @default(0)
+  otpLastSentAt       DateTime?
+  registeredAt        DateTime?
+  createdAt           DateTime  @default(now())
+
+  @@index([status, expiresAt])
+  @@index([createdBy, createdAt])
+}
+
+model ReplenishmentStudy {
+  id        String       @id @default(uuid())
+  projectId BigInt
+  title     String
+  status    ReportStatus @default(DRAFT)
+
+  // JSON field storing all unique survey data (DGPS, Drone, DEM, Cross Sections)
+  surveyData Json @default("{}")
+
+  // JSON field storing the synced DSR data and AI computations
+  reportState Json @default("{}")
+
+  createdBy BigInt?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, createdAt])
+  @@index([status, createdAt])
+  @@index([createdBy, createdAt])
+}
+
+model SystemSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+
+  @@index([updatedAt])
+}
+
+model DsrReportChunk {
+  id        String                       @id @default(uuid())
+  projectId BigInt
+  section   String // e.g., "Chapter 1", "Introduction"
+  content   String
+  embedding Unsupported("vector(1536)")?
+  createdAt DateTime                     @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, section])
+  @@index([createdAt])
+}

@@ -1,0 +1,29 @@
+/* Public landing page: aligned with the portal's navy, sandstone and glass theme. */
+:root { --home-navy: #17324d; --home-navy-deep: #0f1f32; --home-gold: #c49a58; --home-ink: #12253b; --home-muted: #62748a; --home-border: rgba(23, 50, 77, .13); }
+body.home-portal-theme { min-height: 100vh; font-family: "Plus Jakarta Sans", "Inter", "Noto Sans", sans-serif; background: #f6f9fc; color: var(--home-ink); }
+.home-govbar { background: var(--home-navy-deep) !important; color: #e9f1f8 !important; border: 0 !important; }
+.home-govbar a, .home-govbar button { color: #e9f1f8 !important; }
+.home-brandbar { background: rgba(255,255,255,.94) !important; border-color: var(--home-border) !important; box-shadow: 0 8px 26px rgba(17,45,70,.08); }
+.home-nav { background: linear-gradient(100deg, #102b46, #173d61) !important; box-shadow: 0 10px 24px rgba(15,31,50,.18) !important; }
+.home-nav a { letter-spacing: .01em; }
+.home-nav .home-theme-toggle { border: 1px solid rgba(255,255,255,.3); border-radius: 9px; color: #fff; padding: 6px 8px; line-height: 1; transition: .2s ease; }
+.home-nav .home-theme-toggle:hover { background: rgba(255,255,255,.13); }
+.home-hero { background: radial-gradient(circle at 88% 12%, rgba(196,154,88,.23), transparent 33%), linear-gradient(120deg, #f9fcff 0%, #eef5fb 57%, #e8f1f8 100%) !important; }
+.home-hero::after { content: ""; position: absolute; inset: auto 0 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(196,154,88,.7), transparent); }
+.home-hero h2 { color: var(--home-navy) !important; font-family: "Outfit", "Plus Jakarta Sans", sans-serif; }
+.home-hero h2 span { color: #7c5a2d !important; }
+.home-hero .bg-primary-container { background: var(--home-navy) !important; }
+.home-hero .border-primary-container { border-color: var(--home-navy) !important; color: var(--home-navy) !important; }
+.public-notice-bar { background: #fffdf8 !important; border-color: rgba(196,154,88,.33) !important; }
+body.home-portal-theme #notices, body.home-portal-theme .bg-surface { background: #f6f9fc !important; }
+body.home-portal-theme .bg-white, body.home-portal-theme .bg-surface-container, body.home-portal-theme .bg-surface-container-low { border-color: var(--home-border) !important; }
+body.home-portal-theme .bg-white { box-shadow: 0 8px 26px rgba(17,45,70,.06); }
+body.home-portal-theme footer, body.home-portal-theme > div.border-t { background: #102940 !important; color: #dbe7f1 !important; border-color: rgba(255,255,255,.15) !important; }
+html.dark body.home-portal-theme { background: #0c1928; color: #e8f0f7; }
+html.dark .home-brandbar { background: rgba(16,35,54,.96) !important; border-color: rgba(196,154,88,.25) !important; }
+html.dark .home-hero { background: radial-gradient(circle at 86% 12%, rgba(196,154,88,.2), transparent 34%), linear-gradient(120deg, #102338, #132c46) !important; }
+html.dark .home-hero h2 { color: #f3f7fb !important; }
+html.dark body.home-portal-theme .bg-surface, html.dark body.home-portal-theme #notices { background: #0c1928 !important; }
+html.dark body.home-portal-theme .bg-white, html.dark body.home-portal-theme .bg-surface-container, html.dark body.home-portal-theme .bg-surface-container-low { background: #13283d !important; border-color: rgba(167,193,215,.2) !important; box-shadow: none; }
+html.dark body.home-portal-theme .text-on-surface-variant { color: #bdcddd !important; }
+@media (max-width: 768px) { .home-brandbar img:first-child { height: 64px !important; } .home-hero { background-position: center; } }

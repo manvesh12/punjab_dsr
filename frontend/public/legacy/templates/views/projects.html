@@ -1,0 +1,241 @@
+        <div id="view-projects" class="view">
+          <style>
+            #view-projects {
+              min-height: 100vh;
+              padding: 0 !important;
+              margin: 0 !important;
+              background: transparent;
+            }
+            #view-projects .projects-content-shell {
+              padding: 0;
+              display: grid;
+              gap: 24px;
+            }
+            #view-projects .dash-portal-wrapper {
+              background: transparent;
+            }
+            #view-projects .dash-switcher-bar {
+              display: none;
+            }
+            #view-projects .projects-page-header {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: 24px;
+              padding: 24px;
+              border: 1px solid #E5E7EB;
+              border-left: 4px solid #C49A58;
+              border-radius: 8px;
+              background: #ffffff;
+              box-shadow: 0 8px 24px rgba(17, 24, 39, 0.08);
+            }
+            #view-projects .projects-breadcrumb {
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              margin-bottom: 8px;
+              color: #6B7280;
+              font-size: 12px;
+              font-weight: 800;
+              text-transform: uppercase;
+              letter-spacing: 0.04em;
+            }
+            #view-projects .page-title {
+              color: #17324D !important;
+              font-size: 32px !important;
+              line-height: 1.15;
+              font-weight: 900;
+              margin: 0;
+            }
+            #view-projects .page-sub {
+              margin-top: 8px;
+              color: #6B7280;
+              font-weight: 700;
+              max-width: 720px;
+            }
+            .projects-header-actions {
+              display: flex;
+              align-items: center;
+              justify-content: flex-end;
+              gap: 16px;
+              flex-wrap: wrap;
+            }
+            .projects-dash-btn {
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              gap: 8px;
+              min-height: 40px;
+              padding: 0 16px;
+              border-radius: 8px;
+              border: 1px solid #E5E7EB;
+              background: #ffffff;
+              color: #17324D;
+              font-size: 13px;
+              font-weight: 800;
+              cursor: pointer;
+              transition: all 0.2s ease;
+              text-decoration: none;
+            }
+            .projects-dash-btn:hover {
+              border-color: #17324D;
+              box-shadow: 0 6px 16px rgba(23, 50, 77, 0.08);
+              transform: translateY(-1px);
+            }
+            .projects-dash-btn.primary {
+              background: #C49A58;
+              color: #17324D;
+              border-color: #C49A58;
+            }
+            #view-projects .proj-card {
+              border-radius: 8px;
+              border: 1px solid #E5E7EB;
+              box-shadow: 0 8px 24px rgba(17, 24, 39, 0.07);
+            }
+            #view-projects .proj-card-actions .btn {
+              border-radius: 6px !important;
+              min-height: 34px;
+              font-size: 12.5px;
+              font-weight: 800;
+            }
+            #view-projects .proj-card-actions .btn-outline {
+              background: #ffffff !important;
+              color: #17324D !important;
+              border-color: #E2E8F0 !important;
+            }
+            #view-projects .proj-card-actions .btn-outline:hover {
+              border-color: #17324D !important;
+              box-shadow: 0 6px 16px rgba(23, 50, 77, 0.08);
+            }
+            .projects-layout {
+              display: grid;
+              grid-template-columns: minmax(0, 1fr);
+              gap: 24px;
+              align-items: start;
+            }
+            #projects-grid {
+              min-width: 0;
+              align-content: start;
+              gap: 24px !important;
+            }
+            #projects-grid.g2 { grid-template-columns: repeat(2, minmax(320px, 1fr)); }
+            .projects-empty-state {
+              grid-column: 1 / -1;
+              display: grid;
+              place-items: center;
+              min-height: 320px;
+              padding: 48px 24px;
+              text-align: center;
+              border: 1.5px dashed rgba(23, 50, 77, 0.24);
+              border-radius: 10px;
+              background: rgba(255, 255, 255, 0.76);
+              box-shadow: 0 10px 30px rgba(23, 50, 77, 0.06);
+            }
+            .projects-empty-state__inner { max-width: 460px; }
+            .projects-empty-state__icon {
+              width: 52px;
+              height: 52px;
+              border-radius: 8px;
+              margin: 0 auto 18px;
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              background: #17324D;
+              color: #C49A58;
+            }
+            .projects-empty-state h3 {
+              margin: 0 0 8px;
+              color: #17324D;
+              font-size: 18px;
+              font-weight: 800;
+            }
+            .projects-empty-state p {
+              margin: 0 0 18px;
+              color: var(--text-soft);
+              font-size: 13.5px;
+              line-height: 1.55;
+            }
+            #view-projects .dash-menu-link-item.active button {
+              background: rgba(196, 154, 88, 0.18);
+              color: #C49A58;
+            }
+            html.dark #view-projects,
+            html.dark #view-projects .dash-portal-wrapper {
+              background: #07111f;
+              color: #e5edf6;
+            }
+            html.dark #view-projects .dash-switcher-bar,
+            html.dark #view-projects .dash-gov-utility-strip {
+              background: #020817;
+            }
+            html.dark #view-projects .dash-gov-brand-row,
+            html.dark #view-projects .dash-gov-notice-ticker {
+              background: #0d1a2b;
+              border-color: rgba(148, 163, 184, 0.16);
+            }
+            html.dark #view-projects .dash-brand-bilingual,
+            html.dark #view-projects .dash-brand-subtitle {
+              color: #a9b8ca;
+            }
+            html.dark #view-projects .dash-brand-title {
+              color: #f8fafc;
+            }
+            html.dark #view-projects .header-row,
+            html.dark #view-projects .projects-page-header,
+            html.dark #view-projects .proj-card,
+            html.dark #view-projects .projects-empty-state {
+              background: rgba(13, 26, 43, 0.92) !important;
+              border-color: rgba(148, 163, 184, 0.22) !important;
+              color: #f8fafc !important;
+            }
+            html.dark #view-projects .page-title,
+            html.dark #view-projects .projects-empty-state h3 {
+              color: #f8fafc !important;
+            }
+            @media (max-width: 1150px) {
+              .projects-layout { grid-template-columns: 1fr; }
+            }
+            @media (max-width: 720px) {
+              #view-projects .projects-page-header {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 16px;
+              }
+              #view-projects .page-title { font-size: 24px !important; }
+              .projects-header-actions,
+              .projects-dash-btn { width: 100%; }
+              #projects-grid.g2 { grid-template-columns: 1fr; }
+              .projects-empty-state { min-height: 260px; padding: 34px 18px; }
+            }
+          </style>
+          <div class="dash-portal-wrapper">
+            <div class="projects-content-shell">
+              <div class="projects-page-header">
+                <div>
+                  <div class="projects-breadcrumb">
+                    <span>DSR Portal</span>
+                    <span>/</span>
+                    <span>Projects</span>
+                  </div>
+                  <h1 class="page-title">My DSR Projects</h1>
+                  <div class="page-sub">Project Management Workspace for district survey reports across Punjab.</div>
+                  <div id="projects-load-status" style="margin-top:6px;font-size:12px;font-weight:800;color:var(--text-soft);"></div>
+                </div>
+                <div class="projects-header-actions">
+                  <button type="button" class="projects-dash-btn" onclick="clearActiveProject(); showView('dashboard', null)">
+                    <i data-lucide="layout-dashboard" style="width:14px; height:14px;"></i>Dashboard
+                  </button>
+                  <button type="button" class="projects-dash-btn" onclick="showView('workflow', null)">
+                    <i data-lucide="activity" style="width:14px; height:14px;"></i>Workflow
+                  </button>
+                  <button id="view-btn-new-project" type="button" class="projects-dash-btn primary" onclick="newProjectModal()">
+                    <i data-lucide="plus-circle" style="width:14px; height:14px;"></i>New Project
+                  </button>
+                </div>
+              </div>
+              <div class="projects-layout">
+                <div id="projects-grid" class="g2"></div>
+              </div>
+            </div>
+          </div>
+        </div>

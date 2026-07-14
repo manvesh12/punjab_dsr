@@ -1,0 +1,16 @@
+node_modules/
+.next/
+dist/
+.env
+.env.production
+*.env.production
+*.env.local
+*.log
+*.err
+*.out
+runtime/logs/
+.idea/
+.vscode/
+Thumbs.db
+.DS_Store
+frontend/public/legacy/uploads/
