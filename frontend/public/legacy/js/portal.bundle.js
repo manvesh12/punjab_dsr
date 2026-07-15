@@ -484,18 +484,11 @@ class ProjectPersistenceService {
         throw new Error('Offline');
       }
 
-      const res = await fetch(`/api/projects/${projectId}/state`, {
+      // Use the global apiFetch to ensure correct API_BASE_URL and auth headers are applied
+      const responseData = await apiFetch(`/projects/${projectId}/state`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('dsr_token')}`
-        },
         body: JSON.stringify(payload)
       });
-      
-      if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
-      
-      const responseData = await res.json();
       
       // Verification: Ensure backend acknowledged success
       if (!responseData.success) {
@@ -542,7 +535,8 @@ class ProjectPersistenceService {
       progress: progress
     };
     
-    const url = `/api/projects/${projectId}/state`;
+    const baseUrl = typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '/api';
+    const url = `${baseUrl}/projects/${projectId}/state`;
     const blob = new Blob([JSON.stringify(payload)], {type: 'application/json'});
     navigator.sendBeacon(url, blob);
   }
