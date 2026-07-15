@@ -18078,17 +18078,17 @@ class Sidebar {
         badgeHtml = `<span style="font-size:12px; color:${sCol};">${item.status}</span>`;
       }
       
-      html += \`
-        <div class="repl-sb-item" onclick="document.getElementById('acc-\${item.id}')?.scrollIntoView({behavior:'smooth'})" style="display:flex; align-items:center; justify-content:space-between; padding:8px 12px; cursor:pointer; border-radius:8px; font-size:14px; transition:all 0.2s; margin:4px; background:\${bgColor}; color:\${textColor}; transform:\${transform}; box-shadow:\${shadow};" onmouseover="this.style.background='\${hoverBg}'; this.style.color='#ffffff';" onmouseout="this.style.background='\${bgColor}'; this.style.color='\${textColor}';">
+      html += `
+        <div class="repl-sb-item" onclick="document.getElementById('acc-${item.id}')?.scrollIntoView({behavior:'smooth'})" style="display:flex; align-items:center; justify-content:space-between; padding:8px 12px; cursor:pointer; border-radius:8px; font-size:14px; transition:all 0.2s; margin:4px; background:${bgColor}; color:${textColor}; transform:${transform}; box-shadow:${shadow};" onmouseover="this.style.background='${hoverBg}'; this.style.color='#ffffff';" onmouseout="this.style.background='${bgColor}'; this.style.color='${textColor}';">
           <div style="display:flex; align-items:center; gap:12px;">
-            <span style="color:\${iconColor}; display:flex; align-items:center; justify-content:center;">
-              <div style="width:16px; height:16px;">\${item.icon}</div>
+            <span style="color:${iconColor}; display:flex; align-items:center; justify-content:center;">
+              <div style="width:16px; height:16px;">${item.icon}</div>
             </span>
-            <span style="font-weight:500;">\${item.title}</span>
+            <span style="font-weight:500;">${item.title}</span>
           </div>
-          \${badgeHtml}
+          ${badgeHtml}
         </div>
-      \`;
+      `;
     });
     
     this.container.innerHTML = html;
