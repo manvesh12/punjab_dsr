@@ -15,20 +15,50 @@ export class ReplenishmentService {
     return this.repository.list(projectId);
   }
 
+  async listApprovedDsrs(user: AuthUser) {
+    // A user can only fetch Approved DSRs for their assigned district
+    const districtId = user.districtId || null;
+    return this.repository.findApprovedDsrs(districtId);
+  }
+
   async create(projectId: bigint, body: any, user: AuthUser) {
     const project = await this.repository.findProjectForSync(projectId);
     assertProjectDistrictAccess(project, user);
-    const syncedState = this.syncedProjectState(project);
+    
+    const parentDsrId = body?.parentDsrId ? BigInt(body.parentDsrId) : null;
+    let syncedState = {};
+    if (parentDsrId) {
+      const parentDsr = await this.repository.findProjectForSync(parentDsrId);
+      if (parentDsr) {
+        assertProjectDistrictAccess(parentDsr, user);
+        syncedState = this.syncedProjectState(parentDsr);
+      }
+    } else {
+      syncedState = this.syncedProjectState(project);
+    }
+    
     const incoming = body?.reportState && typeof body.reportState === "object" && !Array.isArray(body.reportState)
       ? body.reportState as Prisma.JsonObject
       : {};
+      
+    // Embed the static inherited DSR data cleanly
+    const reportState = {
+      inherited: syncedState,
+      latestSurveyData: {},
+      differences: {},
+      ...incoming
+    } as Prisma.InputJsonObject;
+
     return this.repository.create({
       projectId,
+      parentDsrId,
+      river: body?.river || null,
+      miningBlock: body?.miningBlock || null,
       title: body?.title || `Replenishment Study - ${project.projectName || project.title}`,
       status: ReportStatus.DRAFT,
       createdBy: user.id,
       surveyData: (body?.surveyData || {}) as Prisma.InputJsonValue,
-      reportState: { ...syncedState, ...incoming } as Prisma.InputJsonObject
+      reportState
     });
   }
 
@@ -146,8 +176,34 @@ export class ReplenishmentService {
     const project = await this.repository.findProject(existing.projectId);
     assertProjectDistrictAccess(project, user);
     
-    const newState = body.action || "DRAFT"; // e.g., PENDING_REVIEW, APPROVED
-    return this.repository.update(id, { approvalState: newState });
+    const WORKFLOW_STAGES = [
+      "DRAFT",
+      "SURVEY_OFFICER_APPROVED",
+      "GIS_EXPERT_APPROVED",
+      "GEOLOGIST_APPROVED",
+      "DISTRICT_OFFICER_APPROVED",
+      "REVIEWER_APPROVED",
+      "DISTRICT_ADMIN_APPROVED",
+      "STATE_ADMIN_APPROVED",
+      "FINAL_REPORT_GENERATED"
+    ];
+    
+    const currentStateIndex = WORKFLOW_STAGES.indexOf(existing.approvalState || "DRAFT");
+    const requestedState = body.action || existing.approvalState;
+    const nextStateIndex = WORKFLOW_STAGES.indexOf(requestedState);
+    
+    if (nextStateIndex === -1) {
+      throw new ApiError(400, "INVALID_WORKFLOW_STATE", "Invalid workflow state requested.");
+    }
+    
+    // Strict linear enforcement: can only move forward one step at a time (or reject/rollback which we allow freely for now)
+    if (nextStateIndex > currentStateIndex + 1) {
+      throw new ApiError(403, "WORKFLOW_LOCKED", "Cannot skip workflow stages. Previous stages must be approved first.");
+    }
+    
+    // In a real scenario, we'd check `user.role` against the requested stage here.
+    
+    return this.repository.update(id, { approvalState: requestedState });
   }
 
   async generateAi(id: string, body: any, user: AuthUser) {

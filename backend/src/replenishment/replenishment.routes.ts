@@ -6,6 +6,7 @@ export const replenishmentRouter = Router();
 
 replenishmentRouter.get("/projects/:projectId/replenishment", requireAuth, replenishmentController.list);
 replenishmentRouter.post("/projects/:projectId/replenishment", requireAuth, replenishmentController.create);
+replenishmentRouter.get("/replenishment/approved-dsrs", requireAuth, replenishmentController.listApprovedDsrs);
 replenishmentRouter.get("/replenishment/:id", requireAuth, replenishmentController.get);
 replenishmentRouter.put("/replenishment/:id", requireAuth, replenishmentController.update);
 replenishmentRouter.delete("/replenishment/:id", requireAuth, replenishmentController.delete);

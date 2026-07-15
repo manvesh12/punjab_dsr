@@ -9,6 +9,9 @@ export class ReplenishmentController {
   list = async (req: Request, res: Response, next: NextFunction) =>
     this.respond(res, next, () => this.service.list(replenishmentProjectId(req.params.projectId), req.user!));
 
+  listApprovedDsrs = async (req: Request, res: Response, next: NextFunction) =>
+    this.respond(res, next, () => this.service.listApprovedDsrs(req.user!));
+
   create = async (req: Request, res: Response, next: NextFunction) =>
     this.respond(res, next, () => this.service.create(replenishmentProjectId(req.params.projectId), req.body, req.user!), 201);
 

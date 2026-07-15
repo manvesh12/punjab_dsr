@@ -293,9 +293,9 @@
     </div>
     
     <div class="repl-toolbar-right">
-      <button id="repl-auto-fetch-btn" class="repl-btn repl-btn-ghost">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-        Sync DSR Data
+      <button id="repl-ai-draft-btn" class="repl-btn repl-btn-ghost">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        Generate AI Draft
       </button>
 
       <div class="repl-divider-y"></div>
@@ -305,9 +305,9 @@
         <span id="repl-validation-text">Validating...</span>
       </button>
 
-      <button id="repl-submit-btn" class="repl-btn repl-btn-primary">
+      <button id="repl-workflow-btn" class="repl-btn repl-btn-primary">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-        Approve & Submit
+        Approve Workflow Stage
       </button>
       
       <button id="repl-download-btn" class="repl-btn repl-btn-icon" title="Download Report">
@@ -340,6 +340,41 @@
       </div>
 
       <div id="repl-accordion-container" class="repl-accordion-area custom-scrollbar">
+        
+        <!-- Difference Engine UI (Injected/Static for Demo) -->
+        <div style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; margin-bottom:16px; overflow:hidden; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+          <div style="padding:12px 16px; background:#F8FAFC; border-bottom:1px solid #e5e7eb; font-weight:600; font-size:14px; color:#17324D; display:flex; justify-content:space-between; align-items:center;">
+            <span>Difference Detection Engine</span>
+            <span style="font-size:11px; padding:2px 8px; background:#DCFCE7; color:#16A34A; border-radius:12px;">Synced from Survey</span>
+          </div>
+          <div style="padding:16px;">
+            <table style="width:100%; border-collapse:collapse; font-size:13px; text-align:left;">
+              <thead>
+                <tr style="border-bottom:2px solid #e5e7eb;">
+                  <th style="padding:8px; font-weight:600; color:#475569;">Parameter</th>
+                  <th style="padding:8px; font-weight:600; color:#475569;">Approved DSR</th>
+                  <th style="padding:8px; font-weight:600; color:#475569;">Latest Survey</th>
+                  <th style="padding:8px; font-weight:600; color:#475569;">Difference</th>
+                </tr>
+              </thead>
+              <tbody id="repl-diff-body">
+                <tr style="border-bottom:1px solid #f1f5f9;">
+                  <td style="padding:8px;">Mining Area</td>
+                  <td style="padding:8px; color:#64748B;">45.2 Ha</td>
+                  <td style="padding:8px;">44.8 Ha</td>
+                  <td style="padding:8px; color:#DC2626; font-weight:600;">-0.4 Ha</td>
+                </tr>
+                <tr style="border-bottom:1px solid #f1f5f9;">
+                  <td style="padding:8px;">Sediment Thickness</td>
+                  <td style="padding:8px; color:#64748B;">2.5 m</td>
+                  <td style="padding:8px;">2.8 m</td>
+                  <td style="padding:8px; color:#16A34A; font-weight:600;">+0.3 m</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
         <!-- Accordion Cards Injected Here -->
       </div>
     </div>

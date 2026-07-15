@@ -1,0 +1,234 @@
+/* ═══════════════════════════════════════════════════════════════
+   MINI NAVIGATION RAIL OVERRIDES
+   Enterprise UI Redesign
+═══════════════════════════════════════════════════════════════ */
+
+/* Smooth Sidebar Transitions */
+.sidebar, .app-workspace, .topbar {
+    transition: width 250ms cubic-bezier(0.4, 0, 0.2, 1), 
+                margin-left 250ms cubic-bezier(0.4, 0, 0.2, 1),
+                left 250ms cubic-bezier(0.4, 0, 0.2, 1),
+                transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Expanded State overrides */
+.sidebar .gov-brand-title {
+    transition: opacity 250ms;
+}
+
+@media (min-width: 1281px) {
+    /* Prevent sidebar from moving off screen on desktop */
+    body.sidebar-hidden .sidebar {
+        transform: none !important;
+    }
+
+    /* Collapsed State Width */
+    body.sidebar-hidden {
+        --sidebar-w: var(--sidebar-collapsed-w, 76px) !important;
+    }
+
+    /* Hide specific texts and labels when collapsed */
+    body.sidebar-hidden .sidebar .sb-item > span:not(.sb-ico),
+    body.sidebar-hidden .sidebar .sb-section-lbl,
+    body.sidebar-hidden .gov-brand-title,
+    body.sidebar-hidden .gov-brand-subtitle,
+    body.sidebar-hidden .sb-username-text,
+    body.sidebar-hidden .sb-role-text,
+    body.sidebar-hidden .sb-bottom-container span:not(.sb-ico),
+    body.sidebar-hidden .sb-bottom-container .sb-logout-btn {
+        display: none !important;
+    }
+
+    body.sidebar-hidden .sb-head {
+        justify-content: center;
+        padding: 16px 0;
+        overflow: visible;
+    }
+
+    body.sidebar-hidden .sb-head span {
+        display: none;
+    }
+
+    /* Make sure logo is fully visible in collapsed mode */
+    body.sidebar-hidden .gov-brand-icon-wrapper {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+
+    body.sidebar-hidden .gov-brand-button {
+        justify-content: center !important;
+        width: auto !important;
+        padding: 0 !important;
+    }
+
+    /* Icon Centering & Spacing */
+    body.sidebar-hidden .sb-item {
+        justify-content: center !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin-bottom: 8px;
+        position: relative;
+        width: 44px !important;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    body.sidebar-hidden .sb-ico {
+        margin: 0 !important;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    body.sidebar-hidden .sb-ico i {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* Tooltips for Collapsed Sidebar */
+    body.sidebar-hidden .sb-item:hover::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        left: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        margin-left: 14px;
+        background: #17324D;
+        color: #ffffff;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 1000;
+        pointer-events: none;
+        opacity: 0;
+        animation: tooltipFadeIn 200ms forwards 100ms;
+    }
+
+    /* Tooltip Arrow */
+    body.sidebar-hidden .sb-item:hover::before {
+        content: '';
+        position: absolute;
+        left: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        margin-left: 8px;
+        border-width: 6px;
+        border-style: solid;
+        border-color: transparent #17324D transparent transparent;
+        z-index: 1000;
+        pointer-events: none;
+        opacity: 0;
+        animation: tooltipFadeIn 200ms forwards 100ms;
+    }
+
+    body.sidebar-hidden .sidebar-toggle-btn i {
+        transform: rotate(180deg);
+    }
+
+    body.sidebar-hidden .gov-brand-icon-wrapper img {
+        width: 36px !important;
+        height: 36px !important;
+    }
+
+    /* Adjust new project button when collapsed */
+    body.sidebar-hidden #sidebar-new-project-section .sb-item {
+        width: 36px !important;
+        height: 36px !important;
+        border-radius: 50% !important;
+        padding: 0 !important;
+    }
+    
+    /* Hide topbar logo on desktop since it's now in the sidebar */
+    .topbar .gov-enterprise-brand, .topbar #tb-sidebar-toggle {
+        display: none !important;
+    }
+}
+
+@keyframes tooltipFadeIn {
+    to { opacity: 1; }
+}
+
+/* Active Menu State */
+.sb-item.active {
+    background: rgba(196, 154, 88, 0.1) !important;
+    color: var(--p-accent-gold) !important;
+    font-weight: 800;
+    position: relative;
+    border-radius: 8px;
+}
+
+.sb-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 60%;
+    width: 3px;
+    background: var(--p-accent-gold);
+    border-radius: 0 4px 4px 0;
+}
+
+.sb-item.active i {
+    color: var(--p-accent-gold) !important;
+}
+
+/* Hover Effects */
+.sb-item {
+    transition: background 200ms, color 200ms;
+    border-radius: 8px;
+    margin-bottom: 4px;
+}
+
+.sb-item:hover {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.sb-item:hover i {
+    transform: scale(1.05);
+    transition: transform 200ms;
+}
+
+/* Toggle Button - inline next to logo */
+.sidebar-toggle-btn {
+    background: transparent;
+    border: 1.5px solid rgba(0,0,0,0.1);
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 400;
+    transition: background 200ms, border-color 200ms, transform 250ms;
+    flex-shrink: 0;
+}
+
+.sidebar-toggle-btn:hover {
+    background: rgba(196,154,88,0.12);
+    border-color: var(--p-accent-gold);
+}
+
+.sidebar-toggle-btn i {
+    width: 14px;
+    height: 14px;
+    color: var(--text-soft, #64748B);
+    transition: transform 250ms;
+}
+
+/* Logo Sizing */
+.gov-brand-icon-wrapper {
+    transition: width 250ms, height 250ms;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

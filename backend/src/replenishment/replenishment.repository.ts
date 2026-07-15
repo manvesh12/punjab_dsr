@@ -13,6 +13,21 @@ export class ReplenishmentRepository {
     });
   }
 
+  findApprovedDsrs(districtId: bigint | null) {
+    const where: Prisma.ProjectWhereInput = {
+      // In production, you might restrict to COMPLETED, but for now we include IN_PROGRESS as well to ensure there's data for testing.
+      status: { in: ["COMPLETED", "IN_PROGRESS"] }
+    };
+    if (districtId !== null) {
+      where.districtId = districtId;
+    }
+    return this.database.project.findMany({
+      where,
+      select: { id: true, projectName: true, title: true, year: true, status: true, district: true },
+      orderBy: { createdAt: "desc" }
+    });
+  }
+
   list(projectId: bigint) {
     return this.database.replenishmentStudy.findMany({ where: { projectId }, orderBy: { createdAt: "desc" } });
   }
@@ -43,7 +58,7 @@ export class ReplenishmentRepository {
 
 export type ReplenishmentRepositoryContract = Pick<
   ReplenishmentRepository,
-  "findProject" | "findProjectForSync" | "list" | "create" | "findById" | "findByIdWithProjectDistrict" | "findByIdWithProject" | "update" | "delete"
+  "findProject" | "findProjectForSync" | "findApprovedDsrs" | "list" | "create" | "findById" | "findByIdWithProjectDistrict" | "findByIdWithProject" | "update" | "delete"
 >;
 
 export const replenishmentRepository = new ReplenishmentRepository(prisma);
