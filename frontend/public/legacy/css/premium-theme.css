@@ -2277,6 +2277,9 @@ body.view-dashboard-active .topbar,
 body.view-dashboard-active .app-workspace,
 #screen-app:has(#view-dashboard.active) .app-workspace {
   margin-left: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  height: calc(100vh - var(--topbar-h, 60px)) !important;
 }
 body.view-dashboard-active .main-content,
 #screen-app:has(#view-dashboard.active) .main-content {
@@ -2284,6 +2287,7 @@ body.view-dashboard-active .main-content,
   padding: 0 !important;
   width: 100% !important;
   max-width: 100% !important;
+  overflow: visible !important;
 }
 body.view-dashboard-active .page-body,
 #screen-app:has(#view-dashboard.active) .page-body {
