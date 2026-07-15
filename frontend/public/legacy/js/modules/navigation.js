@@ -770,6 +770,9 @@ function showView(id, btn, push = true) {
   const el = document.getElementById('view-' + id);
   if (el) {
     el.classList.add('active');
+    if (id === 'replenishment' && window.replenishmentApp) {
+      window.replenishmentApp.init(window.S?.activeProject?.id || 'demo_proj');
+    }
     setTimeout(() => {
       const mainContent = document.querySelector('.main-content');
       if (id === 'dashboard') {
