@@ -493,7 +493,7 @@ class AutoSaveManager {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': \`Bearer \${localStorage.getItem('token')}\`
+          'Authorization': `Bearer ${localStorage.getItem('dsr_token')}`
         },
         body: JSON.stringify(stateToSave)
       });
@@ -528,6 +528,7 @@ class AutoSaveManager {
 }
 
 window.AutoSaveManager = new AutoSaveManager();
+
 
 ;
 
