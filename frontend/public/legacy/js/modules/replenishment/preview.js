@@ -3,71 +3,157 @@ class Preview {
   init(module) {
     this.module = module;
     this.container = document.getElementById("repl-pdf-preview");
-    setInterval(() => this.render(), 2000);
+    // We will render on input events now instead of just interval, but keep a slow interval as fallback
+    setInterval(() => this.render(), 3000);
+    this.render();
+  }
+
+  // Helper to safely get value from DOM
+  getVal(fieldId, fallback = '________________') {
+    const el = document.getElementById(fieldId);
+    if (el && el.value.trim() !== '') {
+      // Basic protection against XSS in preview
+      return el.value.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, '<br>');
+    }
+    return fallback;
   }
 
   render() {
     if (!this.container) return;
-    const state = window.S?.activeReplenishment?.reportState || {};
-    const inherited = state.inherited || {};
+    
+    // We fetch current values straight from DOM to ensure absolute WYSIWYG
+    const pName = this.getVal('project_name');
+    const dist = this.getVal('district');
+    const teh = this.getVal('tehsil');
+    const vill = this.getVal('village');
+    const sDate = this.getVal('survey_date');
+    const khasras = this.getVal('khasra_numbers');
+    const coords = this.getVal('coordinates', '<span style="color:#9ca3af;font-style:italic;">No coordinates provided</span>');
+    const river = this.getVal('river_name');
+    const catchArea = this.getVal('catchment_area');
+    const stream = this.getVal('stream_order');
+    const hydro = this.getVal('hydrology', '<span style="color:#9ca3af;font-style:italic;">Data pending...</span>');
+    const geo = this.getVal('geology', '<span style="color:#9ca3af;font-style:italic;">Data pending...</span>');
+    
+    const rArea = this.getVal('replenishedArea', '0');
+    const rDepth = this.getVal('replenishedDepth', '0');
+    const rSg = this.getVal('specificGravity', '2.0');
+    const rEst = this.getVal('estimatedReplenishment', '0');
+    
+    const obs = this.getVal('field_observations', '<span style="color:#9ca3af;font-style:italic;">No observations recorded.</span>');
+    const recs = this.getVal('recommendations', '<span style="color:#9ca3af;font-style:italic;">No recommendations provided.</span>');
 
-    const html = `
+    const html = \`
       <div style="display:flex; flex-direction:column; gap:32px; color:#374151; font-family:'Times New Roman', Times, serif;">
+        
         <!-- Cover Page -->
-        <div style="text-align:center; padding-top:40px; padding-bottom:64px; border-bottom:1px solid #d1d5db; display:flex; flex-direction:column; gap:24px;">
-          <img src="/legacy/assets/images/punjab-logo.png" alt="Punjab Govt" style="height:96px; margin:0 auto 24px auto; opacity:0.8;" onerror="this.style.display='none'">
-          <h1 style="font-size:30px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:#111827; margin:0;">Government of Punjab</h1>
-          <div>
-             <h2 style="font-size:20px; font-weight:700; text-transform:uppercase; color:#374151; margin:32px 0 0 0; border-bottom:2px solid #9ca3af; display:inline-block; padding-bottom:8px;">Replenishment Study Report</h2>
+        <div style="text-align:center; padding-top:40px; padding-bottom:64px; border-bottom:2px solid #17324D; display:flex; flex-direction:column; gap:24px; page-break-after: always;">
+          <img src="legacy/assets/images/punjab-logo.png" alt="Punjab Govt" style="height:120px; margin:0 auto 24px auto;" onerror="this.style.display='none'">
+          <h1 style="font-size:32px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:#111827; margin:0;">Government of Punjab</h1>
+          <h2 style="font-size:24px; font-weight:700; text-transform:uppercase; color:#C49A58; margin:16px 0 0 0;">Department of Mines & Geology</h2>
+          
+          <div style="margin-top:64px;">
+             <h2 style="font-size:28px; font-weight:700; text-transform:uppercase; color:#17324D; margin:0; border-bottom:3px solid #C49A58; display:inline-block; padding-bottom:12px;">Replenishment Study Report</h2>
           </div>
-          <div style="font-size:18px; color:#1f2937; margin-top:48px; display:flex; flex-direction:column; gap:8px;">
-            <p style="margin:0;"><span style="font-weight:700;">Project:</span> ${inherited.project_name || "________________"}</p>
-            <p style="margin:0;"><span style="font-weight:700;">District:</span> ${inherited.district || "________________"}</p>
-            <p style="margin:0;"><span style="font-weight:700;">River:</span> ${inherited.rivers || "________________"}</p>
+          
+          <div style="font-size:20px; color:#1f2937; margin-top:64px; display:flex; flex-direction:column; gap:16px; align-items:center;">
+            <p style="margin:0; width:80%; text-align:left; border-bottom:1px dotted #ccc; padding-bottom:4px;"><span style="font-weight:700; width:150px; display:inline-block;">Project Name:</span> \${pName}</p>
+            <p style="margin:0; width:80%; text-align:left; border-bottom:1px dotted #ccc; padding-bottom:4px;"><span style="font-weight:700; width:150px; display:inline-block;">District:</span> \${dist}</p>
+            <p style="margin:0; width:80%; text-align:left; border-bottom:1px dotted #ccc; padding-bottom:4px;"><span style="font-weight:700; width:150px; display:inline-block;">River/Stream:</span> \${river}</p>
           </div>
-          <div style="margin-top:80px; color:#6b7280; font-weight:500;">
-            <p style="margin:0;">Generated by: Punjab DSR Portal</p>
-            <p style="margin:0;">Date: ${new Date().toLocaleDateString('en-IN')}</p>
+          
+          <div style="margin-top:120px; color:#4b5563; font-weight:500; font-size:16px;">
+            <p style="margin:0;">Generated by: Punjab DSR Portal - Replenishment Module</p>
+            <p style="margin:0;">Date of Generation: \${new Date().toLocaleDateString('en-IN')}</p>
           </div>
         </div>
 
-        <!-- Introduction Section -->
-        <div style="padding-top:32px;">
-          <h3 style="font-size:18px; font-weight:700; color:#1f2937; text-transform:uppercase; border-bottom:1px solid #d1d5db; padding-bottom:8px; margin:0 0 16px 0;">1. Introduction & Background</h3>
-          <p style="color:#374151; text-align:justify; margin:0 0 16px 0; line-height:1.6;">
-            The replenishment study for the mining lease located in district <strong>${inherited.district || "________"}</strong> on the river <strong>${inherited.rivers || "________"}</strong> has been conducted to estimate the rate of sediment deposition and ensure sustainable mining practices.
+        <!-- Section 1 & 2 -->
+        <div style="padding-top:32px; page-break-inside: avoid;">
+          <h3 style="font-size:20px; font-weight:700; color:#1f2937; text-transform:uppercase; border-bottom:1px solid #d1d5db; padding-bottom:8px; margin:0 0 24px 0; color:#17324D;">1. General & Location Information</h3>
+          <table style="width:100%; border-collapse:collapse; margin-bottom:32px; font-size:16px;">
+            <tr><td style="padding:8px; border:1px solid #d1d5db; font-weight:700; width:30%; background:#f9fafb;">Tehsil</td><td style="padding:8px; border:1px solid #d1d5db;">\${teh}</td></tr>
+            <tr><td style="padding:8px; border:1px solid #d1d5db; font-weight:700; background:#f9fafb;">Village</td><td style="padding:8px; border:1px solid #d1d5db;">\${vill}</td></tr>
+            <tr><td style="padding:8px; border:1px solid #d1d5db; font-weight:700; background:#f9fafb;">Date of Survey</td><td style="padding:8px; border:1px solid #d1d5db;">\${sDate}</td></tr>
+            <tr><td style="padding:8px; border:1px solid #d1d5db; font-weight:700; background:#f9fafb;">Khasra Numbers</td><td style="padding:8px; border:1px solid #d1d5db;">\${khasras}</td></tr>
+            <tr><td style="padding:8px; border:1px solid #d1d5db; font-weight:700; background:#f9fafb;">Coordinates</td><td style="padding:8px; border:1px solid #d1d5db; font-family:monospace; font-size:14px;">\${coords}</td></tr>
+          </table>
+        </div>
+
+        <!-- Section 3 & 4 -->
+        <div style="padding-top:16px; page-break-inside: avoid;">
+          <h3 style="font-size:20px; font-weight:700; color:#17324D; text-transform:uppercase; border-bottom:1px solid #d1d5db; padding-bottom:8px; margin:0 0 24px 0;">2. River & Catchment Characteristics</h3>
+          <p style="margin:0 0 16px 0; line-height:1.6; font-size:16px;">
+            The mining lease is situated on the <strong>\${river}</strong> river/stream. The total catchment area contributing to this segment is approximately <strong>\${catchArea} Sq. Km</strong>, and it is classified as a stream of order <strong>\${stream}</strong>.
           </p>
+          <h4 style="font-size:16px; font-weight:700; margin:24px 0 8px 0;">2.1 Hydrological Characteristics</h4>
+          <p style="margin:0 0 16px 0; line-height:1.6; font-size:16px; text-align:justify;">\${hydro}</p>
           
-          <h3 style="font-size:18px; font-weight:700; color:#1f2937; text-transform:uppercase; border-bottom:1px solid #d1d5db; padding-bottom:8px; margin:32px 0 16px 0;">2. Geological & Hydrological Data</h3>
-          <p style="color:#374151; text-align:justify; margin:0 0 16px 0; line-height:1.6;">
-            (Inherited from Final DSR) The general geology of the area indicates...
+          <h4 style="font-size:16px; font-weight:700; margin:24px 0 8px 0;">2.2 Geological Characteristics</h4>
+          <p style="margin:0 0 16px 0; line-height:1.6; font-size:16px; text-align:justify;">\${geo}</p>
+        </div>
+
+        <!-- Section 5 -->
+        <div style="padding-top:32px; page-break-inside: avoid;">
+          <h3 style="font-size:20px; font-weight:700; color:#17324D; text-transform:uppercase; border-bottom:1px solid #d1d5db; padding-bottom:8px; margin:0 0 24px 0;">3. Reserve & Replenishment Estimation</h3>
+          <p style="margin:0 0 16px 0; line-height:1.6; font-size:16px;">
+            Based on the field survey, cross-sectional measurements, and historical data, the annual replenishment for the specified area has been calculated as follows:
           </p>
-          
-          <h3 style="font-size:18px; font-weight:700; color:#1f2937; text-transform:uppercase; border-bottom:1px solid #d1d5db; padding-bottom:8px; margin:32px 0 16px 0;">3. Replenishment Estimation</h3>
-          <table style="width:100%; text-align:left; border-collapse:collapse; margin-top:16px;">
+          <table style="width:100%; text-align:left; border-collapse:collapse; margin-top:16px; font-size:16px;">
             <thead>
-              <tr style="background:#f3f4f6;">
-                <th style="border:1px solid #d1d5db; padding:8px 16px; font-weight:700; color:#1f2937;">Parameter</th>
-                <th style="border:1px solid #d1d5db; padding:8px 16px; font-weight:700; color:#1f2937;">Value</th>
+              <tr style="background:#17324D; color:white;">
+                <th style="border:1px solid #0f2438; padding:12px 16px; font-weight:700;">Parameter</th>
+                <th style="border:1px solid #0f2438; padding:12px 16px; font-weight:700;">Value</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td style="border:1px solid #d1d5db; padding:8px 16px;">Total Replenished Area</td>
-                <td style="border:1px solid #d1d5db; padding:8px 16px;">${document.querySelector('[data-field="replenishedArea"]')?.value || "N/A"} Hectares</td>
+                <td style="border:1px solid #d1d5db; padding:12px 16px; background:#f9fafb;">A. Replenished Area</td>
+                <td style="border:1px solid #d1d5db; padding:12px 16px;"><strong>\${rArea}</strong> Hectares</td>
               </tr>
               <tr>
-                <td style="border:1px solid #d1d5db; padding:8px 16px;">Estimated Replenishment</td>
-                <td style="border:1px solid #d1d5db; padding:8px 16px;">${document.querySelector('[data-field="estimatedReplenishment"]')?.value || "N/A"} MT</td>
+                <td style="border:1px solid #d1d5db; padding:12px 16px; background:#f9fafb;">B. Average Depth of Replenishment</td>
+                <td style="border:1px solid #d1d5db; padding:12px 16px;"><strong>\${rDepth}</strong> Meters</td>
+              </tr>
+              <tr>
+                <td style="border:1px solid #d1d5db; padding:12px 16px; background:#f9fafb;">C. Specific Gravity of Mineral</td>
+                <td style="border:1px solid #d1d5db; padding:12px 16px;"><strong>\${rSg}</strong> Tons/m³</td>
+              </tr>
+              <tr style="background:#eff6ff;">
+                <td style="border:1px solid #93c5fd; padding:12px 16px; font-weight:700; color:#1e40af;">Total Estimated Replenishment (A × 10000 × B × C)</td>
+                <td style="border:1px solid #93c5fd; padding:12px 16px; font-weight:700; color:#1e40af; font-size:18px;">\${rEst} MT</td>
               </tr>
             </tbody>
           </table>
         </div>
-      </div>
-    `;
 
-    if (this.container.innerHTML !== html) {
+        <!-- Section 6 -->
+        <div style="padding-top:32px; page-break-inside: avoid;">
+          <h3 style="font-size:20px; font-weight:700; color:#17324D; text-transform:uppercase; border-bottom:1px solid #d1d5db; padding-bottom:8px; margin:0 0 24px 0;">4. Field Observations & Recommendations</h3>
+          <h4 style="font-size:16px; font-weight:700; margin:0 0 8px 0;">4.1 General Observations</h4>
+          <p style="margin:0 0 24px 0; line-height:1.6; font-size:16px; text-align:justify;">\${obs}</p>
+          
+          <h4 style="font-size:16px; font-weight:700; margin:0 0 8px 0;">4.2 Recommendations & Safeguards</h4>
+          <p style="margin:0 0 16px 0; line-height:1.6; font-size:16px; text-align:justify;">\${recs}</p>
+        </div>
+
+      </div>
+    \`;
+
+    // Only update if changed to prevent scrolling issues
+    if (this.lastHtml !== html) {
       this.container.innerHTML = html;
+      this.lastHtml = html;
+      
+      // Calculate completion %
+      const fields = [pName, dist, teh, vill, sDate, khasras, coords, river, catchArea, stream, hydro, geo, rArea, rDepth, rSg, rEst, obs, recs];
+      const filled = fields.filter(f => f !== '________________' && !f.includes('font-style:italic') && f !== '0').length;
+      const pct = Math.round((filled / fields.length) * 100);
+      const pctEl = document.getElementById('repl-completion-percent');
+      if (pctEl) {
+        pctEl.textContent = pct + '%';
+        pctEl.style.color = pct === 100 ? '#16a34a' : '#17324D';
+      }
     }
   }
 }

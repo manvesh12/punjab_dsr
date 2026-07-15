@@ -18000,24 +18000,32 @@ document.addEventListener('DOMContentLoaded', () => {
 class Sidebar {
   constructor() {
     this.container = document.getElementById("repl-sidebar-container");
+    
+    // Icon SVG definitions to keep things clean
+    const iDoc = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>';
+    const iLoc = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>';
+    const iSurv = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>';
+    const iRiver = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>';
+    const iHydro = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>';
+    const iGeo = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>';
+    const iRes = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>';
+    const iImg = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>';
+    const iMap = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>';
+
     this.navItems = [
-      { id: 'overview', title: 'Overview', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>', status: '100%', color: '#22c55e' },
-      { id: 'imported', title: 'Auto Imported', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>', status: 'Synced', color: '#3b82f6' },
-      { id: 'general', title: 'General Details', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>', badge: '2 Pending' },
-      { id: 'river', title: 'River Details', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>' },
-      { id: 'gis', title: 'GIS', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>', status: '1 file' },
-      { id: 'drone', title: 'Drone', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>', badge: 'Missing' },
-      { id: 'reserve', title: 'Reserve', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>' },
-      { id: 'hydro', title: 'Hydrology', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>' },
-      { id: 'geo', title: 'Geology', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>' },
-      { id: 'images', title: 'Images', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>', status: '0 files' },
-      { id: 'files', title: 'Files', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>', badge: '4' },
-      { id: 'ai', title: 'AI Assistant', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>', color: '#C49A58' },
-      { divider: true },
-      { id: 'comments', title: 'Comments', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>' },
-      { id: 'validation', title: 'Validation', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>', color: '#ca8a04', badge: '3' },
-      { id: 'progress', title: 'Progress', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>' },
-      { id: 'submission', title: 'Submission', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>' },
+      { id: 'general', title: 'General Info', icon: iDoc },
+      { id: 'location', title: 'Location Details', icon: iLoc },
+      { id: 'survey', title: 'Survey Details', icon: iSurv },
+      { id: 'river', title: 'River Info', icon: iRiver },
+      { id: 'hydro', title: 'Hydrology', icon: iHydro },
+      { id: 'geo', title: 'Geology', icon: iGeo },
+      { id: 'reserve', title: 'Reserve Est.', icon: iRes, badge: 'Required', color: '#C49A58' },
+      { id: 'obs', title: 'Field Obs', icon: iDoc },
+      { id: 'images', title: 'Images', icon: iImg },
+      { id: 'maps', title: 'Maps & GIS', icon: iMap },
+      { id: 'docs', title: 'Documents', icon: iDoc },
+      { id: 'annex', title: 'Annexures', icon: iDoc },
+      { id: 'recom', title: 'Recommendations', icon: iDoc }
     ];
   }
 
@@ -18031,11 +18039,7 @@ class Sidebar {
     let html = '';
     
     this.navItems.forEach(item => {
-      if (item.divider) {
-        html += '<div style="margin:12px 8px; border-bottom:1px solid #f3f4f6;"></div>';
-        return;
-      }
-      
+      // Hardcode 'general' as active for visual purpose, later we can bind to scroll position
       const isActive = item.id === 'general';
       const bgColor = isActive ? '#17324D' : 'transparent';
       const textColor = isActive ? '#ffffff' : '#4b5563';
@@ -18054,17 +18058,17 @@ class Sidebar {
         badgeHtml = `<span style="font-size:12px; color:${sCol};">${item.status}</span>`;
       }
       
-      html += `
-        <div class="repl-sb-item" style="display:flex; align-items:center; justify-content:space-between; padding:8px 12px; cursor:pointer; border-radius:8px; font-size:14px; transition:all 0.2s; margin:4px; background:${bgColor}; color:${textColor}; transform:${transform}; box-shadow:${shadow};" onmouseover="this.style.background='${hoverBg}'" onmouseout="this.style.background='${bgColor}'">
+      html += \`
+        <div class="repl-sb-item" onclick="document.getElementById('acc-\${item.id}')?.scrollIntoView({behavior:'smooth'})" style="display:flex; align-items:center; justify-content:space-between; padding:8px 12px; cursor:pointer; border-radius:8px; font-size:14px; transition:all 0.2s; margin:4px; background:\${bgColor}; color:\${textColor}; transform:\${transform}; box-shadow:\${shadow};" onmouseover="this.style.background='\${hoverBg}'; this.style.color='#ffffff';" onmouseout="this.style.background='\${bgColor}'; this.style.color='\${textColor}';">
           <div style="display:flex; align-items:center; gap:12px;">
-            <span style="color:${iconColor}; display:flex; align-items:center; justify-content:center;">
-              <div style="width:16px; height:16px;">${item.icon}</div>
+            <span style="color:\${iconColor}; display:flex; align-items:center; justify-content:center;">
+              <div style="width:16px; height:16px;">\${item.icon}</div>
             </span>
-            <span style="font-weight:500;">${item.title}</span>
+            <span style="font-weight:500;">\${item.title}</span>
           </div>
-          ${badgeHtml}
+          \${badgeHtml}
         </div>
-      `;
+      \`;
     });
     
     this.container.innerHTML = html;
@@ -18090,156 +18094,162 @@ class Workspace {
     const state = window.S?.activeReplenishment?.reportState || {};
     const inherited = state.inherited || {};
 
-    const html = `
-      ${this.buildCard("Auto Imported Information", '<svg style="width:20px; height:20px; flex-shrink:0; color:#16a34a;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>', `
-        <div style="display:flex; flex-direction:column; gap:16px;">
-          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; border-bottom:1px solid #f3f4f6; padding-bottom:12px;">
-             <div style="display:flex; align-items:center; gap:12px;">
-                <span style="background:#dcfce7; color:#15803d; font-size:12px; font-weight:700; padding:4px 8px; border-radius:4px; border:1px solid #bbf7d0;">SOURCE: FINAL DSR</span>
-                <span style="font-size:12px; color:#6b7280;">Last Synced: 2 mins ago</span>
-             </div>
-             <div style="display:flex; gap:8px;">
-                <button style="font-size:12px; color:#2563eb; font-weight:500; cursor:pointer; background:none; border:none;">Compare</button>
-                <button style="font-size:12px; color:#6b7280; font-weight:500; cursor:pointer; background:none; border:none;">Refresh</button>
-             </div>
-          </div>
-          <div>
-            <label style="display:block; font-size:10px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Project Name</label>
-            <div style="padding:12px 16px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:4px; font-size:14px; color:#4b5563; display:flex; justify-content:space-between; align-items:center;">
-              <span>${inherited.project_name || "N/A"}</span>
-              <svg style="width:16px; height:16px; color:#d1d5db;" fill="currentColor" viewBox="0 0 20 20"><path d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"></path></svg>
-            </div>
-          </div>
-          <div style="display:flex; gap:16px;">
-            <div style="flex:1;">
-              <label style="display:block; font-size:10px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">District</label>
-              <div style="padding:12px 16px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:4px; font-size:14px; color:#4b5563; display:flex; justify-content:space-between; align-items:center;">
-                <span>${inherited.district || "N/A"}</span>
-                <svg style="width:16px; height:16px; color:#d1d5db;" fill="currentColor" viewBox="0 0 20 20"><path d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"></path></svg>
-              </div>
-            </div>
-            <div style="flex:1;">
-              <label style="display:block; font-size:10px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">River</label>
-              <div style="padding:12px 16px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:4px; font-size:14px; color:#4b5563; display:flex; justify-content:space-between; align-items:center;">
-                <span>${inherited.rivers || "N/A"}</span>
-                <svg style="width:16px; height:16px; color:#d1d5db;" fill="currentColor" viewBox="0 0 20 20"><path d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"></path></svg>
-              </div>
-            </div>
-          </div>
-        </div>
-      `, true, 'border-color:#bbf7d0; box-shadow:0 1px 2px rgba(0,0,0,0.05);')}
-      
-      ${this.buildCard("Officer Input", '<svg style="width:20px; height:20px; flex-shrink:0; color:#2563eb;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>', `
-        <div style="display:flex; flex-direction:column; gap:24px;">
-          <div style="position:relative;">
-            <label style="font-size:12px; color:#6b7280; font-weight:600; margin-bottom:4px; display:block;">Total Replenished Area (Hectares)</label>
-            <input type="number" id="repl-area" data-field="replenishedArea" style="width:100%; padding:10px 16px; border:1px solid #d1d5db; background:#f9fafb; color:#111827; border-radius:4px; font-size:14px;" value="${state.replenishedArea || ''}">
-          </div>
-          <div style="position:relative;">
-            <label style="font-size:12px; color:#6b7280; font-weight:600; margin-bottom:4px; display:block;">Estimated Replenishment (MT)</label>
-            <input type="number" id="repl-est" data-field="estimatedReplenishment" style="width:100%; padding:10px 16px; border:1px solid #d1d5db; background:#f9fafb; color:#111827; border-radius:4px; font-size:14px;" value="${state.estimatedReplenishment || ''}">
-          </div>
-          <div style="background:#eff6ff; border:1px solid #dbeafe; border-radius:8px; padding:16px;">
-             <div style="display:flex; align-items:flex-start; gap:12px;">
-                <svg style="width:20px; height:20px; color:#3b82f6;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                <div style="font-size:14px; color:#1e40af; line-height:1.4;">
-                   <strong>Live Validation Active:</strong> Inputs are automatically converted to standard units and mapped to the A4 document layout.
-                </div>
-             </div>
-          </div>
-        </div>
-      `, false, 'border-color:#bfdbfe; box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);', true)}
+    const iconDoc = '<svg style="width:20px; height:20px; flex-shrink:0; color:#2563eb;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>';
+    const iconUpload = '<svg style="width:20px; height:20px; flex-shrink:0; color:#9333ea;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>';
+    const iconTable = '<svg style="width:20px; height:20px; flex-shrink:0; color:#ca8a04;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>';
 
-      ${this.buildCard("Upload Section", '<svg style="width:20px; height:20px; flex-shrink:0; color:#9333ea;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>', `
-        <div style="display:flex; flex-direction:column; gap:16px;">
-          <div style="border:2px dashed #e9d5ff; background:#faf5ff; border-radius:12px; padding:32px; text-align:center; cursor:pointer; position:relative; overflow:hidden;">
-            <svg style="margin:0 auto; height:48px; width:48px; color:#c084fc;" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-              <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-            <div style="margin-top:16px; display:flex; flex-direction:column; align-items:center;">
-              <span style="font-size:14px; font-weight:500; color:#7e22ce; background:#ffffff; padding:6px 16px; border-radius:999px; box-shadow:0 1px 2px rgba(0,0,0,0.05); border:1px solid #f3e8ff;">Browse Files or Drag & Drop</span>
-              <p style="font-size:11px; color:#6b7280; margin-top:12px; max-width:250px;">Supports PDF, Word, Excel, Images, DEM, Drone imagery, ZIP, GeoJSON, KML, SHP</p>
-            </div>
-            <input type="file" style="position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer;">
-          </div>
-          <div style="background:#f9fafb; padding:12px; border-radius:8px; border:1px solid #e5e7eb;">
-             <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; color:#6b7280; margin-bottom:8px;">
-                <span>Upload History</span>
-                <span style="color:#2563eb; cursor:pointer;">View All</span>
-             </div>
-             <div style="display:flex; align-items:center; justify-content:center; padding:16px 0; font-size:14px; color:#9ca3af; border-top:1px dashed #d1d5db;">
-                No recent uploads in this section.
-             </div>
-          </div>
-        </div>
-      `, false, 'border-color:#e9d5ff;')}
+    let html = '';
 
-      ${this.buildCard("AI Generated Section", '<svg style="width:20px; height:20px; flex-shrink:0; color:#ca8a04;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>', `
-        <div style="display:flex; flex-direction:column; gap:16px;">
-          <div style="background:linear-gradient(to right, #17324D, #2a4a6b); border-radius:8px; padding:20px; color:#ffffff; box-shadow:0 10px 15px -3px rgba(0,0,0,0.1); position:relative; overflow:hidden;">
-             <h4 style="font-weight:700; font-size:18px; margin:0 0 8px 0; position:relative; z-index:10; display:flex; align-items:center; gap:8px;">
-                <svg style="width:20px; height:20px; color:#C49A58;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                AI Assistant
-             </h4>
-             <p style="font-size:14px; color:#dbeafe; margin:0 0 20px 0; position:relative; z-index:10;">Generate technical methodology, hydrology, geology, and reserve analysis based on your uploaded data.</p>
-             <div style="display:flex; flex-wrap:wrap; gap:8px; position:relative; z-index:10;">
-               <button style="display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:4px; font-size:14px; font-weight:700; color:#17324D; background:#C49A58; border:none; cursor:pointer;">
-                 <svg style="width:16px; height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                 Generate Draft
-               </button>
-               <button style="display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:4px; font-size:14px; font-weight:500; color:#ffffff; background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.2); cursor:pointer;">
-                 Improve
-               </button>
-               <button style="display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:4px; font-size:14px; font-weight:500; color:#ffffff; background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.2); cursor:pointer;">
-                 Translate
-               </button>
-             </div>
-          </div>
-        </div>
-      `, false, 'border-color:#fef08a;')}
-      
-      ${this.buildCard("Validation & Missing Data", '<svg style="width:20px; height:20px; flex-shrink:0; color:#ef4444;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>', `
-        <div style="display:flex; flex-direction:column; gap:12px;">
-          <div style="display:flex; align-items:flex-start; gap:12px; padding:12px; background:#fef2f2; border-radius:4px; border:1px solid #fee2e2;">
-             <svg style="width:16px; height:16px; color:#ef4444; margin-top:2px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-             <div>
-                <div style="font-size:14px; font-weight:500; color:#991b1b;">Missing Drone Imagery</div>
-                <div style="font-size:12px; color:#dc2626; margin-top:4px;">Section 4 requires drone orthomosaic upload before submission.</div>
-                <button style="margin-top:8px; font-size:12px; background:#fee2e2; color:#b91c1c; padding:4px 8px; border-radius:4px; font-weight:500; border:none; cursor:pointer;">Fix Now</button>
-             </div>
-          </div>
-          <div style="display:flex; align-items:flex-start; gap:12px; padding:12px; background:#fefce8; border-radius:4px; border:1px solid #fef08a;">
-             <svg style="width:16px; height:16px; color:#eab308; margin-top:2px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01"></path></svg>
-             <div>
-                <div style="font-size:14px; font-weight:500; color:#854d0e;">Coordinate Mismatch Warning</div>
-                <div style="font-size:12px; color:#a16207; margin-top:4px;">The provided coordinates do not align perfectly with the Final DSR boundaries.</div>
-             </div>
-          </div>
-        </div>
-      `, false, 'border-color:#fecaca;')}
-    `;
+    // 1. General Information
+    html += this.buildCard('acc-general', 'General Information', iconDoc, `
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        ${this.buildInput('Project Name', 'project_name', inherited.project_name || state.project_name || '')}
+        ${this.buildInput('District', 'district', inherited.district || state.district || '')}
+        ${this.buildInput('Tehsil', 'tehsil', state.tehsil || '')}
+        ${this.buildInput('Village', 'village', state.village || '')}
+        ${this.buildInput('Date of Survey', 'survey_date', state.survey_date || '', 'date')}
+      </div>
+    `, false, '', true);
 
-    this.container.innerHTML = html;
-  }
+    // 2. Location Details
+    html += this.buildCard('acc-location', 'Location Details', iconDoc, `
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        ${this.buildInput('Khasra Numbers', 'khasra_numbers', state.khasra_numbers || '')}
+        ${this.buildTextarea('Coordinates (Lat/Long)', 'coordinates', state.coordinates || '', 4, 'Enter corner coordinates...')}
+      </div>
+    `);
 
-  buildCard(title, icon, content, locked = false, customStyle = '', defaultOpen = false) {
-    const id = 'acc-' + Math.random().toString(36).substr(2, 9);
-    
-    return `
-      <div class="repl-card" style="background:#ffffff; border:1px solid #e5e7eb; border-radius:12px; overflow:hidden; margin-bottom:20px; transition:all 0.3s; ${customStyle}">
-        <div style="padding:16px 20px; border-bottom:1px solid #f3f4f6; display:flex; align-items:center; justify-content:space-between; cursor:pointer; background:#ffffff;" onclick="const contentEl = document.getElementById('${id}'); const chev = this.querySelector('.chevron'); if (contentEl.style.display === 'none') { contentEl.style.display = 'block'; chev.style.transform = 'rotate(180deg)'; } else { contentEl.style.display = 'none'; chev.style.transform = 'rotate(0deg)'; }">
-          <h3 style="font-size:15px; font-weight:700; color:#17324D; display:flex; align-items:center; gap:12px; margin:0;">
-            ${icon} ${title}
-          </h3>
-          ${locked 
-            ? '<svg style="width:16px; height:16px; color:#9ca3af; flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>' 
-            : `<svg class="chevron" style="width:20px; height:20px; color:#9ca3af; flex-shrink:0; transition:transform 0.3s; transform:${defaultOpen ? 'rotate(180deg)' : 'rotate(0deg)'};" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`}
+    // 3. River Information
+    html += this.buildCard('acc-river', 'River Information', iconDoc, `
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        ${this.buildInput('River Name', 'river_name', inherited.rivers || state.river_name || '')}
+        ${this.buildInput('Catchment Area (Sq. Km)', 'catchment_area', state.catchment_area || '', 'number')}
+        ${this.buildInput('Stream Order', 'stream_order', state.stream_order || '')}
+      </div>
+    `);
+
+    // 4. Hydrology & Geology
+    html += this.buildCard('acc-hydro', 'Hydrology & Geology', iconDoc, `
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        ${this.buildTextarea('Hydrological Characteristics (Rainfall, Flow Rate)', 'hydrology', state.hydrology || '', 3)}
+        ${this.buildTextarea('Geological Characteristics (Rock Type, Bed Load)', 'geology', state.geology || '', 3)}
+      </div>
+    `);
+
+    // 5. Reserve Estimation
+    html += this.buildCard('acc-reserve', 'Reserve Estimation', iconTable, `
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+          ${this.buildInput('Replenished Area (Hectares)', 'replenishedArea', state.replenishedArea || '', 'number')}
+          ${this.buildInput('Replenishment Depth (Meters)', 'replenishedDepth', state.replenishedDepth || '', 'number')}
+          ${this.buildInput('Specific Gravity (Tons/m³)', 'specificGravity', state.specificGravity || '2.0', 'number')}
+          ${this.buildInput('Total Estimated Replenishment (MT)', 'estimatedReplenishment', state.estimatedReplenishment || '', 'number', true)}
         </div>
-        <div id="${id}" style="padding:24px; ${locked ? 'opacity:0.9; background:#f9fafb;' : ''} display:${defaultOpen ? 'block' : 'none'};">
-          ${content}
+        <div style="background:#eff6ff; border:1px solid #dbeafe; border-radius:8px; padding:12px; font-size:12px; color:#1e40af;">
+          <strong>Calculation Rule:</strong> Area (Ha) × 10,000 × Depth (m) × Specific Gravity = Replenishment (MT)
         </div>
       </div>
-    `;
+    `);
+
+    // 6. Field Observations & Recommendations
+    html += this.buildCard('acc-obs', 'Observations & Recommendations', iconDoc, `
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        ${this.buildTextarea('Field Observations', 'field_observations', state.field_observations || '', 5)}
+        ${this.buildTextarea('Recommendations & Safeguards', 'recommendations', state.recommendations || '', 5)}
+      </div>
+    `);
+
+    // 7. File Uploads (Images, Maps, Annexures)
+    html += this.buildCard('acc-files', 'Attachments & Evidence', iconUpload, `
+      <div style="display:flex; flex-direction:column; gap:24px;">
+        ${this.buildUpload('Site Photographs', 'Upload .jpg, .png', 'images')}
+        ${this.buildUpload('Drone / DEM Maps', 'Upload .pdf, .tif, .geojson', 'maps')}
+        ${this.buildUpload('Annexure Documents', 'Upload .pdf, .docx', 'annexures')}
+      </div>
+    `);
+
+    this.container.innerHTML = html;
+    this.bindCalculations();
+  }
+
+  buildInput(label, field, value, type = 'text', readonly = false) {
+    return \`
+      <div>
+        <label style="font-size:12px; color:#6b7280; font-weight:600; margin-bottom:4px; display:block;">\${label}</label>
+        <input type="\${type}" data-field="\${field}" id="\${field}" value="\${value}" \${readonly ? 'readonly' : ''} style="width:100%; padding:10px 16px; border:1px solid #d1d5db; background:\${readonly ? '#e5e7eb' : '#f9fafb'}; color:#111827; border-radius:4px; font-size:14px; box-sizing:border-box;">
+      </div>
+    \`;
+  }
+
+  buildTextarea(label, field, value, rows = 4, placeholder = '') {
+    return \`
+      <div>
+        <label style="font-size:12px; color:#6b7280; font-weight:600; margin-bottom:4px; display:block;">\${label}</label>
+        <textarea data-field="\${field}" id="\${field}" rows="\${rows}" placeholder="\${placeholder}" style="width:100%; padding:10px 16px; border:1px solid #d1d5db; background:#f9fafb; color:#111827; border-radius:4px; font-size:14px; box-sizing:border-box; resize:vertical;">\${value}</textarea>
+      </div>
+    \`;
+  }
+
+  buildUpload(title, subtitle, type) {
+    return \`
+      <div>
+        <label style="font-size:12px; color:#374151; font-weight:700; margin-bottom:8px; display:block;">\${title}</label>
+        <div style="border:2px dashed #d1d5db; background:#f9fafb; border-radius:8px; padding:24px; text-align:center; cursor:pointer; position:relative; overflow:hidden; transition:all 0.2s;" onmouseover="this.style.borderColor='#9333ea'; this.style.background='#faf5ff';" onmouseout="this.style.borderColor='#d1d5db'; this.style.background='#f9fafb';">
+          <svg style="margin:0 auto; height:32px; width:32px; color:#9ca3af;" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <div style="margin-top:12px;">
+            <span style="font-size:14px; font-weight:500; color:#7e22ce;">Browse Files</span>
+            <p style="font-size:12px; color:#6b7280; margin-top:4px;">\${subtitle}</p>
+          </div>
+          <input type="file" multiple data-upload="\${type}" style="position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer;">
+        </div>
+      </div>
+    \`;
+  }
+
+  buildCard(id, title, icon, content, locked = false, customStyle = '', defaultOpen = false) {
+    return \`
+      <div id="\${id}" class="repl-card" style="background:#ffffff; border:1px solid #e5e7eb; border-radius:12px; overflow:hidden; margin-bottom:20px; transition:all 0.3s; \${customStyle}">
+        <div style="padding:16px 20px; border-bottom:1px solid #f3f4f6; display:flex; align-items:center; justify-content:space-between; cursor:pointer; background:#ffffff;" onclick="const contentEl = this.nextElementSibling; const chev = this.querySelector('.chevron'); if (contentEl.style.display === 'none') { contentEl.style.display = 'block'; chev.style.transform = 'rotate(180deg)'; } else { contentEl.style.display = 'none'; chev.style.transform = 'rotate(0deg)'; }">
+          <h3 style="font-size:15px; font-weight:700; color:#17324D; display:flex; align-items:center; gap:12px; margin:0;">
+            \${icon} \${title}
+          </h3>
+          \${locked 
+            ? '<svg style="width:16px; height:16px; color:#9ca3af; flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>' 
+            : \`<svg class="chevron" style="width:20px; height:20px; color:#9ca3af; flex-shrink:0; transition:transform 0.3s; transform:\${defaultOpen ? 'rotate(180deg)' : 'rotate(0deg)'};" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>\`}
+        </div>
+        <div style="padding:24px; \${locked ? 'opacity:0.9; background:#f9fafb;' : ''} display:\${defaultOpen ? 'block' : 'none'};">
+          \${content}
+        </div>
+      </div>
+    \`;
+  }
+
+  bindCalculations() {
+    const area = document.getElementById('replenishedArea');
+    const depth = document.getElementById('replenishedDepth');
+    const sg = document.getElementById('specificGravity');
+    const total = document.getElementById('estimatedReplenishment');
+
+    const calc = () => {
+      if (area && depth && sg && total) {
+        const a = parseFloat(area.value) || 0;
+        const d = parseFloat(depth.value) || 0;
+        const s = parseFloat(sg.value) || 2.0;
+        if (a > 0 && d > 0) {
+          total.value = (a * 10000 * d * s).toFixed(2);
+          // Trigger event to bubble up for autosave/preview
+          total.dispatchEvent(new Event('input', { bubbles: true }));
+        } else {
+          total.value = '';
+        }
+      }
+    };
+
+    if(area) area.addEventListener('input', calc);
+    if(depth) depth.addEventListener('input', calc);
+    if(sg) sg.addEventListener('input', calc);
   }
 }
 
@@ -18254,71 +18264,157 @@ class Preview {
   init(module) {
     this.module = module;
     this.container = document.getElementById("repl-pdf-preview");
-    setInterval(() => this.render(), 2000);
+    // We will render on input events now instead of just interval, but keep a slow interval as fallback
+    setInterval(() => this.render(), 3000);
+    this.render();
+  }
+
+  // Helper to safely get value from DOM
+  getVal(fieldId, fallback = '________________') {
+    const el = document.getElementById(fieldId);
+    if (el && el.value.trim() !== '') {
+      // Basic protection against XSS in preview
+      return el.value.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, '<br>');
+    }
+    return fallback;
   }
 
   render() {
     if (!this.container) return;
-    const state = window.S?.activeReplenishment?.reportState || {};
-    const inherited = state.inherited || {};
+    
+    // We fetch current values straight from DOM to ensure absolute WYSIWYG
+    const pName = this.getVal('project_name');
+    const dist = this.getVal('district');
+    const teh = this.getVal('tehsil');
+    const vill = this.getVal('village');
+    const sDate = this.getVal('survey_date');
+    const khasras = this.getVal('khasra_numbers');
+    const coords = this.getVal('coordinates', '<span style="color:#9ca3af;font-style:italic;">No coordinates provided</span>');
+    const river = this.getVal('river_name');
+    const catchArea = this.getVal('catchment_area');
+    const stream = this.getVal('stream_order');
+    const hydro = this.getVal('hydrology', '<span style="color:#9ca3af;font-style:italic;">Data pending...</span>');
+    const geo = this.getVal('geology', '<span style="color:#9ca3af;font-style:italic;">Data pending...</span>');
+    
+    const rArea = this.getVal('replenishedArea', '0');
+    const rDepth = this.getVal('replenishedDepth', '0');
+    const rSg = this.getVal('specificGravity', '2.0');
+    const rEst = this.getVal('estimatedReplenishment', '0');
+    
+    const obs = this.getVal('field_observations', '<span style="color:#9ca3af;font-style:italic;">No observations recorded.</span>');
+    const recs = this.getVal('recommendations', '<span style="color:#9ca3af;font-style:italic;">No recommendations provided.</span>');
 
-    const html = `
+    const html = \`
       <div style="display:flex; flex-direction:column; gap:32px; color:#374151; font-family:'Times New Roman', Times, serif;">
+        
         <!-- Cover Page -->
-        <div style="text-align:center; padding-top:40px; padding-bottom:64px; border-bottom:1px solid #d1d5db; display:flex; flex-direction:column; gap:24px;">
-          <img src="/legacy/assets/images/punjab-logo.png" alt="Punjab Govt" style="height:96px; margin:0 auto 24px auto; opacity:0.8;" onerror="this.style.display='none'">
-          <h1 style="font-size:30px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:#111827; margin:0;">Government of Punjab</h1>
-          <div>
-             <h2 style="font-size:20px; font-weight:700; text-transform:uppercase; color:#374151; margin:32px 0 0 0; border-bottom:2px solid #9ca3af; display:inline-block; padding-bottom:8px;">Replenishment Study Report</h2>
+        <div style="text-align:center; padding-top:40px; padding-bottom:64px; border-bottom:2px solid #17324D; display:flex; flex-direction:column; gap:24px; page-break-after: always;">
+          <img src="legacy/assets/images/punjab-logo.png" alt="Punjab Govt" style="height:120px; margin:0 auto 24px auto;" onerror="this.style.display='none'">
+          <h1 style="font-size:32px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:#111827; margin:0;">Government of Punjab</h1>
+          <h2 style="font-size:24px; font-weight:700; text-transform:uppercase; color:#C49A58; margin:16px 0 0 0;">Department of Mines & Geology</h2>
+          
+          <div style="margin-top:64px;">
+             <h2 style="font-size:28px; font-weight:700; text-transform:uppercase; color:#17324D; margin:0; border-bottom:3px solid #C49A58; display:inline-block; padding-bottom:12px;">Replenishment Study Report</h2>
           </div>
-          <div style="font-size:18px; color:#1f2937; margin-top:48px; display:flex; flex-direction:column; gap:8px;">
-            <p style="margin:0;"><span style="font-weight:700;">Project:</span> ${inherited.project_name || "________________"}</p>
-            <p style="margin:0;"><span style="font-weight:700;">District:</span> ${inherited.district || "________________"}</p>
-            <p style="margin:0;"><span style="font-weight:700;">River:</span> ${inherited.rivers || "________________"}</p>
+          
+          <div style="font-size:20px; color:#1f2937; margin-top:64px; display:flex; flex-direction:column; gap:16px; align-items:center;">
+            <p style="margin:0; width:80%; text-align:left; border-bottom:1px dotted #ccc; padding-bottom:4px;"><span style="font-weight:700; width:150px; display:inline-block;">Project Name:</span> \${pName}</p>
+            <p style="margin:0; width:80%; text-align:left; border-bottom:1px dotted #ccc; padding-bottom:4px;"><span style="font-weight:700; width:150px; display:inline-block;">District:</span> \${dist}</p>
+            <p style="margin:0; width:80%; text-align:left; border-bottom:1px dotted #ccc; padding-bottom:4px;"><span style="font-weight:700; width:150px; display:inline-block;">River/Stream:</span> \${river}</p>
           </div>
-          <div style="margin-top:80px; color:#6b7280; font-weight:500;">
-            <p style="margin:0;">Generated by: Punjab DSR Portal</p>
-            <p style="margin:0;">Date: ${new Date().toLocaleDateString('en-IN')}</p>
+          
+          <div style="margin-top:120px; color:#4b5563; font-weight:500; font-size:16px;">
+            <p style="margin:0;">Generated by: Punjab DSR Portal - Replenishment Module</p>
+            <p style="margin:0;">Date of Generation: \${new Date().toLocaleDateString('en-IN')}</p>
           </div>
         </div>
 
-        <!-- Introduction Section -->
-        <div style="padding-top:32px;">
-          <h3 style="font-size:18px; font-weight:700; color:#1f2937; text-transform:uppercase; border-bottom:1px solid #d1d5db; padding-bottom:8px; margin:0 0 16px 0;">1. Introduction & Background</h3>
-          <p style="color:#374151; text-align:justify; margin:0 0 16px 0; line-height:1.6;">
-            The replenishment study for the mining lease located in district <strong>${inherited.district || "________"}</strong> on the river <strong>${inherited.rivers || "________"}</strong> has been conducted to estimate the rate of sediment deposition and ensure sustainable mining practices.
+        <!-- Section 1 & 2 -->
+        <div style="padding-top:32px; page-break-inside: avoid;">
+          <h3 style="font-size:20px; font-weight:700; color:#1f2937; text-transform:uppercase; border-bottom:1px solid #d1d5db; padding-bottom:8px; margin:0 0 24px 0; color:#17324D;">1. General & Location Information</h3>
+          <table style="width:100%; border-collapse:collapse; margin-bottom:32px; font-size:16px;">
+            <tr><td style="padding:8px; border:1px solid #d1d5db; font-weight:700; width:30%; background:#f9fafb;">Tehsil</td><td style="padding:8px; border:1px solid #d1d5db;">\${teh}</td></tr>
+            <tr><td style="padding:8px; border:1px solid #d1d5db; font-weight:700; background:#f9fafb;">Village</td><td style="padding:8px; border:1px solid #d1d5db;">\${vill}</td></tr>
+            <tr><td style="padding:8px; border:1px solid #d1d5db; font-weight:700; background:#f9fafb;">Date of Survey</td><td style="padding:8px; border:1px solid #d1d5db;">\${sDate}</td></tr>
+            <tr><td style="padding:8px; border:1px solid #d1d5db; font-weight:700; background:#f9fafb;">Khasra Numbers</td><td style="padding:8px; border:1px solid #d1d5db;">\${khasras}</td></tr>
+            <tr><td style="padding:8px; border:1px solid #d1d5db; font-weight:700; background:#f9fafb;">Coordinates</td><td style="padding:8px; border:1px solid #d1d5db; font-family:monospace; font-size:14px;">\${coords}</td></tr>
+          </table>
+        </div>
+
+        <!-- Section 3 & 4 -->
+        <div style="padding-top:16px; page-break-inside: avoid;">
+          <h3 style="font-size:20px; font-weight:700; color:#17324D; text-transform:uppercase; border-bottom:1px solid #d1d5db; padding-bottom:8px; margin:0 0 24px 0;">2. River & Catchment Characteristics</h3>
+          <p style="margin:0 0 16px 0; line-height:1.6; font-size:16px;">
+            The mining lease is situated on the <strong>\${river}</strong> river/stream. The total catchment area contributing to this segment is approximately <strong>\${catchArea} Sq. Km</strong>, and it is classified as a stream of order <strong>\${stream}</strong>.
           </p>
+          <h4 style="font-size:16px; font-weight:700; margin:24px 0 8px 0;">2.1 Hydrological Characteristics</h4>
+          <p style="margin:0 0 16px 0; line-height:1.6; font-size:16px; text-align:justify;">\${hydro}</p>
           
-          <h3 style="font-size:18px; font-weight:700; color:#1f2937; text-transform:uppercase; border-bottom:1px solid #d1d5db; padding-bottom:8px; margin:32px 0 16px 0;">2. Geological & Hydrological Data</h3>
-          <p style="color:#374151; text-align:justify; margin:0 0 16px 0; line-height:1.6;">
-            (Inherited from Final DSR) The general geology of the area indicates...
+          <h4 style="font-size:16px; font-weight:700; margin:24px 0 8px 0;">2.2 Geological Characteristics</h4>
+          <p style="margin:0 0 16px 0; line-height:1.6; font-size:16px; text-align:justify;">\${geo}</p>
+        </div>
+
+        <!-- Section 5 -->
+        <div style="padding-top:32px; page-break-inside: avoid;">
+          <h3 style="font-size:20px; font-weight:700; color:#17324D; text-transform:uppercase; border-bottom:1px solid #d1d5db; padding-bottom:8px; margin:0 0 24px 0;">3. Reserve & Replenishment Estimation</h3>
+          <p style="margin:0 0 16px 0; line-height:1.6; font-size:16px;">
+            Based on the field survey, cross-sectional measurements, and historical data, the annual replenishment for the specified area has been calculated as follows:
           </p>
-          
-          <h3 style="font-size:18px; font-weight:700; color:#1f2937; text-transform:uppercase; border-bottom:1px solid #d1d5db; padding-bottom:8px; margin:32px 0 16px 0;">3. Replenishment Estimation</h3>
-          <table style="width:100%; text-align:left; border-collapse:collapse; margin-top:16px;">
+          <table style="width:100%; text-align:left; border-collapse:collapse; margin-top:16px; font-size:16px;">
             <thead>
-              <tr style="background:#f3f4f6;">
-                <th style="border:1px solid #d1d5db; padding:8px 16px; font-weight:700; color:#1f2937;">Parameter</th>
-                <th style="border:1px solid #d1d5db; padding:8px 16px; font-weight:700; color:#1f2937;">Value</th>
+              <tr style="background:#17324D; color:white;">
+                <th style="border:1px solid #0f2438; padding:12px 16px; font-weight:700;">Parameter</th>
+                <th style="border:1px solid #0f2438; padding:12px 16px; font-weight:700;">Value</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td style="border:1px solid #d1d5db; padding:8px 16px;">Total Replenished Area</td>
-                <td style="border:1px solid #d1d5db; padding:8px 16px;">${document.querySelector('[data-field="replenishedArea"]')?.value || "N/A"} Hectares</td>
+                <td style="border:1px solid #d1d5db; padding:12px 16px; background:#f9fafb;">A. Replenished Area</td>
+                <td style="border:1px solid #d1d5db; padding:12px 16px;"><strong>\${rArea}</strong> Hectares</td>
               </tr>
               <tr>
-                <td style="border:1px solid #d1d5db; padding:8px 16px;">Estimated Replenishment</td>
-                <td style="border:1px solid #d1d5db; padding:8px 16px;">${document.querySelector('[data-field="estimatedReplenishment"]')?.value || "N/A"} MT</td>
+                <td style="border:1px solid #d1d5db; padding:12px 16px; background:#f9fafb;">B. Average Depth of Replenishment</td>
+                <td style="border:1px solid #d1d5db; padding:12px 16px;"><strong>\${rDepth}</strong> Meters</td>
+              </tr>
+              <tr>
+                <td style="border:1px solid #d1d5db; padding:12px 16px; background:#f9fafb;">C. Specific Gravity of Mineral</td>
+                <td style="border:1px solid #d1d5db; padding:12px 16px;"><strong>\${rSg}</strong> Tons/m³</td>
+              </tr>
+              <tr style="background:#eff6ff;">
+                <td style="border:1px solid #93c5fd; padding:12px 16px; font-weight:700; color:#1e40af;">Total Estimated Replenishment (A × 10000 × B × C)</td>
+                <td style="border:1px solid #93c5fd; padding:12px 16px; font-weight:700; color:#1e40af; font-size:18px;">\${rEst} MT</td>
               </tr>
             </tbody>
           </table>
         </div>
-      </div>
-    `;
 
-    if (this.container.innerHTML !== html) {
+        <!-- Section 6 -->
+        <div style="padding-top:32px; page-break-inside: avoid;">
+          <h3 style="font-size:20px; font-weight:700; color:#17324D; text-transform:uppercase; border-bottom:1px solid #d1d5db; padding-bottom:8px; margin:0 0 24px 0;">4. Field Observations & Recommendations</h3>
+          <h4 style="font-size:16px; font-weight:700; margin:0 0 8px 0;">4.1 General Observations</h4>
+          <p style="margin:0 0 24px 0; line-height:1.6; font-size:16px; text-align:justify;">\${obs}</p>
+          
+          <h4 style="font-size:16px; font-weight:700; margin:0 0 8px 0;">4.2 Recommendations & Safeguards</h4>
+          <p style="margin:0 0 16px 0; line-height:1.6; font-size:16px; text-align:justify;">\${recs}</p>
+        </div>
+
+      </div>
+    \`;
+
+    // Only update if changed to prevent scrolling issues
+    if (this.lastHtml !== html) {
       this.container.innerHTML = html;
+      this.lastHtml = html;
+      
+      // Calculate completion %
+      const fields = [pName, dist, teh, vill, sDate, khasras, coords, river, catchArea, stream, hydro, geo, rArea, rDepth, rSg, rEst, obs, recs];
+      const filled = fields.filter(f => f !== '________________' && !f.includes('font-style:italic') && f !== '0').length;
+      const pct = Math.round((filled / fields.length) * 100);
+      const pctEl = document.getElementById('repl-completion-percent');
+      if (pctEl) {
+        pctEl.textContent = pct + '%';
+        pctEl.style.color = pct === 100 ? '#16a34a' : '#17324D';
+      }
     }
   }
 }
@@ -18358,21 +18454,24 @@ class ReplenishmentModule {
     if (window.replenishmentPreview) window.replenishmentPreview.init(this);
     
     this.setupAutoSave();
+    
+    // Initial validation check
+    this.validate();
+
     this.initialized = true;
   }
 
   async loadProject(projectId) {
     try {
       if (this.titleEl) this.titleEl.textContent = "Loading...";
-      // We assume window.api or generic fetch exists for the API client
-      const res = await window.api.get(`/projects/${projectId}/replenishment`);
+      const res = await window.api.get(`/projects/\${projectId}/replenishment`);
       if (res && res.data && res.data.length > 0) {
         window.S.activeReplenishment = res.data[0];
       } else {
-        const createRes = await window.api.post(`/projects/${projectId}/replenishment`, {});
+        const createRes = await window.api.post(`/projects/\${projectId}/replenishment`, {});
         window.S.activeReplenishment = createRes.data;
       }
-      if (this.titleEl) this.titleEl.textContent = window.S.activeReplenishment.title || `Project ${projectId}`;
+      if (this.titleEl) this.titleEl.textContent = window.S.activeReplenishment.title || \`Project \${projectId}\`;
     } catch (err) {
       console.error("Failed to load replenishment project", err);
       if (this.titleEl) this.titleEl.textContent = "Error Loading Project";
@@ -18381,23 +18480,23 @@ class ReplenishmentModule {
 
   async handleAutoFetch() {
     try {
-      if (this.autoSaveEl) this.autoSaveEl.innerHTML = `<span class="text-blue-500">Syncing Final DSR...</span>`;
+      if (this.autoSaveEl) this.autoSaveEl.innerHTML = \`<span style="color:#3b82f6;">Syncing Final DSR...</span>\`;
       const id = window.S.activeReplenishment.id;
-      const res = await window.api.post(`/replenishment/${id}/fetch-final-dsr`, {});
+      const res = await window.api.post(\`/replenishment/\${id}/fetch-final-dsr\`, {});
       window.S.activeReplenishment = res.data;
       if (window.replenishmentWorkspace) window.replenishmentWorkspace.render();
       if (window.replenishmentPreview) window.replenishmentPreview.render();
-      if (this.autoSaveEl) this.autoSaveEl.innerHTML = `<span class="text-green-500">Sync Complete</span>`;
+      if (this.autoSaveEl) this.autoSaveEl.innerHTML = \`<span style="color:#16a34a;">Sync Complete</span>\`;
     } catch (err) {
       console.error("Auto Fetch failed", err);
-      if (this.autoSaveEl) this.autoSaveEl.innerHTML = `<span class="text-red-500">Sync Failed</span>`;
+      if (this.autoSaveEl) this.autoSaveEl.innerHTML = \`<span style="color:#ef4444;">Sync Failed</span>\`;
     }
   }
 
   async handleSubmit() {
     try {
       const id = window.S.activeReplenishment.id;
-      await window.api.post(`/replenishment/${id}/workflow`, { action: "PENDING_SDO_REVIEW" });
+      await window.api.post(\`/replenishment/\${id}/workflow\`, { action: "PENDING_SDO_REVIEW" });
       alert("Report submitted successfully for review!");
     } catch (err) {
       alert("Failed to submit: " + (err.response?.data?.message || err.message));
@@ -18407,48 +18506,69 @@ class ReplenishmentModule {
   setupAutoSave() {
     const container = document.getElementById("repl-accordion-container");
     if (container) {
+      // Listen to all inputs inside the workspace
       container.addEventListener("input", (e) => {
         if (e.target.dataset.field) {
+           // Live preview update
+           if (window.replenishmentPreview) window.replenishmentPreview.render();
+           // Trigger auto-save to backend
            this.triggerAutoSave();
+           this.validate();
         }
       });
     }
   }
 
+  validate() {
+    // Simple validation feedback on toolbar
+    const valBtn = document.getElementById('repl-validation-text');
+    if (valBtn) {
+      const pctEl = document.getElementById('repl-completion-percent');
+      if (pctEl && pctEl.textContent === '100%') {
+        valBtn.textContent = 'All Valid';
+        valBtn.parentElement.className = 'repl-btn repl-btn-ghost';
+      } else {
+        valBtn.textContent = 'Validation Pending';
+        valBtn.parentElement.className = 'repl-btn repl-btn-warning';
+      }
+    }
+  }
+
   triggerAutoSave() {
-    if (this.autoSaveEl) this.autoSaveEl.innerHTML = `<span class="text-yellow-500">Saving...</span>`;
+    if (this.autoSaveEl) this.autoSaveEl.innerHTML = \`<span style="color:#eab308;">Saving...</span>\`;
     clearTimeout(this.saveTimeout);
+    
+    // Save to local state immediately
+    if (!window.S.activeReplenishment.reportState) window.S.activeReplenishment.reportState = {};
+    const state = window.S.activeReplenishment.reportState;
+    
+    // Collect all fields
+    document.querySelectorAll('[data-field]').forEach(el => {
+      state[el.dataset.field] = el.value;
+    });
+
+    // Debounce API call
     this.saveTimeout = setTimeout(async () => {
       try {
         const id = window.S.activeReplenishment.id;
-        // Basic sync of input values to state before saving
-        const area = document.querySelector('[data-field="replenishedArea"]')?.value;
-        const mt = document.querySelector('[data-field="estimatedReplenishment"]')?.value;
-        if (!window.S.activeReplenishment.reportState) window.S.activeReplenishment.reportState = {};
-        window.S.activeReplenishment.reportState.replenishedArea = area;
-        window.S.activeReplenishment.reportState.estimatedReplenishment = mt;
-        
-        await window.api.put(`/replenishment/${id}/state`, { reportState: window.S.activeReplenishment.reportState });
-        if (this.autoSaveEl) this.autoSaveEl.innerHTML = `<svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><span>All changes saved</span>`;
+        await window.api.put(\`/replenishment/\${id}/state\`, { reportState: state });
+        if (this.autoSaveEl) this.autoSaveEl.innerHTML = \`<svg style="width:16px;height:16px;color:#16a34a;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><span style="color:#16a34a;">All changes saved</span>\`;
       } catch (err) {
-        if (this.autoSaveEl) this.autoSaveEl.innerHTML = `<span class="text-red-500">Save Failed (Offline)</span>`;
+        if (this.autoSaveEl) this.autoSaveEl.innerHTML = \`<span style="color:#ef4444;">Save Failed (Offline)</span>\`;
       }
-    }, 1500); // Debounce
+    }, 1500);
   }
 }
 
 window.replenishmentV2Module = new ReplenishmentModule();
 
-// Hook into showView directly from here if possible, or we will add it to navigation.js
 const originalShowViewReplV2 = window.showView;
 if (originalShowViewReplV2) {
   window.showView = function(viewId, caller, push) {
     originalShowViewReplV2(viewId, caller, push);
     if (viewId === 'replenishment') {
-      const projectId = window.S?.activeProject?.id;
-      if (projectId) {
-        window.replenishmentV2Module.init(projectId);
-      }
+      const projectId = window.S?.activeProject?.id || 'demo';
+      window.replenishmentV2Module.init(projectId);
     }
   };
 }
