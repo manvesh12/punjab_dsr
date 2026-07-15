@@ -18004,7 +18004,7 @@ class Workspace {
     const inherited = state.inherited || {};
 
     const html = `
-      ${this.buildCard("Inherited Data (Final DSR)", "🟢", `
+      ${this.buildCard("Inherited Data (Final DSR)", '<svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>', `
         <div class="space-y-4">
           <div>
             <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Project Name</label>
@@ -18025,7 +18025,7 @@ class Workspace {
         </div>
       `, true)}
       
-      ${this.buildCard("Survey Input", "🔵", `
+      ${this.buildCard("Survey Input", '<svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>', `
         <div class="space-y-4">
           <div>
             <label class="block text-xs font-medium text-gray-700 mb-1">Total Replenished Area (Hectares)</label>
@@ -18038,7 +18038,7 @@ class Workspace {
         </div>
       `)}
 
-      ${this.buildCard("File Management Center", "🟣", `
+      ${this.buildCard("File Management Center", '<svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>', `
         <div class="space-y-3">
           <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:bg-gray-50 transition-colors cursor-pointer">
             <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
@@ -18056,7 +18056,7 @@ class Workspace {
         </div>
       `)}
 
-      ${this.buildCard("AI Generation", "🟡", `
+      ${this.buildCard("AI Generation", '<svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>', `
         <div class="space-y-4">
           <p class="text-sm text-gray-600">Let AI assist you in generating the technical methodology and analysis based on the uploaded data.</p>
           <button type="button" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
