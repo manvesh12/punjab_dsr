@@ -552,6 +552,12 @@ async function openProject(id) {
       }
     }
     const stateSnapshot = S.activeProject;
+    
+    // Delegate state hydration to the centralized Enterprise Persistence Service
+    if (window.ProjectPersistenceService) {
+      window.ProjectPersistenceService.hydrateState(stateSnapshot);
+    }
+    
     S.phaseMetadata = {
         ...S.phaseMetadata,
         ...(stateSnapshot.phaseMetadata || {}),
@@ -561,45 +567,15 @@ async function openProject(id) {
     };
     S.phaseChangeLog = Array.isArray(stateSnapshot.phaseChangeLog) ? stateSnapshot.phaseChangeLog : [];
     updateLiveProgressUI(S.activeProject.progress || 0);
-      if (stateSnapshot.frontMatter) S.frontMatter = stateSnapshot.frontMatter;
-      if (stateSnapshot.chapters) S.chapters = stateSnapshot.chapters;
-      if (stateSnapshot.plates) S.plates = stateSnapshot.plates;
-      S.importedSourceDocument = stateSnapshot.importedSourceDocument || null;
-      S.sourceSections = Array.isArray(stateSnapshot.sourceSections) ? stateSnapshot.sourceSections : [];
-      if (stateSnapshot.graphs) S.graphs = stateSnapshot.graphs;
-      if (stateSnapshot.graphCharts) S.graphCharts = stateSnapshot.graphCharts;
-      if (stateSnapshot.signatures) S.signatures = stateSnapshot.signatures;
-      if (stateSnapshot.demandDistricts) S.demandDistricts = stateSnapshot.demandDistricts;
-      if (stateSnapshot.summarySources) S.summarySources = stateSnapshot.summarySources;
-      if (stateSnapshot.auctionData) S.auctionData = stateSnapshot.auctionData;
-      if (stateSnapshot.uploadedPDFs) S.uploadedPDFs = stateSnapshot.uploadedPDFs;
-      S.graphsOpened = stateSnapshot.graphsOpened || false;
-      S.annexuresOpened = stateSnapshot.annexuresOpened || false;
-      S.tablesOpened = stateSnapshot.tablesOpened || false;
-      S.frontMatterFiles = stateSnapshot.frontMatterFiles || {};
-      if (stateSnapshot.chapterPDFs) S.chapterPDFs = stateSnapshot.chapterPDFs;
-      S.annexureB = stateSnapshot.annexureB || [];
-      S.annexureC = stateSnapshot.annexureC || [];
-      S.annexureD = stateSnapshot.annexureD || [];
-      S.annexureE = stateSnapshot.annexureE || [];
-      S.annexureG = stateSnapshot.annexureG || [];
-      S.annexureH = stateSnapshot.annexureH || [];
-      S.annexureI = stateSnapshot.annexureI || [];
-      S.annexureJ = stateSnapshot.annexureJ || [];
-      S.annexureJDemandTables = stateSnapshot.annexureJDemandTables || [];
-      if (stateSnapshot.finalPdfName) S.activeProject.finalPdfName = stateSnapshot.finalPdfName;
-      if (stateSnapshot.finalPdfGeneratedAt) S.activeProject.finalPdfGeneratedAt = stateSnapshot.finalPdfGeneratedAt;
-      if (stateSnapshot.finalPdfPages) S.activeProject.finalPdfPages = stateSnapshot.finalPdfPages;
-      if (stateSnapshot.anx6PdfName) {
-        S.activeProject.anx6PdfName = stateSnapshot.anx6PdfName;
-        const index = S.projects.findIndex(p => p.id === S.activeProject.id);
-        if (index >= 0) S.projects[index].anx6PdfName = stateSnapshot.anx6PdfName;
-      }
-      if (stateSnapshot.anx7PdfName) {
-        S.activeProject.anx7PdfName = stateSnapshot.anx7PdfName;
-        const index = S.projects.findIndex(p => p.id === S.activeProject.id);
-        if (index >= 0) S.projects[index].anx7PdfName = stateSnapshot.anx7PdfName;
-      }
+
+    if (stateSnapshot.anx6PdfName) {
+      const index = S.projects.findIndex(p => p.id === S.activeProject.id);
+      if (index >= 0) S.projects[index].anx6PdfName = stateSnapshot.anx6PdfName;
+    }
+    if (stateSnapshot.anx7PdfName) {
+      const index = S.projects.findIndex(p => p.id === S.activeProject.id);
+      if (index >= 0) S.projects[index].anx7PdfName = stateSnapshot.anx7PdfName;
+    }
     } catch (err) {
     console.error('Could not load project state:', err);
   }
@@ -804,10 +780,14 @@ async function createProject() {
 let saveStateTimeout = null;
 function debouncedSaveState() {
   if (!S.activeProject || !S.activeProject.id) return;
-  if (saveStateTimeout) clearTimeout(saveStateTimeout);
-  saveStateTimeout = setTimeout(() => {
-    persistProjectState();
-  }, 1000);
+  
+  // Bridge legacy calls to the new Enterprise Persistence Service
+  if (window.ProjectPersistenceService) {
+    // We treat legacy calls (like PDF uploads) as immediate saves to bypass debounce
+    window.ProjectPersistenceService.requestSave(true);
+  } else if (window.AutoSaveManager) {
+    window.AutoSaveManager.flushQueue();
+  }
 }
 document.addEventListener('input', (e) => {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {

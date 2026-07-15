@@ -367,6 +367,209 @@ window.ensureProjectSectionDefaults = ensureProjectSectionDefaults;
 
 ;
 
+/* js/modules/persistence.service.js */
+/**
+ * Enterprise Project Persistence Service (V2)
+ * Single Source of Truth for Data Persistence, Hydration, and Verification
+ */
+class ProjectPersistenceService {
+  constructor() {
+    this.registry = new Map();
+    this.saveQueue = [];
+    this.isSaving = false;
+    this.retryTimeout = null;
+    this.offlineQueue = false;
+  }
+
+  /**
+   * Register a module's state exporter
+   * @param {string} moduleKey - Unique key for the module (e.g. 'frontMatter')
+   * @param {Function} exporter - Function that returns the module's state
+   */
+  register(moduleKey, exporter) {
+    if (typeof exporter !== 'function') {
+      console.error(`[Persistence] Exporter for ${moduleKey} must be a function`);
+      return;
+    }
+    this.registry.set(moduleKey, exporter);
+  }
+
+  /**
+   * Register legacy keys that modules write directly to window.S
+   */
+  registerLegacyDefaults() {
+    const legacyKeys = [
+      'frontMatter', 'chapters', 'plates', 'graphs', 'graphCharts', 
+      'signatures', 'demandDistricts', 'summarySources', 'auctionData', 
+      'uploadedPDFs', 'graphsOpened', 'annexuresOpened', 'tablesOpened', 
+      'frontMatterFiles', 'chapterPDFs', 'annexureB', 'annexureC', 
+      'annexureD', 'annexureE', 'annexureG', 'annexureH', 'annexureI', 
+      'annexureJ', 'annexureJDemandTables', 'phaseMetadata', 'phaseChangeLog'
+    ];
+    
+    legacyKeys.forEach(key => {
+      if (!this.registry.has(key)) {
+        this.register(key, () => window.S ? window.S[key] : undefined);
+      }
+    });
+  }
+
+  /**
+   * Build a complete, comprehensive state snapshot
+   */
+  buildSnapshot() {
+    if (!window.S || !window.S.activeProject) return {};
+    
+    const snapshot = { ...window.S.activeProject };
+    
+    // Dynamically pull from all registered modules
+    for (const [key, exporter] of this.registry.entries()) {
+      const state = exporter();
+      if (state !== undefined) {
+        snapshot[key] = state;
+      }
+    }
+    return snapshot;
+  }
+
+  /**
+   * Calculate project completion progress based on snapshot data
+   */
+  calculateProgress(snapshot) {
+    if (typeof calculateProjectProgress === 'function') {
+      return calculateProjectProgress(snapshot);
+    }
+    return snapshot.progress || 0;
+  }
+
+  /**
+   * Request a save (can be queued if already saving)
+   */
+  async requestSave(immediate = false) {
+    if (!window.S || !window.S.activeProject || !window.S.activeProject.id) return;
+    
+    if (this.isSaving && !immediate) {
+      if (this.saveQueue.length === 0) this.saveQueue.push(Date.now());
+      window.AutoSaveManager?.updateStatus('Queued...', 'info');
+      return;
+    }
+    
+    if (this.retryTimeout) clearTimeout(this.retryTimeout);
+    
+    await this.executeSave();
+  }
+
+  /**
+   * The core save execution loop
+   */
+  async executeSave() {
+    const projectId = window.S.activeProject.id;
+    this.isSaving = true;
+    window.AutoSaveManager?.updateStatus('Saving...', 'info');
+    
+    try {
+      const snapshot = this.buildSnapshot();
+      const progress = this.calculateProgress(snapshot);
+      
+      // Update local active project with new progress
+      window.S.activeProject.progress = progress;
+      if (typeof updateLiveProgressUI === 'function') updateLiveProgressUI(progress);
+      
+      const payload = {
+        state: JSON.stringify(snapshot),
+        progress: progress
+      };
+      
+      if (!navigator.onLine) {
+        throw new Error('Offline');
+      }
+
+      const res = await fetch(`/api/projects/${projectId}/state`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('dsr_token')}`
+        },
+        body: JSON.stringify(payload)
+      });
+      
+      if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+      
+      const responseData = await res.json();
+      
+      // Verification: Ensure backend acknowledged success
+      if (!responseData.success) {
+        throw new Error(responseData.error || 'Backend rejected save');
+      }
+
+      // Success
+      window.AutoSaveManager?.updateStatus('All Changes Saved', 'success');
+      this.offlineQueue = false;
+      
+    } catch (err) {
+      console.error("[Persistence] Save Failed:", err);
+      this.offlineQueue = true;
+      window.AutoSaveManager?.updateStatus(err.message === 'Offline' ? 'Offline - Queued' : 'Sync Failed - Retrying...', 'error');
+      
+      // Retry in 5 seconds
+      this.retryTimeout = setTimeout(() => {
+        this.executeSave();
+      }, 5000);
+      
+    } finally {
+      this.isSaving = false;
+      
+      // Process queue if another save was requested while we were saving
+      if (this.saveQueue.length > 0) {
+        this.saveQueue.shift();
+        setTimeout(() => this.executeSave(), 1000);
+      }
+    }
+  }
+
+  /**
+   * Guaranteed delivery on unload using sendBeacon
+   */
+  forceSyncSave() {
+    if (!window.S || !window.S.activeProject || !window.S.activeProject.id) return;
+    
+    const projectId = window.S.activeProject.id;
+    const snapshot = this.buildSnapshot();
+    const progress = this.calculateProgress(snapshot);
+    
+    const payload = {
+      state: JSON.stringify(snapshot),
+      progress: progress
+    };
+    
+    const url = `/api/projects/${projectId}/state`;
+    const blob = new Blob([JSON.stringify(payload)], {type: 'application/json'});
+    navigator.sendBeacon(url, blob);
+  }
+
+  /**
+   * Hydrate project state during openProject
+   */
+  hydrateState(stateSnapshot) {
+    if (!stateSnapshot || typeof stateSnapshot !== 'object') return;
+    
+    // Hydrate all registered keys back onto window.S
+    for (const key of this.registry.keys()) {
+      if (stateSnapshot[key] !== undefined) {
+        window.S[key] = stateSnapshot[key];
+      }
+    }
+    
+    // Also merge standard top-level project metadata
+    window.S.activeProject = { ...window.S.activeProject, ...stateSnapshot };
+  }
+}
+
+window.ProjectPersistenceService = new ProjectPersistenceService();
+window.ProjectPersistenceService.registerLegacyDefaults();
+
+;
+
 /* js/modules/autosave.manager.js */
 /**
  * Enterprise Central AutoSave Manager
@@ -468,62 +671,21 @@ class AutoSaveManager {
 
   async flushQueue() {
     if (this.dirtySections.size === 0) return;
-    if (this.isSaving) {
-      // Re-queue if currently saving
-      setTimeout(() => this.flushQueue(), 1000);
-      return;
-    }
     
-    this.isSaving = true;
-    this.updateStatus('Saving...', 'info');
-    
-    const projectId = window.S && window.S.activeProject ? window.S.activeProject.id : null;
-    
-    if (!projectId) {
-       this.isSaving = false;
-       return;
-    }
-
-    try {
-      // In a real app, we would gather the exact form data for each section here
-      // For now, we simulate a draft save of the entire current state
-      const stateToSave = window.S ? { ...window.S.activeProject } : {};
-      
-      const res = await fetch(`/api/projects/${projectId}/draft`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('dsr_token')}`
-        },
-        body: JSON.stringify(stateToSave)
-      });
-      
-      if (!res.ok) throw new Error('Save failed');
-      
+    // Delegate actual saving logic to the centralized service
+    if (window.ProjectPersistenceService) {
+      await window.ProjectPersistenceService.requestSave();
       this.dirtySections.clear();
-      this.updateStatus('All changes saved', 'success');
-      
-    } catch (err) {
-      console.error("AutoSave Error:", err);
-      this.updateStatus('Sync Failed - Retrying...', 'error');
-      // Retry logic
-      setTimeout(() => this.flushQueue(), 5000);
-    } finally {
-      this.isSaving = false;
     }
   }
 
   forceSyncSave() {
     if (this.dirtySections.size === 0) return;
-    const projectId = window.S && window.S.activeProject ? window.S.activeProject.id : null;
-    if (!projectId) return;
-
-    const stateToSave = window.S ? { ...window.S.activeProject } : {};
     
-    // Use navigator.sendBeacon for guaranteed delivery on close
-    const url = `/api/projects/${projectId}/draft`;
-    const blob = new Blob([JSON.stringify(stateToSave)], {type: 'application/json'});
-    navigator.sendBeacon(url, blob);
+    // Delegate to centralized service for unload guaranteed delivery
+    if (window.ProjectPersistenceService) {
+      window.ProjectPersistenceService.forceSyncSave();
+    }
   }
 }
 
@@ -3871,6 +4033,12 @@ async function openProject(id) {
       }
     }
     const stateSnapshot = S.activeProject;
+    
+    // Delegate state hydration to the centralized Enterprise Persistence Service
+    if (window.ProjectPersistenceService) {
+      window.ProjectPersistenceService.hydrateState(stateSnapshot);
+    }
+    
     S.phaseMetadata = {
         ...S.phaseMetadata,
         ...(stateSnapshot.phaseMetadata || {}),
@@ -3880,45 +4048,15 @@ async function openProject(id) {
     };
     S.phaseChangeLog = Array.isArray(stateSnapshot.phaseChangeLog) ? stateSnapshot.phaseChangeLog : [];
     updateLiveProgressUI(S.activeProject.progress || 0);
-      if (stateSnapshot.frontMatter) S.frontMatter = stateSnapshot.frontMatter;
-      if (stateSnapshot.chapters) S.chapters = stateSnapshot.chapters;
-      if (stateSnapshot.plates) S.plates = stateSnapshot.plates;
-      S.importedSourceDocument = stateSnapshot.importedSourceDocument || null;
-      S.sourceSections = Array.isArray(stateSnapshot.sourceSections) ? stateSnapshot.sourceSections : [];
-      if (stateSnapshot.graphs) S.graphs = stateSnapshot.graphs;
-      if (stateSnapshot.graphCharts) S.graphCharts = stateSnapshot.graphCharts;
-      if (stateSnapshot.signatures) S.signatures = stateSnapshot.signatures;
-      if (stateSnapshot.demandDistricts) S.demandDistricts = stateSnapshot.demandDistricts;
-      if (stateSnapshot.summarySources) S.summarySources = stateSnapshot.summarySources;
-      if (stateSnapshot.auctionData) S.auctionData = stateSnapshot.auctionData;
-      if (stateSnapshot.uploadedPDFs) S.uploadedPDFs = stateSnapshot.uploadedPDFs;
-      S.graphsOpened = stateSnapshot.graphsOpened || false;
-      S.annexuresOpened = stateSnapshot.annexuresOpened || false;
-      S.tablesOpened = stateSnapshot.tablesOpened || false;
-      S.frontMatterFiles = stateSnapshot.frontMatterFiles || {};
-      if (stateSnapshot.chapterPDFs) S.chapterPDFs = stateSnapshot.chapterPDFs;
-      S.annexureB = stateSnapshot.annexureB || [];
-      S.annexureC = stateSnapshot.annexureC || [];
-      S.annexureD = stateSnapshot.annexureD || [];
-      S.annexureE = stateSnapshot.annexureE || [];
-      S.annexureG = stateSnapshot.annexureG || [];
-      S.annexureH = stateSnapshot.annexureH || [];
-      S.annexureI = stateSnapshot.annexureI || [];
-      S.annexureJ = stateSnapshot.annexureJ || [];
-      S.annexureJDemandTables = stateSnapshot.annexureJDemandTables || [];
-      if (stateSnapshot.finalPdfName) S.activeProject.finalPdfName = stateSnapshot.finalPdfName;
-      if (stateSnapshot.finalPdfGeneratedAt) S.activeProject.finalPdfGeneratedAt = stateSnapshot.finalPdfGeneratedAt;
-      if (stateSnapshot.finalPdfPages) S.activeProject.finalPdfPages = stateSnapshot.finalPdfPages;
-      if (stateSnapshot.anx6PdfName) {
-        S.activeProject.anx6PdfName = stateSnapshot.anx6PdfName;
-        const index = S.projects.findIndex(p => p.id === S.activeProject.id);
-        if (index >= 0) S.projects[index].anx6PdfName = stateSnapshot.anx6PdfName;
-      }
-      if (stateSnapshot.anx7PdfName) {
-        S.activeProject.anx7PdfName = stateSnapshot.anx7PdfName;
-        const index = S.projects.findIndex(p => p.id === S.activeProject.id);
-        if (index >= 0) S.projects[index].anx7PdfName = stateSnapshot.anx7PdfName;
-      }
+
+    if (stateSnapshot.anx6PdfName) {
+      const index = S.projects.findIndex(p => p.id === S.activeProject.id);
+      if (index >= 0) S.projects[index].anx6PdfName = stateSnapshot.anx6PdfName;
+    }
+    if (stateSnapshot.anx7PdfName) {
+      const index = S.projects.findIndex(p => p.id === S.activeProject.id);
+      if (index >= 0) S.projects[index].anx7PdfName = stateSnapshot.anx7PdfName;
+    }
     } catch (err) {
     console.error('Could not load project state:', err);
   }
@@ -4123,10 +4261,14 @@ async function createProject() {
 let saveStateTimeout = null;
 function debouncedSaveState() {
   if (!S.activeProject || !S.activeProject.id) return;
-  if (saveStateTimeout) clearTimeout(saveStateTimeout);
-  saveStateTimeout = setTimeout(() => {
-    persistProjectState();
-  }, 1000);
+  
+  // Bridge legacy calls to the new Enterprise Persistence Service
+  if (window.ProjectPersistenceService) {
+    // We treat legacy calls (like PDF uploads) as immediate saves to bypass debounce
+    window.ProjectPersistenceService.requestSave(true);
+  } else if (window.AutoSaveManager) {
+    window.AutoSaveManager.flushQueue();
+  }
 }
 document.addEventListener('input', (e) => {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {

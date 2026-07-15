@@ -98,62 +98,21 @@ class AutoSaveManager {
 
   async flushQueue() {
     if (this.dirtySections.size === 0) return;
-    if (this.isSaving) {
-      // Re-queue if currently saving
-      setTimeout(() => this.flushQueue(), 1000);
-      return;
-    }
     
-    this.isSaving = true;
-    this.updateStatus('Saving...', 'info');
-    
-    const projectId = window.S && window.S.activeProject ? window.S.activeProject.id : null;
-    
-    if (!projectId) {
-       this.isSaving = false;
-       return;
-    }
-
-    try {
-      // In a real app, we would gather the exact form data for each section here
-      // For now, we simulate a draft save of the entire current state
-      const stateToSave = window.S ? { ...window.S.activeProject } : {};
-      
-      const res = await fetch(`/api/projects/${projectId}/draft`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('dsr_token')}`
-        },
-        body: JSON.stringify(stateToSave)
-      });
-      
-      if (!res.ok) throw new Error('Save failed');
-      
+    // Delegate actual saving logic to the centralized service
+    if (window.ProjectPersistenceService) {
+      await window.ProjectPersistenceService.requestSave();
       this.dirtySections.clear();
-      this.updateStatus('All changes saved', 'success');
-      
-    } catch (err) {
-      console.error("AutoSave Error:", err);
-      this.updateStatus('Sync Failed - Retrying...', 'error');
-      // Retry logic
-      setTimeout(() => this.flushQueue(), 5000);
-    } finally {
-      this.isSaving = false;
     }
   }
 
   forceSyncSave() {
     if (this.dirtySections.size === 0) return;
-    const projectId = window.S && window.S.activeProject ? window.S.activeProject.id : null;
-    if (!projectId) return;
-
-    const stateToSave = window.S ? { ...window.S.activeProject } : {};
     
-    // Use navigator.sendBeacon for guaranteed delivery on close
-    const url = `/api/projects/${projectId}/draft`;
-    const blob = new Blob([JSON.stringify(stateToSave)], {type: 'application/json'});
-    navigator.sendBeacon(url, blob);
+    // Delegate to centralized service for unload guaranteed delivery
+    if (window.ProjectPersistenceService) {
+      window.ProjectPersistenceService.forceSyncSave();
+    }
   }
 }
 

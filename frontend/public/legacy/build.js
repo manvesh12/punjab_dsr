@@ -9,7 +9,7 @@ const JS_BUNDLE_FILE = 'js/portal.bundle.js';
 // Editable source modules. `portal.bundle.js` remains the generated runtime file
 // loaded by the portal, preserving the existing browser contract.
 const JS_FILES = [
-  'api.js', 'state.js', 'autosave.manager.js', 'phase.js', 'hierarchy.js', 'performance.js',
+  'api.js', 'state.js', 'persistence.service.js', 'autosave.manager.js', 'phase.js', 'hierarchy.js', 'performance.js',
   'navigation.js', 'auth.js', 'projects.js', 'frontmatter.js', 'chapters.js',
   'plates.js', 'graphs.js', 'users.js', 'tables.js', 'anx1.js', 'anx2.js',
   'anx3.js', 'anx4.js', 'anx5.js', 'anx6.js', 'anx7.js', 'more-annexures.js',
