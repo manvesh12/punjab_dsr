@@ -6448,28 +6448,18 @@ body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar 
 .gov-logo,
 .gov-brand-button .gov-logo,
 .dash-global-topbar .gov-brand-button img.gov-logo {
-  width: 40px !important;
-  height: 40px !important;
-  min-width: 40px !important;
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
   object-fit: cover !important;
   border-radius: 50% !important;
-  border: 1px solid #d8b56d !important;
+  border: none !important;
   box-shadow: none !important;
+  background: transparent !important;
 }
 
 .gov-iit-logo {
-  width: 34px !important;
-  height: 34px !important;
-  min-width: 34px !important;
-  border-radius: 9px !important;
-  background: #17324d !important;
-  color: #ffffff !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  font-size: 10px !important;
-  font-weight: 900 !important;
-  letter-spacing: 0.04em !important;
+  display: none !important;
 }
 
 .gov-brand-copy {
@@ -7010,28 +7000,18 @@ body:not(.view-dashboard-active):not(.view-projects-active) .app-workspace {
 .gov-enterprise-topbar .gov-logo,
 .gov-enterprise-brand .gov-logo,
 .dash-global-topbar .gov-enterprise-brand img.gov-logo {
-  width: 50px !important;
-  height: 50px !important;
-  min-width: 50px !important;
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
   object-fit: cover !important;
   border-radius: 50% !important;
-  border: 2px solid #d6a84f !important;
-  box-shadow: 0 6px 14px rgba(19, 50, 79, 0.12) !important;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
 }
 
 .gov-enterprise-topbar .gov-iit-logo {
-  width: 46px !important;
-  height: 46px !important;
-  min-width: 46px !important;
-  border-radius: 12px !important;
-  background: #17324d !important;
-  color: #ffffff !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  font-size: 12px !important;
-  font-weight: 900 !important;
-  letter-spacing: 0.04em !important;
+  display: none !important;
 }
 
 .gov-enterprise-topbar .gov-brand-copy {
