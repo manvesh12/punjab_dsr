@@ -6,12 +6,12 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "dev:worker": "tsx watch src/worker.ts",
-    "build": "prisma generate && tsc -p tsconfig.json",
-    "start": "npx prisma db push --accept-data-loss && npm run seed && node dist/src/server.js",
-    "start:worker": "node dist/src/worker.js",
+    "build": "prisma generate && tsc -p tsconfig.json && npx prisma db push --accept-data-loss && node --max-old-space-size=256 dist/prisma/seed.js",
+    "start": "node --max-old-space-size=350 dist/src/server.js",
+    "start:worker": "node --max-old-space-size=256 dist/src/worker.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma db push",
-    "seed": "node dist/prisma/seed.js",
+    "seed": "node --max-old-space-size=256 dist/prisma/seed.js",
     "test": "tsx --test tests/**/*.test.ts",
     "test:security": "tsx scripts/security-load-test.ts"
   },
