@@ -359,77 +359,10 @@
           </button>
         </div>
         <div class="sb-section" id="overview-nav" style="display:none;"></div>
-        <div class="sb-section" id="report-nav" style="display:none">
-          <div class="sb-section-lbl" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 800; color: var(--p-accent); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; padding: 0 4px;">DSR Sections</div>
-          <button class="sb-item" onclick="showView('front-matter',this)"><span class="sb-ico"><i data-lucide="file-text"></i></span>Front Matter</button>
-          <button class="sb-item" onclick="showView('chapters',this)"><span class="sb-ico"><i data-lucide="book-open"></i></span>Chapters (10)</button>
-          <button class="sb-item" onclick="showView('plates',this)"><span class="sb-ico"><i data-lucide="map"></i></span>Plate Section</button>
-          <button class="sb-item" onclick="showView('graphs',this)" style="padding-left: 24px; font-size: 11px;"><span class="sb-ico" style="width: 24px; height: 24px; font-size: 11px;"><i data-lucide="line-chart"></i></span>Cross Section Graphs</button>
-        </div>
-        <div class="sb-section" id="annexure-nav" style="display:none">
-          <div class="sb-section-lbl" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 800; color: var(--p-accent); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; padding: 0 4px;">Annexures</div>
-          <div style="position: relative;">
-            <button class="sb-item" onclick="toggleSubMenu('flyout-anx1'); showView('anx1',this)"><span class="sb-ico">Ⅰ</span>Annexure I - Sources</button>
-            <div id="flyout-anx1" class="flyout-menu" style="display:none; position:absolute; left:calc(100% + 5px); top:0; background:var(--card); border:1px solid var(--border); border-radius:8px; padding:6px; box-shadow:0 4px 12px rgba(0,0,0,0.1); z-index:100; min-width:160px;">
-              <button class="sb-item" onclick="scrollToSection('anx1', 'anx1-rivers', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx1')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">a) Rivers</button>
-              <button class="sb-item" onclick="scrollToSection('anx1', 'anx1-desilt', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx1')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">b) De-Siltation</button>
-              <button class="sb-item" onclick="scrollToSection('anx1', 'anx1-patta', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx1')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">c) Patta Lands</button>
-              <button class="sb-item" onclick="scrollToSection('anx1', 'anx1-msand', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx1')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">d) M-Sand</button>
-            </div>
-          </div>
-          <div style="position: relative;">
-            <button class="sb-item" onclick="toggleSubMenu('flyout-anx2'); showView('anx2',this)"><span class="sb-ico">Ⅱ</span>Annexure II - Leases</button>
-            <div id="flyout-anx2" class="flyout-menu" style="display:none; position:absolute; left:calc(100% + 5px); top:0; background:var(--card); border:1px solid var(--border); border-radius:8px; padding:6px; box-shadow:0 4px 12px rgba(0,0,0,0.1); z-index:100; min-width:160px;">
-              <button class="sb-item" onclick="scrollToSection('anx2', 'anx2-leases', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx2')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Details of Leases</button>
-              <button class="sb-item" onclick="scrollToSection('anx2', 'anx2-patta', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx2')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Details of Patta</button>
-              <button class="sb-item" onclick="scrollToSection('anx2', 'anx2-desilt', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx2')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Details of De-siltation</button>
-              <button class="sb-item" onclick="scrollToSection('anx2', 'anx2-msand', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx2')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Details of M-Sand</button>
-            </div>
-          </div>
-          <div style="position: relative;">
-            <button class="sb-item" onclick="toggleSubMenu('flyout-anx3'); showView('anx3',this)"><span class="sb-ico">Ⅲ</span>Annexure III - Clusters</button>
-            <div id="flyout-anx3" class="flyout-menu" style="display:none; position:absolute; left:calc(100% + 5px); top:0; background:var(--card); border:1px solid var(--border); border-radius:8px; padding:6px; box-shadow:0 4px 12px rgba(0,0,0,0.1); z-index:100; min-width:160px;">
-              <button class="sb-item" onclick="scrollToSection('anx3', 'anx3-clusters', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx3')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Clusters</button>
-              <button class="sb-item" onclick="scrollToSection('anx3', 'anx3-contiguous', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx3')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Contiguous Clusters</button>
-            </div>
-          </div>
-          <div style="position: relative;">
-            <button class="sb-item" onclick="toggleSubMenu('flyout-anx4'); showView('anx4',this)"><span class="sb-ico">Ⅳ</span>Annexure IV - Transport</button>
-            <div id="flyout-anx4" class="flyout-menu" style="display:none; position:absolute; left:calc(100% + 5px); top:0; background:var(--card); border:1px solid var(--border); border-radius:8px; padding:6px; box-shadow:0 4px 12px rgba(0,0,0,0.1); z-index:100; min-width:160px;">
-              <button class="sb-item" onclick="scrollToSection('anx4', 'individual-routes-container', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx4')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Individual Routes</button>
-              <button class="sb-item" onclick="scrollToSection('anx4', 'cluster-routes-container', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx4')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Cluster Routes</button>
-            </div>
-          </div>
-          <button class="sb-item" onclick="showView('anx5',this)"><span class="sb-ico">Ⅴ</span>Annexure V - Bench Mark & CORS</button>
-          <button class="sb-item" onclick="showView('anx6',this)"><span class="sb-ico">Ⅵ</span>Annexure VI - Final Cluster Details</button>
-          <button class="sb-item" onclick="showView('anx7',this)"><span class="sb-ico">Ⅶ</span>Annexure VII - Transportation Routes</button>
-          <div>
-            <button class="sb-item" id="sb-btn-more-annexures" onclick="toggleMoreAnnexuresInline()"><span class="sb-ico"><i data-lucide="paperclip"></i></span>More Annexures</button>
-            <div id="inline-more-annexures" style="display:none; padding-left: 20px; flex-direction: column;">
-              <button class="sb-item" onclick="showView('annexure-b',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure B</button>
-              <button class="sb-item" onclick="showView('annexure-c',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure C</button>
-              <button class="sb-item" onclick="showView('annexure-d',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure D</button>
-              <button class="sb-item" onclick="showView('annexure-e',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure E</button>
-              <button class="sb-item" onclick="showView('annexure-f',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure F</button>
-              <button class="sb-item" onclick="showView('annexure-g',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure G</button>
-              <button class="sb-item" onclick="showView('annexure-h',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure H</button>
-              <button class="sb-item" onclick="showView('annexure-i',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure I</button>
-              <button class="sb-item" onclick="showView('annexure-j',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure J</button>
-              <button class="sb-item" onclick="showView('annexure-k',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure K</button>
-            </div>
-          </div>
-        </div>
-        <div class="sb-section" id="replenishment-nav" style="display:none">
-          <div class="sb-section-lbl" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 800; color: var(--p-accent); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; padding: 0 4px;">Replenishment</div>
-          <button class="sb-item" onclick="showView('replenishment',this)"><span class="sb-ico"><i data-lucide="refresh-cw"></i></span>Report Builder</button>
-          <button class="sb-item" id="nav-model-dsr" onclick="showView('model-dsr',this)"><span class="sb-ico"><i data-lucide="file-cog"></i></span>Model DSR</button>
-        </div>
-        <div class="sb-section" id="finalize-nav" style="display:none">
-          <div class="sb-section-lbl" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 800; color: var(--p-accent); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; padding: 0 4px;">Finalize</div>
-          <button class="btn sb-item" onclick="showView('generate',this)"><span class="sb-ico"><i data-lucide="download"></i></span>Generate PDF</button>
-          <button class="sb-item" id="nav-users" onclick="showView('settings',this)" style="display:none"><span class="sb-ico"><i data-lucide="settings"></i></span>Settings</button>
-          <button class="sb-item" id="nav-audit-logs" onclick="showView('audit-logs',this)"><span class="sb-ico"><i data-lucide="clipboard-list"></i></span>Audit Logs</button>
-        </div>
+        <div class="sb-section" id="report-nav" style="display:none;"></div>
+        <div class="sb-section" id="annexure-nav" style="display:none;"></div>
+        <div class="sb-section" id="replenishment-nav" style="display:none;"></div>
+        <div class="sb-section" id="finalize-nav" style="display:none;"></div>
       </nav>
       <div class="sb-bottom-container" style="border-top: 1px solid var(--border); padding: 16px; background: var(--sidebar-shell-bg, #f7f4ee);">
 
