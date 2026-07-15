@@ -107,12 +107,15 @@ function handlePlateUpload(e, id) {
         if (err) {
           console.error(err);
           toast('Warning: PDF render failed, falling back to basic preview', 'error');
-          const url = URL.createObjectURL(f);
-          p.pages = [url];
-          p.fileSize = sizeStr;
-          renderPlates();
-          if (window.pdfPreview) window.pdfPreview.notifyUpdate('plates');
-          if (window.debouncedSaveState) window.debouncedSaveState();
+          const reader = new FileReader();
+          reader.onload = function(evt) {
+            p.pages = [evt.target.result];
+            p.fileSize = sizeStr;
+            renderPlates();
+            if (window.pdfPreview) window.pdfPreview.notifyUpdate('plates');
+            if (window.debouncedSaveState) window.debouncedSaveState();
+          };
+          reader.readAsDataURL(f);
           return;
         }
         p.pages = imgs;
@@ -123,12 +126,15 @@ function handlePlateUpload(e, id) {
         if (window.debouncedSaveState) window.debouncedSaveState();
       });
     } else {
-      const url = URL.createObjectURL(f);
-      p.pages = [url];
-      p.fileSize = sizeStr;
-      renderPlates();
-      if (window.pdfPreview) window.pdfPreview.notifyUpdate('plates');
-      if (window.debouncedSaveState) window.debouncedSaveState();
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        p.pages = [evt.target.result];
+        p.fileSize = sizeStr;
+        renderPlates();
+        if (window.pdfPreview) window.pdfPreview.notifyUpdate('plates');
+        if (window.debouncedSaveState) window.debouncedSaveState();
+      };
+      reader.readAsDataURL(f);
     }
   } else if (f.type.startsWith('image/')) {
     const reader = new FileReader();

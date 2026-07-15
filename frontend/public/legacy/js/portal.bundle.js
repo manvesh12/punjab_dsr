@@ -4923,12 +4923,15 @@ function handlePlateUpload(e, id) {
         if (err) {
           console.error(err);
           toast('Warning: PDF render failed, falling back to basic preview', 'error');
-          const url = URL.createObjectURL(f);
-          p.pages = [url];
-          p.fileSize = sizeStr;
-          renderPlates();
-          if (window.pdfPreview) window.pdfPreview.notifyUpdate('plates');
-          if (window.debouncedSaveState) window.debouncedSaveState();
+          const reader = new FileReader();
+          reader.onload = function(evt) {
+            p.pages = [evt.target.result];
+            p.fileSize = sizeStr;
+            renderPlates();
+            if (window.pdfPreview) window.pdfPreview.notifyUpdate('plates');
+            if (window.debouncedSaveState) window.debouncedSaveState();
+          };
+          reader.readAsDataURL(f);
           return;
         }
         p.pages = imgs;
@@ -4939,12 +4942,15 @@ function handlePlateUpload(e, id) {
         if (window.debouncedSaveState) window.debouncedSaveState();
       });
     } else {
-      const url = URL.createObjectURL(f);
-      p.pages = [url];
-      p.fileSize = sizeStr;
-      renderPlates();
-      if (window.pdfPreview) window.pdfPreview.notifyUpdate('plates');
-      if (window.debouncedSaveState) window.debouncedSaveState();
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        p.pages = [evt.target.result];
+        p.fileSize = sizeStr;
+        renderPlates();
+        if (window.pdfPreview) window.pdfPreview.notifyUpdate('plates');
+        if (window.debouncedSaveState) window.debouncedSaveState();
+      };
+      reader.readAsDataURL(f);
     }
   } else if (f.type.startsWith('image/')) {
     const reader = new FileReader();
@@ -16475,7 +16481,7 @@ const pdfPreview = {
     const pages = [];
     S.plates.forEach((p, i) => {
       const sourcePages = Array.isArray(p.pages)
-        ? p.pages.filter(src => this.isPreviewImageSource(src))
+        ? p.pages.filter(src => this.isPreviewImageSource(src) || this.isPdfPreviewSource(src))
         : [];
       const title = p.name || `Plate ${i + 1}`;
       const description = p.summary || 'No plate description has been entered.';
@@ -18004,7 +18010,7 @@ class Workspace {
     const inherited = state.inherited || {};
 
     const html = `
-      ${this.buildCard("Inherited Data (Final DSR)", '<svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>', `
+      ${this.buildCard("Inherited Data (Final DSR)", '<svg class="w-5 h-5 text-green-500" style="width:20px; height:20px; flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>', `
         <div class="space-y-4">
           <div>
             <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Project Name</label>
@@ -18025,7 +18031,7 @@ class Workspace {
         </div>
       `, true)}
       
-      ${this.buildCard("Survey Input", '<svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>', `
+      ${this.buildCard("Survey Input", '<svg class="w-5 h-5 text-blue-500" style="width:20px; height:20px; flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>', `
         <div class="space-y-4">
           <div>
             <label class="block text-xs font-medium text-gray-700 mb-1">Total Replenished Area (Hectares)</label>
@@ -18038,7 +18044,7 @@ class Workspace {
         </div>
       `)}
 
-      ${this.buildCard("File Management Center", '<svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>', `
+      ${this.buildCard("File Management Center", '<svg class="w-5 h-5 text-purple-500" style="width:20px; height:20px; flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>', `
         <div class="space-y-3">
           <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:bg-gray-50 transition-colors cursor-pointer">
             <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
@@ -18056,7 +18062,7 @@ class Workspace {
         </div>
       `)}
 
-      ${this.buildCard("AI Generation", '<svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>', `
+      ${this.buildCard("AI Generation", '<svg class="w-5 h-5 text-yellow-500" style="width:20px; height:20px; flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>', `
         <div class="space-y-4">
           <p class="text-sm text-gray-600">Let AI assist you in generating the technical methodology and analysis based on the uploaded data.</p>
           <button type="button" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -18076,7 +18082,7 @@ class Workspace {
           <h3 class="text-sm font-bold text-gray-800 flex items-center gap-2">
             <span>${icon}</span> ${title}
           </h3>
-          ${locked ? '<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>' : '<svg class="w-4 h-4 text-gray-400 transform rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>'}
+          ${locked ? '<svg class="w-4 h-4 text-gray-400" style="width:16px; height:16px; flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>' : '<svg class="w-4 h-4 text-gray-400 transform rotate-180 transition-transform" style="width:16px; height:16px; flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>'}
         </div>
         <div class="p-4 ${locked ? 'opacity-80' : ''}">
           ${content}

@@ -908,7 +908,7 @@ const pdfPreview = {
     const pages = [];
     S.plates.forEach((p, i) => {
       const sourcePages = Array.isArray(p.pages)
-        ? p.pages.filter(src => this.isPreviewImageSource(src))
+        ? p.pages.filter(src => this.isPreviewImageSource(src) || this.isPdfPreviewSource(src))
         : [];
       const title = p.name || `Plate ${i + 1}`;
       const description = p.summary || 'No plate description has been entered.';
