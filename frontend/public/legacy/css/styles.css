@@ -76,7 +76,9 @@ html.dark {
   --sh-xl: 0 25px 50px -12px rgba(var(--sh-color), 0.35);
 
   /* Layout */
-  --sidebar-w: 280px;
+  --sidebar-expanded-w: 280px;
+  --sidebar-collapsed-w: 76px;
+  --sidebar-w: var(--sidebar-expanded-w);
   --topbar-h:  100px;
   --preview-split: 40%;
   --editor-split: 60%;
@@ -5158,3 +5160,9 @@ table {
  t h  
    w h i t e - s p a c e :   n o w r a p   ! i m p o r t a n t ;    
  
+/* MINI NAVIGATION RAIL OVERRIDES */
+body.sidebar-collapsed { --sidebar-w: var(--sidebar-collapsed-w); }
+body.sidebar-collapsed .sidebar span:not(.sb-ico), body.sidebar-collapsed .sb-section-lbl { display: none !important; }
+body.sidebar-collapsed .sb-item { justify-content: center; padding-left: 0; padding-right: 0; }
+body.sidebar-collapsed .gov-brand-title, body.sidebar-collapsed .gov-brand-subtitle { display: none !important; }
+
