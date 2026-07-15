@@ -45,7 +45,7 @@ async function seedData() {
 
   console.log("Seeding Users...");
   
-  const usersToCreate = [
+  const usersToCreate: any[] = [
     { fullName: "Paramjit Singh", username: "super.admin", email: "paramjit.singh@punjab.gov.in", password: defaultPassword, role: Role.SUPER_ADMIN, employeeId: "PB-ADM-0001", stateId: state.id },
     { fullName: "Manpreet Kaur", username: "state.admin", email: "manpreet.kaur@punjab.gov.in", password: defaultPassword, role: Role.STATE_ADMIN, employeeId: "PB-ADM-0002", stateId: state.id },
   ];

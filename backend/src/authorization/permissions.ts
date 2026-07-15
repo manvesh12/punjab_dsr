@@ -4,19 +4,16 @@ export type Permission = "view_all" | "edit_all" | "approve_reports" | "submit_r
   "view_district" | "edit_district" | "view_block" | "edit_block";
 
 export const rolePermissions: Readonly<Record<Role, Permission[]>> = Object.freeze({
-  ADMIN: ["view_all", "edit_all", "approve_reports", "submit_reports"],
+  SUPER_ADMIN: ["view_all", "edit_all", "approve_reports", "submit_reports"],
   STATE_ADMIN: ["view_all", "approve_reports"],
-  DISTRICT_OWNER: ["view_district", "approve_reports"],
+  DISTRICT_ADMIN: ["view_district", "approve_reports", "edit_district"],
+  DISTRICT_OFFICER: ["view_district", "submit_reports"],
+  GEOLOGIST: ["view_district", "submit_reports"],
+  SURVEY_OFFICER: ["view_district", "submit_reports"],
   REVIEWER: ["view_district", "approve_reports"],
-  REVIEWER_1: ["view_district", "approve_reports"],
-  REVIEWER_2: ["view_district", "approve_reports"],
-  IIT_ROPAR: ["view_all", "submit_reports"],
-  SDLC: ["view_district", "submit_reports"],
-  SDO: ["view_block", "submit_reports"],
-  JE: ["view_block", "submit_reports"],
-  AXEN: ["view_block", "submit_reports"],
-  GIS: ["view_all", "submit_reports"],
-  OFFICER: ["view_district", "submit_reports"]
+  DATA_ENTRY_OPERATOR: ["view_district", "submit_reports"],
+  REPORT_GENERATOR: ["view_district"],
+  PUBLIC_USER: ["view_district"]
 });
 
 export function hasPermission(role: Role, permission: Permission) {

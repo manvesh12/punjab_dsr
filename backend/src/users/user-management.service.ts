@@ -20,7 +20,7 @@ export class UserManagementService {
       fullName: body?.fullName || username,
       password: await this.passwords.hash(String(body?.password || "")),
       role,
-      district: requiredDistrict(body?.district, role),
+      districtId: requiredDistrict(body?.districtId || body?.district, role),
       blockName: body?.block || body?.blockName || "",
       sectionName: body?.section || body?.sectionName || "",
       accessScope: body?.accessScope || "",
@@ -31,14 +31,15 @@ export class UserManagementService {
   async update(id: bigint, body: any) {
     const current = await this.repository.find(id);
     if (!current) throw new ApiError(404, "USER_NOT_FOUND", "User not found");
-    const data: Prisma.UserUpdateInput = {};
+    const data: Prisma.UserUncheckedUpdateInput = {};
     if (body?.fullName !== undefined) data.fullName = body.fullName;
     if (body?.email !== undefined) data.email = body.email;
     if (body?.username !== undefined) data.username = body.username;
     if (body?.role !== undefined) data.role = normalizeRole(body.role);
     const targetRole = (data.role as typeof current.role | undefined) || current.role;
-    if (body?.district !== undefined || requiresDistrict(targetRole)) {
-      data.district = requiredDistrict(body?.district !== undefined ? body.district : current.district, targetRole);
+    if (body?.districtId !== undefined || body?.district !== undefined || requiresDistrict(targetRole)) {
+      const distVal = body?.districtId !== undefined ? body.districtId : (body?.district !== undefined ? body.district : current.districtId);
+      data.districtId = requiredDistrict(distVal, targetRole);
     }
     if (body?.block !== undefined || body?.blockName !== undefined) data.blockName = body.block || body.blockName || "";
     if (body?.section !== undefined || body?.sectionName !== undefined) data.sectionName = body.section || body.sectionName || "";

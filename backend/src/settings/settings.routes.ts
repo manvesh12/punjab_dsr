@@ -7,4 +7,4 @@ import { settingsController } from "./settings.controller.js";
 export const settingsRouter = Router();
 
 settingsRouter.get("/:key", settingsController.getByKey);
-settingsRouter.put("/:key", requireAuth, requireAnyRole([Role.ADMIN, Role.STATE_ADMIN]), settingsController.update);
+settingsRouter.put("/:key", requireAuth, requireAnyRole([Role.SUPER_ADMIN, Role.STATE_ADMIN]), settingsController.update);

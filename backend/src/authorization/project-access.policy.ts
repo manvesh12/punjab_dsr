@@ -3,26 +3,24 @@ import { ApiError } from "../common/exceptions/api-error.js";
 import type { AuthUser } from "../authentication/auth-user.js";
 import { canAdmin } from "./role.policy.js";
 
-function normalized(value?: string | null) {
-  return String(value || "").trim().replace(/\s+/g, " ").toLocaleLowerCase("en-IN");
-}
-
-export function assignedDistrictFor(user: AuthUser): string | null {
+export function assignedDistrictFor(user: AuthUser): bigint | null {
   if (canAdmin(user.role)) return null;
-  const district = String(user.district || "").trim();
-  if (!district) {
+  const districtId = user.districtId;
+  if (!districtId) {
     throw new ApiError(403, "DISTRICT_NOT_ASSIGNED", "Your account has no district assignment. Please contact the administrator.");
   }
-  return district;
+  return districtId;
 }
 
-export function canAccessProjectDistrict(user: AuthUser, district?: string | null) {
-  return canAdmin(user.role) || (Boolean(district) && normalized(user.district) === normalized(district));
+export function canAccessProjectDistrict(user: AuthUser, districtId?: bigint | null) {
+  return canAdmin(user.role) || (Boolean(districtId) && user.districtId === districtId);
 }
 
-export function assertProjectDistrictAccess<T extends Pick<Project, "district">>(project: T | null, user: AuthUser): asserts project is T {
+export function assertProjectDistrictAccess<T extends any>(project: T | null, user: AuthUser): asserts project is T {
   if (!project) throw new ApiError(404, "PROJECT_NOT_FOUND", "Project not found");
-  if (!canAccessProjectDistrict(user, project.district)) {
+  // Check if project has districtId directly or nested in district object
+  const districtId = (project as any).districtId ?? (project as any).district?.id;
+  if (!canAccessProjectDistrict(user, districtId)) {
     throw new ApiError(403, "PROJECT_DISTRICT_FORBIDDEN", "This project belongs to another district.");
   }
 }

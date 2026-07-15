@@ -27,7 +27,7 @@ export class InvitationService {
       department: String(body?.department || "").trim() || null,
       designation: String(body?.designation || "").trim() || null,
       state: String(body?.state || "Punjab").trim() || "Punjab",
-      district: requiredDistrict(body?.district, role),
+      district: requiredDistrict(body?.district, role)?.toString() || null,
       mobileNumber: String(body?.mobileNumber || "").trim() || null
     };
     if (await this.repository.findByEmail(email)) throw new ApiError(400, "USER_EMAIL_EXISTS", "User with this email already exists");

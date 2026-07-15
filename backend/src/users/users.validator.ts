@@ -3,19 +3,19 @@ import { ApiError } from "../common/exceptions/api-error.js";
 import { canAdmin } from "../authorization/role.policy.js";
 
 export function normalizeRole(value: unknown) {
-  const role = String(value || "OFFICER").toUpperCase();
-  if (role === "DATA_ENTRY") return Role.OFFICER;
-  return Object.values(Role).includes(role as Role) ? role as Role : Role.OFFICER;
+  const role = String(value || "DISTRICT_OFFICER").toUpperCase();
+  if (role === "DATA_ENTRY") return Role.DATA_ENTRY_OPERATOR;
+  return Object.values(Role).includes(role as Role) ? role as Role : Role.DISTRICT_OFFICER;
 }
 
 export function requiresDistrict(role: Role) { return !canAdmin(role); }
 
-export function requiredDistrict(value: unknown, role: Role) {
-  const district = String(value || "").trim();
-  if (requiresDistrict(role) && !district) {
+export function requiredDistrict(value: unknown, role: Role): bigint | null {
+  const districtId = String(value || "").trim();
+  if (requiresDistrict(role) && !districtId) {
     throw new ApiError(400, "DISTRICT_REQUIRED", "District is required for every non-admin account.");
   }
-  return district || null;
+  return districtId ? BigInt(districtId) : null;
 }
 
 export function userId(value: string | string[] | undefined) {

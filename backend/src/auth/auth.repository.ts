@@ -79,7 +79,7 @@ export class AuthRepository {
           mobileNumber: String(profile.mobileNumber || invitation.mobileNumber || ""),
           password: invitation.pendingPasswordHash!,
           role: invitation.role,
-          district: invitation.district || "",
+          districtId: invitation.district ? BigInt(invitation.district) : null,
           active: true,
           accessScope: invitation.designation || invitation.department || undefined
         }

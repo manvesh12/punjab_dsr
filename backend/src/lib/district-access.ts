@@ -4,7 +4,7 @@ import { ApiError } from "../common/exceptions/api-error.js";
 import { assignedDistrictFor, assertProjectDistrictAccess, canAccessProjectDistrict } from "../authorization/project-access.policy.js";
 import type { AuthUser } from "./auth.js";
 
-export function assignedDistrict(user: AuthUser, res: Response): string | null | undefined {
+export function assignedDistrict(user: AuthUser, res: Response): bigint | null | undefined {
   try {
     return assignedDistrictFor(user);
   } catch (error) {
@@ -14,11 +14,11 @@ export function assignedDistrict(user: AuthUser, res: Response): string | null |
   }
 }
 
-export function canAccessDistrict(user: AuthUser, district?: string | null) {
-  return canAccessProjectDistrict(user, district);
+export function canAccessDistrict(user: AuthUser, districtId?: bigint | null) {
+  return canAccessProjectDistrict(user, districtId);
 }
 
-export function requireProjectDistrictAccess<T extends Pick<Project, "district">>(project: T | null, user: AuthUser, res: Response): project is T {
+export function requireProjectDistrictAccess<T extends any>(project: T | null, user: AuthUser, res: Response): project is T {
   try {
     assertProjectDistrictAccess(project, user);
     return true;

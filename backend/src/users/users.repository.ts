@@ -5,15 +5,15 @@ export class UsersRepository {
   constructor(private readonly database: PrismaClient) {}
 
   list() { return this.database.user.findMany({ orderBy: { createdAt: "desc" } }); }
-  exportUsers() { return this.database.user.findMany({ orderBy: [{ district: "asc" }, { email: "asc" }] }); }
+  exportUsers() { return this.database.user.findMany({ orderBy: [{ districtId: "asc" }, { email: "asc" }] }); }
   pendingInvitations() {
     return this.database.invitation.findMany({ where: { status: { not: "REGISTERED" } }, orderBy: [{ district: "asc" }, { email: "asc" }] });
   }
-  create(data: Prisma.UserCreateInput) { return this.database.user.create({ data }); }
+  create(data: Prisma.UserUncheckedCreateInput) { return this.database.user.create({ data }); }
   find(id: bigint) { return this.database.user.findUnique({ where: { id } }); }
   findByEmail(email: string) { return this.database.user.findUnique({ where: { email } }); }
   findByMobile(mobileNumber: string) { return this.database.user.findUnique({ where: { mobileNumber } }); }
-  update(id: bigint, data: Prisma.UserUpdateInput) { return this.database.user.update({ where: { id }, data }); }
+  update(id: bigint, data: Prisma.UserUncheckedUpdateInput) { return this.database.user.update({ where: { id }, data }); }
   delete(id: bigint) { return this.database.user.delete({ where: { id } }); }
   findInvitation(email: string) { return this.database.invitation.findUnique({ where: { email } }); }
   upsertInvitation(email: string, create: Prisma.InvitationUncheckedCreateInput, update: Prisma.InvitationUncheckedUpdateInput) {

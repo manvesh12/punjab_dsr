@@ -21,9 +21,9 @@ export class ProjectsService {
       this.requireAdmin(user.role, "Bulk project replacement is restricted to Administrators.");
       await this.repository.deleteAll();
       const projects = await Promise.all(body.map(project => this.repository.create({
-        projectName: project.projectName || project.title || `District Survey Report - ${project.district || "Punjab"}`,
+        projectName: project.projectName || project.title || `District Survey Report`,
         title: project.title || project.projectName,
-        district: project.district || "Punjab",
+        districtId: userDistrict || null,
         year: project.year || "2025-26",
         mineral: project.mineral || "Sand",
         rivers: project.rivers || "Not specified",
@@ -36,15 +36,15 @@ export class ProjectsService {
       return { bulk: true as const, projects };
     }
 
-    const requestedDistrict = String(body?.district || "").trim();
-    if (userDistrict && requestedDistrict && !canAccessProjectDistrict(user, requestedDistrict)) {
+    const requestedDistrictId = body?.districtId ? BigInt(body.districtId) : null;
+    if (userDistrict && requestedDistrictId && !canAccessProjectDistrict(user, requestedDistrictId)) {
       throw new ApiError(403, "PROJECT_CREATE_DISTRICT_FORBIDDEN", "You can create reports only for your assigned district.");
     }
-    const district = userDistrict || requestedDistrict || "Punjab";
+    const districtId = userDistrict || requestedDistrictId || null;
     const created = await this.repository.create({
-      projectName: body?.projectName || body?.title || `District Survey Report - ${district}`,
+      projectName: body?.projectName || body?.title || `District Survey Report`,
       title: body?.title || body?.projectName,
-      district,
+      districtId,
       year: body?.year || "2025-26",
       mineral: body?.mineral || "Sand",
       rivers: body?.rivers || "Not specified",
@@ -57,7 +57,7 @@ export class ProjectsService {
     await this.repository.createWorkflow({
       reportId: created.id,
       action: "PROJECT_CREATED",
-      remarks: `${created.district || "Punjab"} DSR project created for ${created.year || "2025-26"}`,
+      remarks: `DSR project created for ${created.year || "2025-26"}`,
       performedBy: user.id
     });
     return { bulk: false as const, project: created };
@@ -132,7 +132,7 @@ export class ProjectsService {
       sourceId: source.id,
       lockedSourceState: JSON.stringify(lockedSourceState),
       nextProject: {
-        projectName: name, title: name, district: source.district, year: source.year, mineral: source.mineral,
+        projectName: name, title: name, districtId: source.districtId, year: source.year, mineral: source.mineral,
         rivers: source.rivers, description: source.description, progress: 0, status: ProjectStatus.IN_PROGRESS,
         signatures: 0, phaseNo: nextPhaseNo, parentPhaseId: source.id, phaseLocked: false,
         phaseOrigin: `Imported from project ${source.id} / Phase ${source.phaseNo || 1}`,
@@ -142,7 +142,7 @@ export class ProjectsService {
       workflow: {
         reportId: source.id,
         action: "PROJECT_PHASE_INITIATED",
-        remarks: `Phase ${nextPhaseNo} created from Phase ${source.phaseNo || 1} (${source.district || "Punjab"})`,
+        remarks: `Phase ${nextPhaseNo} created from Phase ${source.phaseNo || 1}`,
         performedBy: user.id
       }
     });

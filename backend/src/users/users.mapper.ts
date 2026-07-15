@@ -8,7 +8,7 @@ export function toUserDto(user: User) {
     email: user.email,
     fullName: user.fullName,
     role: user.role,
-    district: user.district || "",
+    district: user.districtId ? String(user.districtId) : "",
     block: user.blockName || "",
     blockName: user.blockName || "",
     section: user.sectionName || "",

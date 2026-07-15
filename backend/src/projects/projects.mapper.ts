@@ -30,7 +30,7 @@ export function toProjectDto(project: Project & { files?: { annexureId: string; 
   };
 }
 
-export function projectName(project?: Pick<Project, "projectName" | "title" | "district"> | null) {
+export function projectName(project?: Pick<Project, "projectName" | "title" | "districtId"> | null) {
   if (!project) return "Unknown Project";
-  return project.projectName || project.title || `District Survey Report - ${project.district || "Punjab"}`;
+  return project.projectName || project.title || `District Survey Report`;
 }

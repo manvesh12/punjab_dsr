@@ -12,8 +12,8 @@ type PhasePersistenceInput = {
 export class ProjectsRepository {
   constructor(private readonly database: PrismaClient) {}
 
-  list(district: string | null) {
-    return this.database.project.findMany({ where: district ? { district } : {}, include: { files: true }, orderBy: { createdAt: "desc" } });
+  list(districtId: bigint | null) {
+    return this.database.project.findMany({ where: districtId ? { districtId } : {}, include: { files: true }, orderBy: { createdAt: "desc" } });
   }
 
   deleteAll() { return this.database.project.deleteMany({}); }

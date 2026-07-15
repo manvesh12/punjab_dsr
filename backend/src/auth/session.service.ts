@@ -59,7 +59,7 @@ export class SessionService {
       role: `ROLE_${user.role}`,
       uiRole: roleToFrontend(user.role),
       permissions: permissionsFor(user.role),
-      scope: { district: user.district, blockName: user.blockName, sectionName: user.sectionName },
+      scope: { districtId: user.districtId, blockName: user.blockName, sectionName: user.sectionName },
       accessLabel: user.accessScope || user.role.replaceAll("_", " ")
     };
   }
