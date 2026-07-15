@@ -98,6 +98,68 @@ export class ReplenishmentService {
       return {};
     }
   }
+
+  async fetchFinalDsr(id: string, user: AuthUser) {
+    const existing = await this.repository.findById(id);
+    if (!existing) throw new ApiError(404, "REPLENISHMENT_NOT_FOUND", "Replenishment study not found");
+    const project = await this.repository.findProjectForSync(existing.projectId);
+    assertProjectDistrictAccess(project, user);
+    const syncedState = this.syncedProjectState(project);
+    
+    // Merge into reportState.inherited
+    const currentState = (existing.reportState as Prisma.JsonObject) || {};
+    const updatedState = { ...currentState, inherited: syncedState } as Prisma.InputJsonObject;
+    
+    return this.repository.update(id, { reportState: updatedState });
+  }
+
+  async saveState(id: string, body: any, user: AuthUser) {
+    const existing = await this.repository.findById(id);
+    if (!existing) throw new ApiError(404, "REPLENISHMENT_NOT_FOUND", "Replenishment study not found");
+    const project = await this.repository.findProject(existing.projectId);
+    assertProjectDistrictAccess(project, user);
+    
+    // Support optimistic concurrency control
+    if (body?.currentVersion && body.currentVersion !== existing.currentVersion) {
+      throw new ApiError(409, "REPLENISHMENT_VERSION_CONFLICT", "Version conflict. Please refresh.");
+    }
+    
+    return this.repository.update(id, {
+      reportState: body?.reportState !== undefined ? body.reportState : existing.reportState,
+      surveyData: body?.surveyData !== undefined ? body.surveyData : existing.surveyData,
+      currentVersion: existing.currentVersion + 1
+    });
+  }
+
+  async upload(id: string, body: any, user: AuthUser) {
+    const existing = await this.repository.findById(id);
+    if (!existing) throw new ApiError(404, "REPLENISHMENT_NOT_FOUND", "Replenishment study not found");
+    const project = await this.repository.findProject(existing.projectId);
+    assertProjectDistrictAccess(project, user);
+    // Real implementation will link to S3 and create ReplenishmentFile record
+    return { success: true, objectKey: `fake-object-key-${Date.now()}` };
+  }
+
+  async workflow(id: string, body: any, user: AuthUser) {
+    const existing = await this.repository.findById(id);
+    if (!existing) throw new ApiError(404, "REPLENISHMENT_NOT_FOUND", "Replenishment study not found");
+    const project = await this.repository.findProject(existing.projectId);
+    assertProjectDistrictAccess(project, user);
+    
+    const newState = body.action || "DRAFT"; // e.g., PENDING_REVIEW, APPROVED
+    return this.repository.update(id, { approvalState: newState });
+  }
+
+  async generateAi(id: string, body: any, user: AuthUser) {
+    const existing = await this.repository.findById(id);
+    if (!existing) throw new ApiError(404, "REPLENISHMENT_NOT_FOUND", "Replenishment study not found");
+    const project = await this.repository.findProject(existing.projectId);
+    assertProjectDistrictAccess(project, user);
+    
+    // Simulate AI Generation
+    const generatedText = `Generated analysis for ${body.section || 'General'}...`;
+    return { success: true, generatedText };
+  }
 }
 
 export const replenishmentService = new ReplenishmentService(replenishmentRepository);

@@ -16,7 +16,9 @@ const JS_FILES = [
   'annexure-b.js', 'annexure-c.js', 'annexure-d.js', 'annexure-e.js',
   'annexure-f.js', 'annexure-g.js', 'annexure-h.js', 'annexure-i.js',
   'annexure-j.js', 'annexure-k.js', 'signatures.js', 'pdf-preview.js',
-  'audit-logs.js', 'model-dsr.js', 'main.js'
+  'audit-logs.js', 'model-dsr.js', 
+  'replenishment/workspace.js', 'replenishment/preview.js', 'replenishment/index.js',
+  'main.js'
 ].map(file => `js/modules/${file}`);
 
 const ASSET_VERSION = 'portal-chapter-render-fix-20260714-v6';
