@@ -43,7 +43,7 @@ class Preview {
     const obs = this.getVal('field_observations', '<span style="color:#9ca3af;font-style:italic;">No observations recorded.</span>');
     const recs = this.getVal('recommendations', '<span style="color:#9ca3af;font-style:italic;">No recommendations provided.</span>');
 
-    const html = \`
+    const html = `
       <div style="display:flex; flex-direction:column; gap:32px; color:#374151; font-family:'Times New Roman', Times, serif;">
         
         <!-- Cover Page -->
@@ -138,7 +138,7 @@ class Preview {
         </div>
 
       </div>
-    \`;
+    `;
 
     // Only update if changed to prevent scrolling issues
     if (this.lastHtml !== html) {
