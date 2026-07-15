@@ -18001,23 +18001,23 @@ class Sidebar {
   constructor() {
     this.container = document.getElementById("repl-sidebar-container");
     this.navItems = [
-      { id: 'overview', title: 'Overview', icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>', status: '100%', color: 'text-green-500' },
-      { id: 'imported', title: 'Auto Imported', icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>', status: 'Synced', color: 'text-blue-500' },
-      { id: 'general', title: 'General Details', icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>', badge: '2 Pending' },
-      { id: 'river', title: 'River Details', icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>' },
-      { id: 'gis', title: 'GIS', icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>', status: '1 file' },
-      { id: 'drone', title: 'Drone', icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>', badge: 'Missing' },
-      { id: 'reserve', title: 'Reserve', icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>' },
-      { id: 'hydro', title: 'Hydrology', icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>' },
-      { id: 'geo', title: 'Geology', icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>' },
-      { id: 'images', title: 'Images', icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>', status: '0 files' },
-      { id: 'files', title: 'Files', icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>', badge: '4' },
-      { id: 'ai', title: 'AI Assistant', icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>', color: 'text-[#C49A58]' },
+      { id: 'overview', title: 'Overview', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>', status: '100%', color: '#22c55e' },
+      { id: 'imported', title: 'Auto Imported', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>', status: 'Synced', color: '#3b82f6' },
+      { id: 'general', title: 'General Details', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>', badge: '2 Pending' },
+      { id: 'river', title: 'River Details', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>' },
+      { id: 'gis', title: 'GIS', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>', status: '1 file' },
+      { id: 'drone', title: 'Drone', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>', badge: 'Missing' },
+      { id: 'reserve', title: 'Reserve', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>' },
+      { id: 'hydro', title: 'Hydrology', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>' },
+      { id: 'geo', title: 'Geology', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>' },
+      { id: 'images', title: 'Images', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>', status: '0 files' },
+      { id: 'files', title: 'Files', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>', badge: '4' },
+      { id: 'ai', title: 'AI Assistant', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>', color: '#C49A58' },
       { divider: true },
-      { id: 'comments', title: 'Comments', icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>' },
-      { id: 'validation', title: 'Validation', icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>', color: 'text-yellow-600', badge: '3' },
-      { id: 'progress', title: 'Progress', icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>' },
-      { id: 'submission', title: 'Submission', icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>' },
+      { id: 'comments', title: 'Comments', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>' },
+      { id: 'validation', title: 'Validation', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>', color: '#ca8a04', badge: '3' },
+      { id: 'progress', title: 'Progress', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>' },
+      { id: 'submission', title: 'Submission', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>' },
     ];
   }
 
@@ -18032,30 +18032,37 @@ class Sidebar {
     
     this.navItems.forEach(item => {
       if (item.divider) {
-        html += '<div class="my-3 border-b border-gray-100 mx-2"></div>';
+        html += '<div style="margin:12px 8px; border-bottom:1px solid #f3f4f6;"></div>';
         return;
       }
       
       const isActive = item.id === 'general';
+      const bgColor = isActive ? '#17324D' : 'transparent';
+      const textColor = isActive ? '#ffffff' : '#4b5563';
+      const hoverBg = isActive ? '#17324D' : '#f3f4f6';
+      const iconColor = isActive ? '#C49A58' : (item.color || '#9ca3af');
+      const transform = isActive ? 'scale(1.02)' : 'none';
+      const shadow = isActive ? '0 4px 6px -1px rgba(0,0,0,0.1)' : 'none';
+      
+      let badgeHtml = '';
+      if (item.badge) {
+        const bBg = isActive ? '#C49A58' : '#fee2e2';
+        const bCol = isActive ? '#17324D' : '#dc2626';
+        badgeHtml = `<span style="padding:2px 8px; font-size:10px; font-weight:700; border-radius:10px; background:${bBg}; color:${bCol};">${item.badge}</span>`;
+      } else if (item.status) {
+        const sCol = isActive ? '#d1d5db' : '#9ca3af';
+        badgeHtml = `<span style="font-size:12px; color:${sCol};">${item.status}</span>`;
+      }
       
       html += `
-        <div class="flex items-center justify-between px-3 py-2 cursor-pointer rounded-lg text-sm transition-all duration-200 mb-1 mx-1
-             ${isActive ? 'bg-[#17324D] text-white shadow-md transform scale-[1.02]' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}">
-          <div class="flex items-center gap-3">
-            <span class="${isActive ? 'text-[#C49A58]' : (item.color || 'text-gray-400')}">
-              ${item.icon}
+        <div class="repl-sb-item" style="display:flex; align-items:center; justify-content:space-between; padding:8px 12px; cursor:pointer; border-radius:8px; font-size:14px; transition:all 0.2s; margin:4px; background:${bgColor}; color:${textColor}; transform:${transform}; box-shadow:${shadow};" onmouseover="this.style.background='${hoverBg}'" onmouseout="this.style.background='${bgColor}'">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span style="color:${iconColor}; display:flex; align-items:center; justify-content:center;">
+              <div style="width:16px; height:16px;">${item.icon}</div>
             </span>
-            <span class="font-medium ${isActive ? '' : ''}">${item.title}</span>
+            <span style="font-weight:500;">${item.title}</span>
           </div>
-          ${item.badge ? `
-            <span class="px-2 py-0.5 text-[10px] font-bold rounded-full 
-                 ${isActive ? 'bg-[#C49A58] text-[#17324D]' : 'bg-red-100 text-red-600'}">
-              ${item.badge}
-            </span>
-          ` : ''}
-          ${item.status && !item.badge ? `
-            <span class="text-xs ${isActive ? 'text-gray-300' : 'text-gray-400'}">${item.status}</span>
-          ` : ''}
+          ${badgeHtml}
         </div>
       `;
     });
@@ -18084,155 +18091,151 @@ class Workspace {
     const inherited = state.inherited || {};
 
     const html = `
-      ${this.buildCard("Auto Imported Information", '<svg class="w-5 h-5 text-green-600" style="width:20px; height:20px; flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>', `
-        <div class="space-y-4">
-          <div class="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
-             <div class="flex items-center gap-3">
-                <span class="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded border border-green-200">SOURCE: FINAL DSR</span>
-                <span class="text-xs text-gray-500">Last Synced: 2 mins ago</span>
+      ${this.buildCard("Auto Imported Information", '<svg style="width:20px; height:20px; flex-shrink:0; color:#16a34a;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>', `
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; border-bottom:1px solid #f3f4f6; padding-bottom:12px;">
+             <div style="display:flex; align-items:center; gap:12px;">
+                <span style="background:#dcfce7; color:#15803d; font-size:12px; font-weight:700; padding:4px 8px; border-radius:4px; border:1px solid #bbf7d0;">SOURCE: FINAL DSR</span>
+                <span style="font-size:12px; color:#6b7280;">Last Synced: 2 mins ago</span>
              </div>
-             <div class="flex gap-2">
-                <button class="text-xs text-blue-600 font-medium hover:underline">Compare</button>
-                <button class="text-xs text-gray-500 font-medium hover:underline">Refresh</button>
+             <div style="display:flex; gap:8px;">
+                <button style="font-size:12px; color:#2563eb; font-weight:500; cursor:pointer; background:none; border:none;">Compare</button>
+                <button style="font-size:12px; color:#6b7280; font-weight:500; cursor:pointer; background:none; border:none;">Refresh</button>
              </div>
           </div>
           <div>
-            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Project Name</label>
-            <div class="px-4 py-3 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 cursor-not-allowed flex justify-between items-center">
+            <label style="display:block; font-size:10px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Project Name</label>
+            <div style="padding:12px 16px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:4px; font-size:14px; color:#4b5563; display:flex; justify-content:space-between; align-items:center;">
               <span>${inherited.project_name || "N/A"}</span>
-              <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><path d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"></path></svg>
+              <svg style="width:16px; height:16px; color:#d1d5db;" fill="currentColor" viewBox="0 0 20 20"><path d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"></path></svg>
             </div>
           </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">District</label>
-              <div class="px-4 py-3 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 cursor-not-allowed flex justify-between items-center">
+          <div style="display:flex; gap:16px;">
+            <div style="flex:1;">
+              <label style="display:block; font-size:10px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">District</label>
+              <div style="padding:12px 16px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:4px; font-size:14px; color:#4b5563; display:flex; justify-content:space-between; align-items:center;">
                 <span>${inherited.district || "N/A"}</span>
-                <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><path d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"></path></svg>
+                <svg style="width:16px; height:16px; color:#d1d5db;" fill="currentColor" viewBox="0 0 20 20"><path d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"></path></svg>
               </div>
             </div>
-            <div>
-              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">River</label>
-              <div class="px-4 py-3 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 cursor-not-allowed flex justify-between items-center">
+            <div style="flex:1;">
+              <label style="display:block; font-size:10px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">River</label>
+              <div style="padding:12px 16px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:4px; font-size:14px; color:#4b5563; display:flex; justify-content:space-between; align-items:center;">
                 <span>${inherited.rivers || "N/A"}</span>
-                <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><path d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"></path></svg>
+                <svg style="width:16px; height:16px; color:#d1d5db;" fill="currentColor" viewBox="0 0 20 20"><path d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"></path></svg>
               </div>
             </div>
           </div>
         </div>
-      `, true, 'border-green-200 shadow-sm')}
+      `, true, 'border-color:#bbf7d0; box-shadow:0 1px 2px rgba(0,0,0,0.05);')}
       
-      ${this.buildCard("Officer Input", '<svg class="w-5 h-5 text-blue-600" style="width:20px; height:20px; flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>', `
-        <div class="space-y-6">
-          <div class="relative group">
-            <input type="number" id="repl-area" data-field="replenishedArea" class="block w-full px-4 pt-5 pb-2 border-b-2 border-gray-300 bg-gray-50 text-gray-900 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors peer" placeholder=" " value="${state.replenishedArea || ''}">
-            <label for="repl-area" class="absolute text-sm text-gray-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] left-4 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-blue-600 peer-focus:font-medium uppercase tracking-wide">Total Replenished Area (Hectares)</label>
+      ${this.buildCard("Officer Input", '<svg style="width:20px; height:20px; flex-shrink:0; color:#2563eb;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>', `
+        <div style="display:flex; flex-direction:column; gap:24px;">
+          <div style="position:relative;">
+            <label style="font-size:12px; color:#6b7280; font-weight:600; margin-bottom:4px; display:block;">Total Replenished Area (Hectares)</label>
+            <input type="number" id="repl-area" data-field="replenishedArea" style="width:100%; padding:10px 16px; border:1px solid #d1d5db; background:#f9fafb; color:#111827; border-radius:4px; font-size:14px;" value="${state.replenishedArea || ''}">
           </div>
-          <div class="relative group">
-            <input type="number" id="repl-est" data-field="estimatedReplenishment" class="block w-full px-4 pt-5 pb-2 border-b-2 border-gray-300 bg-gray-50 text-gray-900 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors peer" placeholder=" " value="${state.estimatedReplenishment || ''}">
-            <label for="repl-est" class="absolute text-sm text-gray-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] left-4 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-blue-600 peer-focus:font-medium uppercase tracking-wide">Estimated Replenishment (MT)</label>
+          <div style="position:relative;">
+            <label style="font-size:12px; color:#6b7280; font-weight:600; margin-bottom:4px; display:block;">Estimated Replenishment (MT)</label>
+            <input type="number" id="repl-est" data-field="estimatedReplenishment" style="width:100%; padding:10px 16px; border:1px solid #d1d5db; background:#f9fafb; color:#111827; border-radius:4px; font-size:14px;" value="${state.estimatedReplenishment || ''}">
           </div>
-          <div class="bg-blue-50 border border-blue-100 rounded-lg p-4">
-             <div class="flex items-start gap-3">
-                <svg class="w-5 h-5 text-blue-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                <div class="text-sm text-blue-800">
+          <div style="background:#eff6ff; border:1px solid #dbeafe; border-radius:8px; padding:16px;">
+             <div style="display:flex; align-items:flex-start; gap:12px;">
+                <svg style="width:20px; height:20px; color:#3b82f6;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div style="font-size:14px; color:#1e40af; line-height:1.4;">
                    <strong>Live Validation Active:</strong> Inputs are automatically converted to standard units and mapped to the A4 document layout.
                 </div>
              </div>
           </div>
         </div>
-      `, false, 'border-blue-200 shadow-md', true)}
+      `, false, 'border-color:#bfdbfe; box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);', true)}
 
-      ${this.buildCard("Upload Section", '<svg class="w-5 h-5 text-purple-600" style="width:20px; height:20px; flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>', `
-        <div class="space-y-4">
-          <div class="border-2 border-dashed border-purple-200 bg-purple-50/30 rounded-xl p-8 text-center hover:bg-purple-50 transition-colors cursor-pointer relative overflow-hidden group">
-            <svg class="mx-auto h-12 w-12 text-purple-400 group-hover:scale-110 transition-transform" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+      ${this.buildCard("Upload Section", '<svg style="width:20px; height:20px; flex-shrink:0; color:#9333ea;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>', `
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <div style="border:2px dashed #e9d5ff; background:#faf5ff; border-radius:12px; padding:32px; text-align:center; cursor:pointer; position:relative; overflow:hidden;">
+            <svg style="margin:0 auto; height:48px; width:48px; color:#c084fc;" stroke="currentColor" fill="none" viewBox="0 0 48 48">
               <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
-            <div class="mt-4 flex flex-col items-center justify-center">
-              <span class="text-sm font-medium text-purple-700 bg-white px-4 py-1.5 rounded-full shadow-sm border border-purple-100">Browse Files or Drag & Drop</span>
-              <p class="text-[11px] text-gray-500 mt-3 max-w-xs mx-auto">Supports PDF, Word, Excel, Images, DEM, Drone imagery, ZIP, GeoJSON, KML, SHP</p>
+            <div style="margin-top:16px; display:flex; flex-direction:column; align-items:center;">
+              <span style="font-size:14px; font-weight:500; color:#7e22ce; background:#ffffff; padding:6px 16px; border-radius:999px; box-shadow:0 1px 2px rgba(0,0,0,0.05); border:1px solid #f3e8ff;">Browse Files or Drag & Drop</span>
+              <p style="font-size:11px; color:#6b7280; margin-top:12px; max-width:250px;">Supports PDF, Word, Excel, Images, DEM, Drone imagery, ZIP, GeoJSON, KML, SHP</p>
             </div>
-            <input type="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+            <input type="file" style="position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer;">
           </div>
-          <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
-             <div class="flex justify-between items-center text-xs text-gray-500 mb-2">
+          <div style="background:#f9fafb; padding:12px; border-radius:8px; border:1px solid #e5e7eb;">
+             <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; color:#6b7280; margin-bottom:8px;">
                 <span>Upload History</span>
-                <span class="text-blue-600 cursor-pointer hover:underline">View All</span>
+                <span style="color:#2563eb; cursor:pointer;">View All</span>
              </div>
-             <div class="flex items-center justify-center py-4 text-sm text-gray-400 border-t border-dashed border-gray-300">
+             <div style="display:flex; align-items:center; justify-content:center; padding:16px 0; font-size:14px; color:#9ca3af; border-top:1px dashed #d1d5db;">
                 No recent uploads in this section.
              </div>
           </div>
         </div>
-      `, false, 'border-purple-200')}
+      `, false, 'border-color:#e9d5ff;')}
 
-      ${this.buildCard("AI Generated Section", '<svg class="w-5 h-5 text-yellow-600" style="width:20px; height:20px; flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>', `
-        <div class="space-y-4">
-          <div class="bg-gradient-to-r from-[#17324D] to-[#2a4a6b] rounded-lg p-5 text-white shadow-lg relative overflow-hidden">
-             <div class="absolute -right-4 -top-4 opacity-10">
-                <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
-             </div>
-             <h4 class="font-bold text-lg mb-2 relative z-10 flex items-center gap-2">
-                <svg class="w-5 h-5 text-[#C49A58]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+      ${this.buildCard("AI Generated Section", '<svg style="width:20px; height:20px; flex-shrink:0; color:#ca8a04;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>', `
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <div style="background:linear-gradient(to right, #17324D, #2a4a6b); border-radius:8px; padding:20px; color:#ffffff; box-shadow:0 10px 15px -3px rgba(0,0,0,0.1); position:relative; overflow:hidden;">
+             <h4 style="font-weight:700; font-size:18px; margin:0 0 8px 0; position:relative; z-index:10; display:flex; align-items:center; gap:8px;">
+                <svg style="width:20px; height:20px; color:#C49A58;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                 AI Assistant
              </h4>
-             <p class="text-sm text-blue-100 mb-5 relative z-10">Generate technical methodology, hydrology, geology, and reserve analysis based on your uploaded data.</p>
-             <div class="flex flex-wrap gap-2 relative z-10">
-               <button type="button" class="flex items-center gap-1.5 py-1.5 px-3 rounded text-sm font-bold text-[#17324D] bg-[#C49A58] hover:bg-white transition-colors shadow-sm">
-                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+             <p style="font-size:14px; color:#dbeafe; margin:0 0 20px 0; position:relative; z-index:10;">Generate technical methodology, hydrology, geology, and reserve analysis based on your uploaded data.</p>
+             <div style="display:flex; flex-wrap:wrap; gap:8px; position:relative; z-index:10;">
+               <button style="display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:4px; font-size:14px; font-weight:700; color:#17324D; background:#C49A58; border:none; cursor:pointer;">
+                 <svg style="width:16px; height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                  Generate Draft
                </button>
-               <button type="button" class="flex items-center gap-1.5 py-1.5 px-3 rounded text-sm font-medium text-white bg-white/20 hover:bg-white/30 transition-colors border border-white/20">
+               <button style="display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:4px; font-size:14px; font-weight:500; color:#ffffff; background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.2); cursor:pointer;">
                  Improve
                </button>
-               <button type="button" class="flex items-center gap-1.5 py-1.5 px-3 rounded text-sm font-medium text-white bg-white/20 hover:bg-white/30 transition-colors border border-white/20">
+               <button style="display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:4px; font-size:14px; font-weight:500; color:#ffffff; background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.2); cursor:pointer;">
                  Translate
                </button>
              </div>
           </div>
         </div>
-      `, false, 'border-yellow-200')}
+      `, false, 'border-color:#fef08a;')}
       
-      ${this.buildCard("Validation & Missing Data", '<svg class="w-5 h-5 text-red-500" style="width:20px; height:20px; flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>', `
-        <div class="space-y-3">
-          <div class="flex items-start gap-3 p-3 bg-red-50 rounded border border-red-100">
-             <svg class="w-4 h-4 text-red-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      ${this.buildCard("Validation & Missing Data", '<svg style="width:20px; height:20px; flex-shrink:0; color:#ef4444;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>', `
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <div style="display:flex; align-items:flex-start; gap:12px; padding:12px; background:#fef2f2; border-radius:4px; border:1px solid #fee2e2;">
+             <svg style="width:16px; height:16px; color:#ef4444; margin-top:2px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
              <div>
-                <div class="text-sm font-medium text-red-800">Missing Drone Imagery</div>
-                <div class="text-xs text-red-600 mt-1">Section 4 requires drone orthomosaic upload before submission.</div>
-                <button class="mt-2 text-xs bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 font-medium">Fix Now</button>
+                <div style="font-size:14px; font-weight:500; color:#991b1b;">Missing Drone Imagery</div>
+                <div style="font-size:12px; color:#dc2626; margin-top:4px;">Section 4 requires drone orthomosaic upload before submission.</div>
+                <button style="margin-top:8px; font-size:12px; background:#fee2e2; color:#b91c1c; padding:4px 8px; border-radius:4px; font-weight:500; border:none; cursor:pointer;">Fix Now</button>
              </div>
           </div>
-          <div class="flex items-start gap-3 p-3 bg-yellow-50 rounded border border-yellow-100">
-             <svg class="w-4 h-4 text-yellow-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01"></path></svg>
+          <div style="display:flex; align-items:flex-start; gap:12px; padding:12px; background:#fefce8; border-radius:4px; border:1px solid #fef08a;">
+             <svg style="width:16px; height:16px; color:#eab308; margin-top:2px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01"></path></svg>
              <div>
-                <div class="text-sm font-medium text-yellow-800">Coordinate Mismatch Warning</div>
-                <div class="text-xs text-yellow-700 mt-1">The provided coordinates do not align perfectly with the Final DSR boundaries.</div>
+                <div style="font-size:14px; font-weight:500; color:#854d0e;">Coordinate Mismatch Warning</div>
+                <div style="font-size:12px; color:#a16207; margin-top:4px;">The provided coordinates do not align perfectly with the Final DSR boundaries.</div>
              </div>
           </div>
         </div>
-      `, false, 'border-red-200')}
+      `, false, 'border-color:#fecaca;')}
     `;
 
     this.container.innerHTML = html;
   }
 
-  buildCard(title, icon, content, locked = false, customClasses = 'border-gray-200', defaultOpen = false) {
-    // Generate a random ID for accordion toggling
+  buildCard(title, icon, content, locked = false, customStyle = '', defaultOpen = false) {
     const id = 'acc-' + Math.random().toString(36).substr(2, 9);
     
     return `
-      <div class="bg-white border rounded-xl shadow-sm overflow-hidden transition-all duration-300 group ${customClasses}">
-        <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors" onclick="document.getElementById('${id}').classList.toggle('hidden'); this.querySelector('.chevron').classList.toggle('rotate-180')">
-          <h3 class="text-[15px] font-bold text-[#17324D] flex items-center gap-3">
-            <span>${icon}</span> ${title}
+      <div class="repl-card" style="background:#ffffff; border:1px solid #e5e7eb; border-radius:12px; overflow:hidden; margin-bottom:20px; transition:all 0.3s; ${customStyle}">
+        <div style="padding:16px 20px; border-bottom:1px solid #f3f4f6; display:flex; align-items:center; justify-content:space-between; cursor:pointer; background:#ffffff;" onclick="const contentEl = document.getElementById('${id}'); const chev = this.querySelector('.chevron'); if (contentEl.style.display === 'none') { contentEl.style.display = 'block'; chev.style.transform = 'rotate(180deg)'; } else { contentEl.style.display = 'none'; chev.style.transform = 'rotate(0deg)'; }">
+          <h3 style="font-size:15px; font-weight:700; color:#17324D; display:flex; align-items:center; gap:12px; margin:0;">
+            ${icon} ${title}
           </h3>
           ${locked 
-            ? '<svg class="w-4 h-4 text-gray-400" style="width:16px; height:16px; flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>' 
-            : `<svg class="chevron w-5 h-5 text-gray-400 transform transition-transform duration-300 ${defaultOpen ? 'rotate-180' : ''}" style="width:20px; height:20px; flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`}
+            ? '<svg style="width:16px; height:16px; color:#9ca3af; flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>' 
+            : `<svg class="chevron" style="width:20px; height:20px; color:#9ca3af; flex-shrink:0; transition:transform 0.3s; transform:${defaultOpen ? 'rotate(180deg)' : 'rotate(0deg)'};" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`}
         </div>
-        <div id="${id}" class="p-6 ${locked ? 'opacity-90 bg-gray-50/50' : ''} ${defaultOpen ? '' : 'hidden'} transition-all duration-300">
+        <div id="${id}" style="padding:24px; ${locked ? 'opacity:0.9; background:#f9fafb;' : ''} display:${defaultOpen ? 'block' : 'none'};">
           ${content}
         </div>
       </div>
@@ -18260,51 +18263,53 @@ class Preview {
     const inherited = state.inherited || {};
 
     const html = `
-      <div class="space-y-8">
+      <div style="display:flex; flex-direction:column; gap:32px; color:#374151; font-family:'Times New Roman', Times, serif;">
         <!-- Cover Page -->
-        <div class="text-center space-y-6 pt-10 border-b border-gray-300 pb-16">
-          <img src="/legacy/assets/images/punjab-logo.png" alt="Punjab Govt" class="h-24 mx-auto mb-6 opacity-80" onerror="this.style.display='none'">
-          <h1 class="text-3xl font-bold uppercase tracking-widest text-gray-900">Government of Punjab</h1>
-          <h2 class="text-xl font-bold uppercase text-gray-700 mt-8 border-b-2 border-gray-400 inline-block pb-2">Replenishment Study Report</h2>
-          <div class="text-lg text-gray-800 mt-12 space-y-2">
-            <p><span class="font-bold">Project:</span> ${inherited.project_name || "________________"}</p>
-            <p><span class="font-bold">District:</span> ${inherited.district || "________________"}</p>
-            <p><span class="font-bold">River:</span> ${inherited.rivers || "________________"}</p>
+        <div style="text-align:center; padding-top:40px; padding-bottom:64px; border-bottom:1px solid #d1d5db; display:flex; flex-direction:column; gap:24px;">
+          <img src="/legacy/assets/images/punjab-logo.png" alt="Punjab Govt" style="height:96px; margin:0 auto 24px auto; opacity:0.8;" onerror="this.style.display='none'">
+          <h1 style="font-size:30px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:#111827; margin:0;">Government of Punjab</h1>
+          <div>
+             <h2 style="font-size:20px; font-weight:700; text-transform:uppercase; color:#374151; margin:32px 0 0 0; border-bottom:2px solid #9ca3af; display:inline-block; padding-bottom:8px;">Replenishment Study Report</h2>
           </div>
-          <div class="mt-20 text-gray-500 font-medium">
-            <p>Generated by: Punjab DSR Portal</p>
-            <p>Date: ${new Date().toLocaleDateString('en-IN')}</p>
+          <div style="font-size:18px; color:#1f2937; margin-top:48px; display:flex; flex-direction:column; gap:8px;">
+            <p style="margin:0;"><span style="font-weight:700;">Project:</span> ${inherited.project_name || "________________"}</p>
+            <p style="margin:0;"><span style="font-weight:700;">District:</span> ${inherited.district || "________________"}</p>
+            <p style="margin:0;"><span style="font-weight:700;">River:</span> ${inherited.rivers || "________________"}</p>
+          </div>
+          <div style="margin-top:80px; color:#6b7280; font-weight:500;">
+            <p style="margin:0;">Generated by: Punjab DSR Portal</p>
+            <p style="margin:0;">Date: ${new Date().toLocaleDateString('en-IN')}</p>
           </div>
         </div>
 
         <!-- Introduction Section -->
-        <div class="pt-8">
-          <h3 class="text-lg font-bold text-gray-800 uppercase border-b border-gray-300 pb-2 mb-4">1. Introduction & Background</h3>
-          <p class="text-gray-700 text-justify mb-4">
+        <div style="padding-top:32px;">
+          <h3 style="font-size:18px; font-weight:700; color:#1f2937; text-transform:uppercase; border-bottom:1px solid #d1d5db; padding-bottom:8px; margin:0 0 16px 0;">1. Introduction & Background</h3>
+          <p style="color:#374151; text-align:justify; margin:0 0 16px 0; line-height:1.6;">
             The replenishment study for the mining lease located in district <strong>${inherited.district || "________"}</strong> on the river <strong>${inherited.rivers || "________"}</strong> has been conducted to estimate the rate of sediment deposition and ensure sustainable mining practices.
           </p>
           
-          <h3 class="text-lg font-bold text-gray-800 uppercase border-b border-gray-300 pb-2 mb-4 mt-8">2. Geological & Hydrological Data</h3>
-          <p class="text-gray-700 text-justify mb-4">
+          <h3 style="font-size:18px; font-weight:700; color:#1f2937; text-transform:uppercase; border-bottom:1px solid #d1d5db; padding-bottom:8px; margin:32px 0 16px 0;">2. Geological & Hydrological Data</h3>
+          <p style="color:#374151; text-align:justify; margin:0 0 16px 0; line-height:1.6;">
             (Inherited from Final DSR) The general geology of the area indicates...
           </p>
           
-          <h3 class="text-lg font-bold text-gray-800 uppercase border-b border-gray-300 pb-2 mb-4 mt-8">3. Replenishment Estimation</h3>
-          <table class="w-full text-left border-collapse mt-4">
+          <h3 style="font-size:18px; font-weight:700; color:#1f2937; text-transform:uppercase; border-bottom:1px solid #d1d5db; padding-bottom:8px; margin:32px 0 16px 0;">3. Replenishment Estimation</h3>
+          <table style="width:100%; text-align:left; border-collapse:collapse; margin-top:16px;">
             <thead>
-              <tr class="bg-gray-100">
-                <th class="border border-gray-300 px-4 py-2 font-bold">Parameter</th>
-                <th class="border border-gray-300 px-4 py-2 font-bold">Value</th>
+              <tr style="background:#f3f4f6;">
+                <th style="border:1px solid #d1d5db; padding:8px 16px; font-weight:700; color:#1f2937;">Parameter</th>
+                <th style="border:1px solid #d1d5db; padding:8px 16px; font-weight:700; color:#1f2937;">Value</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td class="border border-gray-300 px-4 py-2">Total Replenished Area</td>
-                <td class="border border-gray-300 px-4 py-2">${document.querySelector('[data-field="replenishedArea"]')?.value || "N/A"} Hectares</td>
+                <td style="border:1px solid #d1d5db; padding:8px 16px;">Total Replenished Area</td>
+                <td style="border:1px solid #d1d5db; padding:8px 16px;">${document.querySelector('[data-field="replenishedArea"]')?.value || "N/A"} Hectares</td>
               </tr>
               <tr>
-                <td class="border border-gray-300 px-4 py-2">Estimated Replenishment</td>
-                <td class="border border-gray-300 px-4 py-2">${document.querySelector('[data-field="estimatedReplenishment"]')?.value || "N/A"} MT</td>
+                <td style="border:1px solid #d1d5db; padding:8px 16px;">Estimated Replenishment</td>
+                <td style="border:1px solid #d1d5db; padding:8px 16px;">${document.querySelector('[data-field="estimatedReplenishment"]')?.value || "N/A"} MT</td>
               </tr>
             </tbody>
           </table>
