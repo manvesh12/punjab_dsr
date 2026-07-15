@@ -3675,11 +3675,7 @@ body:not(.view-dashboard-active):not(.view-projects-active) .dash-global-topbar 
   background: #ffffff !important;
   background-color: #ffffff !important;
 }
-#view-dashboard .dash-gov-notice-ticker,
-#view-projects .dash-gov-notice-ticker {
-  background: transparent !important;
-  background-color: transparent !important;
-}
+
 #view-dashboard .dash-panel-card,
 #view-projects .header-row,
 #view-projects .proj-card,
@@ -5856,12 +5852,10 @@ body.view-projects-active .topbar.dash-global-topbar {
 #view-dashboard > .dash-portal-wrapper > .dash-gov-utility-strip,
 #view-dashboard > .dash-portal-wrapper > .dash-gov-brand-row,
 #view-dashboard > .dash-portal-wrapper > .dash-gov-menu-bar,
-#view-dashboard > .dash-portal-wrapper > .dash-gov-notice-ticker,
 #view-projects .dash-portal-wrapper > .dash-switcher-bar,
 #view-projects .dash-portal-wrapper > .dash-gov-utility-strip,
 #view-projects .dash-portal-wrapper > .dash-gov-brand-row,
-#view-projects .dash-portal-wrapper > .dash-gov-menu-bar,
-#view-projects .dash-portal-wrapper > .dash-gov-notice-ticker {
+#view-projects .dash-portal-wrapper > .dash-gov-menu-bar {
   display: none !important;
 }
 
