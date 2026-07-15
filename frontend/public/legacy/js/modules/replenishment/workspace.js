@@ -92,8 +92,8 @@ class Workspace {
   buildInput(label, field, value, type = 'text', readonly = false) {
     return `
       <div>
-        <label style="font-size:12px; color:#6b7280; font-weight:600; margin-bottom:4px; display:block;">\${label}</label>
-        <input type="\${type}" data-field="\${field}" id="\${field}" value="\${value}" \${readonly ? 'readonly' : ''} style="width:100%; padding:10px 16px; border:1px solid #d1d5db; background:\${readonly ? '#e5e7eb' : '#f9fafb'}; color:#111827; border-radius:4px; font-size:14px; box-sizing:border-box;">
+        <label style="font-size:12px; color:#6b7280; font-weight:600; margin-bottom:4px; display:block;">${label}</label>
+        <input type="${type}" data-field="${field}" id="${field}" value="${value}" ${readonly ? 'readonly' : ''} style="width:100%; padding:10px 16px; border:1px solid #d1d5db; background:${readonly ? '#e5e7eb' : '#f9fafb'}; color:#111827; border-radius:4px; font-size:14px; box-sizing:border-box;">
       </div>
     `;
   }
@@ -101,8 +101,8 @@ class Workspace {
   buildTextarea(label, field, value, rows = 4, placeholder = '') {
     return `
       <div>
-        <label style="font-size:12px; color:#6b7280; font-weight:600; margin-bottom:4px; display:block;">\${label}</label>
-        <textarea data-field="\${field}" id="\${field}" rows="\${rows}" placeholder="\${placeholder}" style="width:100%; padding:10px 16px; border:1px solid #d1d5db; background:#f9fafb; color:#111827; border-radius:4px; font-size:14px; box-sizing:border-box; resize:vertical;">\${value}</textarea>
+        <label style="font-size:12px; color:#6b7280; font-weight:600; margin-bottom:4px; display:block;">${label}</label>
+        <textarea data-field="${field}" id="${field}" rows="${rows}" placeholder="${placeholder}" style="width:100%; padding:10px 16px; border:1px solid #d1d5db; background:#f9fafb; color:#111827; border-radius:4px; font-size:14px; box-sizing:border-box; resize:vertical;">${value}</textarea>
       </div>
     `;
   }
@@ -110,16 +110,16 @@ class Workspace {
   buildUpload(title, subtitle, type) {
     return `
       <div>
-        <label style="font-size:12px; color:#374151; font-weight:700; margin-bottom:8px; display:block;">\${title}</label>
+        <label style="font-size:12px; color:#374151; font-weight:700; margin-bottom:8px; display:block;">${title}</label>
         <div style="border:2px dashed #d1d5db; background:#f9fafb; border-radius:8px; padding:24px; text-align:center; cursor:pointer; position:relative; overflow:hidden; transition:all 0.2s;" onmouseover="this.style.borderColor='#9333ea'; this.style.background='#faf5ff';" onmouseout="this.style.borderColor='#d1d5db'; this.style.background='#f9fafb';">
           <svg style="margin:0 auto; height:32px; width:32px; color:#9ca3af;" stroke="currentColor" fill="none" viewBox="0 0 48 48">
             <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
           <div style="margin-top:12px;">
             <span style="font-size:14px; font-weight:500; color:#7e22ce;">Browse Files</span>
-            <p style="font-size:12px; color:#6b7280; margin-top:4px;">\${subtitle}</p>
+            <p style="font-size:12px; color:#6b7280; margin-top:4px;">${subtitle}</p>
           </div>
-          <input type="file" multiple data-upload="\${type}" style="position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer;">
+          <input type="file" multiple data-upload="${type}" style="position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer;">
         </div>
       </div>
     `;
@@ -127,17 +127,17 @@ class Workspace {
 
   buildCard(id, title, icon, content, locked = false, customStyle = '', defaultOpen = false) {
     return `
-      <div id="\${id}" class="repl-card" style="background:#ffffff; border:1px solid #e5e7eb; border-radius:12px; overflow:hidden; margin-bottom:20px; transition:all 0.3s; \${customStyle}">
+      <div id="${id}" class="repl-card" style="background:#ffffff; border:1px solid #e5e7eb; border-radius:12px; overflow:hidden; margin-bottom:20px; transition:all 0.3s; ${customStyle}">
         <div style="padding:16px 20px; border-bottom:1px solid #f3f4f6; display:flex; align-items:center; justify-content:space-between; cursor:pointer; background:#ffffff;" onclick="const contentEl = this.nextElementSibling; const chev = this.querySelector('.chevron'); if (contentEl.style.display === 'none') { contentEl.style.display = 'block'; chev.style.transform = 'rotate(180deg)'; } else { contentEl.style.display = 'none'; chev.style.transform = 'rotate(0deg)'; }">
           <h3 style="font-size:15px; font-weight:700; color:#17324D; display:flex; align-items:center; gap:12px; margin:0;">
-            \${icon} \${title}
+            ${icon} ${title}
           </h3>
-          \${locked 
+          ${locked 
             ? '<svg style="width:16px; height:16px; color:#9ca3af; flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>' 
-            : `<svg class="chevron" style="width:20px; height:20px; color:#9ca3af; flex-shrink:0; transition:transform 0.3s; transform:\${defaultOpen ? 'rotate(180deg)' : 'rotate(0deg)'};" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`}
+            : `<svg class="chevron" style="width:20px; height:20px; color:#9ca3af; flex-shrink:0; transition:transform 0.3s; transform:${defaultOpen ? 'rotate(180deg)' : 'rotate(0deg)'};" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`}
         </div>
-        <div style="padding:24px; \${locked ? 'opacity:0.9; background:#f9fafb;' : ''} display:\${defaultOpen ? 'block' : 'none'};">
-          \${content}
+        <div style="padding:24px; ${locked ? 'opacity:0.9; background:#f9fafb;' : ''} display:${defaultOpen ? 'block' : 'none'};">
+          ${content}
         </div>
       </div>
     `;

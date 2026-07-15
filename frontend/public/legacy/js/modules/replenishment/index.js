@@ -37,14 +37,14 @@ class ReplenishmentModule {
   async loadProject(projectId) {
     try {
       if (this.titleEl) this.titleEl.textContent = "Loading...";
-      const res = await window.api.get(`/projects/\${projectId}/replenishment`);
+      const res = await window.api.get(`/projects/${projectId}/replenishment`);
       if (res && res.data && res.data.length > 0) {
         window.S.activeReplenishment = res.data[0];
       } else {
-        const createRes = await window.api.post(`/projects/\${projectId}/replenishment`, {});
+        const createRes = await window.api.post(`/projects/${projectId}/replenishment`, {});
         window.S.activeReplenishment = createRes.data;
       }
-      if (this.titleEl) this.titleEl.textContent = window.S.activeReplenishment.title || `Project \${projectId}`;
+      if (this.titleEl) this.titleEl.textContent = window.S.activeReplenishment.title || `Project ${projectId}`;
     } catch (err) {
       console.error("Failed to load replenishment project", err);
       if (this.titleEl) this.titleEl.textContent = "Error Loading Project";
@@ -55,7 +55,7 @@ class ReplenishmentModule {
     try {
       if (this.autoSaveEl) this.autoSaveEl.innerHTML = `<span style="color:#3b82f6;">Syncing Final DSR...</span>`;
       const id = window.S.activeReplenishment.id;
-      const res = await window.api.post(`/replenishment/\${id}/fetch-final-dsr`, {});
+      const res = await window.api.post(`/replenishment/${id}/fetch-final-dsr`, {});
       window.S.activeReplenishment = res.data;
       if (window.replenishmentWorkspace) window.replenishmentWorkspace.render();
       if (window.replenishmentPreview) window.replenishmentPreview.render();
@@ -69,7 +69,7 @@ class ReplenishmentModule {
   async handleSubmit() {
     try {
       const id = window.S.activeReplenishment.id;
-      await window.api.post(`/replenishment/\${id}/workflow`, { action: "PENDING_SDO_REVIEW" });
+      await window.api.post(`/replenishment/${id}/workflow`, { action: "PENDING_SDO_REVIEW" });
       alert("Report submitted successfully for review!");
     } catch (err) {
       alert("Failed to submit: " + (err.response?.data?.message || err.message));
@@ -124,7 +124,7 @@ class ReplenishmentModule {
     this.saveTimeout = setTimeout(async () => {
       try {
         const id = window.S.activeReplenishment.id;
-        await window.api.put(`/replenishment/\${id}/state`, { reportState: state });
+        await window.api.put(`/replenishment/${id}/state`, { reportState: state });
         if (this.autoSaveEl) this.autoSaveEl.innerHTML = `<svg style="width:16px;height:16px;color:#16a34a;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><span style="color:#16a34a;">All changes saved</span>`;
       } catch (err) {
         if (this.autoSaveEl) this.autoSaveEl.innerHTML = `<span style="color:#ef4444;">Save Failed (Offline)</span>`;
