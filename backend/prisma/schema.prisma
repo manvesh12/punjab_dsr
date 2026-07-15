@@ -10,19 +10,16 @@ datasource db {
 }
 
 enum Role {
-  ADMIN
+  SUPER_ADMIN
   STATE_ADMIN
-  DISTRICT_OWNER
-  OFFICER
+  DISTRICT_ADMIN
+  DISTRICT_OFFICER
+  GEOLOGIST
+  SURVEY_OFFICER
   REVIEWER
-  IIT_ROPAR
-  SDLC
-  SDO
-  JE
-  AXEN
-  GIS
-  REVIEWER_1
-  REVIEWER_2
+  DATA_ENTRY_OPERATOR
+  REPORT_GENERATOR
+  PUBLIC_USER
 }
 
 enum ProjectStatus {
@@ -59,26 +56,34 @@ enum GeneratedDsrStatus {
 }
 
 model User {
-  id           BigInt   @id @default(autoincrement())
+  id           BigInt    @id @default(autoincrement())
   fullName     String
-  username     String   @unique
-  email        String   @unique
-  mobileNumber String?  @unique
+  username     String    @unique
+  email        String    @unique
+  mobileNumber String?   @unique
   password     String
   role         Role
-  district     String?
+  districtId   BigInt?
+  district     District? @relation(fields: [districtId], references: [id], onDelete: SetNull)
+  stateId      BigInt?
+  state        State?    @relation(fields: [stateId], references: [id], onDelete: SetNull)
+  officeName   String?
+  designation  String?
+  employeeId   String?   @unique
   blockName    String?
   sectionName  String?
   accessScope  String?
-  active       Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   refreshTokens         RefreshToken[]
   passwordResetRequests PasswordResetRequest[]
+  projectMembers        ProjectMember[]
+  notifications         Notification[]
 
   @@index([role, active])
-  @@index([district, role])
+  @@index([districtId, role])
   @@index([createdAt])
 }
 
@@ -100,7 +105,8 @@ model Project {
   projectCode          String?              @unique
   projectName          String
   title                String?
-  district             String?
+  districtId           BigInt?
+  district             District?            @relation(fields: [districtId], references: [id], onDelete: SetNull)
   year                 String?
   mineral              String?
   rivers               String?
@@ -128,12 +134,14 @@ model Project {
   projectDraft         ProjectDraft?
   projectVersions      ProjectVersion[]
   auditLogs            ProjectAuditLog[]
+  projectMembers       ProjectMember[]
+  reports              Report[]
 
   @@index([parentPhaseId])
-  @@index([district, phaseNo])
+  @@index([districtId, phaseNo])
   @@index([status, createdAt])
   @@index([createdBy, createdAt])
-  @@index([district, status, createdAt])
+  @@index([districtId, status, createdAt])
 }
 
 model Report {
@@ -149,6 +157,8 @@ model Report {
   approvedBy   BigInt?
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
+
+  project Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
 
   @@index([projectId, status])
   @@index([status, createdAt])
@@ -230,7 +240,7 @@ model ModelDsr {
   generated GeneratedDsr[]
 
   @@index([status, createdAt])
-  @@index([district, status])
+  @@index([district, status], map: "idx_modeldsr_district_status")
   @@index([createdBy, createdAt])
   @@index([category, status])
 }
@@ -421,29 +431,29 @@ model Invitation {
 }
 
 model ReplenishmentStudy {
-  id            String       @id @default(uuid())
-  projectId     BigInt
-  title         String
-  status        ReportStatus @default(DRAFT)
-  approvalState String       @default("DRAFT")
-  currentVersion Int         @default(1)
+  id             String       @id @default(uuid())
+  projectId      BigInt
+  title          String
+  status         ReportStatus @default(DRAFT)
+  approvalState  String       @default("DRAFT")
+  currentVersion Int          @default(1)
 
   // JSON field storing all unique survey data (DGPS, Drone, DEM, Cross Sections)
-  surveyData    Json         @default("{}")
+  surveyData Json @default("{}")
 
   // JSON field storing the synced DSR data and AI computations
-  reportState   Json         @default("{}")
+  reportState Json @default("{}")
 
-  createdBy     BigInt?
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  createdBy BigInt?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  project       Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  files         ReplenishmentFile[]
-  comments      ReplenishmentComment[]
-  auditLogs     ReplenishmentAuditLog[]
-  aiHistory     ReplenishmentAiHistory[]
+  files     ReplenishmentFile[]
+  comments  ReplenishmentComment[]
+  auditLogs ReplenishmentAuditLog[]
+  aiHistory ReplenishmentAiHistory[]
 
   @@index([projectId, createdAt])
   @@index([status, createdAt])
@@ -451,60 +461,60 @@ model ReplenishmentStudy {
 }
 
 model ReplenishmentFile {
-  id             String   @id @default(uuid())
+  id              String   @id @default(uuid())
   replenishmentId String
-  sectionId      String
-  fileName       String
-  objectKey      String
-  contentType    String
-  sizeBytes      Int
-  uploadedBy     BigInt?
-  createdAt      DateTime @default(now())
-  
-  replenishment  ReplenishmentStudy @relation(fields: [replenishmentId], references: [id], onDelete: Cascade)
+  sectionId       String
+  fileName        String
+  objectKey       String
+  contentType     String
+  sizeBytes       Int
+  uploadedBy      BigInt?
+  createdAt       DateTime @default(now())
+
+  replenishment ReplenishmentStudy @relation(fields: [replenishmentId], references: [id], onDelete: Cascade)
 
   @@index([replenishmentId, sectionId])
   @@index([objectKey])
 }
 
 model ReplenishmentComment {
-  id             String   @id @default(uuid())
+  id              String   @id @default(uuid())
   replenishmentId String
-  sectionId      String
-  content        String
-  createdBy      BigInt
-  resolved       Boolean  @default(false)
-  createdAt      DateTime @default(now())
-  
-  replenishment  ReplenishmentStudy @relation(fields: [replenishmentId], references: [id], onDelete: Cascade)
+  sectionId       String
+  content         String
+  createdBy       BigInt
+  resolved        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  replenishment ReplenishmentStudy @relation(fields: [replenishmentId], references: [id], onDelete: Cascade)
 
   @@index([replenishmentId, sectionId])
 }
 
 model ReplenishmentAuditLog {
-  id             String   @id @default(uuid())
+  id              String   @id @default(uuid())
   replenishmentId String
-  userId         BigInt
-  action         String
-  details        Json?
-  createdAt      DateTime @default(now())
-  
-  replenishment  ReplenishmentStudy @relation(fields: [replenishmentId], references: [id], onDelete: Cascade)
+  userId          BigInt
+  action          String
+  details         Json?
+  createdAt       DateTime @default(now())
+
+  replenishment ReplenishmentStudy @relation(fields: [replenishmentId], references: [id], onDelete: Cascade)
 
   @@index([replenishmentId, createdAt])
 }
 
 model ReplenishmentAiHistory {
-  id             String   @id @default(uuid())
-  replenishmentId String
-  sectionId      String
-  promptContext  Json?
-  generatedText  String
+  id                String   @id @default(uuid())
+  replenishmentId   String
+  sectionId         String
+  promptContext     Json?
+  generatedText     String
   officerEditedText String?
-  accepted       Boolean  @default(false)
-  createdAt      DateTime @default(now())
-  
-  replenishment  ReplenishmentStudy @relation(fields: [replenishmentId], references: [id], onDelete: Cascade)
+  accepted          Boolean  @default(false)
+  createdAt         DateTime @default(now())
+
+  replenishment ReplenishmentStudy @relation(fields: [replenishmentId], references: [id], onDelete: Cascade)
 
   @@index([replenishmentId, sectionId])
 }
@@ -531,8 +541,6 @@ model DsrReportChunk {
   @@index([createdAt])
 }
 
-
-
 enum SectionStatus {
   DRAFT
   PENDING_REVIEW
@@ -544,46 +552,103 @@ enum SectionStatus {
 }
 
 model ProjectSection {
-  id              BigInt        @id @default(autoincrement())
-  projectId       BigInt
-  sectionName     String
-  content         Json
-  status          SectionStatus @default(DRAFT)
-  version         Int           @default(1)
-  lastEditedBy    BigInt?
-  updatedAt       DateTime      @updatedAt
-  project         Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  id           BigInt        @id @default(autoincrement())
+  projectId    BigInt
+  sectionName  String
+  content      Json
+  status       SectionStatus @default(DRAFT)
+  version      Int           @default(1)
+  lastEditedBy BigInt?
+  updatedAt    DateTime      @updatedAt
+  project      Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@unique([projectId, sectionName])
 }
 
 model ProjectDraft {
-  id              BigInt    @id @default(autoincrement())
-  projectId       BigInt    @unique
-  draftContent    Json
-  updatedAt       DateTime  @updatedAt
-  project         Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  id           BigInt   @id @default(autoincrement())
+  projectId    BigInt   @unique
+  draftContent Json
+  updatedAt    DateTime @updatedAt
+  project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 model ProjectVersion {
-  id              BigInt    @id @default(autoincrement())
-  projectId       BigInt
-  versionNumber   Int
-  snapshot        Json
-  createdAt       DateTime  @default(now())
-  project         Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  id            BigInt   @id @default(autoincrement())
+  projectId     BigInt
+  versionNumber Int
+  snapshot      Json
+  createdAt     DateTime @default(now())
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@unique([projectId, versionNumber])
 }
 
 model ProjectAuditLog {
-  id              BigInt    @id @default(autoincrement())
-  projectId       BigInt
-  userId          BigInt
-  action          String
-  oldValue        Json?
-  newValue        Json?
-  ipAddress       String?
-  createdAt       DateTime  @default(now())
-  project         Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  id        BigInt   @id @default(autoincrement())
+  projectId BigInt
+  userId    BigInt
+  action    String
+  oldValue  Json?
+  newValue  Json?
+  ipAddress String?
+  createdAt DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model State {
+  id        BigInt     @id @default(autoincrement())
+  name      String     @unique
+  code      String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  districts District[]
+  users     User[]
+}
+
+model District {
+  id        BigInt    @id @default(autoincrement())
+  stateId   BigInt
+  name      String    @unique
+  code      String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  state     State     @relation(fields: [stateId], references: [id], onDelete: Cascade)
+  users     User[]
+  projects  Project[]
+}
+
+model ProjectMember {
+  id         BigInt   @id @default(autoincrement())
+  projectId  BigInt
+  userId     BigInt
+  role       Role
+  assignedAt DateTime @default(now())
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+}
+
+model Notification {
+  id        BigInt   @id @default(autoincrement())
+  userId    BigInt
+  type      String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@index([createdAt])
+}
+
+model Permission {
+  id        BigInt   @id @default(autoincrement())
+  role      Role
+  action    String
+  resource  String
+  createdAt DateTime @default(now())
+
+  @@unique([role, action, resource])
 }
