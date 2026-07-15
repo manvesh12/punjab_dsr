@@ -1,7 +1,7 @@
 
 /* js/modules/api.js */
 var API_BASE_URL = (() => {
-    if (!window.location || window.location.protocol === 'file:') return 'http://localhost:8080/api';
+    if (!window.location || window.location.protocol === 'file:') return 'http://localhost:8081/api';
     return `${window.location.origin}/api`;
 })();
 async function apiFetch(endpoint, options = {}) {
@@ -18605,6 +18605,7 @@ function calculateProjectProgress(state) {
 
 function updateLiveProgressUI(progress) {
   let bar = document.getElementById('global-live-progress');
+  let pctEl = document.getElementById('global-live-progress-text');
   if (pctEl) {
     pctEl.textContent = typeof S !== 'undefined' && S.activeProject ? 'Project Progress: ' + progress + '%' : '';
   }
