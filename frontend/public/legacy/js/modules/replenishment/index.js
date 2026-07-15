@@ -22,6 +22,7 @@ class ReplenishmentModule {
     await this.loadProject(projectId);
     
     // Initialize sub-modules
+    if (window.replenishmentSidebar) window.replenishmentSidebar.init(this);
     if (window.replenishmentWorkspace) window.replenishmentWorkspace.init(this);
     if (window.replenishmentPreview) window.replenishmentPreview.init(this);
     
