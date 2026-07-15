@@ -332,7 +332,7 @@
      SCREEN 2 - MAIN APP
 ═══════════════════════════════════════════════════════════════ -->
 <div id="screen-app" class="screen">
-      <aside class="sidebar" id="sidebar" style="width: var(--sidebar-w); background: var(--sidebar-shell-bg, #f7f4ee); border-right: 1.5px solid var(--sidebar-shell-border, var(--p-accent-gold)); height: 100vh; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 300; transition: transform .3s cubic-bezier(.4,0,.2,1); box-shadow: 4px 0 24px rgba(0,0,0,0.03);">
+      <aside class="sidebar" id="sidebar" style="width: var(--sidebar-w); background: var(--sidebar-shell-bg, #f7f4ee); border-right: 1.5px solid var(--sidebar-shell-border, var(--p-accent-gold)); height: 100vh; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 300; transition: transform .3s cubic-bezier(.4,0,.2,1); box-shadow: 4px 0 24px rgba(0,0,0,0.03); padding-bottom: 26px;">
       <div class="sb-head" style="padding: 16px; background: #17324D; border-bottom: 2px solid var(--p-accent-gold);">
         <div style="display: flex; align-items: center; justify-content: space-between;">
           <span style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 800; color: #ffffff; letter-spacing: 1px; text-transform: uppercase;">Project Menu</span>
@@ -433,15 +433,6 @@
       </nav>
       <div class="sb-bottom-container" style="border-top: 1px solid var(--border); padding: 16px; background: var(--sidebar-shell-bg, #f7f4ee);">
 
-        <div class="sb-user-card" style="display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 8px; background: var(--off); border: 1px solid var(--border-2); margin-bottom: 12px;">
-          <div class="sb-avatar-circle" style="width: 34px; height: 34px; border-radius: 50%; background: #17324D; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 12.5px; font-weight: 800; font-family: 'Outfit', sans-serif; border: 1.5px solid var(--p-accent-gold);">
-            S
-          </div>
-          <div style="display: flex; flex-direction: column; line-height: 1.2;">
-            <span class="sb-username-text" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 800; color: var(--text);">saceadust</span>
-            <span class="sb-role-text" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 10px; font-weight: 600; color: var(--text-soft);">System Admin</span>
-          </div>
-        </div>
         <div style="display: flex; justify-content: flex-start; padding-left: 4px;">
           <button class="sb-logout-btn" onclick="doLogout()" style="background: none; border: none; cursor: pointer; color: var(--text-soft); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; transition: color 0.2s;">
             <i data-lucide="log-out" style="width: 13px; height: 13px; color: var(--text-faint);"></i>Logout
@@ -587,7 +578,7 @@
     <button type="button" class="pdf-preview-mobile-tab active" data-tab="editor">Editor</button>
     <button type="button" class="pdf-preview-mobile-tab" data-tab="preview">PDF Preview</button>
   </div>
-  <div class="app-workspace">
+  <div class="app-workspace" style="padding-bottom: 26px;">
     <div class="main-content">
 
       <div id="view-dashboard" class="view active" style="position: relative; z-index: 1; padding: 0 !important; margin: 0 !important; background: var(--dash-page-bg, #ffffff);">
@@ -6122,6 +6113,16 @@
   </div>
 </aside>
 
+  </div>
+  
+  <!-- Global Footer -->
+  <div class="global-footer" id="global-footer" style="position: fixed; bottom: 0; left: 0; width: 100%; height: 26px; background: #ffffff; border-top: 1px solid #e5e7eb; z-index: 9999; display: flex; align-items: center; justify-content: flex-end; padding: 0 16px; box-shadow: 0 -2px 10px rgba(0,0,0,0.02);">
+    <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 600; color: #6b7280; display: flex; gap: 16px; align-items: center;">
+      <span style="display: flex; gap: 6px;"><span style="color: #9ca3af;">User:</span> <span id="footer-user-name" style="color: #111827; font-weight: 700;"></span></span>
+      <span style="display: flex; gap: 6px;"><span style="color: #9ca3af;">Role:</span> <span id="footer-user-role" style="color: #C49A58; font-weight: 700;"></span></span>
+      <span style="display: flex; gap: 6px;"><span style="color: #9ca3af;">Email:</span> <span id="footer-user-email" style="color: #374151;"></span></span>
+      <span style="display: flex; gap: 6px;"><span style="color: #9ca3af;">Login Time:</span> <span id="footer-login-time" style="color: #374151;"></span></span>
+    </div>
   </div>
 </div>
 <!-- ═══════════════════════════════════════════════════════════════

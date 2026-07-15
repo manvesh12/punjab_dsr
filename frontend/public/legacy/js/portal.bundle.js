@@ -3423,14 +3423,22 @@ async function showAppScreen() {
     initThemeFromStorage();
   }
   if (typeof updateDarkModeIcon === 'function') updateDarkModeIcon();
-  const init = S.user.name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
-  const sidebarAvatar = document.getElementById('sb-avatar');
-  if (sidebarAvatar) sidebarAvatar.textContent = init;
-  const sidebarName = document.getElementById('sb-uname');
-  if (sidebarName) sidebarName.textContent = S.user.name;
   const roleLabel = (typeof getRoleRule === 'function') ? getRoleRule().label : (S.role==='admin'?'System Admin':S.role==='reviewer'?'Section Reviewer':'Report Coordinator');
-  const sidebarRole = document.getElementById('sb-urole');
-  if (sidebarRole) sidebarRole.textContent = S.accessLabel || roleLabel;
+  
+  const fName = document.getElementById('footer-user-name');
+  if (fName) fName.textContent = S.user.name || 'Unknown User';
+  
+  const fRole = document.getElementById('footer-user-role');
+  if (fRole) fRole.textContent = S.accessLabel || roleLabel;
+  
+  const fEmail = document.getElementById('footer-user-email');
+  if (fEmail) fEmail.textContent = S.user.email || 'N/A';
+  
+  const fTime = document.getElementById('footer-login-time');
+  if (fTime) {
+    const now = new Date();
+    fTime.textContent = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+  }
   const navAuditLogs = document.getElementById('nav-audit-logs');
   if (navAuditLogs) {
     navAuditLogs.style.display = 'block';
