@@ -132,12 +132,12 @@ class ProjectPersistenceService {
     } catch (err) {
       console.error("[Persistence] Save Failed:", err);
       this.offlineQueue = true;
-      window.AutoSaveManager?.updateStatus(err.message === 'Offline' ? 'Offline - Queued' : 'Sync Failed - Retrying...', 'error');
+      const displayMsg = err.message === 'Offline' ? 'Offline - Queued' : `Sync Failed: ${err.message.substring(0, 30)}`;
+      window.AutoSaveManager?.updateStatus(displayMsg, 'error');
       
       // Retry in 5 seconds
-      this.retryTimeout = setTimeout(() => {
-        this.executeSave();
-      }, 5000);
+      if (this.retryTimeout) clearTimeout(this.retryTimeout);
+      this.retryTimeout = setTimeout(() => this.executeSave(), 5000);
       
     } finally {
       this.isSaving = false;

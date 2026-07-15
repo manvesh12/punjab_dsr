@@ -1,5 +1,5 @@
 var API_BASE_URL = (() => {
-    if (!window.location || window.location.protocol === 'file:') return 'http://localhost:8080/api';
+    if (!window.location || window.location.protocol === 'file:') return 'http://localhost:8081/api';
     return `${window.location.origin}/api`;
 })();
 async function apiFetch(endpoint, options = {}) {
