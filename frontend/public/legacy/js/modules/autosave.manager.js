@@ -151,7 +151,7 @@ class AutoSaveManager {
     const stateToSave = window.S ? { ...window.S.activeProject } : {};
     
     // Use navigator.sendBeacon for guaranteed delivery on close
-    const url = \`/api/projects/\${projectId}/draft\`;
+    const url = `/api/projects/${projectId}/draft`;
     const blob = new Blob([JSON.stringify(stateToSave)], {type: 'application/json'});
     navigator.sendBeacon(url, blob);
   }

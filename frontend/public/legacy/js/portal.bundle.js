@@ -521,7 +521,7 @@ class AutoSaveManager {
     const stateToSave = window.S ? { ...window.S.activeProject } : {};
     
     // Use navigator.sendBeacon for guaranteed delivery on close
-    const url = \`/api/projects/\${projectId}/draft\`;
+    const url = `/api/projects/${projectId}/draft`;
     const blob = new Blob([JSON.stringify(stateToSave)], {type: 'application/json'});
     navigator.sendBeacon(url, blob);
   }
@@ -3918,8 +3918,7 @@ async function openProject(id) {
         const index = S.projects.findIndex(p => p.id === S.activeProject.id);
         if (index >= 0) S.projects[index].anx7PdfName = stateSnapshot.anx7PdfName;
       }
-    }
-  } catch (err) {
+    } catch (err) {
     console.error('Could not load project state:', err);
   }
   ['report-nav','annexure-nav','replenishment-nav','tables-nav','finalize-nav'].forEach(n=>{

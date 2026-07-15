@@ -600,8 +600,7 @@ async function openProject(id) {
         const index = S.projects.findIndex(p => p.id === S.activeProject.id);
         if (index >= 0) S.projects[index].anx7PdfName = stateSnapshot.anx7PdfName;
       }
-    }
-  } catch (err) {
+    } catch (err) {
     console.error('Could not load project state:', err);
   }
   ['report-nav','annexure-nav','replenishment-nav','tables-nav','finalize-nav'].forEach(n=>{
