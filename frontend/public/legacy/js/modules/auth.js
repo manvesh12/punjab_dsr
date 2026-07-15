@@ -203,6 +203,7 @@ async function doVerifySignupOtp() {
   }
 }
 function doLogout() {
+  if (window.AutoSaveManager) window.AutoSaveManager.forceSyncSave();
   try {
     apiFetch('/auth/logout', { method: 'POST' }).catch(() => {});
   } catch (e) {}
