@@ -1,8 +1,12 @@
 <div class="topbar dash-global-topbar gov-compact-topbar gov-enterprise-topbar">
   <div class="gov-enterprise-brand-row">
     <div class="gov-enterprise-brand-left">
+      <button id="tb-sidebar-toggle" class="dashboard-sidebar-toggle" type="button" onclick="return toggleSidebar(event)" aria-label="Open navigation menu" aria-controls="sidebar" aria-expanded="false" title="Open or close navigation">
+        <i data-lucide="panel-left"></i>
+      </button>
       <button class="gov-brand-button gov-enterprise-brand" type="button" onclick="clearActiveProject(); showView('dashboard', null);" aria-label="Go to dashboard">
-        <img src="assets/dsr-logo.png" alt="Punjab Government Smart DSR Logo" class="gov-logo gov-logo-punjab" style="width:44px;height:44px;border-radius:50%;object-fit:cover;display:block;">
+        <img src="assets/dsr-logo.png" alt="Punjab Government Smart DSR Logo" class="gov-logo gov-logo-punjab">
+        <span class="gov-iit-logo" aria-label="IIT Ropar">IIT</span>
         <span class="gov-brand-copy">
           <span class="gov-brand-title">District Survey Report Automation Portal</span>
           <span class="gov-brand-subtitle">Sand Automation for Sand Mining</span>

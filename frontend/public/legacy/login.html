@@ -333,51 +333,119 @@
      SCREEN 2 - MAIN APP
 ═══════════════════════════════════════════════════════════════ -->
 <div id="screen-app" class="screen">
-      <aside class="sidebar" id="sidebar" style="width: var(--sidebar-w); background: var(--sidebar-shell-bg, #f7f4ee); border-right: 1.5px solid var(--sidebar-shell-border, var(--p-accent-gold)); height: 100vh; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 300; transition: transform .3s cubic-bezier(.4,0,.2,1); box-shadow: 4px 0 24px rgba(0,0,0,0.03); padding-bottom: 26px;">
-      <div class="sb-head" style="padding: 12px 14px; background: transparent; border-bottom: 1px solid rgba(196,154,88,0.25); display: flex; align-items: center; position: relative; min-height: 68px;">
-        <button class="gov-brand-button gov-enterprise-brand" type="button" onclick="clearActiveProject(); showView('dashboard', null);" aria-label="Go to dashboard" style="background: transparent; border: none; padding: 0; display: flex; align-items: center; gap: 10px; cursor: pointer; width: 100%; flex: 1;">
-          <div class="gov-brand-icon-wrapper" style="flex-shrink: 0;">
-             <img src="assets/dsr-logo.png" alt="Punjab Government Smart DSR Logo" class="gov-logo gov-logo-punjab" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; display: block;">
-          </div>
-          <span class="gov-brand-copy" style="text-align: left; line-height: 1.3; white-space: nowrap; flex: 1;">
-            <span class="gov-brand-title" style="display: block; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 800; color: var(--text, #1E293B);">District Survey Report</span>
-            <span class="gov-brand-subtitle" style="display: block; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 10px; font-weight: 600; color: var(--p-accent-gold);">Automation Portal</span>
-          </span>
-        </button>
-        <div class="sidebar-toggle-btn" id="sb-inline-toggle" onclick="toggleSidebar(event)" title="Toggle Sidebar" style="position:relative; right:auto; top:auto; flex-shrink:0; margin-left:6px;">
-           <i data-lucide="chevron-left" id="sb-toggle-icon"></i>
+      <aside class="sidebar" id="sidebar" style="width: var(--sidebar-w); background: var(--sidebar-shell-bg, #f7f4ee); border-right: 1.5px solid var(--sidebar-shell-border, var(--p-accent-gold)); height: 100vh; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 300; transition: transform .3s cubic-bezier(.4,0,.2,1); box-shadow: 4px 0 24px rgba(0,0,0,0.03);">
+      <div class="sb-head" style="padding: 16px; background: #17324D; border-bottom: 2px solid var(--p-accent-gold);">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <span style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 800; color: #ffffff; letter-spacing: 1px; text-transform: uppercase;">Project Menu</span>
+          <i data-lucide="menu" style="width: 14px; height: 14px; color: var(--p-accent-gold);"></i>
         </div>
       </div>
       <nav class="sb-nav" style="padding: 16px; flex: 1; overflow-y: auto; background: var(--sidebar-shell-bg, transparent);">
         <div class="sb-section portal-main-nav" id="portal-main-nav" style="margin-bottom: 16px;">
           <div class="sb-section-lbl" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 800; color: var(--p-accent); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; padding: 0 4px;">Portal</div>
-          <button class="sb-item" onclick="clearActiveProject(); showView('dashboard',this)" data-tooltip="Home"><span class="sb-ico"><i data-lucide="home"></i></span><span>Home</span></button>
-          <button class="sb-item" onclick="openAboutDsr(this)" data-tooltip="About DSR"><span class="sb-ico"><i data-lucide="info"></i></span><span>About DSR</span></button>
-          <button class="sb-item" onclick="showView('projects',this)" data-tooltip="Projects"><span class="sb-ico"><i data-lucide="folder"></i></span><span>Projects</span></button>
-          <button class="sb-item" onclick="showView('workflow',this)" data-tooltip="Workflow"><span class="sb-ico"><i data-lucide="activity"></i></span><span>Workflow</span></button>
-          <button class="sb-item" id="sb-main-audit-logs" onclick="showView('audit-logs',this)" data-tooltip="Audit Logs"><span class="sb-ico"><i data-lucide="clipboard-list"></i></span><span>Audit Logs</span></button>
-          <button class="sb-item" id="sb-main-settings" onclick="showView('settings',this)" data-tooltip="Settings"><span class="sb-ico"><i data-lucide="settings"></i></span><span>Settings</span></button>
-          <button class="sb-item" onclick="openDistrictMap(this)" data-tooltip="Districts"><span class="sb-ico"><i data-lucide="map-pin"></i></span><span>Districts</span></button>
-          <button class="sb-item" onclick="clearActiveProject(); showView('dashboard', this); setTimeout(()=>document.getElementById('dash-contact-section')?.scrollIntoView({behavior:'smooth', block:'start'}), 80);" data-tooltip="Contact"><span class="sb-ico"><i data-lucide="phone"></i></span><span>Contact</span></button>
-          <button class="sb-item" type="button" aria-expanded="false" onclick="toast('More features coming soon in v2.0', 'info'); this.setAttribute('aria-expanded', this.getAttribute('aria-expanded') !== 'true')" data-tooltip="More"><span class="sb-ico"><i data-lucide="ellipsis"></i></span><span>More</span></button>
+          <button class="sb-item" onclick="clearActiveProject(); showView('dashboard',this)"><span class="sb-ico"><i data-lucide="home"></i></span><span>Home</span></button>
+          <button class="sb-item" onclick="openAboutDsr(this)"><span class="sb-ico"><i data-lucide="info"></i></span><span>About DSR</span></button>
+          <button class="sb-item" onclick="showView('projects',this)"><span class="sb-ico"><i data-lucide="folder"></i></span><span>Projects</span></button>
+          <button class="sb-item" onclick="showView('workflow',this)"><span class="sb-ico"><i data-lucide="activity"></i></span><span>Workflow</span></button>
+          <button class="sb-item" id="sb-main-audit-logs" onclick="showView('audit-logs',this)"><span class="sb-ico"><i data-lucide="clipboard-list"></i></span><span>Audit Logs</span></button>
+          <button class="sb-item" id="sb-main-settings" onclick="showView('settings',this)"><span class="sb-ico"><i data-lucide="settings"></i></span><span>Settings</span></button>
+          <button class="sb-item" onclick="openDistrictMap(this)"><span class="sb-ico"><i data-lucide="map-pin"></i></span><span>Districts</span></button>
+          <button class="sb-item" onclick="clearActiveProject(); showView('dashboard', this); setTimeout(()=>document.getElementById('dash-contact-section')?.scrollIntoView({behavior:'smooth', block:'start'}), 80);"><span class="sb-ico"><i data-lucide="phone"></i></span><span>Contact</span></button>
+          <button class="sb-item" type="button" aria-expanded="false" onclick="this.setAttribute('aria-expanded', this.getAttribute('aria-expanded') !== 'true')"><span class="sb-ico"><i data-lucide="ellipsis"></i></span><span>More</span></button>
         </div>
         <div class="sb-section" id="sidebar-new-project-section" style="margin-bottom: 16px;">
-          <button class="sb-item" style="background: var(--p-accent-gold) !important; color: #17324D !important; font-weight: 700; border: 1.5px solid var(--p-accent-gold) !important; border-radius: 6px; display: flex; align-items: center; justify-content: center; width: 100%; height: 36px; gap: 6px; cursor: pointer;" onclick="newProjectModal()" data-tooltip="New Project">
+          <button class="sb-item" style="background: var(--p-accent-gold) !important; color: #17324D !important; font-weight: 700; border: 1.5px solid var(--p-accent-gold) !important; border-radius: 6px; display: flex; align-items: center; justify-content: center; width: 100%; height: 36px; gap: 6px; cursor: pointer;" onclick="newProjectModal()">
             <span class="sb-ico" style="display: flex; align-items: center; justify-content: center; width: auto; height: auto;"><i data-lucide="plus" style="width: 14px; height: 14px; color: #17324D !important;"></i></span>
             <span>New Project</span>
           </button>
         </div>
         <div class="sb-section" id="overview-nav" style="display:none;"></div>
-        <div class="sb-section" id="report-nav" style="display:none;"></div>
-        <div class="sb-section" id="annexure-nav" style="display:none;"></div>
-        <div class="sb-section" id="replenishment-nav" style="display:none;"></div>
-        <div class="sb-section" id="finalize-nav" style="display:none;"></div>
+        <div class="sb-section" id="report-nav" style="display:none">
+          <div class="sb-section-lbl" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 800; color: var(--p-accent); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; padding: 0 4px;">DSR Sections</div>
+          <button class="sb-item" onclick="showView('front-matter',this)"><span class="sb-ico"><i data-lucide="file-text"></i></span>Front Matter</button>
+          <button class="sb-item" onclick="showView('chapters',this)"><span class="sb-ico"><i data-lucide="book-open"></i></span>Chapters (10)</button>
+          <button class="sb-item" onclick="showView('plates',this)"><span class="sb-ico"><i data-lucide="map"></i></span>Plate Section</button>
+          <button class="sb-item" onclick="showView('graphs',this)" style="padding-left: 24px; font-size: 11px;"><span class="sb-ico" style="width: 24px; height: 24px; font-size: 11px;"><i data-lucide="line-chart"></i></span>Cross Section Graphs</button>
+        </div>
+        <div class="sb-section" id="annexure-nav" style="display:none">
+          <div class="sb-section-lbl" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 800; color: var(--p-accent); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; padding: 0 4px;">Annexures</div>
+          <div style="position: relative;">
+            <button class="sb-item" onclick="toggleSubMenu('flyout-anx1'); showView('anx1',this)"><span class="sb-ico">Ⅰ</span>Annexure I - Sources</button>
+            <div id="flyout-anx1" class="flyout-menu" style="display:none; position:absolute; left:calc(100% + 5px); top:0; background:var(--card); border:1px solid var(--border); border-radius:8px; padding:6px; box-shadow:0 4px 12px rgba(0,0,0,0.1); z-index:100; min-width:160px;">
+              <button class="sb-item" onclick="scrollToSection('anx1', 'anx1-rivers', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx1')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">a) Rivers</button>
+              <button class="sb-item" onclick="scrollToSection('anx1', 'anx1-desilt', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx1')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">b) De-Siltation</button>
+              <button class="sb-item" onclick="scrollToSection('anx1', 'anx1-patta', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx1')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">c) Patta Lands</button>
+              <button class="sb-item" onclick="scrollToSection('anx1', 'anx1-msand', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx1')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">d) M-Sand</button>
+            </div>
+          </div>
+          <div style="position: relative;">
+            <button class="sb-item" onclick="toggleSubMenu('flyout-anx2'); showView('anx2',this)"><span class="sb-ico">Ⅱ</span>Annexure II - Leases</button>
+            <div id="flyout-anx2" class="flyout-menu" style="display:none; position:absolute; left:calc(100% + 5px); top:0; background:var(--card); border:1px solid var(--border); border-radius:8px; padding:6px; box-shadow:0 4px 12px rgba(0,0,0,0.1); z-index:100; min-width:160px;">
+              <button class="sb-item" onclick="scrollToSection('anx2', 'anx2-leases', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx2')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Details of Leases</button>
+              <button class="sb-item" onclick="scrollToSection('anx2', 'anx2-patta', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx2')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Details of Patta</button>
+              <button class="sb-item" onclick="scrollToSection('anx2', 'anx2-desilt', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx2')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Details of De-siltation</button>
+              <button class="sb-item" onclick="scrollToSection('anx2', 'anx2-msand', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx2')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Details of M-Sand</button>
+            </div>
+          </div>
+          <div style="position: relative;">
+            <button class="sb-item" onclick="toggleSubMenu('flyout-anx3'); showView('anx3',this)"><span class="sb-ico">Ⅲ</span>Annexure III - Clusters</button>
+            <div id="flyout-anx3" class="flyout-menu" style="display:none; position:absolute; left:calc(100% + 5px); top:0; background:var(--card); border:1px solid var(--border); border-radius:8px; padding:6px; box-shadow:0 4px 12px rgba(0,0,0,0.1); z-index:100; min-width:160px;">
+              <button class="sb-item" onclick="scrollToSection('anx3', 'anx3-clusters', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx3')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Clusters</button>
+              <button class="sb-item" onclick="scrollToSection('anx3', 'anx3-contiguous', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx3')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Contiguous Clusters</button>
+            </div>
+          </div>
+          <div style="position: relative;">
+            <button class="sb-item" onclick="toggleSubMenu('flyout-anx4'); showView('anx4',this)"><span class="sb-ico">Ⅳ</span>Annexure IV - Transport</button>
+            <div id="flyout-anx4" class="flyout-menu" style="display:none; position:absolute; left:calc(100% + 5px); top:0; background:var(--card); border:1px solid var(--border); border-radius:8px; padding:6px; box-shadow:0 4px 12px rgba(0,0,0,0.1); z-index:100; min-width:160px;">
+              <button class="sb-item" onclick="scrollToSection('anx4', 'individual-routes-container', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx4')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Individual Routes</button>
+              <button class="sb-item" onclick="scrollToSection('anx4', 'cluster-routes-container', this.parentElement.previousElementSibling); toggleSubMenu('flyout-anx4')" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Cluster Routes</button>
+            </div>
+          </div>
+          <button class="sb-item" onclick="showView('anx5',this)"><span class="sb-ico">Ⅴ</span>Annexure V - Bench Mark & CORS</button>
+          <button class="sb-item" onclick="showView('anx6',this)"><span class="sb-ico">Ⅵ</span>Annexure VI - Final Cluster Details</button>
+          <button class="sb-item" onclick="showView('anx7',this)"><span class="sb-ico">Ⅶ</span>Annexure VII - Transportation Routes</button>
+          <div>
+            <button class="sb-item" id="sb-btn-more-annexures" onclick="toggleMoreAnnexuresInline()"><span class="sb-ico"><i data-lucide="paperclip"></i></span>More Annexures</button>
+            <div id="inline-more-annexures" style="display:none; padding-left: 20px; flex-direction: column;">
+              <button class="sb-item" onclick="showView('annexure-b',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure B</button>
+              <button class="sb-item" onclick="showView('annexure-c',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure C</button>
+              <button class="sb-item" onclick="showView('annexure-d',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure D</button>
+              <button class="sb-item" onclick="showView('annexure-e',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure E</button>
+              <button class="sb-item" onclick="showView('annexure-f',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure F</button>
+              <button class="sb-item" onclick="showView('annexure-g',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure G</button>
+              <button class="sb-item" onclick="showView('annexure-h',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure H</button>
+              <button class="sb-item" onclick="showView('annexure-i',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure I</button>
+              <button class="sb-item" onclick="showView('annexure-j',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure J</button>
+              <button class="sb-item" onclick="showView('annexure-k',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure K</button>
+            </div>
+          </div>
+        </div>
+        <div class="sb-section" id="replenishment-nav" style="display:none">
+          <div class="sb-section-lbl" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 800; color: var(--p-accent); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; padding: 0 4px;">Replenishment</div>
+          <button class="sb-item" onclick="showView('replenishment',this)"><span class="sb-ico"><i data-lucide="refresh-cw"></i></span>Report Builder</button>
+          <button class="sb-item" id="nav-model-dsr" onclick="showView('model-dsr',this)"><span class="sb-ico"><i data-lucide="file-cog"></i></span>Model DSR</button>
+        </div>
+        <div class="sb-section" id="finalize-nav" style="display:none">
+          <div class="sb-section-lbl" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 800; color: var(--p-accent); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; padding: 0 4px;">Finalize</div>
+          <button class="btn sb-item" onclick="showView('generate',this)"><span class="sb-ico"><i data-lucide="download"></i></span>Generate PDF</button>
+          <button class="sb-item" id="nav-users" onclick="showView('settings',this)" style="display:none"><span class="sb-ico"><i data-lucide="settings"></i></span>Settings</button>
+          <button class="sb-item" id="nav-audit-logs" onclick="showView('audit-logs',this)"><span class="sb-ico"><i data-lucide="clipboard-list"></i></span>Audit Logs</button>
+        </div>
       </nav>
       <div class="sb-bottom-container" style="border-top: 1px solid var(--border); padding: 16px; background: var(--sidebar-shell-bg, #f7f4ee);">
 
+        <div class="sb-user-card" style="display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 8px; background: var(--off); border: 1px solid var(--border-2); margin-bottom: 12px;">
+          <div class="sb-avatar-circle" style="width: 34px; height: 34px; border-radius: 50%; background: #17324D; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 12.5px; font-weight: 800; font-family: 'Outfit', sans-serif; border: 1.5px solid var(--p-accent-gold);">
+            S
+          </div>
+          <div style="display: flex; flex-direction: column; line-height: 1.2;">
+            <span class="sb-username-text" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 800; color: var(--text);">saceadust</span>
+            <span class="sb-role-text" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 10px; font-weight: 600; color: var(--text-soft);">System Admin</span>
+          </div>
+        </div>
         <div style="display: flex; justify-content: flex-start; padding-left: 4px;">
-          <button class="sb-logout-btn" onclick="doLogout()" style="background: none; border: none; cursor: pointer; color: var(--text-soft); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; transition: color 0.2s;" data-tooltip="Logout">
-            <span class="sb-ico"><i data-lucide="log-out" style="width: 16px; height: 16px; color: var(--text-faint);"></i></span><span>Logout</span>
+          <button class="sb-logout-btn" onclick="doLogout()" style="background: none; border: none; cursor: pointer; color: var(--text-soft); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; transition: color 0.2s;">
+            <i data-lucide="log-out" style="width: 13px; height: 13px; color: var(--text-faint);"></i>Logout
           </button>
         </div>
       </div>
@@ -386,8 +454,12 @@
   <div class="topbar dash-global-topbar gov-compact-topbar gov-enterprise-topbar">
   <div class="gov-enterprise-brand-row">
     <div class="gov-enterprise-brand-left">
+      <button id="tb-sidebar-toggle" class="dashboard-sidebar-toggle" type="button" onclick="return toggleSidebar(event)" aria-label="Open navigation menu" aria-controls="sidebar" aria-expanded="false" title="Open or close navigation">
+        <i data-lucide="panel-left"></i>
+      </button>
       <button class="gov-brand-button gov-enterprise-brand" type="button" onclick="clearActiveProject(); showView('dashboard', null);" aria-label="Go to dashboard">
-        <img src="assets/dsr-logo.png" alt="Punjab Government Smart DSR Logo" class="gov-logo gov-logo-punjab" style="width:44px;height:44px;border-radius:50%;object-fit:cover;display:block;">
+        <img src="assets/dsr-logo.png" alt="Punjab Government Smart DSR Logo" class="gov-logo gov-logo-punjab">
+        <span class="gov-iit-logo" aria-label="IIT Ropar">IIT</span>
         <span class="gov-brand-copy">
           <span class="gov-brand-title">District Survey Report Automation Portal</span>
           <span class="gov-brand-subtitle">Sand Automation for Sand Mining</span>
