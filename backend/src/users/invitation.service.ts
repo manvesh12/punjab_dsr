@@ -22,12 +22,22 @@ export class InvitationService {
     const email = String(body?.email || "").trim().toLowerCase();
     if (!email) throw new ApiError(400, "INVITATION_EMAIL_REQUIRED", "Email is required");
     const role = normalizeRole(body?.role);
+    let districtId = null;
+    const rawDistrict = String(body?.district || "").trim();
+    if (rawDistrict) {
+      const d = await this.repository.findDistrictByName(rawDistrict);
+      districtId = d ? d.id.toString() : null;
+      if (!districtId) throw new ApiError(400, "INVALID_DISTRICT", `District '${rawDistrict}' not found`);
+    } else if (requiresDistrict(role)) {
+      throw new ApiError(400, "DISTRICT_REQUIRED", "District is required for every non-admin account.");
+    }
+    
     const profile = {
       fullName: String(body?.fullName || "").trim() || null,
       department: String(body?.department || "").trim() || null,
       designation: String(body?.designation || "").trim() || null,
       state: String(body?.state || "Punjab").trim() || "Punjab",
-      district: requiredDistrict(body?.district, role)?.toString() || null,
+      district: districtId,
       mobileNumber: String(body?.mobileNumber || "").trim() || null
     };
     if (await this.repository.findByEmail(email)) throw new ApiError(400, "USER_EMAIL_EXISTS", "User with this email already exists");
