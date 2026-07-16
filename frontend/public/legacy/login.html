@@ -553,41 +553,6 @@
       box-sizing: border-box;
     }
 
-    /* --- District Context Bar --- */
-    .dash-context-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #fff;
-      border: 1px solid #E2E8F0;
-      border-radius: 8px;
-      padding: 10px 18px;
-      margin-bottom: 24px;
-      gap: 16px;
-    }
-    .dash-context-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 13px;
-      font-weight: 600;
-      color: #475569;
-    }
-    .dash-context-select {
-      border: 1px solid #CBD5E1;
-      border-radius: 6px;
-      padding: 5px 12px;
-      font-size: 13px;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background: #F8FAFC;
-      color: #0F172A;
-      cursor: pointer;
-      outline: none;
-    }
-    .dash-context-right {
-      font-size: 12px;
-      color: #64748B;
-    }
 
     /* --- Hero Section --- */
     .dash-hero-section {
@@ -939,7 +904,6 @@
     html.dark #view-dashboard { background: #07111f; color: #CBD5E1; }
     html.dark .dash-panel-card,
     html.dark .dash-stat-card,
-    html.dark .dash-context-bar,
     html.dark .dash-hero-section { background: #0e1f35; border-color: rgba(255,255,255,0.08); }
     html.dark .dash-quick-access-btn { background: #0a1929; border-color: rgba(255,255,255,0.08); }
     html.dark .dash-quick-access-btn:hover { background: #0f2744; border-color: rgba(99,179,237,0.3); }
@@ -950,42 +914,10 @@
     html.dark .dash-stat-bar-bg { background: rgba(255,255,255,0.07); }
     html.dark .dash-page-footer { border-color: rgba(255,255,255,0.1); }
     html.dark .dash-footer-bottom { border-color: rgba(255,255,255,0.08); }
-    html.dark .dash-context-select { background: #0a1929; border-color: rgba(255,255,255,0.1); color: #F1F5F9; }
   </style>
 
   <div class="dash-content-wrapper">
 
-    <!-- District Context Bar -->
-    <div class="dash-context-bar">
-      <div class="dash-context-left">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
-        DISTRICT CONTEXT:
-        <select class="dash-context-select" id="dash-district-ctx" onchange="window.applyDistrictContext && applyDistrictContext(this.value)">
-          <option value="all">All Districts (Punjab)</option>
-          <option value="amritsar">Amritsar</option>
-          <option value="bathinda">Bathinda</option>
-          <option value="faridkot">Faridkot</option>
-          <option value="fatehgarh">Fatehgarh Sahib</option>
-          <option value="ferozepur">Ferozepur</option>
-          <option value="gurdaspur">Gurdaspur</option>
-          <option value="hoshiarpur">Hoshiarpur</option>
-          <option value="jalandhar">Jalandhar</option>
-          <option value="kapurthala">Kapurthala</option>
-          <option value="ludhiana">Ludhiana</option>
-          <option value="mansa">Mansa</option>
-          <option value="moga">Moga</option>
-          <option value="mohali">Mohali (SAS Nagar)</option>
-          <option value="muktsar">Sri Muktsar Sahib</option>
-          <option value="nawanshahr">Nawanshahr (SBS Nagar)</option>
-          <option value="pathankot">Pathankot</option>
-          <option value="patiala">Patiala</option>
-          <option value="rupnagar">Rupnagar (Ropar)</option>
-          <option value="sangrur">Sangrur</option>
-          <option value="tarn-taran">Tarn Taran</option>
-        </select>
-      </div>
-      <div class="dash-context-right">Active District Highlight: <strong>None</strong></div>
-    </div>
 
     <!-- Hero Section -->
     <div class="dash-hero-section">
