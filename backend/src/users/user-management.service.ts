@@ -12,7 +12,7 @@ export class UserManagementService {
   private async resolveDistrictId(value: unknown, role: string) {
     const raw = String(value || "").trim();
     if (!raw && requiresDistrict(role)) throw new ApiError(400, "DISTRICT_REQUIRED", "District is required for every non-admin account.");
-    if (!raw) return null;
+    if (!raw || raw.toUpperCase() === "ALL") return null;
     if (/^\d+$/.test(raw)) return BigInt(raw);
     const d = await this.repository.findDistrictByName(raw);
     if (!d) throw new ApiError(400, "INVALID_DISTRICT", `District '${raw}' not found`);

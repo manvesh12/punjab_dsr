@@ -24,7 +24,7 @@ export class InvitationService {
     const role = normalizeRole(body?.role);
     let districtId = null;
     const rawDistrict = String(body?.district || "").trim();
-    if (rawDistrict) {
+    if (rawDistrict && rawDistrict.toUpperCase() !== "ALL") {
       const d = await this.repository.findDistrictByName(rawDistrict);
       districtId = d ? d.id.toString() : null;
       if (!districtId) throw new ApiError(400, "INVALID_DISTRICT", `District '${rawDistrict}' not found`);
