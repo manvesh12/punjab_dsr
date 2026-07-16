@@ -395,6 +395,8 @@
       </button>
     </div>
 
+    <div id="topbar-title" style="flex:1; text-align:center; font-size:1.2rem; font-weight:700; color:var(--text-color); align-self:center; letter-spacing:1px; text-transform:uppercase;">DISTRICT SURVEY REPORT</div>
+
     <div class="gov-header-right gov-enterprise-actions">
       <div class="dash-menu-search gov-compact-search gov-enterprise-search">
         <i data-lucide="search"></i>
@@ -552,7 +554,6 @@
       padding: 24px 32px 80px 32px;
       box-sizing: border-box;
     }
-
 
     /* --- Hero Section --- */
     .dash-hero-section {
@@ -918,7 +919,6 @@
 
   <div class="dash-content-wrapper">
 
-
     <!-- Hero Section -->
     <div class="dash-hero-section">
       <span class="dash-hero-badge">DSR AUTOMATION PORTAL – PUNJAB</span>
@@ -1043,7 +1043,7 @@
           Quick Access
         </span>
       </div>
-      <div class="dash-quick-access-grid" style="grid-template-columns: repeat(4, 1fr); padding:14px 18px;">
+      <div class="dash-quick-access-grid" style="grid-template-columns: repeat(5, 1fr); padding:14px 18px;">
         <div onclick="newProjectModal && newProjectModal()" class="dash-quick-access-btn">
           <div class="dash-quick-icon-box" style="color:#3B82F6;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -1060,6 +1060,15 @@
           <div class="dash-quick-text-box">
             <span class="dash-quick-title">My Projects</span>
             <span class="dash-quick-subtitle">View &amp; edit</span>
+          </div>
+        </div>
+        <div onclick="showView && showView('replenishment-wizard', null); if(typeof initReplenishmentWizard === 'function') initReplenishmentWizard();" class="dash-quick-access-btn">
+          <div class="dash-quick-icon-box" style="color:#C49A58;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+          </div>
+          <div class="dash-quick-text-box">
+            <span class="dash-quick-title">Replenishment</span>
+            <span class="dash-quick-subtitle">Create study</span>
           </div>
         </div>
         <div onclick="showView && showView('generate', null)" class="dash-quick-access-btn">
@@ -1083,8 +1092,38 @@
       </div>
     </div>
 
-    <!-- Contact & Support -->
-    <section id="dash-contact-section" class="dash-panel-card" style="margin-bottom:0;">
+      <!-- About DSR -->
+      <section id="dash-about-dsr-section" class="dash-panel-card">
+        <div class="dash-panel-header">
+          <span class="dash-panel-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C49A58" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            About District Survey Report (DSR)
+          </span>
+        </div>
+        <div class="dash-panel-body">
+          <p style="font-size:14px; color:var(--text-soft); line-height:1.6; margin-bottom:12px;">
+            The District Survey Report (DSR) is prepared to identify the mineral resources and develop a master plan for sustainable mining. The DSR acts as a guiding document for sand mining operations in the district, ensuring environmental compliance and resource conservation in line with the EMGSM 2020 guidelines.
+          </p>
+        </div>
+      </section>
+
+      <!-- District Map -->
+      <section id="dash-district-map-section" class="dash-panel-card">
+        <div class="dash-panel-header">
+          <span class="dash-panel-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C49A58" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            Punjab Districts Overview
+          </span>
+        </div>
+        <div class="dash-panel-body">
+          <p style="font-size:14px; color:var(--text-soft); line-height:1.6; margin-bottom:12px;">
+            This section provides a geographical overview of all active and upcoming DSR projects across the state of Punjab. (Map integration coming soon).
+          </p>
+        </div>
+      </section>
+
+      <!-- Contact & Support -->
+      <section id="dash-contact-section" class="dash-panel-card" style="margin-bottom:0;">
       <div class="dash-panel-header">
         <span class="dash-panel-title">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C49A58" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.96a16 16 0 0 0 6.29 6.29l.51-.51a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 17z"></path></svg>
@@ -1883,9 +1922,9 @@
     </div>
     
     <div class="repl-toolbar-right">
-      <button id="repl-auto-fetch-btn" class="repl-btn repl-btn-ghost">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-        Sync DSR Data
+      <button id="repl-ai-draft-btn" class="repl-btn repl-btn-ghost">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        Generate AI Draft
       </button>
 
       <div class="repl-divider-y"></div>
@@ -1895,9 +1934,9 @@
         <span id="repl-validation-text">Validating...</span>
       </button>
 
-      <button id="repl-submit-btn" class="repl-btn repl-btn-primary">
+      <button id="repl-workflow-btn" class="repl-btn repl-btn-primary">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-        Approve & Submit
+        Approve Workflow Stage
       </button>
       
       <button id="repl-download-btn" class="repl-btn repl-btn-icon" title="Download Report">
@@ -1930,6 +1969,41 @@
       </div>
 
       <div id="repl-accordion-container" class="repl-accordion-area custom-scrollbar">
+        
+        <!-- Difference Engine UI (Injected/Static for Demo) -->
+        <div style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; margin-bottom:16px; overflow:hidden; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+          <div style="padding:12px 16px; background:#F8FAFC; border-bottom:1px solid #e5e7eb; font-weight:600; font-size:14px; color:#17324D; display:flex; justify-content:space-between; align-items:center;">
+            <span>Difference Detection Engine</span>
+            <span style="font-size:11px; padding:2px 8px; background:#DCFCE7; color:#16A34A; border-radius:12px;">Synced from Survey</span>
+          </div>
+          <div style="padding:16px;">
+            <table style="width:100%; border-collapse:collapse; font-size:13px; text-align:left;">
+              <thead>
+                <tr style="border-bottom:2px solid #e5e7eb;">
+                  <th style="padding:8px; font-weight:600; color:#475569;">Parameter</th>
+                  <th style="padding:8px; font-weight:600; color:#475569;">Approved DSR</th>
+                  <th style="padding:8px; font-weight:600; color:#475569;">Latest Survey</th>
+                  <th style="padding:8px; font-weight:600; color:#475569;">Difference</th>
+                </tr>
+              </thead>
+              <tbody id="repl-diff-body">
+                <tr style="border-bottom:1px solid #f1f5f9;">
+                  <td style="padding:8px;">Mining Area</td>
+                  <td style="padding:8px; color:#64748B;">45.2 Ha</td>
+                  <td style="padding:8px;">44.8 Ha</td>
+                  <td style="padding:8px; color:#DC2626; font-weight:600;">-0.4 Ha</td>
+                </tr>
+                <tr style="border-bottom:1px solid #f1f5f9;">
+                  <td style="padding:8px;">Sediment Thickness</td>
+                  <td style="padding:8px; color:#64748B;">2.5 m</td>
+                  <td style="padding:8px;">2.8 m</td>
+                  <td style="padding:8px; color:#16A34A; font-weight:600;">+0.3 m</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
         <!-- Accordion Cards Injected Here -->
       </div>
     </div>
@@ -1987,6 +2061,384 @@
   </div>
   
 </div>
+
+      <style>
+  /* Enterprise Wizard Styles */
+  #view-replenishment-wizard {
+    padding: 32px;
+    background: #F7F4EE;
+    min-height: calc(100vh - 64px);
+    font-family: 'Inter', sans-serif;
+  }
+  .wizard-container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    overflow: hidden;
+  }
+  .wizard-header {
+    background: #17324D;
+    color: #fff;
+    padding: 24px 32px;
+  }
+  .wizard-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+  }
+  .wizard-subtitle {
+    font-size: 14px;
+    color: #94A3B8;
+  }
+  .wizard-stepper {
+    display: flex;
+    justify-content: space-between;
+    padding: 24px 32px;
+    background: #F8FAFC;
+    border-bottom: 1px solid #E2E8F0;
+  }
+  .step-indicator {
+    flex: 1;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: #94A3B8;
+    position: relative;
+  }
+  .step-indicator::after {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background: #E2E8F0;
+    z-index: 1;
+  }
+  .step-indicator:last-child::after {
+    display: none;
+  }
+  .step-circle {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #E2E8F0;
+    color: #64748B;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 8px auto;
+    position: relative;
+    z-index: 2;
+  }
+  .step-indicator.active .step-circle {
+    background: #C49A58;
+    color: #17324D;
+  }
+  .step-indicator.active {
+    color: #17324D;
+  }
+  .wizard-content {
+    padding: 32px;
+    min-height: 300px;
+  }
+  .wizard-footer {
+    padding: 24px 32px;
+    border-top: 1px solid #E2E8F0;
+    display: flex;
+    justify-content: space-between;
+    background: #F8FAFC;
+  }
+  .wizard-btn {
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+  .wizard-btn-secondary {
+    background: #fff;
+    border: 1px solid #CBD5E1;
+    color: #475569;
+  }
+  .wizard-btn-primary {
+    background: #C49A58;
+    color: #17324D;
+  }
+  .form-group {
+    margin-bottom: 20px;
+  }
+  .form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #1E293B;
+  }
+  .form-select, .form-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #CBD5E1;
+    border-radius: 6px;
+    font-size: 14px;
+    background: #fff;
+  }
+  .diff-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+  }
+  .diff-table th, .diff-table td {
+    border: 1px solid #E2E8F0;
+    padding: 12px;
+    text-align: left;
+    font-size: 13px;
+  }
+  .diff-table th {
+    background: #F1F5F9;
+    font-weight: 600;
+  }
+  .diff-highlight-neg { color: #DC2626; font-weight: 600; background: #FEF2F2; }
+  .diff-highlight-pos { color: #16A34A; font-weight: 600; background: #F0FDF4; }
+</style>
+
+<div id="view-replenishment-wizard" class="view" style="display:none;">
+  <div class="wizard-container">
+    <div class="wizard-header">
+      <h1 class="wizard-title">New Replenishment Report</h1>
+      <div class="wizard-subtitle">Follow the workflow to inherit DSR data and generate a new study.</div>
+    </div>
+    
+    <div class="wizard-stepper">
+      <div class="step-indicator active" id="step-ind-1"><div class="step-circle">1</div>Setup</div>
+      <div class="step-indicator" id="step-ind-2"><div class="step-circle">2</div>Inherit</div>
+      <div class="step-indicator" id="step-ind-3"><div class="step-circle">3</div>Upload</div>
+      <div class="step-indicator" id="step-ind-4"><div class="step-circle">4</div>Generate</div>
+    </div>
+    
+    <div class="wizard-content">
+      <!-- Step 1: Select DSR & Details -->
+      <div id="wizard-step-1" class="wizard-step">
+        <h2 style="font-size: 18px; margin-bottom: 24px;">Step 1: Select District & Approved DSR</h2>
+        
+        <div class="form-group">
+          <label class="form-label">District</label>
+          <select class="form-select" id="wizard-district" disabled>
+            <option value="">Loading your district...</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Approved District Survey Report (DSR)</label>
+          <select class="form-select" id="wizard-parent-dsr">
+            <option value="">Select an Approved DSR to Inherit From</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Target River</label>
+          <input type="text" class="form-input" id="wizard-river" placeholder="e.g. Sutlej">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Mining Block / Stretch</label>
+          <input type="text" class="form-input" id="wizard-mining-block" placeholder="e.g. Block A, Stretch 1">
+        </div>
+      </div>
+      
+      <!-- Step 2: Review Inherited Data -->
+      <div id="wizard-step-2" class="wizard-step" style="display:none;">
+        <h2 style="font-size: 18px; margin-bottom: 24px;">Step 2: Review Inherited Information</h2>
+        <p style="font-size:14px; color:#64748B;">The following static information has been automatically inherited from the approved DSR and will be locked in this report.</p>
+        
+        <div style="background: #F8FAFC; padding: 16px; border: 1px solid #E2E8F0; border-radius: 6px; font-size:13px; margin-top:16px;">
+          <div style="margin-bottom:8px;"><strong>Drainage System:</strong> <span id="inherit-drainage">...</span></div>
+          <div style="margin-bottom:8px;"><strong>Geology:</strong> <span id="inherit-geology">...</span></div>
+          <div style="margin-bottom:8px;"><strong>Baseline Environment:</strong> <span id="inherit-baseline">...</span></div>
+          <div><strong>Original Average Bed Level:</strong> <span id="inherit-bedlevel">...</span></div>
+        </div>
+      </div>
+      
+      <!-- Step 3: Upload Latest Survey -->
+      <div id="wizard-step-3" class="wizard-step" style="display:none;">
+        <h2 style="font-size: 18px; margin-bottom: 24px;">Step 3: Upload Latest Survey Data</h2>
+        <p style="font-size:14px; color:#64748B;">Upload the latest DGPS, Drone, or DEM survey data. The Difference Detection Engine will compute replenishment automatically.</p>
+        
+        <div style="border: 2px dashed #CBD5E1; padding: 40px; text-align: center; border-radius: 8px; margin-bottom: 24px; background: #F8FAFC;">
+          <svg style="width: 48px; height: 48px; color: #94A3B8; margin-bottom: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+          <div style="font-size:14px; font-weight:600; color:#475569;">Drag and drop Survey Zip / KML here</div>
+          <div style="font-size:12px; color:#94A3B8; margin-top:4px;">or click to browse files</div>
+        </div>
+        
+        <h3 style="font-size: 15px; margin-bottom: 12px;">Difference Detection Preview</h3>
+        <table class="diff-table">
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Old Value (DSR)</th>
+              <th>New Value (Survey)</th>
+              <th>Difference</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>River Width</td>
+              <td>120m</td>
+              <td>118m</td>
+              <td class="diff-highlight-neg">-2.0m</td>
+            </tr>
+            <tr>
+              <td>Average Bed Level</td>
+              <td>210.5m</td>
+              <td>211.2m</td>
+              <td class="diff-highlight-pos">+0.7m (Replenished)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Step 4: AI Generation -->
+      <div id="wizard-step-4" class="wizard-step" style="display:none;">
+        <h2 style="font-size: 18px; margin-bottom: 24px;">Step 4: Generate AI Draft & Proceed</h2>
+        <p style="font-size:14px; color:#64748B;">The AI engine will now draft the Replenishment Report using the inherited DSR context and the detected survey differences.</p>
+        
+        <div style="display: flex; align-items: center; gap: 16px; padding: 24px; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; margin-top: 24px;">
+          <svg style="width: 32px; height: 32px; color: #3B82F6;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+          <div>
+            <div style="font-weight:600; color:#1E3A8A;">Ready to Generate Draft</div>
+            <div style="font-size:13px; color:#1E40AF; margin-top:4px;">Click 'Generate & Open Editor' to proceed to the main workspace and initiate the approval workflow.</div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+    
+    <div class="wizard-footer">
+      <button class="wizard-btn wizard-btn-secondary" id="wizard-btn-prev" disabled>Back</button>
+      <button class="wizard-btn wizard-btn-primary" id="wizard-btn-next">Next Step</button>
+      <button class="wizard-btn wizard-btn-primary" id="wizard-btn-finish" style="display:none;" onclick="openReplenishmentWorkspace()">Generate & Open Editor</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentWizardStep = 1;
+  const totalWizardSteps = 4;
+  
+  document.getElementById('wizard-btn-next').addEventListener('click', () => {
+    if (currentWizardStep < totalWizardSteps) {
+      document.getElementById(`wizard-step-${currentWizardStep}`).style.display = 'none';
+      document.getElementById(`step-ind-${currentWizardStep}`).classList.remove('active');
+      
+      currentWizardStep++;
+      
+      document.getElementById(`wizard-step-${currentWizardStep}`).style.display = 'block';
+      document.getElementById(`step-ind-${currentWizardStep}`).classList.add('active');
+      
+      document.getElementById('wizard-btn-prev').disabled = false;
+      
+      if (currentWizardStep === totalWizardSteps) {
+        document.getElementById('wizard-btn-next').style.display = 'none';
+        document.getElementById('wizard-btn-finish').style.display = 'inline-block';
+      }
+    }
+  });
+  
+  document.getElementById('wizard-btn-prev').addEventListener('click', () => {
+    if (currentWizardStep > 1) {
+      document.getElementById(`wizard-step-${currentWizardStep}`).style.display = 'none';
+      document.getElementById(`step-ind-${currentWizardStep}`).classList.remove('active');
+      
+      currentWizardStep--;
+      
+      document.getElementById(`wizard-step-${currentWizardStep}`).style.display = 'block';
+      document.getElementById(`step-ind-${currentWizardStep}`).classList.add('active');
+      
+      document.getElementById('wizard-btn-next').style.display = 'inline-block';
+      document.getElementById('wizard-btn-finish').style.display = 'none';
+      
+      if (currentWizardStep === 1) {
+        document.getElementById('wizard-btn-prev').disabled = true;
+      }
+    }
+  });
+
+  async function initReplenishmentWizard() {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    const districtSelect = document.getElementById('wizard-district');
+    const dsrSelect = document.getElementById('wizard-parent-dsr');
+    
+    try {
+      const meRes = await fetch('/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` } });
+      const user = await meRes.json();
+      if (user.districtId) {
+        districtSelect.innerHTML = `<option value="${user.districtId}">District #${user.districtId}</option>`;
+      } else {
+        districtSelect.innerHTML = `<option value="">State Wide (No District Selected)</option>`;
+      }
+      
+      const res = await fetch('/api/replenishment/approved-dsrs', { headers: { 'Authorization': `Bearer ${token}` } });
+      const dsrs = await res.json();
+      
+      if (dsrs && dsrs.length > 0) {
+        dsrSelect.innerHTML = dsrs.map(d => `<option value="${d.id}">${d.title || d.projectName} (${d.year}) - ${d.status}</option>`).join('');
+      } else {
+        dsrSelect.innerHTML = `<option value="">No Approved DSRs found for this district</option>`;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function openReplenishmentWorkspace() {
+    const token = localStorage.getItem('token');
+    const parentDsrId = document.getElementById('wizard-parent-dsr').value;
+    const river = document.getElementById('wizard-river').value;
+    const miningBlock = document.getElementById('wizard-mining-block').value;
+    
+    if (!parentDsrId) {
+      alert("Please select an Approved DSR first.");
+      return;
+    }
+    
+    const payload = {
+      parentDsrId,
+      river,
+      miningBlock,
+      title: `Replenishment Study - ${river} - ${miningBlock}`,
+      surveyData: { testSurvey: true }
+    };
+    
+    try {
+      const res = await fetch(`/api/projects/${parentDsrId}/replenishment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      
+      if (data && data.id) {
+        if (typeof showView === 'function') {
+          showView('replenishment');
+          alert("Created Replenishment Study successfully! Opening editor...");
+        }
+      } else {
+        alert("Failed to create. Check console.");
+      }
+    } catch(e) {
+      alert("Error creating report");
+      console.error(e);
+    }
+  }
+</script>
 
               <div id="view-graphs" class="view">
           <div class="header-row">
@@ -5045,15 +5497,29 @@
     }
   }
 
-  // Called every time settings view is opened
+  // Called every time settings view is opened (by showView or directly)
   function initSettingsView() {
+    const isAdmin = typeof hasAdminAccess === 'function' && hasAdminAccess();
+    
+    const generalTabBtn = document.getElementById('tab-btn-general');
+    if (generalTabBtn) {
+      generalTabBtn.style.display = isAdmin ? 'flex' : 'none';
+    }
+    
+    const usersTabBtn = document.getElementById('tab-btn-users');
+    if (usersTabBtn) {
+      usersTabBtn.style.display = isAdmin ? 'flex' : 'none';
+    }
+
+    // Always start on profile
     switchSettingsTab('profile');
     setTimeout(installNoticeLanguagePatch, 0);
   }
   window.initSettingsView = initSettingsView;
 
   document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(initSettingsView, 150); // Defer so S.user is available
+    // Initial load — permissions may not be ready yet, so defer
+    setTimeout(initSettingsView, 150);
   });
 </script>
 
@@ -5443,7 +5909,7 @@
           <div class="field"><label>Department</label><input type="text" id="invite-single-department" placeholder="Department"></div>
           <div class="field"><label>Designation</label><input type="text" id="invite-single-designation" placeholder="Designation"></div>
           <div class="field"><label>State</label><input type="text" id="invite-single-state" placeholder="Punjab" value="Punjab"></div>
-          <div class="field"><label>District</label><input type="text" id="invite-single-district" placeholder="District"></div>
+          <div class="field"><label>District</label><select id="invite-single-district"></select></div>
           <div class="field"><label>Mobile Number (Optional)</label><input type="text" id="invite-single-mobile" placeholder="10-digit mobile number"></div>
           <div class="field"><label>Role</label>
             <select id="invite-single-role">

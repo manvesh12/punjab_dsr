@@ -728,39 +728,7 @@ const pdfPreview = {
       y += lineHeight;
     });
   },
-  getFrontMatterPages() {
-    const pages = [];
-    const pdfs = S.uploadedPDFs || {};
-    this.FM_ORDER.forEach(type => {
-      const sectionLabel = this.FM_LABELS[type] || type;
-      const uploaded = pdfs[type];
-      if (uploaded && uploaded.length) {
-        uploaded.forEach((img, idx) => {
-          pages.push({
-            src: img,
-            label: uploaded.length > 1 ? `${sectionLabel} - Page ${idx + 1}` : sectionLabel
-          });
-        });
-        return;
-      }
-      if (type === 'cover') {
-        pages.push({ src: this.renderCoverPageCanvas(), label: sectionLabel, generated: true });
-      } else if (type === 'pref' && S.frontMatter && S.frontMatter.preface) {
-        pages.push({
-          src: this.renderTextPageCanvas('PREFACE', S.frontMatter.preface, 'District Survey Report'),
-          label: sectionLabel,
-          generated: true
-        });
-      } else if (type === 'ack' && S.frontMatter && S.frontMatter.acknowledgement) {
-        pages.push({
-          src: this.renderTextPageCanvas('ACKNOWLEDGEMENT', S.frontMatter.acknowledgement, 'District Survey Report'),
-          label: sectionLabel,
-          generated: true
-        });
-      }
-    });
-    return pages;
-  },
+
   getFrontMatterPages() {
     const pages = [];
     const pdfs = S.uploadedPDFs || {};

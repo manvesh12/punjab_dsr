@@ -145,7 +145,7 @@ function editUserScope(userId) {
   const user = (window.cachedUsers || []).find(u => u.id === userId);
   if (!user) return;
   document.getElementById('edit-scope-user-id').value = userId;
-  hydrateDistrictSelect('edit-scope-district', false);
+  hydrateDistrictSelect('edit-scope-district', true);
   const districtSelect = document.getElementById('edit-scope-district');
   districtSelect.insertAdjacentHTML('afterbegin', '<option value="">Global / State Admin only</option>');
   districtSelect.value = user.district || '';
