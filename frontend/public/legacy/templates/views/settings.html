@@ -521,12 +521,21 @@
     }
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    // Check if user is admin to show admin tabs
-    if (typeof hasAdminAccess === 'function' && hasAdminAccess()) {
-      document.querySelectorAll('.admin-only-tab').forEach(el => el.style.display = 'flex');
-    }
-    switchSettingsTab('profile'); // Default to profile tab
+  // Called every time settings view is opened (by showView or directly)
+  function initSettingsView() {
+    // Show admin-only tabs only if user has admin access
+    const isAdmin = typeof hasAdminAccess === 'function' && hasAdminAccess();
+    document.querySelectorAll('.admin-only-tab').forEach(el => {
+      el.style.display = isAdmin ? 'flex' : 'none';
+    });
+    // Always start on profile tab
+    switchSettingsTab('profile');
     setTimeout(installNoticeLanguagePatch, 0);
+  }
+  window.initSettingsView = initSettingsView;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Initial load — permissions may not be ready yet, so defer
+    setTimeout(initSettingsView, 150);
   });
 </script>
