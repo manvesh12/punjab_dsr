@@ -133,7 +133,7 @@ async function submitUserScope() {
 window.submitUserScope = submitUserScope;
 
 function openAddUserPrompt() {
-  hydrateDistrictSelect('invite-single-district', false);
+  hydrateDistrictSelect('invite-single-district', true);
   openModal('modal-invite-user');
 }
 
