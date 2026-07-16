@@ -28,9 +28,17 @@ async function main() {
 
   // Create Districts
   console.log('Creating Districts...');
-  const distLdh = await prisma.district.create({ data: { name: 'Ludhiana', code: 'LDH', stateId: state.id }});
-  const distAmr = await prisma.district.create({ data: { name: 'Amritsar', code: 'AMR', stateId: state.id }});
-  const distMhl = await prisma.district.create({ data: { name: 'SAS Nagar', code: 'SAS', stateId: state.id }});
+  const districts = ['Barnala', 'Bathinda', 'Faridkot', 'Fatehgarh Sahib', 'Fazilka', 'Ferozepur', 'Gurdaspur', 'Hoshiarpur', 'Jalandhar', 'Kapurthala', 'Malerkotla', 'Mansa', 'Moga', 'Pathankot', 'Patiala', 'Rupnagar', 'Sahibzada Ajit Singh Nagar', 'Sangrur', 'Shaheed Bhagat Singh Nagar', 'Sri Muktsar Sahib', 'Tarn Taran', 'Ludhiana', 'Amritsar'];
+  const districtMap: any = {};
+  for (let i = 0; i < districts.length; i++) {
+    const d = districts[i];
+    districtMap[d] = await prisma.district.create({ 
+      data: { name: d, code: 'PB' + String(i + 1).padStart(3, '0'), stateId: state.id } 
+    });
+  }
+  const distLdh = districtMap['Ludhiana'];
+  const distAmr = districtMap['Amritsar'];
+  const distMhl = districtMap['Sahibzada Ajit Singh Nagar'];
 
   // Create Modules and Permissions
   console.log('Creating Modules & Permissions...');
