@@ -1,17 +1,18 @@
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   PLATES SECTION MANAGEMENT
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 function renderPlates() {
   const el = document.getElementById('plate-list');
   if (!el) return;
   ensureProjectSectionDefaults();
   if (!S.plates.length) {
-    el.innerHTML = '<div class="empty-state"><span class="empty-icon">ðŸ—‚ï¸</span><h3>No plates added yet</h3><p>Click "Add Plate" to setup maps, graphs, and images</p></div>';
+    el.innerHTML = '<div class="empty-state"><span class="empty-icon">📂</span><h3>No plates added yet</h3><p>Click "Add Plate" to setup maps, graphs, and images</p></div>';
     return;
   }
+  
+  const sourceSections = Array.isArray(S.sourceSections) ? S.sourceSections : [];
+  
   el.innerHTML = S.plates.map((p, i) => {
     let fileInfoHTML = '';
-    const sourceSection = (S.sourceSections || []).find(section => section && (section.file === p.fileName || section.title === p.name));
+    const sourceSection = sourceSections.find(section => section && (section.file === p.fileName || section.title === p.name));
     const sourceUrl = p.sourceUrl || sourceSection?.url || '';
     if (p.fileName || sourceUrl) {
       fileInfoHTML = `
@@ -20,7 +21,7 @@ function renderPlates() {
             <div class="file-icon" style="background:var(--teal-lt); color:var(--teal); padding:6px; border-radius:var(--r-xs); font-size:14px;">PDF</div>
             <div style="line-height:1.2;">
               <div style="font-size:11.5px; font-weight:600; color:var(--text);">${p.fileName || sourceSection?.file || 'Imported plate PDF'}</div>
-              <div style="font-size:9.5px; color:var(--text-faint);">${p.fileSize || ''} Â· ${p.pages ? p.pages.length : 0} Page(s)</div>
+              <div style="font-size:9.5px; color:var(--text-faint);">${p.fileSize || ''} · ${p.pages ? p.pages.length : (sourceSection?.pageCount || 0)} Page(s)</div>
             </div>
           </div>
           <div style="display:flex; gap:6px;">
@@ -35,7 +36,7 @@ function renderPlates() {
       fileInfoHTML = `
         <div>
           <label class="btn btn-xs btn-outline" style="cursor:pointer;">
-            ðŸ“Ž Upload PDF/Image <input type="file" accept=".pdf,image/*" hidden onchange="handlePlateUpload(event,${p.id})">
+            📎 Upload PDF/Image <input type="file" accept=".pdf,image/*" hidden onchange="handlePlateUpload(event,${p.id})">
           </label>
         </div>`;
     }
@@ -43,14 +44,21 @@ function renderPlates() {
     <div class="chapter-item">
       <div class="ch-num" style="background:var(--teal)">P${i + 1}</div>
       <div class="ch-body">
-        <input class="ch-name-input" value="${p.name}" oninput="updatePlateField(${i},'name',this.value)" placeholder="Plate Name">
-        <textarea class="ch-summary" rows="2" oninput="updatePlateField(${i},'summary',this.value)" placeholder="Plate Description...">${p.summary}</textarea>
+        <input class="ch-name-input" value="${p.name ? p.name.replace(/"/g, '&quot;') : ''}" oninput="updatePlateField(${i},'name',this.value)" placeholder="Plate Name">
+        <textarea class="ch-summary" rows="2" oninput="updatePlateField(${i},'summary',this.value)" placeholder="Plate Description...">${p.summary || ''}</textarea>
         <div style="margin-top:8px; display:flex; flex-direction:column; gap:6px;">
           ${fileInfoHTML}
         </div>
       </div>
       <div style="display:flex; gap:5px; flex-shrink:0">
-        ${i > 0 ? `<button class="btn btn-xs btn-outline" onclick="movePlate(${i},-1)">â†‘</button>` : ''}
+        ${i > 0 ? `<button class="btn btn-xs btn-outline" onclick="movePlate(${i},-1)">↑</button>` : ''}
+        ${i < S.plates.length - 1 ? `<button class="btn btn-xs btn-outline" onclick="movePlate(${i},1)">↓</button>` : ''}
+        <button class="btn btn-xs btn-danger" onclick="deletePlateReq(${p.id})">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function addPlate() {e(${i},-1)">â†‘</button>` : ''}
         ${i < S.plates.length - 1 ? `<button class="btn btn-xs btn-outline" onclick="movePlate(${i},1)">â†“</button>` : ''}
         <button class="btn btn-xs btn-danger" onclick="deletePlateReq(${p.id})">âœ•</button>
       </div>

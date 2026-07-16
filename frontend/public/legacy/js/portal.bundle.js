@@ -4848,19 +4848,20 @@ window.moveChapter = moveChapter;
 
 /* js/modules/plates.js */
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   PLATES SECTION MANAGEMENT
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 function renderPlates() {
   const el = document.getElementById('plate-list');
   if (!el) return;
   ensureProjectSectionDefaults();
   if (!S.plates.length) {
-    el.innerHTML = '<div class="empty-state"><span class="empty-icon">ðŸ—‚ï¸</span><h3>No plates added yet</h3><p>Click "Add Plate" to setup maps, graphs, and images</p></div>';
+    el.innerHTML = '<div class="empty-state"><span class="empty-icon">📂</span><h3>No plates added yet</h3><p>Click "Add Plate" to setup maps, graphs, and images</p></div>';
     return;
   }
+  
+  const sourceSections = Array.isArray(S.sourceSections) ? S.sourceSections : [];
+  
   el.innerHTML = S.plates.map((p, i) => {
     let fileInfoHTML = '';
-    const sourceSection = (S.sourceSections || []).find(section => section && (section.file === p.fileName || section.title === p.name));
+    const sourceSection = sourceSections.find(section => section && (section.file === p.fileName || section.title === p.name));
     const sourceUrl = p.sourceUrl || sourceSection?.url || '';
     if (p.fileName || sourceUrl) {
       fileInfoHTML = `
@@ -4869,7 +4870,7 @@ function renderPlates() {
             <div class="file-icon" style="background:var(--teal-lt); color:var(--teal); padding:6px; border-radius:var(--r-xs); font-size:14px;">PDF</div>
             <div style="line-height:1.2;">
               <div style="font-size:11.5px; font-weight:600; color:var(--text);">${p.fileName || sourceSection?.file || 'Imported plate PDF'}</div>
-              <div style="font-size:9.5px; color:var(--text-faint);">${p.fileSize || ''} Â· ${p.pages ? p.pages.length : 0} Page(s)</div>
+              <div style="font-size:9.5px; color:var(--text-faint);">${p.fileSize || ''} · ${p.pages ? p.pages.length : (sourceSection?.pageCount || 0)} Page(s)</div>
             </div>
           </div>
           <div style="display:flex; gap:6px;">
@@ -4884,7 +4885,7 @@ function renderPlates() {
       fileInfoHTML = `
         <div>
           <label class="btn btn-xs btn-outline" style="cursor:pointer;">
-            ðŸ“Ž Upload PDF/Image <input type="file" accept=".pdf,image/*" hidden onchange="handlePlateUpload(event,${p.id})">
+            📎 Upload PDF/Image <input type="file" accept=".pdf,image/*" hidden onchange="handlePlateUpload(event,${p.id})">
           </label>
         </div>`;
     }
@@ -4892,14 +4893,21 @@ function renderPlates() {
     <div class="chapter-item">
       <div class="ch-num" style="background:var(--teal)">P${i + 1}</div>
       <div class="ch-body">
-        <input class="ch-name-input" value="${p.name}" oninput="updatePlateField(${i},'name',this.value)" placeholder="Plate Name">
-        <textarea class="ch-summary" rows="2" oninput="updatePlateField(${i},'summary',this.value)" placeholder="Plate Description...">${p.summary}</textarea>
+        <input class="ch-name-input" value="${p.name ? p.name.replace(/"/g, '&quot;') : ''}" oninput="updatePlateField(${i},'name',this.value)" placeholder="Plate Name">
+        <textarea class="ch-summary" rows="2" oninput="updatePlateField(${i},'summary',this.value)" placeholder="Plate Description...">${p.summary || ''}</textarea>
         <div style="margin-top:8px; display:flex; flex-direction:column; gap:6px;">
           ${fileInfoHTML}
         </div>
       </div>
       <div style="display:flex; gap:5px; flex-shrink:0">
-        ${i > 0 ? `<button class="btn btn-xs btn-outline" onclick="movePlate(${i},-1)">â†‘</button>` : ''}
+        ${i > 0 ? `<button class="btn btn-xs btn-outline" onclick="movePlate(${i},-1)">↑</button>` : ''}
+        ${i < S.plates.length - 1 ? `<button class="btn btn-xs btn-outline" onclick="movePlate(${i},1)">↓</button>` : ''}
+        <button class="btn btn-xs btn-danger" onclick="deletePlateReq(${p.id})">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function addPlate() {e(${i},-1)">â†‘</button>` : ''}
         ${i < S.plates.length - 1 ? `<button class="btn btn-xs btn-outline" onclick="movePlate(${i},1)">â†“</button>` : ''}
         <button class="btn btn-xs btn-danger" onclick="deletePlateReq(${p.id})">âœ•</button>
       </div>
@@ -18509,12 +18517,12 @@ class ReplenishmentModule {
   async loadProject(projectId) {
     try {
       if (this.titleEl) this.titleEl.textContent = "Loading...";
-      const res = await window.api.get(`/projects/${projectId}/replenishment`);
-      if (res && res.data && res.data.length > 0) {
-        window.S.activeReplenishment = res.data[0];
+      const res = await apiFetch(`/projects/${projectId}/replenishment`);
+      if (res && res.length > 0) {
+        window.S.activeReplenishment = res[0];
       } else {
-        const createRes = await window.api.post(`/projects/${projectId}/replenishment`, {});
-        window.S.activeReplenishment = createRes.data;
+        const createRes = await apiFetch(`/projects/${projectId}/replenishment`, { method: 'POST', body: JSON.stringify({}) });
+        window.S.activeReplenishment = createRes;
       }
       if (this.titleEl) this.titleEl.textContent = window.S.activeReplenishment.title || `Project ${projectId}`;
     } catch (err) {
@@ -18527,8 +18535,8 @@ class ReplenishmentModule {
     try {
       if (this.autoSaveEl) this.autoSaveEl.innerHTML = `<span style="color:#3b82f6;">Syncing Final DSR...</span>`;
       const id = window.S.activeReplenishment.id;
-      const res = await window.api.post(`/replenishment/${id}/fetch-final-dsr`, {});
-      window.S.activeReplenishment = res.data;
+      const res = await apiFetch(`/replenishment/${id}/fetch-final-dsr`, { method: 'POST', body: JSON.stringify({}) });
+      window.S.activeReplenishment = res;
       if (window.replenishmentWorkspace) window.replenishmentWorkspace.render();
       if (window.replenishmentPreview) window.replenishmentPreview.render();
       if (this.autoSaveEl) this.autoSaveEl.innerHTML = `<span style="color:#16a34a;">Sync Complete</span>`;
@@ -18541,10 +18549,10 @@ class ReplenishmentModule {
   async handleSubmit() {
     try {
       const id = window.S.activeReplenishment.id;
-      await window.api.post(`/replenishment/${id}/workflow`, { action: "PENDING_SDO_REVIEW" });
+      await apiFetch(`/replenishment/${id}/workflow`, { method: 'POST', body: JSON.stringify({ action: "PENDING_SDO_REVIEW" }) });
       alert("Report submitted successfully for review!");
     } catch (err) {
-      alert("Failed to submit: " + (err.response?.data?.message || err.message));
+      alert("Failed to submit: " + (err.message || "Error"));
     }
   }
 
@@ -18596,7 +18604,7 @@ class ReplenishmentModule {
     this.saveTimeout = setTimeout(async () => {
       try {
         const id = window.S.activeReplenishment.id;
-        await window.api.put(`/replenishment/${id}/state`, { reportState: state });
+        await apiFetch(`/replenishment/${id}/state`, { method: 'PUT', body: JSON.stringify({ reportState: state }) });
         if (this.autoSaveEl) this.autoSaveEl.innerHTML = `<svg style="width:16px;height:16px;color:#16a34a;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><span style="color:#16a34a;">All changes saved</span>`;
       } catch (err) {
         if (this.autoSaveEl) this.autoSaveEl.innerHTML = `<span style="color:#ef4444;">Save Failed (Offline)</span>`;
