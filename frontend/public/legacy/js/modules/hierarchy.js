@@ -298,8 +298,8 @@ function hasReviewAccess() {
 }
 function hasAdminAccess() {
   if (typeof S === 'undefined' || !S || !S.user) return false;
-  const role = getBackendRole();
-  return hasPermission('ADMIN') || role === 'ADMIN' || role === 'STATE_ADMIN';
+  const role = getBackendRole() || S.user.role || '';
+  return role.includes('ADMIN') || hasPermission('ADMIN');
 }
 function setLockedElement(el, locked, label) {
   if (!el) return;

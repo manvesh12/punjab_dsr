@@ -32,7 +32,10 @@ async function renderUsers() {
       return `
         <tr>
           <td>
-            <div style="font-weight:700;">${user.email || user.username}</div>
+            <div style="font-weight:700; display:flex; align-items:center; gap:4px;">
+              ${user.email || user.username}
+              <i data-lucide="check-circle-2" style="width:14px;height:14px;color:#10B981;" title="Email Sent"></i>
+            </div>
             <div style="font-size:11px;color:var(--text-soft);">${user.fullName || ''}</div>
           </td>
           <td>${renderRoleSelect(user)}</td>

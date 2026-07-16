@@ -1076,7 +1076,8 @@ function hasReviewAccess() {
 }
 function hasAdminAccess() {
   if (typeof S === 'undefined' || !S || !S.user) return false;
-  return hasPermission('USER_VIEW') && hasPermission('ROLE_VIEW');
+  const role = S.user.role || '';
+  return role.includes('ADMIN') || (hasPermission('USER_VIEW') && hasPermission('ROLE_VIEW'));
 }
 function setLockedElement(el, locked, label) {
   if (!el) return;
