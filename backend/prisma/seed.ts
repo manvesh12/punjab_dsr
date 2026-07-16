@@ -12,10 +12,10 @@ async function main() {
   await prisma.report.deleteMany();
   await prisma.replenishmentStudy.deleteMany();
   await prisma.project.deleteMany();
-  await prisma.user.deleteMany(); 
+  await prisma.user.deleteMany();
   await prisma.rolePermission.deleteMany();
-  await prisma.role.deleteMany(); 
-  await prisma.permission.deleteMany(); 
+  await prisma.role.deleteMany();
+  await prisma.permission.deleteMany();
   await prisma.module.deleteMany();
   await prisma.district.deleteMany();
   await prisma.state.deleteMany();
@@ -28,17 +28,9 @@ async function main() {
 
   // Create Districts
   console.log('Creating Districts...');
-  const districts = ['Barnala', 'Bathinda', 'Faridkot', 'Fatehgarh Sahib', 'Fazilka', 'Ferozepur', 'Gurdaspur', 'Hoshiarpur', 'Jalandhar', 'Kapurthala', 'Malerkotla', 'Mansa', 'Moga', 'Pathankot', 'Patiala', 'Rupnagar', 'Sahibzada Ajit Singh Nagar', 'Sangrur', 'Shaheed Bhagat Singh Nagar', 'Sri Muktsar Sahib', 'Tarn Taran', 'Ludhiana', 'Amritsar'];
-  const districtMap: any = {};
-  for (let i = 0; i < districts.length; i++) {
-    const d = districts[i];
-    districtMap[d] = await prisma.district.create({ 
-      data: { name: d, code: 'PB' + String(i + 1).padStart(3, '0'), stateId: state.id } 
-    });
-  }
-  const distLdh = districtMap['Ludhiana'];
-  const distAmr = districtMap['Amritsar'];
-  const distMhl = districtMap['Sahibzada Ajit Singh Nagar'];
+  const distLdh = await prisma.district.create({ data: { name: 'Ludhiana', code: 'LDH', stateId: state.id } });
+  const distAmr = await prisma.district.create({ data: { name: 'Amritsar', code: 'AMR', stateId: state.id } });
+  const distMhl = await prisma.district.create({ data: { name: 'SAS Nagar', code: 'SAS', stateId: state.id } });
 
   // Create Modules and Permissions
   console.log('Creating Modules & Permissions...');
@@ -128,7 +120,7 @@ async function main() {
       }
     }
   });
-  
+
   const roleGeologist = await prisma.role.create({
     data: {
       name: 'GEOLOGIST',
@@ -200,7 +192,7 @@ async function main() {
   const usersToCreate = [
     { username: 'super.admin', name: 'Paramjit Singh', email: 'paramjit.singh@punjab.gov.in', role: 'SUPER_ADMIN' },
     { username: 'state.admin', name: 'Manpreet Kaur', email: 'manpreet.kaur@punjab.gov.in', role: 'STATE_ADMIN' },
-    
+
     // Ludhiana
     { username: 'admin.ldh', name: 'District Admin LDH', email: 'admin.ldh@punjab.gov.in', role: 'DISTRICT_ADMIN', dist: distLdh.id },
     { username: 'officer1.ldh', name: 'Officer One LDH', email: 'officer1.ldh@punjab.gov.in', role: 'DISTRICT_OFFICER', dist: distLdh.id },

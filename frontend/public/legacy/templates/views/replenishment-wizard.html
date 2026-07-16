@@ -346,16 +346,16 @@
       parentDsrId,
       river,
       miningBlock,
-      title: \`Replenishment Study - \${river} - \${miningBlock}\`,
+      title: `Replenishment Study - ${river} - ${miningBlock}`,
       surveyData: { testSurvey: true }
     };
     
     try {
-      const res = await fetch(\`/api/projects/\${parentDsrId}/replenishment\`, {
+      const res = await fetch(`/api/projects/${parentDsrId}/replenishment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': \`Bearer \${token}\`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(payload)
       });

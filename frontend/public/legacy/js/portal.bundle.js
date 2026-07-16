@@ -1018,15 +1018,22 @@ function getRoleRule() {
 }
 function hasPermission(permission) {
   const perms = S?.permissions || [];
-  return perms.includes(permission);
+  if (perms.includes(permission)) return true;
+  const rule = getRoleRule();
+  if (permission === 'UPLOAD') return !!rule.upload;
+  if (permission === 'REVIEW') return !!rule.review;
+  if (permission === 'ADMIN') return !!rule.admin;
+  return false;
 }
 function hasModuleAccess(viewId) {
-  if (!viewId) return true;
-  if (viewId === 'users') return hasAdminAccess(); // Only user management is admin-only
-  if (viewId === 'settings') return true; // All users can access profile/settings
-  if (viewId === 'audit-logs') return hasPermission('REPORT_VIEW');
-  if (viewId === 'model-dsr') return hasPermission('PROJECT_VIEW');
-  return true; // Component-level hiding applies
+    if (!viewId) return true;
+    if (viewId === 'users') return hasAdminAccess();
+    if (viewId === 'settings') return true;
+    if (viewId === 'audit-logs') return hasPermission('REPORT_VIEW');
+    if (viewId === 'model-dsr') return true;
+  const rule = getRoleRule();
+  if (rule.modules?.includes('*')) return true;
+  return rule.modules?.includes(viewId);
 }
 function getFirstAllowedView() {
   const preferredViews = [
@@ -1055,11 +1062,20 @@ function showUnauthorizedAccessError() {
 }
 function canEditView(viewId) {
   if (typeof isActivePhaseLocked === 'function' && isActivePhaseLocked()) return false;
+  const role = getBackendRole();
+  const rule = getRoleRule();
+  if (role === 'ADMIN' || role === 'OFFICER' || role === 'DATA_ENTRY') return true;
+  if (rule.readOnly) return false;
+  if (!rule.upload) return false;
   if (viewId === 'dashboard' || viewId === 'projects' || viewId === 'workflow' || viewId === 'history') return false;
-  return hasPermission('PROJECT_EDIT');
+  return hasModuleAccess(viewId);
 }
 function canEditChapter(chapterNo) {
-  return hasPermission('PROJECT_EDIT');
+  const role = getBackendRole();
+  const rule = getRoleRule();
+  if (role === 'ADMIN' || role === 'OFFICER' || role === 'DATA_ENTRY') return true;
+  if (rule.chapters === 'all') return true;
+  return Array.isArray(rule.chapters) && rule.chapters.includes(Number(chapterNo));
 }
 function hasWriteAccess() {
   if (typeof S === 'undefined' || !S || !S.user) return false;
@@ -1072,12 +1088,12 @@ function isUserReadOnly() {
 }
 function hasReviewAccess() {
   if (typeof S === 'undefined' || !S || !S.user) return false;
-  return hasPermission('REPORT_APPROVE');
+  return hasPermission('REVIEW');
 }
 function hasAdminAccess() {
   if (typeof S === 'undefined' || !S || !S.user) return false;
-  const role = (S.user.backendRole || S.user.role || '').toUpperCase();
-  return role.includes('ADMIN') || (hasPermission('USER_VIEW') && hasPermission('ROLE_VIEW'));
+  const role = (getBackendRole() || S.user.role || '').toUpperCase();
+  return role.includes('ADMIN') || hasPermission('ADMIN');
 }
 function setLockedElement(el, locked, label) {
   if (!el) return;
@@ -2362,9 +2378,6 @@ function showView(id, btn, push = true) {
   const el = document.getElementById('view-' + id);
   if (el) {
     el.classList.add('active');
-    if (id === 'settings' && typeof window.initSettingsView === 'function') {
-      setTimeout(window.initSettingsView, 50); // Run after user data is ready
-    }
     if (id === 'replenishment' && window.replenishmentApp) {
       window.replenishmentApp.init(window.S?.activeProject?.id || 'demo_proj');
     }
@@ -4002,7 +4015,7 @@ window.downloadProjectFinalPDF = downloadProjectFinalPDF;
 window.initiateNextPhase = initiateNextPhase;
 window.createNextPhase = createNextPhase;
 async function openProject(id) {
-  S.activeProject = S.projects.find(p=>String(p.id)===String(id));
+  S.activeProject = S.projects.find(p=>p.id===id);
   if (!S.activeProject) return;
   sessionStorage.setItem('dsr_active_project_id', id);
   if (typeof resetProjectWorkingState === 'function') {
@@ -4301,7 +4314,7 @@ function deleteProject(id, event) {
     toast('Permission Denied: Only Administrators can delete projects.', 'error');
     return;
   }
-  const proj = S.projects.find(p => String(p.id) === String(id));
+  const proj = S.projects.find(p => p.id === id);
   if (!proj) return;
   customConfirm(
     `Permanently delete "${proj.title}" (${proj.district} District)? This action cannot be undone.`,
@@ -4311,8 +4324,8 @@ function deleteProject(id, event) {
         await apiFetch(`/projects/${id}`, {
           method: 'DELETE'
         });
-        const wasActive = S.activeProject && String(S.activeProject.id) === String(id);
-        S.projects = S.projects.filter(p => String(p.id) !== String(id));
+        const wasActive = S.activeProject && S.activeProject.id === id;
+        S.projects = S.projects.filter(p => p.id !== id);
         if (wasActive) {
           clearActiveProject();
         }
@@ -5993,7 +6006,10 @@ async function renderUsers() {
       return `
         <tr>
           <td>
-            <div style="font-weight:700;">${user.email || user.username}</div>
+            <div style="font-weight:700; display:flex; align-items:center; gap:4px;">
+              ${user.email || user.username}
+              <i data-lucide="check-circle-2" style="width:14px;height:14px;color:#10B981;" title="Email Sent"></i>
+            </div>
             <div style="font-size:11px;color:var(--text-soft);">${user.fullName || ''}</div>
           </td>
           <td>${renderRoleSelect(user)}</td>
@@ -6032,15 +6048,56 @@ async function updateUserRole(userId, role) {
 }
 async function toggleUserActive(userId, active) {
   try {
-    await apiFetch(`/users/${userId}/active`, {
+    const updatedUser = await apiFetch(`/users/${userId}/active`, {
       method: 'PATCH',
       body: JSON.stringify({ active })
     });
     toast(active ? 'User enabled' : 'User disabled', 'success');
+    
+    if (window.cachedUsers) {
+      const idx = window.cachedUsers.findIndex(u => u.id === userId);
+      if (idx !== -1) {
+        window.cachedUsers[idx].active = active;
+        renderUsersFromCache();
+        return;
+      }
+    }
     renderUsers();
   } catch (e) {
     toast(e.message || 'Failed to update user', 'error');
   }
+}
+
+function renderUsersFromCache() {
+  const users = window.cachedUsers || [];
+  const tbody = document.getElementById('users-table-body');
+  if (!tbody) return;
+  tbody.innerHTML = users.map(user => {
+    const perms = user.permissions || [];
+    const activeLabel = user.active ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-gray">Inactive</span>';
+    return `
+      <tr>
+        <td>
+          <div style="font-weight:700; display:flex; align-items:center; gap:4px;">
+            ${user.email || user.username}
+            <i data-lucide="check-circle-2" style="width:14px;height:14px;color:#10B981;" title="Email Sent"></i>
+          </div>
+          <div style="font-size:11px;color:var(--text-soft);">${user.fullName || ''}</div>
+        </td>
+        <td>${renderRoleSelect(user)}</td>
+        <td>${usersBadge(perms.includes('UPLOAD'))}</td>
+        <td>${usersBadge(perms.includes('REVIEW'))}</td>
+        <td>${user.accessLabel || '-'}</td>
+        <td>${formatUserScope(user)}</td>
+        <td>${activeLabel}</td>
+        <td style="display:flex;gap:6px;align-items:center;">
+          <button class="btn btn-xs btn-outline" onclick="editUserScope(${user.id})">Scope</button>
+          <button class="btn btn-xs ${user.active ? 'btn-danger' : 'btn-saffron'}" onclick="toggleUserActive(${user.id}, ${!user.active})">${user.active ? 'Disable' : 'Enable'}</button>
+          ${!user.active ? `<button class="btn btn-xs btn-danger" onclick="deleteUserPermanently(${user.id}, '${user.email || user.username}')">Delete</button>` : ''}
+        </td>
+      </tr>`;
+  }).join('');
+  if (window.initLucide) window.initLucide();
 }
 async function deleteUserPermanently(userId, email) {
   if (!confirm(`Are you sure you want to permanently delete user "${email}" from the project? This action cannot be undone.`)) {
@@ -6062,7 +6119,7 @@ function editUserScope(userId) {
   const user = (window.cachedUsers || []).find(u => u.id === userId);
   if (!user) return;
   document.getElementById('edit-scope-user-id').value = userId;
-  hydrateDistrictSelect('edit-scope-district', false);
+  hydrateDistrictSelect('edit-scope-district', true);
   const districtSelect = document.getElementById('edit-scope-district');
   districtSelect.insertAdjacentHTML('afterbegin', '<option value="">Global / State Admin only</option>');
   districtSelect.value = user.district || '';
@@ -6091,7 +6148,7 @@ async function submitUserScope() {
 window.submitUserScope = submitUserScope;
 
 function openAddUserPrompt() {
-  hydrateDistrictSelect('invite-single-district', false);
+  hydrateDistrictSelect('invite-single-district', true);
   openModal('modal-invite-user');
 }
 
@@ -6113,26 +6170,18 @@ async function doSingleInvite() {
     return;
   }
   try {
-    const result = await apiFetch('/users/invite', {
+    await apiFetch('/users/invite', {
       method: 'POST',
       body: JSON.stringify({ email, role, fullName, department, designation, state, district, mobileNumber })
     });
-    // Check if email was not configured and a link was returned
-    if (result && result.message && result.message.includes('share this link')) {
-      closeModal('modal-invite-user');
-      const link = result.message.split('share this link: ')[1] || '';
-      alert(`Invitation created!\n\nEmail is not configured on this server.\nShare this registration link manually with ${email}:\n\n${link}\n\n(Copy this link and send it via WhatsApp/Email)`);
-    } else {
-      toast(`Invitation sent to ${email}`, 'success');
-      closeModal('modal-invite-user');
-    }
+    toast(`Invitation sent to ${email}`, 'success');
+    closeModal('modal-invite-user');
     ['invite-single-name', 'invite-single-email', 'invite-single-department', 'invite-single-designation', 'invite-single-district', 'invite-single-mobile'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
     const stateEl = document.getElementById('invite-single-state');
     if (stateEl) stateEl.value = 'Punjab';
-    renderUsers();
   } catch (e) {
     toast(e.message || 'Failed to send invitation', 'error');
   }
@@ -16329,39 +16378,7 @@ const pdfPreview = {
       y += lineHeight;
     });
   },
-  getFrontMatterPages() {
-    const pages = [];
-    const pdfs = S.uploadedPDFs || {};
-    this.FM_ORDER.forEach(type => {
-      const sectionLabel = this.FM_LABELS[type] || type;
-      const uploaded = pdfs[type];
-      if (uploaded && uploaded.length) {
-        uploaded.forEach((img, idx) => {
-          pages.push({
-            src: img,
-            label: uploaded.length > 1 ? `${sectionLabel} - Page ${idx + 1}` : sectionLabel
-          });
-        });
-        return;
-      }
-      if (type === 'cover') {
-        pages.push({ src: this.renderCoverPageCanvas(), label: sectionLabel, generated: true });
-      } else if (type === 'pref' && S.frontMatter && S.frontMatter.preface) {
-        pages.push({
-          src: this.renderTextPageCanvas('PREFACE', S.frontMatter.preface, 'District Survey Report'),
-          label: sectionLabel,
-          generated: true
-        });
-      } else if (type === 'ack' && S.frontMatter && S.frontMatter.acknowledgement) {
-        pages.push({
-          src: this.renderTextPageCanvas('ACKNOWLEDGEMENT', S.frontMatter.acknowledgement, 'District Survey Report'),
-          label: sectionLabel,
-          generated: true
-        });
-      }
-    });
-    return pages;
-  },
+
   getFrontMatterPages() {
     const pages = [];
     const pdfs = S.uploadedPDFs || {};
@@ -19004,7 +19021,7 @@ function updateNotificationUI(returnedReports) {
 }
 function openProjectAndWorkflow(projectId) {
   toggleNotificationDropdown();
-  const proj = S.projects.find(p => String(p.id) === String(projectId));
+  const proj = S.projects.find(p => p.id === projectId);
   if (proj) {
     S.activeProject = proj;
     showView('workflow', null);

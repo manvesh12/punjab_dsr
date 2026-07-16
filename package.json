@@ -4,5 +4,9 @@
   "workspaces": [
     "backend",
     "frontend"
-  ]
+  ],
+  "dependencies": {
+    "jsdom": "^29.1.1",
+    "puppeteer": "^25.3.0"
+  }
 }
