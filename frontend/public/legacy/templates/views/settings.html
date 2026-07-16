@@ -530,7 +530,19 @@
 
   // Called every time settings view is opened (by showView or directly)
   function initSettingsView() {
-    // All tabs are visible - always start on profile
+    const isAdmin = typeof hasAdminAccess === 'function' && hasAdminAccess();
+    
+    const generalTabBtn = document.getElementById('tab-btn-general');
+    if (generalTabBtn) {
+      generalTabBtn.style.display = isAdmin ? 'flex' : 'none';
+    }
+    
+    const usersTabBtn = document.getElementById('tab-btn-users');
+    if (usersTabBtn) {
+      usersTabBtn.style.display = isAdmin ? 'flex' : 'none';
+    }
+
+    // Always start on profile
     switchSettingsTab('profile');
     setTimeout(installNoticeLanguagePatch, 0);
   }
