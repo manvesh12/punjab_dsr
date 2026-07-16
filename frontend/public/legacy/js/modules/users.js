@@ -74,15 +74,56 @@ async function updateUserRole(userId, role) {
 }
 async function toggleUserActive(userId, active) {
   try {
-    await apiFetch(`/users/${userId}/active`, {
+    const updatedUser = await apiFetch(`/users/${userId}/active`, {
       method: 'PATCH',
       body: JSON.stringify({ active })
     });
     toast(active ? 'User enabled' : 'User disabled', 'success');
+    
+    if (window.cachedUsers) {
+      const idx = window.cachedUsers.findIndex(u => u.id === userId);
+      if (idx !== -1) {
+        window.cachedUsers[idx].active = active;
+        renderUsersFromCache();
+        return;
+      }
+    }
     renderUsers();
   } catch (e) {
     toast(e.message || 'Failed to update user', 'error');
   }
+}
+
+function renderUsersFromCache() {
+  const users = window.cachedUsers || [];
+  const tbody = document.getElementById('users-table-body');
+  if (!tbody) return;
+  tbody.innerHTML = users.map(user => {
+    const perms = user.permissions || [];
+    const activeLabel = user.active ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-gray">Inactive</span>';
+    return `
+      <tr>
+        <td>
+          <div style="font-weight:700; display:flex; align-items:center; gap:4px;">
+            ${user.email || user.username}
+            <i data-lucide="check-circle-2" style="width:14px;height:14px;color:#10B981;" title="Email Sent"></i>
+          </div>
+          <div style="font-size:11px;color:var(--text-soft);">${user.fullName || ''}</div>
+        </td>
+        <td>${renderRoleSelect(user)}</td>
+        <td>${usersBadge(perms.includes('UPLOAD'))}</td>
+        <td>${usersBadge(perms.includes('REVIEW'))}</td>
+        <td>${user.accessLabel || '-'}</td>
+        <td>${formatUserScope(user)}</td>
+        <td>${activeLabel}</td>
+        <td style="display:flex;gap:6px;align-items:center;">
+          <button class="btn btn-xs btn-outline" onclick="editUserScope(${user.id})">Scope</button>
+          <button class="btn btn-xs ${user.active ? 'btn-danger' : 'btn-saffron'}" onclick="toggleUserActive(${user.id}, ${!user.active})">${user.active ? 'Disable' : 'Enable'}</button>
+          ${!user.active ? `<button class="btn btn-xs btn-danger" onclick="deleteUserPermanently(${user.id}, '${user.email || user.username}')">Delete</button>` : ''}
+        </td>
+      </tr>`;
+  }).join('');
+  if (window.initLucide) window.initLucide();
 }
 async function deleteUserPermanently(userId, email) {
   if (!confirm(`Are you sure you want to permanently delete user "${email}" from the project? This action cannot be undone.`)) {
