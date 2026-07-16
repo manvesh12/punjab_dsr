@@ -47,10 +47,10 @@ export class SessionService {
     const token = tokenService.sign(user);
     const refreshToken = crypto.randomBytes(40).toString("hex");
     await this.repository.createRefreshToken(user.id, refreshToken, new Date(Date.now() + REFRESH_TOKEN_TTL_MS));
-    return { token, refreshToken, response: this.userResponse(user, token) };
+    return { token, refreshToken, response: await this.userResponse(user, token) };
   }
 
-  userResponse(user: User, token: string) {
+  async userResponse(user: User, token: string) {
     return {
       token,
       username: user.username,
@@ -58,7 +58,7 @@ export class SessionService {
       fullName: user.fullName,
       role: `ROLE_${user.role}`,
       uiRole: roleToFrontend(user.role),
-      permissions: permissionsFor(user.role),
+      permissions: Array.from(await (await import('../authorization/permissions.middleware.js')).getPermissionsForRole(user.role)),
       scope: { districtId: user.districtId, blockName: user.blockName, sectionName: user.sectionName },
       accessLabel: user.accessScope || user.role.replaceAll("_", " ")
     };
