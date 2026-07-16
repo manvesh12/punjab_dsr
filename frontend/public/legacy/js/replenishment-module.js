@@ -71,10 +71,19 @@ async function initReplenishmentView() {
 
   if (!S.activeProject || !S.activeProject.id) {
     editorContainer.innerHTML = `
-      <div class="card" style="margin-top:20px; padding:40px; text-align:center; max-width:600px; margin:20px auto;">
-        <i data-lucide="info" style="width:48px;height:48px;color:#3b82f6;display:block;margin:0 auto 16px;"></i>
-        <h2 style="color:#17324d;">No Active Project</h2>
-        <p style="color:#64748b; margin-top:8px;">Please select a DSR project from the projects list first to manage its Replenishment Reports.</p>
+      <div style="max-width:980px;margin:32px auto;padding:0 20px;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px;">
+          <button type="button" onclick="window.showView && window.showView('projects')" style="text-align:left;border:1px solid #dbe4ee;border-radius:14px;background:#fff;padding:24px;cursor:pointer;box-shadow:0 4px 14px rgba(15,23,42,.06);">
+            <div style="font-size:12px;font-weight:800;color:#f59e0b;text-transform:uppercase;letter-spacing:.08em;">Step 1</div>
+            <h2 style="margin:8px 0;color:#17324d;font-size:19px;">Select a DSR Project</h2>
+            <p style="color:#64748b;margin:0;line-height:1.5;">Your previously filled Replenishment Report is stored under its project. Select that project to load its upload cards.</p>
+          </button>
+          <div style="border:1px solid #dbe4ee;border-radius:14px;background:#fff;padding:24px;box-shadow:0 4px 14px rgba(15,23,42,.06);">
+            <div style="font-size:12px;font-weight:800;color:#16a34a;text-transform:uppercase;letter-spacing:.08em;">Step 2</div>
+            <h2 style="margin:8px 0;color:#17324d;font-size:19px;">Upload Cards & Preview</h2>
+            <p style="color:#64748b;margin:0;line-height:1.5;">Once selected, the report's existing Imported, Uploaded and Pending cards open here with the right-side preview.</p>
+          </div>
+        </div>
       </div>
     `;
     if (window.lucide) lucide.createIcons();
@@ -88,9 +97,16 @@ async function initReplenishmentView() {
     </div>
   `;
   
-  await refreshLocalReportsFromServer();
-  
-  // Show the main option cards
+  const reports = await refreshLocalReportsFromServer();
+
+  // Existing work should open straight into the upload-card workspace rather
+  // than leaving the user at an intermediate, apparently empty choice screen.
+  if (reports.length) {
+    window.activeReport = reports[0];
+    renderCustomReportGenerator(editorContainer, reports[0]);
+    return;
+  }
+
   window.showReplenishmentOptions(editorContainer);
 }
 

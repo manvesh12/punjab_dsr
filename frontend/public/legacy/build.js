@@ -21,7 +21,7 @@ const JS_FILES = [
   'main.js'
 ].map(file => `js/modules/${file}`);
 
-const ASSET_VERSION = 'replenishment-render-fix-20260716-v8';
+const ASSET_VERSION = 'replenishment-cards-direct-open-20260716-v9';
 const applyAssetVersion = (html) => html.replace(/\{\{ASSET_VERSION\}\}/g, ASSET_VERSION);
 
 function buildJsBundle() {
