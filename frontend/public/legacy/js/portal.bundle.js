@@ -2361,6 +2361,9 @@ function showView(id, btn, push = true) {
   const el = document.getElementById('view-' + id);
   if (el) {
     el.classList.add('active');
+    if (id === 'settings' && typeof window.initSettingsView === 'function') {
+      setTimeout(window.initSettingsView, 50); // Run after user data is ready
+    }
     if (id === 'replenishment' && window.replenishmentApp) {
       window.replenishmentApp.init(window.S?.activeProject?.id || 'demo_proj');
     }
