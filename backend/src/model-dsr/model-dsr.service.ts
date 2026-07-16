@@ -1,4 +1,4 @@
-import { GeneratedDsrStatus, ModelDsrStatus, Prisma, type Role } from "@prisma/client";
+import { GeneratedDsrStatus, ModelDsrStatus, Prisma } from "@prisma/client";
 import { assertProjectDistrictAccess } from "../authorization/project-access.policy.js";
 import { ApiError } from "../common/exceptions/api-error.js";
 import type { AuthUser } from "../authentication/auth-user.js";
@@ -184,7 +184,7 @@ export class ModelDsrService {
     }
   }
 
-  private requireAdmin(role: Role) {
+  private requireAdmin(role: string) {
     if (role !== "SUPER_ADMIN" && role !== "STATE_ADMIN") {
       throw new ApiError(403, "MODEL_DSR_ADMIN_REQUIRED", "Access denied. Only Admins can manage Model DSRs.");
     }

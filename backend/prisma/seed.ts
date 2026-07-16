@@ -1,4 +1,4 @@
-import { PrismaClient, Role, ProjectStatus, ReportStatus } from "@prisma/client";
+import { PrismaClient, ProjectStatus, ReportStatus } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -46,8 +46,8 @@ async function seedData() {
   console.log("Seeding Users...");
   
   const usersToCreate: any[] = [
-    { fullName: "Paramjit Singh", username: "super.admin", email: "paramjit.singh@punjab.gov.in", password: defaultPassword, role: Role.SUPER_ADMIN, employeeId: "PB-ADM-0001", stateId: state.id },
-    { fullName: "Manpreet Kaur", username: "state.admin", email: "manpreet.kaur@punjab.gov.in", password: defaultPassword, role: Role.STATE_ADMIN, employeeId: "PB-ADM-0002", stateId: state.id },
+    { fullName: "Paramjit Singh", username: "super.admin", email: "paramjit.singh@punjab.gov.in", password: defaultPassword, role: "SUPER_ADMIN", employeeId: "PB-ADM-0001", stateId: state.id },
+    { fullName: "Manpreet Kaur", username: "state.admin", email: "manpreet.kaur@punjab.gov.in", password: defaultPassword, role: "STATE_ADMIN", employeeId: "PB-ADM-0002", stateId: state.id },
   ];
 
   const districtConfigs = [
@@ -60,27 +60,27 @@ async function seedData() {
     let idCounter = dc.idStart;
     
     // 1 District Admin
-    usersToCreate.push({ fullName: `District Admin ${dc.prefix}`, username: `admin.${dc.prefix.toLowerCase()}`, email: `admin.${dc.prefix.toLowerCase()}@punjab.gov.in`, password: defaultPassword, role: Role.DISTRICT_ADMIN, employeeId: `PB-${dc.prefix}-${++idCounter}`, stateId: state.id, districtId: dc.district.id, officeName: `DC Office ${dc.district.name}`, designation: "District Commissioner" });
+    usersToCreate.push({ fullName: `District Admin ${dc.prefix}`, username: `admin.${dc.prefix.toLowerCase()}`, email: `admin.${dc.prefix.toLowerCase()}@punjab.gov.in`, password: defaultPassword, role: "DISTRICT_ADMIN", employeeId: `PB-${dc.prefix}-${++idCounter}`, stateId: state.id, districtId: dc.district.id, officeName: `DC Office ${dc.district.name}`, designation: "District Commissioner" });
     
     // 2 District Officers
-    usersToCreate.push({ fullName: `Officer One ${dc.prefix}`, username: `officer1.${dc.prefix.toLowerCase()}`, email: `officer1.${dc.prefix.toLowerCase()}@punjab.gov.in`, password: defaultPassword, role: Role.DISTRICT_OFFICER, employeeId: `PB-${dc.prefix}-${++idCounter}`, stateId: state.id, districtId: dc.district.id, officeName: `Mining Office ${dc.district.name}`, designation: "District Mining Officer" });
-    usersToCreate.push({ fullName: `Officer Two ${dc.prefix}`, username: `officer2.${dc.prefix.toLowerCase()}`, email: `officer2.${dc.prefix.toLowerCase()}@punjab.gov.in`, password: defaultPassword, role: Role.DISTRICT_OFFICER, employeeId: `PB-${dc.prefix}-${++idCounter}`, stateId: state.id, districtId: dc.district.id, officeName: `Mining Office ${dc.district.name}`, designation: "District Mining Officer" });
+    usersToCreate.push({ fullName: `Officer One ${dc.prefix}`, username: `officer1.${dc.prefix.toLowerCase()}`, email: `officer1.${dc.prefix.toLowerCase()}@punjab.gov.in`, password: defaultPassword, role: "DISTRICT_OFFICER", employeeId: `PB-${dc.prefix}-${++idCounter}`, stateId: state.id, districtId: dc.district.id, officeName: `Mining Office ${dc.district.name}`, designation: "District Mining Officer" });
+    usersToCreate.push({ fullName: `Officer Two ${dc.prefix}`, username: `officer2.${dc.prefix.toLowerCase()}`, email: `officer2.${dc.prefix.toLowerCase()}@punjab.gov.in`, password: defaultPassword, role: "DISTRICT_OFFICER", employeeId: `PB-${dc.prefix}-${++idCounter}`, stateId: state.id, districtId: dc.district.id, officeName: `Mining Office ${dc.district.name}`, designation: "District Mining Officer" });
 
     // 1 Geologist
-    usersToCreate.push({ fullName: `Geologist ${dc.prefix}`, username: `geologist.${dc.prefix.toLowerCase()}`, email: `geo.${dc.prefix.toLowerCase()}@punjab.gov.in`, password: defaultPassword, role: Role.GEOLOGIST, employeeId: `PB-${dc.prefix}-${++idCounter}`, stateId: state.id, districtId: dc.district.id, officeName: `Geology Dept ${dc.district.name}`, designation: "Senior Geologist" });
+    usersToCreate.push({ fullName: `Geologist ${dc.prefix}`, username: `geologist.${dc.prefix.toLowerCase()}`, email: `geo.${dc.prefix.toLowerCase()}@punjab.gov.in`, password: defaultPassword, role: "GEOLOGIST", employeeId: `PB-${dc.prefix}-${++idCounter}`, stateId: state.id, districtId: dc.district.id, officeName: `Geology Dept ${dc.district.name}`, designation: "Senior Geologist" });
 
     // 1 Survey Officer
-    usersToCreate.push({ fullName: `Surveyor ${dc.prefix}`, username: `surveyor.${dc.prefix.toLowerCase()}`, email: `survey.${dc.prefix.toLowerCase()}@punjab.gov.in`, password: defaultPassword, role: Role.SURVEY_OFFICER, employeeId: `PB-${dc.prefix}-${++idCounter}`, stateId: state.id, districtId: dc.district.id, officeName: `Survey Dept ${dc.district.name}`, designation: "Survey Officer" });
+    usersToCreate.push({ fullName: `Surveyor ${dc.prefix}`, username: `surveyor.${dc.prefix.toLowerCase()}`, email: `survey.${dc.prefix.toLowerCase()}@punjab.gov.in`, password: defaultPassword, role: "SURVEY_OFFICER", employeeId: `PB-${dc.prefix}-${++idCounter}`, stateId: state.id, districtId: dc.district.id, officeName: `Survey Dept ${dc.district.name}`, designation: "Survey Officer" });
 
     // 1 Reviewer
-    usersToCreate.push({ fullName: `Reviewer ${dc.prefix}`, username: `reviewer.${dc.prefix.toLowerCase()}`, email: `review.${dc.prefix.toLowerCase()}@punjab.gov.in`, password: defaultPassword, role: Role.REVIEWER, employeeId: `PB-${dc.prefix}-${++idCounter}`, stateId: state.id, districtId: dc.district.id, officeName: `Review Board ${dc.district.name}`, designation: "Technical Reviewer" });
+    usersToCreate.push({ fullName: `Reviewer ${dc.prefix}`, username: `reviewer.${dc.prefix.toLowerCase()}`, email: `review.${dc.prefix.toLowerCase()}@punjab.gov.in`, password: defaultPassword, role: "REVIEWER", employeeId: `PB-${dc.prefix}-${++idCounter}`, stateId: state.id, districtId: dc.district.id, officeName: `Review Board ${dc.district.name}`, designation: "Technical Reviewer" });
 
     // 2 Data Entry Operators
-    usersToCreate.push({ fullName: `DEO One ${dc.prefix}`, username: `deo1.${dc.prefix.toLowerCase()}`, email: `deo1.${dc.prefix.toLowerCase()}@punjab.gov.in`, password: defaultPassword, role: Role.DATA_ENTRY_OPERATOR, employeeId: `PB-${dc.prefix}-${++idCounter}`, stateId: state.id, districtId: dc.district.id, officeName: `Mining Office ${dc.district.name}`, designation: "Data Entry Operator" });
-    usersToCreate.push({ fullName: `DEO Two ${dc.prefix}`, username: `deo2.${dc.prefix.toLowerCase()}`, email: `deo2.${dc.prefix.toLowerCase()}@punjab.gov.in`, password: defaultPassword, role: Role.DATA_ENTRY_OPERATOR, employeeId: `PB-${dc.prefix}-${++idCounter}`, stateId: state.id, districtId: dc.district.id, officeName: `Mining Office ${dc.district.name}`, designation: "Data Entry Operator" });
+    usersToCreate.push({ fullName: `DEO One ${dc.prefix}`, username: `deo1.${dc.prefix.toLowerCase()}`, email: `deo1.${dc.prefix.toLowerCase()}@punjab.gov.in`, password: defaultPassword, role: "DATA_ENTRY_OPERATOR", employeeId: `PB-${dc.prefix}-${++idCounter}`, stateId: state.id, districtId: dc.district.id, officeName: `Mining Office ${dc.district.name}`, designation: "Data Entry Operator" });
+    usersToCreate.push({ fullName: `DEO Two ${dc.prefix}`, username: `deo2.${dc.prefix.toLowerCase()}`, email: `deo2.${dc.prefix.toLowerCase()}@punjab.gov.in`, password: defaultPassword, role: "DATA_ENTRY_OPERATOR", employeeId: `PB-${dc.prefix}-${++idCounter}`, stateId: state.id, districtId: dc.district.id, officeName: `Mining Office ${dc.district.name}`, designation: "Data Entry Operator" });
 
     // 1 Report Generator
-    usersToCreate.push({ fullName: `Report Gen ${dc.prefix}`, username: `reportgen.${dc.prefix.toLowerCase()}`, email: `report.${dc.prefix.toLowerCase()}@punjab.gov.in`, password: defaultPassword, role: Role.REPORT_GENERATOR, employeeId: `PB-${dc.prefix}-${++idCounter}`, stateId: state.id, districtId: dc.district.id, officeName: `IT Dept ${dc.district.name}`, designation: "Report Specialist" });
+    usersToCreate.push({ fullName: `Report Gen ${dc.prefix}`, username: `reportgen.${dc.prefix.toLowerCase()}`, email: `report.${dc.prefix.toLowerCase()}@punjab.gov.in`, password: defaultPassword, role: "REPORT_GENERATOR", employeeId: `PB-${dc.prefix}-${++idCounter}`, stateId: state.id, districtId: dc.district.id, officeName: `IT Dept ${dc.district.name}`, designation: "Report Specialist" });
   }
 
   const createdUsers = [];
@@ -115,15 +115,15 @@ async function seedData() {
     const districtUsers = createdUsers.filter(u => u.districtId === dc.district.id);
     for (const u of districtUsers) {
       await prisma.projectMember.create({
-        data: { projectId: dsrProject.id, userId: u.id, role: u.role }
+        data: { projectId: dsrProject.id, userId: u.id, role: u.role as any }
       });
       await prisma.projectMember.create({
-        data: { projectId: repProject.id, userId: u.id, role: u.role }
+        data: { projectId: repProject.id, userId: u.id, role: u.role as any }
       });
     }
 
     // Seed Notification and AuditLog
-    const admin = districtUsers.find(u => u.role === Role.DISTRICT_ADMIN);
+    const admin = districtUsers.find(u => u.role === "DISTRICT_ADMIN");
     if (admin) {
       await prisma.notification.create({
         data: { userId: admin.id, type: "PROJECT_ASSIGNED", message: `You have been assigned to project ${dsrProject.projectName}` }

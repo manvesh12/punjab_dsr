@@ -1,4 +1,3 @@
-import type { Role } from "@prisma/client";
 import { ApiError } from "../common/exceptions/api-error.js";
 import type { AuthUser } from "../authentication/auth-user.js";
 import { canReview, canUpload } from "../authorization/role.policy.js";
@@ -54,8 +53,8 @@ export class ReportsService {
     }));
   }
 
-  private requireUpload(role: Role) { if (!canUpload(role)) this.denied(); }
-  private requireReview(role: Role) { if (!canReview(role)) this.denied(); }
+  private requireUpload(role: string) { if (!canUpload(role)) this.denied(); }
+  private requireReview(role: string) { if (!canReview(role)) this.denied(); }
   private denied(): never { throw new ApiError(403, "ACCESS_DENIED", "Access denied"); }
 }
 

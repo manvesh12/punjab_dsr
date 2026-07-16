@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { Role } from "@prisma/client";
+
 import { ApiError } from "../common/exceptions/api-error.js";
 import { logger } from "../common/logging/logger.js";
 import type { AuthUser } from "../authentication/auth-user.js";
@@ -9,7 +9,7 @@ import { usersRepository, type UsersRepositoryContract } from "./users.repositor
 import { normalizeRole, normalizedBulkRole, requiredDistrict, requiresDistrict, rowValue } from "./users.validator.js";
 import { userSpreadsheetService, type UserSpreadsheetService } from "./user-spreadsheet.service.js";
 
-type InvitationMailer = (email: string, token: string, role: Role) => Promise<unknown>;
+type InvitationMailer = (email: string, token: string, role: string) => Promise<unknown>;
 
 export class InvitationService {
   constructor(
@@ -58,7 +58,7 @@ export class InvitationService {
     let successCount = 0;
     let failedCount = 0;
     const errors: Array<{ row: number; email: string; reason: string }> = [];
-    const validRoles = Object.values(Role);
+    const validRoles = ["SUPER_ADMIN", "STATE_ADMIN", "DISTRICT_ADMIN", "DISTRICT_OFFICER", "GEOLOGIST", "SURVEY_OFFICER", "REVIEWER", "DATA_ENTRY_OPERATOR", "REPORT_GENERATOR", "PUBLIC_USER"];
 
     for (let index = 0; index < rows.length; index++) {
       const row = rows[index];
@@ -82,8 +82,8 @@ export class InvitationService {
       }
 
       const normalizedRole = normalizedBulkRole(rawRole);
-      if (!validRoles.includes(normalizedRole as Role)) { failure(`Invalid role: ${rawRole}`); continue; }
-      const role = normalizedRole as Role;
+      if (!validRoles.includes(normalizedRole)) { failure(`Invalid role: ${rawRole}`); continue; }
+      const role = normalizedRole;
       const district = rowValue(row, "district").trim() || null;
       if (requiresDistrict(role) && !district) { failure("District is required for every non-admin account"); continue; }
 

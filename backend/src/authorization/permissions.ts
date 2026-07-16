@@ -1,9 +1,9 @@
-import { Role } from "@prisma/client";
+
 
 export type Permission = "view_all" | "edit_all" | "approve_reports" | "submit_reports" |
   "view_district" | "edit_district" | "view_block" | "edit_block";
 
-export const rolePermissions: Readonly<Record<Role, Permission[]>> = Object.freeze({
+export const rolePermissions: Readonly<Record<string, Permission[]>> = Object.freeze({
   SUPER_ADMIN: ["view_all", "edit_all", "approve_reports", "submit_reports"],
   STATE_ADMIN: ["view_all", "approve_reports"],
   DISTRICT_ADMIN: ["view_district", "approve_reports", "edit_district"],
@@ -16,6 +16,6 @@ export const rolePermissions: Readonly<Record<Role, Permission[]>> = Object.free
   PUBLIC_USER: ["view_district"]
 });
 
-export function hasPermission(role: Role, permission: Permission) {
+export function hasPermission(role: string, permission: Permission) {
   return rolePermissions[role]?.includes(permission) || false;
 }

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { ApiError } from '../core/errors/api.error.js';
+import { ApiError } from '../common/exceptions/api-error.js';
 
 const prisma = new PrismaClient();
 
