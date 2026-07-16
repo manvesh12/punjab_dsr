@@ -9,26 +9,6 @@ datasource db {
   extensions = [vector, postgis]
 }
 
-enum Role {
-  SUPER_ADMIN
-  STATE_ADMIN
-  DISTRICT_ADMIN
-  DISTRICT_OFFICER
-  GEOLOGIST
-  SURVEY_OFFICER
-  REVIEWER
-  DATA_ENTRY_OPERATOR
-  REPORT_GENERATOR
-  PUBLIC_USER
-  // New Enterprise Roles
-  MINING_OFFICER
-  GIS_EXPERT
-  HYDROLOGIST
-  ENVIRONMENTAL_EXPERT
-  COMMITTEE_MEMBER
-  DIGITAL_SIGNATORY
-}
-
 enum ProjectStatus {
   ACTIVE
   IN_PROGRESS
@@ -122,7 +102,7 @@ model User {
   email        String    @unique
   mobileNumber String?   @unique
   password     String
-  role         Role
+  role         String
   districtId   BigInt?
   district     District? @relation(fields: [districtId], references: [id], onDelete: SetNull)
   stateId      BigInt?
@@ -145,6 +125,9 @@ model User {
   passwordResetRequests PasswordResetRequest[]
   projectMembers        ProjectMember[]
   notifications         Notification[]
+  userSessions          UserSession[]
+  loginHistories        LoginHistory[]
+  permissionHistories   PermissionHistory[]
 
   @@index([role, active])
   @@index([districtId, role])
@@ -295,7 +278,7 @@ model ProjectMember {
   id         BigInt   @id @default(autoincrement())
   projectId  BigInt
   userId     BigInt
-  role       Role
+  role       String
   assignedAt DateTime @default(now())
   project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -784,7 +767,7 @@ model Invitation {
   state               String?
   district            String?
   mobileNumber        String?
-  role                Role
+  role                String
   token               String    @unique
   status              String    @default("INVITED")
   expiresAt           DateTime
@@ -866,12 +849,80 @@ model Notification {
   @@index([createdAt])
 }
 
-model Permission {
-  id        BigInt   @id @default(autoincrement())
-  role      Role
-  action    String
-  resource  String
-  createdAt DateTime @default(now())
+// =========================================================
+// NORMALIZED ENTERPRISE RBAC (PHASE 45)
+// =========================================================
+model Module {
+  id          BigInt       @id @default(autoincrement())
+  name        String       @unique
+  description String?
+  permissions Permission[]
+}
 
-  @@unique([role, action, resource])
+model Permission {
+  id          BigInt           @id @default(autoincrement())
+  moduleId    BigInt
+  action      String           @unique // e.g., USER_VIEW, PROJECT_CREATE
+  description String?
+  module      Module           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  roles       RolePermission[]
+}
+
+model Role {
+  id                BigInt              @id @default(autoincrement())
+  name              String              @unique // e.g., SUPER_ADMIN
+  description       String?
+  permissions       RolePermission[]
+  permissionHistory PermissionHistory[]
+}
+
+model RolePermission {
+  roleId       BigInt
+  permissionId BigInt
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+model UserSession {
+  id        BigInt   @id @default(autoincrement())
+  userId    BigInt
+  token     String   @unique
+  ipAddress String?
+  device    String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model LoginHistory {
+  id        BigInt   @id @default(autoincrement())
+  userId    BigInt
+  ipAddress String?
+  device    String?
+  browser   String?
+  status    String // SUCCESS, FAILED
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PermissionHistory {
+  id            BigInt   @id @default(autoincrement())
+  roleId        BigInt
+  changedBy     BigInt
+  action        String // ADDED, REMOVED
+  permission    String
+  reason        String?
+  createdAt     DateTime @default(now())
+  role          Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  changedByUser User     @relation(fields: [changedBy], references: [id], onDelete: Restrict)
+}
+
+model FeatureFlag {
+  id          BigInt   @id @default(autoincrement())
+  name        String   @unique
+  isEnabled   Boolean  @default(false)
+  description String?
+  updatedAt   DateTime @updatedAt
 }

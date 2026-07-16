@@ -1018,21 +1018,14 @@ function getRoleRule() {
 }
 function hasPermission(permission) {
   const perms = S?.permissions || [];
-  if (perms.includes(permission)) return true;
-  const rule = getRoleRule();
-  if (permission === 'UPLOAD') return !!rule.upload;
-  if (permission === 'REVIEW') return !!rule.review;
-  if (permission === 'ADMIN') return !!rule.admin;
-  return false;
+  return perms.includes(permission);
 }
 function hasModuleAccess(viewId) {
   if (!viewId) return true;
   if (viewId === 'settings' || viewId === 'users') return hasAdminAccess();
-  if (viewId === 'audit-logs') return true;
-  if (viewId === 'model-dsr') return true;
-  const rule = getRoleRule();
-  if (rule.modules?.includes('*')) return true;
-  return rule.modules?.includes(viewId);
+  if (viewId === 'audit-logs') return hasPermission('REPORT_VIEW');
+  if (viewId === 'model-dsr') return hasPermission('PROJECT_VIEW');
+  return true; // Component-level hiding applies
 }
 function getFirstAllowedView() {
   const preferredViews = [
@@ -1061,20 +1054,11 @@ function showUnauthorizedAccessError() {
 }
 function canEditView(viewId) {
   if (typeof isActivePhaseLocked === 'function' && isActivePhaseLocked()) return false;
-  const role = getBackendRole();
-  const rule = getRoleRule();
-  if (role === 'ADMIN' || role === 'OFFICER' || role === 'DATA_ENTRY') return true;
-  if (rule.readOnly) return false;
-  if (!rule.upload) return false;
   if (viewId === 'dashboard' || viewId === 'projects' || viewId === 'workflow' || viewId === 'history') return false;
-  return hasModuleAccess(viewId);
+  return hasPermission('PROJECT_EDIT');
 }
 function canEditChapter(chapterNo) {
-  const role = getBackendRole();
-  const rule = getRoleRule();
-  if (role === 'ADMIN' || role === 'OFFICER' || role === 'DATA_ENTRY') return true;
-  if (rule.chapters === 'all') return true;
-  return Array.isArray(rule.chapters) && rule.chapters.includes(Number(chapterNo));
+  return hasPermission('PROJECT_EDIT');
 }
 function hasWriteAccess() {
   if (typeof S === 'undefined' || !S || !S.user) return false;
@@ -1087,12 +1071,11 @@ function isUserReadOnly() {
 }
 function hasReviewAccess() {
   if (typeof S === 'undefined' || !S || !S.user) return false;
-  return hasPermission('REVIEW');
+  return hasPermission('REPORT_APPROVE');
 }
 function hasAdminAccess() {
   if (typeof S === 'undefined' || !S || !S.user) return false;
-  const role = getBackendRole();
-  return hasPermission('ADMIN') || role === 'ADMIN' || role === 'STATE_ADMIN';
+  return hasPermission('USER_VIEW') && hasPermission('ROLE_VIEW');
 }
 function setLockedElement(el, locked, label) {
   if (!el) return;
