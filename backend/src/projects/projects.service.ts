@@ -1,4 +1,4 @@
-import { ProjectStatus, type Prisma, type Role } from "@prisma/client";
+import { ProjectStatus, type Prisma } from "@prisma/client";
 import { assignedDistrictFor, assertProjectDistrictAccess, canAccessProjectDistrict } from "../authorization/project-access.policy.js";
 import { ApiError } from "../common/exceptions/api-error.js";
 import type { AuthUser } from "../authentication/auth-user.js";
@@ -178,7 +178,7 @@ export class ProjectsService {
     return typeof state === "string" ? state : state ? JSON.stringify(state) : null;
   }
 
-  private requireAdmin(role: Role, message: string) {
+  private requireAdmin(role: string, message: string) {
     if (!canAdmin(role)) throw new ApiError(403, "ACCESS_DENIED", message);
   }
 }

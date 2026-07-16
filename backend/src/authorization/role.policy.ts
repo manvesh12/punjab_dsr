@@ -7,6 +7,10 @@ export function roleToFrontend(role: string) {
   return 'user';
 }
 
+export function permissionsFor(role: string): string[] {
+  return []; // Replaced by dynamic Session permissions
+}
+
 // These legacy helpers are mapped loosely for compatibility with untouched files, 
 // but the true authorization uses PermissionsGuard in routers.
 export function canUpload(role: string) { return role === 'SUPER_ADMIN' || role === 'DISTRICT_OFFICER' || role === 'DATA_ENTRY_OPERATOR'; }
