@@ -298,7 +298,7 @@ function hasReviewAccess() {
 }
 function hasAdminAccess() {
   if (typeof S === 'undefined' || !S || !S.user) return false;
-  const role = getBackendRole() || S.user.role || '';
+  const role = (getBackendRole() || S.user.role || '').toUpperCase();
   return role.includes('ADMIN') || hasPermission('ADMIN');
 }
 function setLockedElement(el, locked, label) {
