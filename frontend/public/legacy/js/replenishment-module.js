@@ -247,10 +247,10 @@ const REPLENISHMENT_EXCEL_MODULES = [
   ['instrument-details', 'Instrument Details', ['Instrument', 'Make', 'Model', 'Serial Number', 'Calibration Date']],
   ['gcp-details', 'GCP Details', ['GCP ID', 'Latitude', 'Longitude', 'RL', 'Observation']],
   ['dgps-details', 'DGPS Details', ['Station', 'Latitude', 'Longitude', 'RL', 'Instrument']],
-  ['rl-grid-tables', 'RL Grid Tables', ['Grid ID', 'Pre Monsoon RL', 'Post Monsoon RL', 'Difference', 'Area']],
+  ['rl-grid-tables', 'RL Grid Tables', ['Grid ID', 'Grid Area (sqm)', 'Pre Monsoon RL (m)', 'Post Monsoon RL (m)', 'Elevation Difference (m)', 'Deposited Volume (cum)']],
   ['cross-sections', 'Cross Sections', ['Section ID', 'Chainage', 'Pre RL', 'Post RL', 'Difference']],
   ['volume-calculation', 'Volume Calculation', ['Section/Grid', 'Area', 'Depth', 'Volume', 'Remarks']],
-  ['replenishment-calculation', 'Replenishment Calculation', ['Reach', 'Pre Volume', 'Post Volume', 'Replenishment', 'Percentage']],
+  ['replenishment-calculation', 'Replenishment Calculation', ['Reach', 'Mineable Reserve (MT)', 'Replenished Volume (cum)', 'Bulk Density (MT/cum)', 'Replenished Quantity (MT)', 'Replenishment (%)']],
   ['rainfall-data', 'Rainfall Data', ['Month', 'Rainfall (mm)', 'Normal Rainfall', 'Deviation', 'Source']],
   ['sediment-sample', 'Sediment Sample', ['Sample ID', 'Location', 'Sand %', 'Silt %', 'Clay %']],
   ['photo-register', 'Photo Register', ['Photo No', 'Description', 'Location', 'Date', 'Remarks']],
@@ -283,7 +283,17 @@ const REPLENISHMENT_REPORT_META_FIELDS = [
   ['miningArea', 'Mineable Area (ha)', 'Mineable area'],
   ['khasraNumbers', 'Khasra Numbers', 'Khasra / survey numbers'],
   ['studyPeriod', 'Study Period', 'Pre and post monsoon period'],
-  ['bulkDensity', 'Bulk Density', '1.80']
+  ['preSurveyDate', 'Pre-monsoon Survey Date', 'YYYY-MM-DD'],
+  ['postSurveyDate', 'Post-monsoon Survey Date', 'YYYY-MM-DD'],
+  ['loiNumber', 'LOI / Auction Letter No.', 'Letter number and date'],
+  ['ecNumber', 'Environmental Clearance No.', 'EC number and date'],
+  ['miningPlanApproval', 'Mining Plan Approval', 'Approval number and date'],
+  ['consultantAccreditation', 'NABET Accreditation', 'Certificate number and validity'],
+  ['targetProduction', 'Approved Annual Production (MT)', 'Approved quantity'],
+  ['mineableReserve', 'Mineable Reserve (MT)', 'As per approved plan / EC'],
+  ['gridSize', 'Survey Grid Size (m)', '25 x 25'],
+  ['coordinateSystem', 'Coordinate System / Datum', 'WGS 84 / UTM zone'],
+  ['bulkDensity', 'Bulk Density (MT/cum)', '1.80']
 ];
 
 const REPLENISHMENT_SECTION_ALIASES = {
@@ -317,7 +327,9 @@ function defaultEnterpriseBuilder() {
     reportMeta: {
       reportYear: '', projectName: '', mineral: 'Sand (Minor Mineral)', district: '', state: 'Punjab',
       village: '', block: '', river: '', applicant: '', applicantAddress: '', consultant: '',
-      leaseArea: '', miningArea: '', khasraNumbers: '', studyPeriod: '', bulkDensity: '1.80'
+      leaseArea: '', miningArea: '', khasraNumbers: '', studyPeriod: '', preSurveyDate: '', postSurveyDate: '',
+      loiNumber: '', ecNumber: '', miningPlanApproval: '', consultantAccreditation: '', targetProduction: '',
+      mineableReserve: '', gridSize: '25 x 25', coordinateSystem: 'WGS 84', bulkDensity: '1.80'
     },
     autoFill: { source: '', updatedAt: '', fields: [] },
     manualOverrides: [],
@@ -644,6 +656,9 @@ window.updateReplIntro = updateReplIntro;
 window.uploadReplIntroFile = uploadReplIntroFile;
 window.downloadReplExcelTemplate = downloadReplExcelTemplate;
 window.uploadReplExcelModule = uploadReplExcelModule;
+window.addReplTableRow = addReplTableRow;
+window.updateReplTableCell = updateReplTableCell;
+window.deleteReplTableRow = deleteReplTableRow;
 window.addReplAnnexure = addReplAnnexure;
 window.updateReplAnnexure = updateReplAnnexure;
 window.uploadReplAnnexureFile = uploadReplAnnexureFile;
@@ -2522,6 +2537,9 @@ async function updateReplReportMeta(reportId, field, value) {
   if (!report) return;
   const builder = ensureEnterpriseBuilder(report);
   builder.reportMeta[field] = String(value || '').trim();
+  if (field === 'bulkDensity' || field === 'mineableReserve' || field === 'river' || field === 'block') {
+    calculateReplModuleRows(builder, 'rl-grid-tables');
+  }
   builder.autoFill.fields = (builder.autoFill.fields || []).filter(item => item !== field);
   if (!builder.manualOverrides.includes(field)) builder.manualOverrides.push(field);
   await saveEnterpriseBuilder(reportId);
@@ -2605,6 +2623,72 @@ function downloadReplExcelTemplate(moduleId) {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
+function replNumber(value) {
+  const number = Number(String(value ?? '').replace(/,/g, '').trim());
+  return Number.isFinite(number) ? number : 0;
+}
+
+function calculateReplModuleRows(builder, moduleId) {
+  const module = builder.excelModules[moduleId];
+  if (!module) return;
+  if (moduleId === 'rl-grid-tables') {
+    module.rows.forEach(row => {
+      const pre = replNumber(row['Pre Monsoon RL (m)']);
+      const post = replNumber(row['Post Monsoon RL (m)']);
+      const area = replNumber(row['Grid Area (sqm)']);
+      const difference = Math.max(0, post - pre);
+      row['Elevation Difference (m)'] = difference ? difference.toFixed(3) : '';
+      row['Deposited Volume (cum)'] = difference && area ? (difference * area).toFixed(3) : '';
+    });
+    const totalVolume = module.rows.reduce((sum, row) => sum + replNumber(row['Deposited Volume (cum)']), 0);
+    const calculation = builder.excelModules['replenishment-calculation'];
+    if (calculation && totalVolume > 0) {
+      const density = replNumber(builder.reportMeta.bulkDensity) || 1.8;
+      const reserve = replNumber(builder.reportMeta.mineableReserve);
+      const row = calculation.rows[0] || {};
+      row['Reach'] = row['Reach'] || builder.reportMeta.river || builder.reportMeta.block || 'Lease Area';
+      row['Mineable Reserve (MT)'] = reserve || '';
+      row['Replenished Volume (cum)'] = totalVolume.toFixed(3);
+      row['Bulk Density (MT/cum)'] = density.toFixed(2);
+      row['Replenished Quantity (MT)'] = (totalVolume * density).toFixed(3);
+      row['Replenishment (%)'] = reserve ? ((totalVolume * density / reserve) * 100).toFixed(2) : '';
+      calculation.rows = [row];
+    }
+  }
+}
+
+async function addReplTableRow(reportId, moduleId) {
+  const report = (window.activeReport && window.activeReport.id === reportId) ? window.activeReport : loadLocalReports().find(r => r.id === reportId);
+  if (!report) return;
+  const builder = ensureEnterpriseBuilder(report);
+  const module = builder.excelModules[moduleId];
+  if (!module) return;
+  module.rows.push(Object.fromEntries(module.columns.map(column => [column, ''])));
+  await saveEnterpriseBuilder(reportId, true);
+}
+
+async function updateReplTableCell(reportId, moduleId, rowIndex, column, value) {
+  const report = (window.activeReport && window.activeReport.id === reportId) ? window.activeReport : loadLocalReports().find(r => r.id === reportId);
+  if (!report) return;
+  const builder = ensureEnterpriseBuilder(report);
+  const module = builder.excelModules[moduleId];
+  if (!module || !module.rows[rowIndex]) return;
+  module.rows[rowIndex][column] = value;
+  calculateReplModuleRows(builder, moduleId);
+  await saveEnterpriseBuilder(reportId, moduleId === 'rl-grid-tables');
+}
+
+async function deleteReplTableRow(reportId, moduleId, rowIndex) {
+  const report = (window.activeReport && window.activeReport.id === reportId) ? window.activeReport : loadLocalReports().find(r => r.id === reportId);
+  if (!report) return;
+  const builder = ensureEnterpriseBuilder(report);
+  const module = builder.excelModules[moduleId];
+  if (!module) return;
+  module.rows.splice(rowIndex, 1);
+  calculateReplModuleRows(builder, moduleId);
+  await saveEnterpriseBuilder(reportId, true);
+}
+
 async function uploadReplExcelModule(input, reportId, moduleId) {
   const file = input.files && input.files[0];
   const report = (window.activeReport && window.activeReport.id === reportId) ? window.activeReport : loadLocalReports().find(r => r.id === reportId);
@@ -2619,6 +2703,7 @@ async function uploadReplExcelModule(input, reportId, moduleId) {
       const workbook = window.XLSX.read(bytes, { type: 'array' });
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
       module.rows = window.XLSX.utils.sheet_to_json(sheet, { defval: '' });
+      calculateReplModuleRows(ensureEnterpriseBuilder(report), moduleId);
     }
   } catch (error) {
     console.warn('Could not parse uploaded Excel file for preview:', error);
@@ -2666,7 +2751,11 @@ function renderEnterpriseBuilderPanel(report) {
   }).join('');
   const certHtml = builder.certificates.map(cert => `<div class="repl-builder-row"><input value="${replEscapeAttr(cert.title)}" onchange="window.updateReplCertificate('${rid}','${cert.id}','title',this.value)" placeholder="Certificate Title"><input value="${replEscapeAttr(cert.number)}" onchange="window.updateReplCertificate('${rid}','${cert.id}','number',this.value)" placeholder="Certificate No."><input value="${replEscapeAttr(cert.issuedBy)}" onchange="window.updateReplCertificate('${rid}','${cert.id}','issuedBy',this.value)" placeholder="Issued By"><input type="date" value="${replEscapeAttr(cert.issueDate)}" onchange="window.updateReplCertificate('${rid}','${cert.id}','issueDate',this.value)"><button type="button" onclick="document.getElementById('repl-cert-${cert.id}').click()">${cert.files?.length ? 'Replace' : 'Upload'}</button><button type="button" onclick="document.getElementById('repl-cert-scan-${cert.id}').click()">Scan</button><button type="button" onclick="window.deleteReplBuilderItem('${rid}','certificates','${cert.id}')">Delete</button><input id="repl-cert-${cert.id}" type="file" accept="application/pdf,image/*" style="display:none" onchange="window.uploadReplCertificateFile(this, '${rid}', '${cert.id}')"><input id="repl-cert-scan-${cert.id}" type="file" accept="image/*" capture="environment" style="display:none" onchange="window.uploadReplCertificateFile(this, '${rid}', '${cert.id}')"></div>`).join('');
   const introHtml = builder.introSubsections.map(section => `<details class="repl-builder-detail"><summary><label><input type="checkbox" ${section.enabled ? 'checked' : ''} onchange="window.updateReplIntro('${rid}','${section.id}','enabled',this.checked)"> ${section.title}</label><span>${section.files?.length ? 'Uploaded' : (section.text ? ((builder.autoFill?.fields || []).includes(section.id) ? 'DSR Auto-filled' : 'Text') : 'Pending')}</span></summary><textarea onchange="window.updateReplIntro('${rid}','${section.id}','text',this.value)" placeholder="Write content for ${replEscapeAttr(section.title)}">${replEscapeAttr(section.text)}</textarea><div class="repl-builder-actions"><button type="button" onclick="document.getElementById('repl-intro-${section.id}').click()">${section.files?.length ? 'Replace File' : 'Upload File'}</button><button type="button" onclick="document.getElementById('repl-intro-scan-${section.id}').click()">Scan Page</button></div><input id="repl-intro-${section.id}" type="file" accept=".pdf,.doc,.docx,image/*" style="display:none" onchange="window.uploadReplIntroFile(this, '${rid}', '${section.id}')"><input id="repl-intro-scan-${section.id}" type="file" accept="image/*" capture="environment" style="display:none" onchange="window.uploadReplIntroFile(this, '${rid}', '${section.id}')"></details>`).join('');
-  const excelHtml = Object.values(builder.excelModules).map(module => `<div class="repl-builder-tile"><div><strong>${module.title}</strong><span>${module.files?.length ? replEscapeAttr(module.files[0].name) : `${module.columns.length} template columns`}</span></div><button type="button" onclick="window.downloadReplExcelTemplate('${module.id}')">Template</button><button type="button" onclick="document.getElementById('repl-table-${module.id}').click()">${module.files?.length ? 'Replace' : 'Upload'}</button><input id="repl-table-${module.id}" type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="window.uploadReplExcelModule(this, '${rid}', '${module.id}')"></div>`).join('');
+  const excelHtml = Object.values(builder.excelModules).map(module => {
+    const header = module.columns.map(column => `<th>${escapeHtml(column)}</th>`).join('');
+    const rows = (module.rows || []).map((row, rowIndex) => `<tr>${module.columns.map(column => `<td><input value="${replEscapeAttr(row[column])}" ${/Difference|Deposited Volume|Replenished Quantity|Replenishment \(%\)/.test(column) ? 'readonly' : ''} onchange="window.updateReplTableCell('${rid}','${module.id}',${rowIndex},'${replEscapeAttr(column)}',this.value)"></td>`).join('')}<td><button type="button" class="repl-row-delete" onclick="window.deleteReplTableRow('${rid}','${module.id}',${rowIndex})">Delete</button></td></tr>`).join('');
+    return `<details class="repl-table-editor"><summary><strong>${module.title}</strong><span>${module.rows?.length || 0} rows${module.files?.length ? ` - ${replEscapeAttr(module.files[0].name)}` : ''}</span></summary><div class="repl-table-toolbar"><button type="button" onclick="window.addReplTableRow('${rid}','${module.id}')">+ Add row</button><button type="button" onclick="window.downloadReplExcelTemplate('${module.id}')">Download template</button><button type="button" onclick="document.getElementById('repl-table-${module.id}').click()">${module.files?.length ? 'Replace Excel' : 'Import Excel / CSV'}</button><input id="repl-table-${module.id}" type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="window.uploadReplExcelModule(this, '${rid}', '${module.id}')"></div><div class="repl-table-scroll"><table><thead><tr>${header}<th>Action</th></tr></thead><tbody>${rows || `<tr><td colspan="${module.columns.length + 1}" class="repl-empty-row">Add rows here or import the official template.</td></tr>`}</tbody></table></div></details>`;
+  }).join('');
   const annexureHtml = builder.annexures.map(item => `<div class="repl-builder-row"><input value="${replEscapeAttr(item.title)}" onchange="window.updateReplAnnexure('${rid}','${item.id}','title',this.value)" placeholder="Annexure Title"><input value="${replEscapeAttr(item.description)}" onchange="window.updateReplAnnexure('${rid}','${item.id}','description',this.value)" placeholder="Description"><button type="button" onclick="document.getElementById('repl-annex-${item.id}').click()">${item.files?.length ? 'Replace' : 'Upload'}</button><button type="button" onclick="document.getElementById('repl-annex-scan-${item.id}').click()">Scan</button><button type="button" onclick="window.deleteReplBuilderItem('${rid}','annexures','${item.id}')">Delete</button><input id="repl-annex-${item.id}" type="file" accept=".pdf,.doc,.docx,.xlsx,.xls,.csv,image/*" style="display:none" onchange="window.uploadReplAnnexureFile(this, '${rid}', '${item.id}')"><input id="repl-annex-scan-${item.id}" type="file" accept="image/*" capture="environment" style="display:none" onchange="window.uploadReplAnnexureFile(this, '${rid}', '${item.id}')"></div>`).join('');
   const copyMatrixHtml = REPLENISHMENT_DSR_COPY_MATRIX.map(item => {
     const isUpload = item.mode === 'UPLOAD REQUIRED' || item.mode === 'NEW / UPLOAD';
@@ -2696,6 +2785,7 @@ function renderEnterpriseBuilderPanel(report) {
       .repl-builder-detail{border:1px solid #e5e7eb;border-radius:6px;padding:8px;margin-bottom:7px;background:#fff}
       .repl-builder-detail summary{font-size:12px;font-weight:800;color:#1e293b;cursor:pointer;display:flex;justify-content:space-between;gap:10px}
       .repl-builder-detail textarea{margin-top:8px;min-height:70px;resize:vertical}
+      .repl-table-editor{border:1px solid #cbd5e1;border-radius:8px;background:#fff;margin-bottom:8px;overflow:hidden}.repl-table-editor>summary{cursor:pointer;padding:10px 12px;display:flex;justify-content:space-between;gap:8px;color:#1e293b;font-size:12px}.repl-table-editor>summary span{color:#64748b;font-weight:600}.repl-table-toolbar{display:flex;gap:7px;padding:8px;background:#f8fafc;border-top:1px solid #e2e8f0}.repl-table-scroll{overflow:auto;max-height:300px}.repl-table-scroll table{border-collapse:collapse;min-width:100%;font-size:11px}.repl-table-scroll th{position:sticky;top:0;background:#17324d;color:#fff;text-align:left;padding:7px;white-space:nowrap;z-index:1}.repl-table-scroll td{border:1px solid #e2e8f0;padding:4px;background:#fff}.repl-table-scroll td input{min-width:125px;width:100%;border:1px solid #dbe3ed;border-radius:4px;padding:5px;box-sizing:border-box;font-size:11px}.repl-table-scroll td input[readonly]{background:#ecfdf5;color:#166534;font-weight:800}.repl-table-scroll .repl-row-delete{background:#fff1f2;color:#be123c;border-color:#fecdd3}.repl-empty-row{text-align:center!important;color:#64748b;padding:18px!important}
       .repl-status-strip{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
       .repl-status-strip span{font-size:11px;border-radius:999px;padding:3px 8px;background:#ecfdf5;color:#047857;font-weight:800}
       .repl-copy-guide{margin-bottom:12px;border:1px solid #bfdbfe;border-radius:10px;background:#f8fbff;overflow:hidden}.repl-copy-guide summary{cursor:pointer;padding:11px 12px;color:#1e3a5f;font-size:12px;font-weight:900;list-style:none;display:flex;justify-content:space-between;gap:10px}.repl-copy-guide summary::-webkit-details-marker{display:none}.repl-copy-guide summary span{color:#475569;font-size:11px;font-weight:600}.repl-copy-rows{border-top:1px solid #dbeafe;background:#fff}.repl-copy-row{display:grid;grid-template-columns:minmax(170px,1fr) auto;gap:5px 12px;padding:9px 12px;border-bottom:1px solid #eff6ff}.repl-copy-row:last-child{border-bottom:0}.repl-copy-row strong,.repl-copy-row span{display:block}.repl-copy-row strong{font-size:11.5px;color:#1e293b}.repl-copy-row span,.repl-copy-row p{font-size:10.5px;color:#64748b;margin:2px 0 0;line-height:1.4}.repl-copy-row p{grid-column:1/-1}.repl-copy-row b{align-self:start;border-radius:999px;padding:3px 7px;font-size:9px;white-space:nowrap}.repl-copy-ready{background:#dcfce7;color:#166534}.repl-copy-upload{background:#fef3c7;color:#92400e}
@@ -4065,6 +4155,35 @@ function validateReplenishmentReportForPdf(report, checkedIds) {
       }
     });
   });
+
+  if (report?.enterpriseBuilder) {
+    const builder = ensureEnterpriseBuilder(report);
+    const requiredMeta = [
+      ['reportYear', 'Report Year'], ['projectName', 'Project / Mining Block'], ['district', 'District'],
+      ['state', 'State'], ['village', 'Village'], ['block', 'Block'], ['river', 'River'],
+      ['applicant', 'Applicant'], ['leaseArea', 'Lease Area'], ['studyPeriod', 'Study Period'],
+      ['preSurveyDate', 'Pre-monsoon Survey Date'], ['postSurveyDate', 'Post-monsoon Survey Date'],
+      ['ecNumber', 'Environmental Clearance No.'], ['bulkDensity', 'Bulk Density']
+    ];
+    requiredMeta.forEach(([key, label]) => {
+      if (!String(builder.reportMeta[key] || '').trim()) errors.push(`Report Details: ${label} is required.`);
+    });
+    if (builder.reportMeta.preSurveyDate && builder.reportMeta.postSurveyDate && new Date(builder.reportMeta.postSurveyDate) <= new Date(builder.reportMeta.preSurveyDate)) {
+      errors.push('Post-monsoon survey date must be after the pre-monsoon survey date.');
+    }
+    const gridRows = builder.excelModules?.['rl-grid-tables']?.rows || [];
+    if (!gridRows.length) errors.push('RL Grid Tables: enter or import pre/post monsoon grid measurements.');
+    if (gridRows.some(row => !replNumber(row['Grid Area (sqm)']) || !replNumber(row['Pre Monsoon RL (m)']) || !replNumber(row['Post Monsoon RL (m)']))) {
+      errors.push('RL Grid Tables: every row requires grid area, pre-monsoon RL and post-monsoon RL.');
+    }
+    const requiredTables = ['gps-coordinates', 'production-programme', 'drone-details', 'instrument-details', 'gcp-details', 'dgps-details', 'rainfall-data', 'photo-register', 'compliance-checklist'];
+    requiredTables.forEach(moduleId => {
+      const module = builder.excelModules[moduleId];
+      if (module && !module.rows?.length && !module.files?.length) errors.push(`${module.title}: enter rows or import the completed template.`);
+    });
+    if (!builder.certificates.length) errors.push('Certificates: add Environmental Clearance / statutory certificate details.');
+    if (!builder.annexures.length) errors.push('Annexures: add current approvals, survey plates, maps and photographs.');
+  }
 
   return errors;
 }
