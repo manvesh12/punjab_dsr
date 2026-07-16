@@ -22,11 +22,14 @@ export class UsersRepository {
   updateInvitation(id: string, data: Prisma.InvitationUncheckedUpdateInput) {
     return this.database.invitation.update({ where: { id }, data });
   }
+  findDistrictByName(name: string) {
+    return this.database.district.findFirst({ where: { name } });
+  }
 }
 
 export type UsersRepositoryContract = Pick<
   UsersRepository,
-  "list" | "exportUsers" | "pendingInvitations" | "create" | "find" | "findByEmail" | "findByMobile" | "update" | "delete" | "findInvitation" | "upsertInvitation" | "updateInvitation"
+  "list" | "exportUsers" | "pendingInvitations" | "create" | "find" | "findByEmail" | "findByMobile" | "update" | "delete" | "findInvitation" | "upsertInvitation" | "updateInvitation" | "findDistrictByName"
 >;
 
 export const usersRepository = new UsersRepository(prisma);
