@@ -232,10 +232,11 @@ function hasPermission(permission) {
   return false;
 }
 function hasModuleAccess(viewId) {
-  if (!viewId) return true;
-  if (viewId === 'settings' || viewId === 'users') return hasAdminAccess();
-  if (viewId === 'audit-logs') return true;
-  if (viewId === 'model-dsr') return true;
+    if (!viewId) return true;
+    if (viewId === 'users') return hasAdminAccess();
+    if (viewId === 'settings') return true;
+    if (viewId === 'audit-logs') return hasPermission('REPORT_VIEW');
+    if (viewId === 'model-dsr') return true;
   const rule = getRoleRule();
   if (rule.modules?.includes('*')) return true;
   return rule.modules?.includes(viewId);
