@@ -51,7 +51,10 @@ function injectDraggableStyles() {
   document.head.appendChild(style);
 }
 
-async function initReplenishmentView() {
+let replenishmentInitPromise = null;
+let replenishmentInitSequence = 0;
+
+async function runReplenishmentViewInit(sequence) {
   injectDraggableStyles();
   const container = document.getElementById('view-replenishment');
   if (!container) return;
@@ -63,13 +66,16 @@ async function initReplenishmentView() {
   if (selectContainer) selectContainer.style.display = 'none';
   if (contentContainer) contentContainer.style.display = 'none';
   if (!editorContainer) return;
+
+  editorContainer.removeAttribute('data-repl-bootstrap');
   
   const modelDsrEditor = document.getElementById('model-dsr-editor-container');
   if (modelDsrEditor) modelDsrEditor.innerHTML = '';
 
   editorContainer.style.display = 'block';
 
-  if (!S.activeProject || !S.activeProject.id) {
+  const portalState = window.S;
+  if (!portalState || !portalState.activeProject || !portalState.activeProject.id) {
     editorContainer.innerHTML = `
       <div style="max-width:980px;margin:32px auto;padding:0 20px;">
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px;">
@@ -99,6 +105,8 @@ async function initReplenishmentView() {
   
   const reports = await refreshLocalReportsFromServer();
 
+  if (sequence !== replenishmentInitSequence) return;
+
   // Existing work should open straight into the upload-card workspace rather
   // than leaving the user at an intermediate, apparently empty choice screen.
   if (reports.length) {
@@ -108,6 +116,31 @@ async function initReplenishmentView() {
   }
 
   window.showReplenishmentOptions(editorContainer);
+}
+
+async function initReplenishmentView() {
+  const container = document.getElementById('view-replenishment');
+  const editorContainer = document.getElementById('repl-editor-container');
+  if (!container || !editorContainer) return;
+  if (replenishmentInitPromise) return replenishmentInitPromise;
+
+  const sequence = ++replenishmentInitSequence;
+  replenishmentInitPromise = runReplenishmentViewInit(sequence)
+    .catch(error => {
+      console.error('Failed to initialize Replenishment view:', error);
+      if (sequence !== replenishmentInitSequence) return;
+      editorContainer.style.display = 'block';
+      editorContainer.innerHTML = `
+        <div style="max-width:720px;margin:40px auto;padding:24px;border:1px solid #fecaca;border-radius:12px;background:#fff;box-shadow:0 4px 14px rgba(15,23,42,.06);text-align:center;">
+          <h2 style="margin:0 0 8px;color:#991b1b;font-size:18px;">Replenishment report could not be loaded</h2>
+          <p style="margin:0 0 18px;color:#64748b;line-height:1.5;">${escapeHtml(error?.message || 'An unexpected loading error occurred.')}</p>
+          <button type="button" onclick="window.initReplenishmentView()" style="border:0;border-radius:8px;background:#17324d;color:#fff;padding:10px 18px;font-weight:700;cursor:pointer;">Retry</button>
+        </div>`;
+    })
+    .finally(() => {
+      if (sequence === replenishmentInitSequence) replenishmentInitPromise = null;
+    });
+  return replenishmentInitPromise;
 }
 
 // Navigation invokes this directly after the Replenishment view is made visible.
@@ -125,6 +158,26 @@ window.showView = function(viewId, caller) {
 
 if (window.location.hash === '#replenishment' || window.currentViewId === 'replenishment') {
   setTimeout(() => initReplenishmentView(), 100);
+}
+
+function ensureActiveReplenishmentViewIsRendered() {
+  const view = document.getElementById('view-replenishment');
+  const editor = document.getElementById('repl-editor-container');
+  if (!view?.classList.contains('active') || !editor) return;
+  if (!editor.innerHTML.trim() || editor.hasAttribute('data-repl-bootstrap')) initReplenishmentView();
+}
+
+window.addEventListener('hashchange', ensureActiveReplenishmentViewIsRendered);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', ensureActiveReplenishmentViewIsRendered, { once: true });
+} else {
+  ensureActiveReplenishmentViewIsRendered();
+}
+
+const replenishmentViewNode = document.getElementById('view-replenishment');
+if (replenishmentViewNode) {
+  new MutationObserver(ensureActiveReplenishmentViewIsRendered)
+    .observe(replenishmentViewNode, { attributes: true, attributeFilter: ['class'] });
 }
 
 // Sync sidebar visibility

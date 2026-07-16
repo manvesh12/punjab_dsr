@@ -139,7 +139,9 @@ const originalShowViewReplV2 = window.showView;
 if (originalShowViewReplV2) {
   window.showView = function(viewId, caller, push) {
     originalShowViewReplV2(viewId, caller, push);
-    if (viewId === 'replenishment') {
+    // This legacy accordion workspace is not present in the current report
+    // builder. Avoid calling its obsolete window.api client on navigation.
+    if (viewId === 'replenishment' && document.getElementById('repl-accordion-container')) {
       const projectId = window.S?.activeProject?.id || 'demo';
       window.replenishmentV2Module.init(projectId);
     }
