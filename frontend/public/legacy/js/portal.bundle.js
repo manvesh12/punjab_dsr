@@ -1022,7 +1022,8 @@ function hasPermission(permission) {
 }
 function hasModuleAccess(viewId) {
   if (!viewId) return true;
-  if (viewId === 'settings' || viewId === 'users') return hasAdminAccess();
+  if (viewId === 'users') return hasAdminAccess(); // Only user management is admin-only
+  if (viewId === 'settings') return true; // All users can access profile/settings
   if (viewId === 'audit-logs') return hasPermission('REPORT_VIEW');
   if (viewId === 'model-dsr') return hasPermission('PROJECT_VIEW');
   return true; // Component-level hiding applies
