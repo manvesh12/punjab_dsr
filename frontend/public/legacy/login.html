@@ -14,7 +14,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=replenishment-cards-direct-open-20260716-v9">
+  <link rel="stylesheet" href="css/styles.css?v=plates-preview-20260717-v1">
   <link rel="stylesheet" href="css/premium-theme.css?v=replenishment-cards-direct-open-20260716-v9">
   <link rel="stylesheet" href="css/responsive-overrides.css?v=replenishment-cards-direct-open-20260716-v9">
   <link rel="stylesheet" href="css/enterprise-theme-audit.css?v=replenishment-cards-direct-open-20260716-v9">
@@ -1788,7 +1788,28 @@
 </style>
 
 <div id="view-replenishment" class="view">
-  <main id="repl-editor-container" aria-label="Replenishment report workspace"></main>
+  <main id="repl-editor-container" data-repl-bootstrap="true" aria-label="Replenishment report workspace">
+    <section style="max-width:980px;margin:32px auto;padding:0 20px;box-sizing:border-box;">
+      <header style="text-align:center;margin-bottom:32px;">
+        <div style="display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:12px;background:#fff7ed;color:#c2410c;font-size:24px;font-weight:800;margin-bottom:14px;">R</div>
+        <h1 style="margin:0 0 8px;color:#17324d;font-size:24px;">Government Replenishment Report Builder</h1>
+        <p style="margin:0;color:#64748b;font-size:14px;">Create a report or open the reports saved under the selected DSR project.</p>
+      </header>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;">
+        <button type="button" onclick="window.showCreateReportForm && window.showCreateReportForm()" style="min-height:190px;padding:28px;text-align:left;border:1px solid #dbe4ee;border-radius:14px;background:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(15,23,42,.06);">
+          <span style="display:inline-flex;padding:6px 10px;border-radius:999px;background:#eff6ff;color:#1d4ed8;font-size:11px;font-weight:800;text-transform:uppercase;">New report</span>
+          <h2 style="margin:18px 0 8px;color:#17324d;font-size:19px;">Create Official Report</h2>
+          <p style="margin:0;color:#64748b;line-height:1.55;font-size:13px;">Scan the Final DSR and prepare the required upload cards and report sections.</p>
+        </button>
+        <button type="button" onclick="window.showExistingReportsList && window.showExistingReportsList()" style="min-height:190px;padding:28px;text-align:left;border:1px solid #dbe4ee;border-radius:14px;background:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(15,23,42,.06);">
+          <span style="display:inline-flex;padding:6px 10px;border-radius:999px;background:#ecfdf5;color:#047857;font-size:11px;font-weight:800;text-transform:uppercase;">Saved reports</span>
+          <h2 style="margin:18px 0 8px;color:#17324d;font-size:19px;">Open Report Workspace</h2>
+          <p style="margin:0;color:#64748b;line-height:1.55;font-size:13px;">Load Imported, Uploaded and Pending cards for the selected project.</p>
+        </button>
+      </div>
+      <p style="margin:20px 0 0;text-align:center;color:#94a3b8;font-size:12px;">Loading project reports…</p>
+    </section>
+  </main>
 </div>
 
       <style>
@@ -5765,9 +5786,9 @@
 
   <div class="toast" id="toast"></div>
 
-<script defer src="js/portal.bundle.js?v=replenishment-cards-direct-open-20260716-v9-v3"></script>
+<script defer src="js/portal.bundle.js?v=plates-preview-20260717-v1"></script>
 <script defer src="js/model-dsr-module.js?v=12"></script>
-<script defer src="js/replenishment-module.js?v=30"></script>
+<script defer src="js/replenishment-module.js?v=32"></script>
 <script defer src="js/map-bootstrap.js?v=replenishment-cards-direct-open-20260716-v9"></script>
 <link rel="stylesheet" href="css/map.css?v=replenishment-cards-direct-open-20260716-v9">
   <!-- PWA Service Worker Registration -->

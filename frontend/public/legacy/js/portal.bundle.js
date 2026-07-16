@@ -4853,6 +4853,26 @@ window.moveChapter = moveChapter;
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    PLATES SECTION MANAGEMENT
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+function escapePlateHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[char]);
+}
+
+function renderPlatePreview(plate, sourceUrl) {
+  const pages = Array.isArray(plate.pages) ? plate.pages.filter(Boolean) : [];
+  const previewItems = pages.length ? pages : (sourceUrl ? [sourceUrl] : []);
+  if (!previewItems.length) return '<div class="plate-preview-empty">Upload a PDF or image to see its preview here.</div>';
+  return `<div class="plate-preview-grid">${previewItems.map((src, pageIndex) => {
+    const safeSrc = escapePlateHtml(src);
+    const isPdf = /^data:application\/pdf/i.test(src) || /\.pdf(?:[?#]|$)/i.test(src);
+    const media = isPdf
+      ? `<iframe src="${safeSrc}#toolbar=0&navpanes=0" title="Plate PDF page ${pageIndex + 1}" loading="lazy"></iframe>`
+      : `<img src="${safeSrc}" alt="${escapePlateHtml(plate.name || 'Plate')} preview ${pageIndex + 1}" loading="lazy">`;
+    return `<figure class="plate-preview-page">${media}<figcaption>Page ${pageIndex + 1}</figcaption></figure>`;
+  }).join('')}</div>`;
+}
+
 function renderPlates() {
   const el = document.getElementById('plate-list');
   if (!el) return;
@@ -4891,6 +4911,7 @@ function renderPlates() {
           </label>
         </div>`;
     }
+    const previewHTML = renderPlatePreview(p, sourceUrl);
     return `
     <div class="chapter-item">
       <div class="ch-num" style="background:var(--teal)">P${i + 1}</div>
@@ -4899,6 +4920,7 @@ function renderPlates() {
         <textarea class="ch-summary" rows="2" oninput="updatePlateField(${i},'summary',this.value)" placeholder="Plate Description...">${p.summary}</textarea>
         <div style="margin-top:8px; display:flex; flex-direction:column; gap:6px;">
           ${fileInfoHTML}
+          ${previewHTML}
         </div>
       </div>
       <div style="display:flex; gap:5px; flex-shrink:0">

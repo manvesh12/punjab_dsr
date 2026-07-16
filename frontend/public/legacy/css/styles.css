@@ -1826,6 +1826,57 @@ body.preview-open .pdf-preview-mobile-tabs { display: none; }
 /* Chapter Item */
 .chapter-item { background: var(--card); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 16px 20px; display: flex; align-items: flex-start; gap: 16px; transition: box-shadow .2s; margin-bottom: 10px; }
 .chapter-item:hover { box-shadow: var(--sh-sm); }
+
+#view-plates .chapter-item { align-items: stretch; }
+#view-plates .ch-body { min-width: 0; }
+.plate-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+.plate-preview-page {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: #fff;
+  box-shadow: var(--sh-xs);
+}
+.plate-preview-page img,
+.plate-preview-page iframe {
+  display: block;
+  width: 100%;
+  height: 320px;
+  border: 0;
+  object-fit: contain;
+  background: #f8fafc;
+}
+.plate-preview-page figcaption {
+  padding: 7px 10px;
+  border-top: 1px solid var(--border);
+  color: var(--text-soft);
+  font-size: 11px;
+  font-weight: 700;
+}
+.plate-preview-empty {
+  min-height: 110px;
+  display: grid;
+  place-items: center;
+  margin-top: 10px;
+  padding: 18px;
+  border: 1px dashed var(--border);
+  border-radius: var(--r-sm);
+  background: var(--off);
+  color: var(--text-soft);
+  text-align: center;
+  font-size: 12px;
+}
+@media (max-width: 720px) {
+  .plate-preview-grid { grid-template-columns: 1fr; }
+  .plate-preview-page img,
+  .plate-preview-page iframe { height: 240px; }
+}
 .ch-num { width: 36px; height: 36px; border-radius: var(--r-md); background: var(--navy); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
 .ch-body { flex: 1; }
 .ch-name-input { border: none; border-bottom: 2px solid var(--border); background: transparent; font-size: 14px; font-weight: 700; color: var(--text); width: 100%; padding: 3px 0; margin-bottom: 8px; transition: border-color .2s; }
