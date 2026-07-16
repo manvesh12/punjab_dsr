@@ -100,6 +100,7 @@ async function doLogin() {
           backendRole,
           district: data.scope?.district || district,
           scope: data.scope || {},
+          permissions: data.permissions || [],
           accessLabel: data.accessLabel || ''
       };
       S.role = uiRole;
