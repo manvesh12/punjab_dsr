@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 
 // The standalone portal server is the local development fallback. Production
 // deployments always provide NEXT_PUBLIC_API_BASE_URL for the API service.
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8081";
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
 const connectSrc = ["'self'", "http://localhost:8080", apiBaseUrl].join(" ");
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
