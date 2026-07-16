@@ -21,7 +21,7 @@ const JS_FILES = [
   'main.js'
 ].map(file => `js/modules/${file}`);
 
-const ASSET_VERSION = 'portal-chapter-render-fix-20260714-v6';
+const ASSET_VERSION = 'replenishment-render-fix-20260716-v8';
 const applyAssetVersion = (html) => html.replace(/\{\{ASSET_VERSION\}\}/g, ASSET_VERSION);
 
 function buildJsBundle() {
@@ -77,7 +77,7 @@ function compile() {
     // 6. Append bundled and extra JS modules + Leaflet map script + styles
     html += `\n<script defer src="${JS_BUNDLE_FILE}?v=${ASSET_VERSION}-v3"></script>`;
     html += `\n<script defer src="js/model-dsr-module.js?v=12"></script>`;
-    html += `\n<script defer src="js/replenishment-module.js?v=27"></script>`;
+    html += `\n<script defer src="js/replenishment-module.js?v=30"></script>`;
     html += `\n<script defer src="js/map-bootstrap.js?v=${ASSET_VERSION}"></script>`;
     html += `\n<link rel="stylesheet" href="css/map.css?v=${ASSET_VERSION}">`;
     // Map bootstrap and its visual rules are maintained as standalone assets.

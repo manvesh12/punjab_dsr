@@ -94,6 +94,10 @@ async function initReplenishmentView() {
   window.showReplenishmentOptions(editorContainer);
 }
 
+// Navigation invokes this directly after the Replenishment view is made visible.
+// Keeping the renderer on window avoids an empty workspace if another module owns showView.
+window.initReplenishmentView = initReplenishmentView;
+
 // Hook into existing navigation system
 const originalShowViewReplenishmentHook = window.showView;
 window.showView = function(viewId, caller) {

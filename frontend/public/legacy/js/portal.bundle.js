@@ -2378,6 +2378,9 @@ function showView(id, btn, push = true) {
   const el = document.getElementById('view-' + id);
   if (el) {
     el.classList.add('active');
+    if (id === 'replenishment' && typeof window.initReplenishmentView === 'function') {
+      window.initReplenishmentView();
+    }
     if (id === 'replenishment' && window.replenishmentApp) {
       window.replenishmentApp.init(window.S?.activeProject?.id || 'demo_proj');
     }
