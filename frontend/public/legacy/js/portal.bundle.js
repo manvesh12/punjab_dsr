@@ -4013,7 +4013,7 @@ window.downloadProjectFinalPDF = downloadProjectFinalPDF;
 window.initiateNextPhase = initiateNextPhase;
 window.createNextPhase = createNextPhase;
 async function openProject(id) {
-  S.activeProject = S.projects.find(p=>p.id===id);
+  S.activeProject = S.projects.find(p=>String(p.id)===String(id));
   if (!S.activeProject) return;
   sessionStorage.setItem('dsr_active_project_id', id);
   if (typeof resetProjectWorkingState === 'function') {
@@ -4312,7 +4312,7 @@ function deleteProject(id, event) {
     toast('Permission Denied: Only Administrators can delete projects.', 'error');
     return;
   }
-  const proj = S.projects.find(p => p.id === id);
+  const proj = S.projects.find(p => String(p.id) === String(id));
   if (!proj) return;
   customConfirm(
     `Permanently delete "${proj.title}" (${proj.district} District)? This action cannot be undone.`,
@@ -4322,8 +4322,8 @@ function deleteProject(id, event) {
         await apiFetch(`/projects/${id}`, {
           method: 'DELETE'
         });
-        const wasActive = S.activeProject && S.activeProject.id === id;
-        S.projects = S.projects.filter(p => p.id !== id);
+        const wasActive = S.activeProject && String(S.activeProject.id) === String(id);
+        S.projects = S.projects.filter(p => String(p.id) !== String(id));
         if (wasActive) {
           clearActiveProject();
         }
@@ -19007,7 +19007,7 @@ function updateNotificationUI(returnedReports) {
 }
 function openProjectAndWorkflow(projectId) {
   toggleNotificationDropdown();
-  const proj = S.projects.find(p => p.id === projectId);
+  const proj = S.projects.find(p => String(p.id) === String(projectId));
   if (proj) {
     S.activeProject = proj;
     showView('workflow', null);
