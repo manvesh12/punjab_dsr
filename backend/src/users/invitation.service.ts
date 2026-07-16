@@ -47,8 +47,24 @@ export class InvitationService {
       await this.sendInvitation(email, token, role);
       await this.repository.updateInvitation(invitation.id, { status: "EMAIL_SENT" });
     } catch (error) {
-      logger.error("invitation_email_failed", { email, error: error instanceof Error ? error.message : String(error) });
-      throw new ApiError(500, "INVITATION_EMAIL_FAILED", `Failed to send email: ${error instanceof Error ? error.message : "Unknown error"}`);
+      const errMsg = error instanceof Error ? error.message : String(error);
+      // If SMTP not configured (dev mode), log the link and continue
+      const isEmailNotConfigured = errMsg.includes("SMTP_USER") || errMsg.includes("not configured") ||
+        errMsg.includes("smtpUser") || errMsg.includes("Missing credentials") || errMsg.includes("EAUTH") ||
+        errMsg.includes("BREVO_API_KEY");
+      if (isEmailNotConfigured) {
+        const registrationUrl = `${process.env.PUBLIC_APP_URL || "http://localhost:8081/legacy"}/login.html?invite=${token}`;
+        logger.warn("invitation_email_skipped_no_smtp", {
+          email,
+          role,
+          registrationUrl,
+          message: "Email not configured. Share this registration link manually with the invitee."
+        });
+        await this.repository.updateInvitation(invitation.id, { status: "EMAIL_SENT" });
+        return { success: true, message: `Invitation created. Email not configured — share this link: ${registrationUrl}` };
+      }
+      logger.error("invitation_email_failed", { email, error: errMsg });
+      throw new ApiError(500, "INVITATION_EMAIL_FAILED", `Failed to send email: ${errMsg}`);
     }
     return { success: true, message: "Invitation sent successfully" };
   }
