@@ -3117,8 +3117,8 @@ function renderCustomReportGenerator(container, report) {
       <div class="repl-source-strip"><i data-lucide="database-zap"></i><strong>Linked Final DSR:</strong><span>${replEscapeAttr(source)}</span><span class="repl-pill repl-pill-good">${inheritedCount} reusable</span><span class="repl-pill repl-pill-warn">${missingCount} need input</span></div>
       <main class="repl-studio-grid">
         <div class="repl-card-stack">
-          <section class="repl-ui-card"><div class="repl-ui-card-label"><strong><i class="repl-card-dot"></i>Report data and calculations</strong><span>Auto-saved</span></div>${renderEnterpriseBuilderPanel(report)}</section>
-          <section class="repl-ui-card"><div class="repl-ui-card-label"><strong><i class="repl-card-dot"></i>Survey evidence and supporting files</strong><span>Current study period</span></div>${renderFinalDsrUploadInventory(report)}</section>
+          <section class="repl-ui-card repl-upload-card-workspace"><div class="repl-ui-card-label"><strong><i class="repl-card-dot"></i>Replenishment data upload cards</strong><span>Imported / Uploaded / Pending</span></div>${renderInheritancePanel(report)}</section>
+          <section class="repl-ui-card"><div class="repl-ui-card-label"><strong><i class="repl-card-dot"></i>Final DSR source files</strong><span>Auto-scanned documents</span></div>${renderFinalDsrUploadInventory(report)}</section>
         </div>
         <aside class="repl-preview-shell">
           <div class="repl-preview-toolbar"><div class="repl-preview-name"><i class="repl-live-dot"></i>Live A4 report preview <span id="preview-sections-count" class="repl-pill repl-pill-good">Live</span></div><div class="repl-preview-tools"><button title="Refresh preview" onclick="window.updateCustomReportPreview(document.getElementById('custom-report-title-display').textContent, '${report.id}')"><i data-lucide="refresh-cw"></i></button><button title="Generate final report" onclick="window.downloadCustomReportFilesDirect('${report.id}', this)"><i data-lucide="download"></i></button></div></div>
