@@ -6111,18 +6111,26 @@ async function doSingleInvite() {
     return;
   }
   try {
-    await apiFetch('/users/invite', {
+    const result = await apiFetch('/users/invite', {
       method: 'POST',
       body: JSON.stringify({ email, role, fullName, department, designation, state, district, mobileNumber })
     });
-    toast(`Invitation sent to ${email}`, 'success');
-    closeModal('modal-invite-user');
+    // Check if email was not configured and a link was returned
+    if (result && result.message && result.message.includes('share this link')) {
+      closeModal('modal-invite-user');
+      const link = result.message.split('share this link: ')[1] || '';
+      alert(`Invitation created!\n\nEmail is not configured on this server.\nShare this registration link manually with ${email}:\n\n${link}\n\n(Copy this link and send it via WhatsApp/Email)`);
+    } else {
+      toast(`Invitation sent to ${email}`, 'success');
+      closeModal('modal-invite-user');
+    }
     ['invite-single-name', 'invite-single-email', 'invite-single-department', 'invite-single-designation', 'invite-single-district', 'invite-single-mobile'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
     const stateEl = document.getElementById('invite-single-state');
     if (stateEl) stateEl.value = 'Punjab';
+    renderUsers();
   } catch (e) {
     toast(e.message || 'Failed to send invitation', 'error');
   }
